@@ -110,7 +110,6 @@ function Write-HostItemDecorator {
   $getResult = $PassThru.Contains('GET-RESULT') ? $PassThru['GET-RESULT'] : $defaultGetResult;
 
   [string[][]]$themedPairs = @(, @('No', $("{0,3}" -f ($Index + 1))));
-  # $themedPairs = $themedPairs += , @($itemLabel, $itemValue);
 
   # Get Product if it exists
   #
@@ -124,9 +123,6 @@ function Write-HostItemDecorator {
     }
   }
 
-  $themedPairs += @(@('DUMMY', 'FUCK-IT'), @('TWAT', 'BALLS'));
-  # $themedPairs += , @('TWAT', 'BALLS');
-
   # PROPERTIES or ITEM-LABEL/ITEM-VALUE
   #
   if ($PassThru.Contains('PROPERTIES')) {
@@ -134,15 +130,11 @@ function Write-HostItemDecorator {
 
     if ($properties) {
       if ($properties -is [Array]) {
-        # $themedPairs += ($properties.Count -eq 1) ? $properties : $properties;
-
+        Write-Warning "No of propeties: $($properties.Length)"
+        # The += operator on an array is adding an element to the array, but because we're
+        # adding an array, we need the "," op, to prevent it being incorrectly flattened.
+        #
         $themedPairs += , $properties;
-        # if ($properties.Count -eq 1) {
-        #   $themedPairs += , $properties;
-        # }
-        # else {
-        #   $themedPairs += $properties;
-        # }
       }
       else {
         Write-Warning "Custom 'PROPERTIES' in PassThru is not an array, skipping (type: $($properties.GetType()))"
