@@ -55,8 +55,9 @@ function Write-HostItemDecorator {
         # be mandatory because we need the facility to just pick up the default defined in
         # powershell environment.
         #
-        return ($_.ContainsKey('FUNCTION-NAME') -xor $_.ContainsKey('BLOCK')) `
-          -and $_.ContainsKey('KRAYOLA-THEME') -and $_.ContainsKey('ITEM-LABEL')
+        return ($_.ContainsKey('FUNCTION-NAME') -xor $_.ContainsKey('BLOCK')) -and
+          $_.ContainsKey('KRAYOLA-THEME') -and
+          ($_.ContainsKey('ITEM-LABEL') -xor $_.ContainsKey('PROPERTIES'))
       })]
     [System.Collections.Hashtable]
     $PassThru,
@@ -104,13 +105,55 @@ function Write-HostItemDecorator {
   [string]$message = $PassThru['MESSAGE'];
   [string]$itemLabel = $PassThru['ITEM-LABEL'];
   [string]$itemValue = $PassThru['ITEM-VALUE'];
+  [string]$productValue = [string]::Empty;
 
   $getResult = $PassThru.Contains('GET-RESULT') ? $PassThru['GET-RESULT'] : $defaultGetResult;
 
+  [string[][]]$themedPairs = @(, @('No', $("{0,3}" -f ($Index + 1))));
+  # $themedPairs = $themedPairs += , @($itemLabel, $itemValue);
+
+  # Get Product if it exists
+  #
   [string]$productLabel = '';
   if ($invokeResult -and $invokeResult.Product) {
-    $itemValue = $getResult.Invoke($invokeResult.Product);
+    $productValue = $getResult.Invoke($invokeResult.Product);
     $productLabel = $PassThru.ContainsKey('PRODUCT-LABEL') ? $PassThru['PRODUCT-LABEL'] : 'Product';
+
+    if (-not([string]::IsNullOrWhiteSpace($productLabel))) {
+      $themedPairs += , @($productLabel, $productValue);
+    }
+  }
+
+  $themedPairs += @(@('DUMMY', 'FUCK-IT'), @('TWAT', 'BALLS'));
+  # $themedPairs += , @('TWAT', 'BALLS');
+
+  # PROPERTIES or ITEM-LABEL/ITEM-VALUE
+  #
+  if ($PassThru.Contains('PROPERTIES')) {
+    $properties = $PassThru['PROPERTIES'];
+
+    if ($properties) {
+      if ($properties -is [Array]) {
+        # $themedPairs += ($properties.Count -eq 1) ? $properties : $properties;
+
+        $themedPairs += , $properties;
+        # if ($properties.Count -eq 1) {
+        #   $themedPairs += , $properties;
+        # }
+        # else {
+        #   $themedPairs += $properties;
+        # }
+      }
+      else {
+        Write-Warning "Custom 'PROPERTIES' in PassThru is not an array, skipping (type: $($properties.GetType()))"
+        $themedPairs += , @('PROPERTIES', 'Malformed');
+      }
+    } else {
+      $themedPairs += , @('PROPERTIES', 'Malformed (null)');
+    }
+
+  } else {
+    $themedPairs += , @($itemLabel, $itemValue);
   }
 
   [System.Collections.Hashtable]$parameters = @{}
@@ -120,11 +163,8 @@ function Write-HostItemDecorator {
   #
   if ($PassThru.ContainsKey('KRAYOLA-THEME')) {
     [System.Collections.Hashtable]$krayolaTheme = $PassThru['KRAYOLA-THEME'];
-    [string[][]]$themedPairs = @(@('No', $("{0,3}" -f ($Index + 1))), @($itemLabel, $itemValue));
+    # [string[][]]$themedPairs = @(@('No', $("{0,3}" -f ($Index + 1))), @($itemLabel, $itemValue));
 
-    if (-not([string]::IsNullOrWhiteSpace($productLabel))) {
-      $themedPairs = $themedPairs += , @($productLabel, $invokeResult.Product);
-    }
 
     $parameters['Pairs'] = $themedPairs;
     $parameters['Theme'] = $krayolaTheme;

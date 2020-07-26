@@ -1,10 +1,6 @@
 
 Describe 'write-HostItemDecorator' {
   BeforeAll {
-    # This is a temporary fix (there is a legacy version of Write-HostItemDecorator
-    # in it which is conflicting with the location version being tested.)
-    #
-    # Get-Module Elizium.TerminalBuddy | Remove-Module
     Get-Module Elizium.Loopz | Remove-Module
     Import-Module .\Output\Elizium.Loopz\Elizium.Loopz.psm1 `
       -ErrorAction 'stop' -DisableNameChecking
@@ -41,7 +37,7 @@ Describe 'write-HostItemDecorator' {
 
       $result.Product | Should -Be "What is the answer to the universe: Fourty Two";
     }
-  }
+  } # given: a function
 
   Context 'given: a script block' {
     It 'should: inovke the script block' {
@@ -92,5 +88,42 @@ Describe 'write-HostItemDecorator' {
 
       $result.Product | Should -Be "What is the answer to the universe: Fourty Two";
     }
-  }
-}
+  } # given: a script block
+
+  Context 'given: PassThru with single item PROPERTIES defined' {
+    It 'should: invoke the function' -Tag 'Current' {
+      # Mock Write-ThemedPairsInColour -ModuleName Elizium.Loopz { }
+
+      $properties = @('Author', 'Douglas Adams');
+      # $properties = , @('Author', 'Douglas Adams');
+
+      # $themedPairs += @(@('DUMMY', 'FUCK-IT'), @('TWAT', 'BALLS'));
+
+      [System.Collections.Hashtable]$passThru = @{
+        'FUNCTION-NAME' = 'get-AnswerAdvancedFn';
+        'ANSWER'        = 'Fourty Two';
+        'MESSAGE'       = 'Test Advanced Function';
+        'KRAYOLA-THEME' = $(Get-KrayolaTheme);
+        'PROPERTIES'    = $properties;
+        'PRODUCT-LABEL' = 'Test product';
+        'WHAT-IF'       = $false;
+      }
+  
+      [scriptblock]$decorator = {
+        param(
+          $_underscore, $_index, $_passthru, $_trigger
+        )
+  
+        return Write-HostItemDecorator -Underscore $_underscore `
+          -Index $_index `
+          -PassThru $_passthru `
+          -Trigger $_trigger
+      }
+
+      $underscore = 'What is the answer to the universe';
+      $result = $decorator.Invoke($underscore, 0, $passThru, $false)
+
+      $result.Product | Should -Be "What is the answer to the universe: Fourty Two";
+    }
+  } # given: a function
+} # write-HostItemDecorator
