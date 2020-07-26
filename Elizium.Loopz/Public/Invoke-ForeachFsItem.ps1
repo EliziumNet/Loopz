@@ -12,7 +12,7 @@ function Invoke-ForeachFsItem {
     [scriptblock]$Condition = ( { return $true; }),
 
     [Parameter(ParameterSetName = 'InvokeScriptBlock', Mandatory)]
-    [scriptblock]$Body,
+    [scriptblock]$Block,
 
     [Parameter(ParameterSetName = 'InvokeFunction', Mandatory)]
     [ValidateScript( { -not([string]::IsNullOrEmpty($_)); })]
@@ -24,7 +24,17 @@ function Invoke-ForeachFsItem {
 
     [Parameter(ParameterSetName = 'InvokeScriptBlock')]
     [Parameter(ParameterSetName = 'InvokeFunction')]
-    [scriptblock]$Summary = ( { })
+    [scriptblock]$Summary = ( { }),
+
+    [Parameter(ParameterSetName = 'InvokeScriptBlock')]
+    [Parameter(ParameterSetName = 'InvokeFunction')]
+    [ValidateScript( { -not($PSBoundParameters.ContainsKey('Directory')) })]
+    [switch]$File,
+
+    [Parameter(ParameterSetName = 'InvokeScriptBlock')]
+    [Parameter(ParameterSetName = 'InvokeFunction')]
+    [ValidateScript( { -not($PSBoundParameters.ContainsKey('File')) })]
+    [switch]$Directory
   )
 
   begin {
@@ -35,20 +45,24 @@ function Invoke-ForeachFsItem {
   }
 
   process {
-    if (-not($broken)) {
-      if (-not(($pipelineItem.Attributes -band [System.IO.FileAttributes]::Directory) -eq [System.IO.FileAttributes]::Directory)) {
-        $pipelineFileInfo = [System.IO.FileInfo]$pipelineItem;
+    [boolean]$itemIsDirectory = ($pipelineItem.Attributes -band
+      [System.IO.FileAttributes]::Directory) -eq [System.IO.FileAttributes]::Directory;
 
-        if ($Condition.Invoke($pipelineFileInfo)) {
+    [boolean]$acceptAll = -not($File.ToBool()) -and -not($Directory.ToBool());
+
+    if (-not($broken)) {
+      if ( $acceptAll -or ($Directory.ToBool() -and $itemIsDirectory) -or
+        ($File.ToBool() -and -not($itemIsDirectory)) ) {
+        if ($Condition.Invoke($pipelineItem)) {
 
           if ('InvokeScriptBlock' -eq $PSCmdlet.ParameterSetName) {
-            $result = Invoke-Command -ScriptBlock $Body -ArgumentList @(
-              $pipelineFileInfo, $index, $PassThru, $trigger
+            $result = Invoke-Command -ScriptBlock $Block -ArgumentList @(
+              $pipelineItem, $index, $PassThru, $trigger
             );
           }
           elseif ('InvokeFunction' -eq $PSCmdlet.ParameterSetName) {
             $parameters = @{
-              Underscore = $pipelineFileInfo;
+              Underscore = $pipelineItem;
               Index      = $index;
               PassThru   = $PassThru;
               Trigger    = $trigger;
@@ -67,15 +81,15 @@ function Invoke-ForeachFsItem {
             }
 
             if ($result.psobject.properties.match('Product') -and $result.Product) {
-              if ([System.IO.FileInfo] -eq $result.Product.GetType()) {
-                $result.Product;
-              }
+              $result.Product;
             }
           }
         }
       }
-    }
-    else {
+      else {
+        $skipped++;
+      }
+    } else {
       $skipped++;
     }
   }

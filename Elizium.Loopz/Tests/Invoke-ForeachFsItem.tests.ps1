@@ -12,6 +12,8 @@ Describe 'Invoke-ForeachFsItem' {
         [System.Collections.Hashtable]$PassThru,
         [boolean]$Trigger
       )
+
+      @{ Product = $FileInfo; }
     }
   }
 
@@ -33,7 +35,7 @@ Describe 'Invoke-ForeachFsItem' {
         }
 
         [string]$directoryPath = './Tests/Data/fefsi/csv';
-        Get-ChildItem $directoryPath | Invoke-ForeachFsItem -body $block;
+        Get-ChildItem $directoryPath -File | Invoke-ForeachFsItem -Block $block;
         $container.count | Should -Be 3;
       }
     }
@@ -55,7 +57,7 @@ Describe 'Invoke-ForeachFsItem' {
         }
 
         [string]$directoryPath = './Tests/Data/fefsi';
-        Get-ChildItem $directoryPath -Recurse -Filter '*.txt' | Invoke-ForeachFsItem -body $block;
+        Get-ChildItem $directoryPath -Recurse -Filter '*.txt' -File | Invoke-ForeachFsItem -Block $block;
         $container.count | Should -Be 4;
       }
     }
@@ -75,6 +77,8 @@ Describe 'Invoke-ForeachFsItem' {
           [boolean]$Trigger
         )
         $container.count++;
+
+        @{ Product = $FileInfo; }
       }
 
       [scriptblock]$fileIsEmpty = {
@@ -85,8 +89,8 @@ Describe 'Invoke-ForeachFsItem' {
       }
 
       [string]$directoryPath = './Tests/Data/fefsi';
-      Get-ChildItem $directoryPath -Recurse -Filter '*.txt' | Invoke-ForeachFsItem `
-        -body $block -condition $fileIsEmpty;
+      Get-ChildItem $directoryPath -Recurse -Filter '*.txt' -File | Invoke-ForeachFsItem `
+        -Block $block -condition $fileIsEmpty;
       $container.count | Should -Be 3;
     }
   } # given: condition provided
@@ -108,8 +112,8 @@ Describe 'Invoke-ForeachFsItem' {
         }
 
         [string]$directoryPath = './Tests/Data/fefsi';
-        Get-ChildItem $directoryPath -Recurse | Invoke-ForeachFsItem `
-          -body $commonBlock -Summary $summary;
+        Get-ChildItem $directoryPath -Recurse -File | Invoke-ForeachFsItem `
+          -Block $commonBlock -Summary $summary;
       }
     }
 
@@ -117,6 +121,7 @@ Describe 'Invoke-ForeachFsItem' {
       Context 'and: Block with Break' {
         It 'should: invoke all until Break occurs' {
           [scriptblock]$block = {
+            [OutputType([PSCustomObject])]
             param(
               [System.IO.FileInfo]$FileInfo,
               [int]$Index,
@@ -125,7 +130,9 @@ Describe 'Invoke-ForeachFsItem' {
             )
 
             if ($Index -eq 2) {
-              return @{ Break = $true }
+              @{ Product = $FileInfo; Break = $true }
+            } else {
+              @{ Product = $FileInfo; }
             }
           }
 
@@ -143,8 +150,8 @@ Describe 'Invoke-ForeachFsItem' {
           }
 
           [string]$directoryPath = './Tests/Data/fefsi';
-          Get-ChildItem $directoryPath -Recurse | Invoke-ForeachFsItem `
-            -body $block -Summary $summary;
+          Get-ChildItem $directoryPath -Recurse -File | Invoke-ForeachFsItem `
+            -Block $block -Summary $summary;
         }
       } # and: Block with Break
 
@@ -175,8 +182,8 @@ Describe 'Invoke-ForeachFsItem' {
           }
 
           [string]$directoryPath = './Tests/Data/fefsi';
-          Get-ChildItem $directoryPath -Recurse | Invoke-ForeachFsItem `
-            -body $block -Summary $summary;
+          Get-ChildItem $directoryPath -Recurse -File | Invoke-ForeachFsItem `
+            -Block $block -Summary $summary;
         }
       } # and: Triggered entry
 
@@ -209,8 +216,8 @@ Describe 'Invoke-ForeachFsItem' {
           }
 
           [string]$directoryPath = './Tests/Data/fefsi';
-          Get-ChildItem $directoryPath -Recurse | Invoke-ForeachFsItem `
-            -body $block -Summary $summary -PassThru $passThru;
+          Get-ChildItem $directoryPath -Recurse -File | Invoke-ForeachFsItem `
+            -Block $block -Summary $summary -PassThru $passThru;
         }
       } # With PassThru
     } # and: files piped from different directories
@@ -218,7 +225,7 @@ Describe 'Invoke-ForeachFsItem' {
 
   Context 'given: invoke named function' {
     Context 'and: files piped from different directories' {
-      It 'should: send objects out of the pipeline' -Tag 'Current' {
+      It 'should: send objects out of the pipeline' {
         Mock -ModuleName Elizium.Loopz invoke-Dummy -Verifiable {
           param(
             [Alias('Underscore')]
@@ -228,12 +235,12 @@ Describe 'Invoke-ForeachFsItem' {
             [boolean]$Trigger
           )
 
-          [PSCustomObject]@{ Product = $FileInfo; }
+          @{ Product = $FileInfo; }
         }
         [System.IO.FileInfo[]]$collection = @();
         [string]$directoryPath = './Tests/Data/fefsi';
 
-        Get-ChildItem $directoryPath -Recurse | Invoke-ForeachFsItem -Functee 'invoke-Dummy' | ForEach-Object {
+        Get-ChildItem $directoryPath -Recurse -File | Invoke-ForeachFsItem -Functee 'invoke-Dummy' | ForEach-Object {
           $collection += $_;
         }
 
@@ -242,4 +249,80 @@ Describe 'Invoke-ForeachFsItem' {
       }
     }
   } # given: invoke named function
+
+  Context 'given: File flag specified' {
+    Context 'and: files piped from same directory' {
+      It 'should: invoke all' {
+        $container = @{
+          count = 0
+        }
+
+        [scriptblock]$block = {
+          param(
+            [System.IO.FileInfo]$FileInfo,
+            [int]$Index,
+            [System.Collections.Hashtable]$PassThru,
+            [boolean]$Trigger
+          )
+          $container.count++;
+
+          @{ Product = $FileInfo }
+        }
+
+        [string]$directoryPath = './Tests/Data/fefsi/csv';
+        Get-ChildItem $directoryPath | Invoke-ForeachFsItem -Block $block -File;
+        $container.count | Should -Be 3;
+      }
+    } # and: files piped from same directory
+
+    Context 'and: files and directories piped from same directory' {
+      It 'should: invoke all' {
+        $container = @{
+          count = 0
+        }
+
+        [scriptblock]$block = {
+          param(
+            [System.IO.FileInfo]$FileInfo,
+            [int]$Index,
+            [System.Collections.Hashtable]$PassThru,
+            [boolean]$Trigger
+          )
+          $container.count++;
+
+          @{ Product = $FileInfo }
+        }
+
+        [string]$directoryPath = './Tests/Data/fefsi';
+        Get-ChildItem $directoryPath | Invoke-ForeachFsItem -Block $block -File;
+        $container.count | Should -Be 5;
+      }
+    } # and: files piped from same directory
+  } # given: File flag specified
+
+  Context 'given: Directory flag specified' {
+    Context 'and: single directory piped' {
+      It 'should: invoke all' {
+        $container = @{
+          count = 0
+        }
+
+        [scriptblock]$block = {
+          param(
+            [System.IO.DirectoryInfo]$DirInfo,
+            [int]$Index,
+            [System.Collections.Hashtable]$PassThru,
+            [boolean]$Trigger
+          )
+          $container.count++;
+
+          @{ Product = $DirInfo }
+        }
+
+        [string]$directoryPath = './Tests/Data/fefsi';
+        Get-ChildItem $directoryPath | Invoke-ForeachFsItem -Block $block -Directory;
+        $container.count | Should -Be 1;
+      }
+    } # and: single directory piped
+  } # given: Directory flag specified
 } # Invoke-ForeachFsItem
