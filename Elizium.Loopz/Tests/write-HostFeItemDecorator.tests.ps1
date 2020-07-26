@@ -1,5 +1,5 @@
 
-Describe 'write-HostItemDecorator' {
+Describe 'Write-HostFeItemDecorator' {
   BeforeAll {
     Get-Module Elizium.Loopz | Remove-Module
     Import-Module .\Output\Elizium.Loopz\Elizium.Loopz.psm1 `
@@ -10,7 +10,7 @@ Describe 'write-HostItemDecorator' {
         $_underscore, $_index, $_passthru, $_trigger
       )
 
-      return Write-HostItemDecorator -Underscore $_underscore `
+      return Write-HostFeItemDecorator -Underscore $_underscore `
         -Index $_index `
         -PassThru $_passthru `
         -Trigger $_trigger
@@ -116,4 +116,4 @@ Describe 'write-HostItemDecorator' {
 
     }
   } # given: PassThru contains PROPERTIES
-} # write-HostItemDecorator
+} # Write-HostFeItemDecorator

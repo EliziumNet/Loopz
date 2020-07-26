@@ -1,7 +1,7 @@
-function Write-HostItemDecorator {
+function Write-HostFeItemDecorator {
   <#
   .NAME
-    Write-HostItemDecorator
+    Write-HostFeItemDecorator
 
   .SYNOPSIS
     Wraps a function or scriptbloack as a decorator writing appropriate user interface
