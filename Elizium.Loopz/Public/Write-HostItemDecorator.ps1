@@ -130,24 +130,15 @@ function Write-HostItemDecorator {
 
     if ($properties) {
       if ($properties -is [Array]) {
-        Write-Warning "No of propeties: $($properties.Length)"
-        # The += operator on an array is adding an element to the array, but because we're
-        # adding an array, we need the "," op, to prevent it being incorrectly flattened.
-        #
-
-        # # MULIPLE:
-        # $themedPairs += $properties;
-
-        # # SINGLE:
-        # $themedPairs += , $properties;
-
-        $properties | ForEach-Object { $themedPairs += $properties }
+        Write-Warning "No of custom propeties in PassThru: $($properties.Length)"
+        $themedPairs += $properties;
       }
       else {
         Write-Warning "Custom 'PROPERTIES' in PassThru is not an array, skipping (type: $($properties.GetType()))"
         $themedPairs += , @('PROPERTIES', 'Malformed');
       }
     } else {
+      Write-Warning "null custom propeties defined in PassThru"
       $themedPairs += , @('PROPERTIES', 'Malformed (null)');
     }
 
@@ -162,8 +153,6 @@ function Write-HostItemDecorator {
   #
   if ($PassThru.ContainsKey('KRAYOLA-THEME')) {
     [System.Collections.Hashtable]$krayolaTheme = $PassThru['KRAYOLA-THEME'];
-    # [string[][]]$themedPairs = @(@('No', $("{0,3}" -f ($Index + 1))), @($itemLabel, $itemValue));
-
 
     $parameters['Pairs'] = $themedPairs;
     $parameters['Theme'] = $krayolaTheme;
