@@ -134,7 +134,14 @@ function Write-HostItemDecorator {
         # The += operator on an array is adding an element to the array, but because we're
         # adding an array, we need the "," op, to prevent it being incorrectly flattened.
         #
-        $themedPairs += , $properties;
+
+        # # MULIPLE:
+        # $themedPairs += $properties;
+
+        # # SINGLE:
+        # $themedPairs += , $properties;
+
+        $properties | ForEach-Object { $themedPairs += $properties }
       }
       else {
         Write-Warning "Custom 'PROPERTIES' in PassThru is not an array, skipping (type: $($properties.GetType()))"

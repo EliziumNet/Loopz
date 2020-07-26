@@ -94,7 +94,7 @@ Describe 'write-HostItemDecorator' {
     It 'should: invoke the function' -Tag 'Current' {
       # Mock Write-ThemedPairsInColour -ModuleName Elizium.Loopz { }
 
-      $properties = @('Author', 'Douglas Adams');
+      $properties = , @('Author', 'Douglas Adams');
 
       [System.Collections.Hashtable]$passThru = @{
         'FUNCTION-NAME' = 'get-AnswerAdvancedFn';
