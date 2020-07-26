@@ -51,12 +51,7 @@ function Write-HostItemDecorator {
       Mandatory = $true
     )]
     [ValidateScript( {
-        # TODO: Do we need to remove 'KRAYOLA-THEME' from being required here. It shouldn't
-        # be mandatory because we need the facility to just pick up the default defined in
-        # powershell environment.
-        #
         return ($_.ContainsKey('FUNCTION-NAME') -xor $_.ContainsKey('BLOCK')) -and
-          $_.ContainsKey('KRAYOLA-THEME') -and
           ($_.ContainsKey('ITEM-LABEL') -xor $_.ContainsKey('PROPERTIES'))
       })]
     [System.Collections.Hashtable]
@@ -130,7 +125,7 @@ function Write-HostItemDecorator {
 
     if ($properties) {
       if ($properties -is [Array]) {
-        Write-Warning "No of custom propeties in PassThru: $($properties.Length)"
+        Write-Debug "No of custom propeties in PassThru: $($properties.Length)"
         $themedPairs += $properties;
       }
       else {
@@ -146,19 +141,16 @@ function Write-HostItemDecorator {
     $themedPairs += , @($itemLabel, $itemValue);
   }
 
-  [System.Collections.Hashtable]$parameters = @{}
-  [string]$writerFn = '';
-
   # Write with a Krayola Theme
   #
-  if ($PassThru.ContainsKey('KRAYOLA-THEME')) {
-    [System.Collections.Hashtable]$krayolaTheme = $PassThru['KRAYOLA-THEME'];
+  [System.Collections.Hashtable]$krayolaTheme = $PassThru.ContainsKey('KRAYOLA-THEME') ?
+    $PassThru['KRAYOLA-THEME'] : (Get-KrayolaTheme);
+  
+  [System.Collections.Hashtable]$parameters = @{}
+  $parameters['Pairs'] = $themedPairs;
+  $parameters['Theme'] = $krayolaTheme;
 
-    $parameters['Pairs'] = $themedPairs;
-    $parameters['Theme'] = $krayolaTheme;
-
-    $writerFn = 'Write-ThemedPairsInColour';
-  }
+  [string]$writerFn = 'Write-ThemedPairsInColour';
 
   if (-not([string]::IsNullOrWhiteSpace($message))) {
     $parameters['Message'] = $message;
