@@ -1,4 +1,4 @@
-
+﻿
 Describe 'Write-HostFeItemDecorator' {
   BeforeAll {
     Get-Module Elizium.Loopz | Remove-Module
@@ -32,7 +32,7 @@ Describe 'Write-HostFeItemDecorator' {
           'PRODUCT-LABEL' = 'Test product';
           'WHAT-IF'       = $false;
         }
-  
+
         $underscore = 'What is the answer to the universe';
         $result = $decorator.Invoke($underscore, 0, $passThru, $false);
 
@@ -48,17 +48,17 @@ Describe 'Write-HostFeItemDecorator' {
           param(
             [Parameter(Mandatory)]
             $Underscore,
-        
+
             [Parameter(Mandatory)]
             [int]$Index,
-        
+
             [Parameter(Mandatory)]
             [System.Collections.Hashtable]$PassThru,
-        
+
             [Parameter(Mandatory)]
             [boolean]$Trigger
           )
-      
+
           @{ Product = "{0}: {1}" -f $Underscore, $PassThru['ANSWER'] }
         }
 
@@ -72,7 +72,7 @@ Describe 'Write-HostFeItemDecorator' {
           'PRODUCT-LABEL' = 'Test product';
           'WHAT-IF'       = $false;
         }
-  
+
         $underscore = 'What is the answer to the universe';
         $result = $decorator.Invoke($underscore, $index, $PassThru, $false);
 
@@ -108,7 +108,7 @@ Describe 'Write-HostFeItemDecorator' {
         'PRODUCT-LABEL' = 'Test product';
         'WHAT-IF'       = $false;
       }
-  
+
       $underscore = 'What is the answer to the universe';
       $result = $decorator.Invoke($underscore, 0, $passThru, $false);
 

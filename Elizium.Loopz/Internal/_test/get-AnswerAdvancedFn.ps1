@@ -1,4 +1,4 @@
-function get-AnswerAdvancedFn {
+﻿function get-AnswerAdvancedFn {
 
   # This function is only required because the tests using the invoke operator
   # on a string can not correctly pick up the local function name (ie defined as part
@@ -9,13 +9,13 @@ function get-AnswerAdvancedFn {
   param(
     [Parameter(Mandatory)]
     $Underscore,
-  
+
     [Parameter(Mandatory)]
     [int]$Index,
-  
+
     [Parameter(Mandatory)]
     [System.Collections.Hashtable]$PassThru,
-  
+
     [Parameter(Mandatory)]
     [boolean]$Trigger
   )

@@ -1,4 +1,4 @@
-function Write-HostFeItemDecorator {
+﻿function Write-HostFeItemDecorator {
   <#
   .NAME
     Write-HostFeItemDecorator
@@ -145,7 +145,7 @@ function Write-HostFeItemDecorator {
   #
   [System.Collections.Hashtable]$krayolaTheme = $PassThru.ContainsKey('KRAYOLA-THEME') ?
     $PassThru['KRAYOLA-THEME'] : (Get-KrayolaTheme);
-  
+
   [System.Collections.Hashtable]$parameters = @{}
   $parameters['Pairs'] = $themedPairs;
   $parameters['Theme'] = $krayolaTheme;
