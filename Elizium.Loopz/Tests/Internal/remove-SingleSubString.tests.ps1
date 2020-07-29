@@ -1,5 +1,5 @@
 
-Describe 'remove-SingleSubString' -Tag 'Current' {
+Describe 'remove-SingleSubString' {
   BeforeAll {
     Get-Module Elizium.Loopz | Remove-Module
     Import-Module .\Output\Elizium.Loopz\Elizium.Loopz.psm1 `

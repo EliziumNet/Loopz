@@ -1,5 +1,5 @@
 
-Describe 'Invoke-MirrorDirectoryTree' -Tag 'Current' -Skip {
+Describe 'Invoke-MirrorDirectoryTree' -Skip {
   BeforeAll {
     Get-Module Elizium.Loopz | Remove-Module
     Import-Module .\Output\Elizium.Loopz\Elizium.Loopz.psm1 `

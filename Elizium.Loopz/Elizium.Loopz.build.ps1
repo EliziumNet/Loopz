@@ -113,7 +113,7 @@ task UpdatePublicFunctionsToExport -if (Test-Path -Path $script:PublicFolder) {
 
 task ImportCompiledModule -if (Test-Path -Path $script:PsmPath) {
   Get-Module -Name $script:ModuleName | Remove-Module -Force
-  Import-Module -Name $script:PsdPath -Force
+  Import-Module -Name $script:PsdPath -Force -DisableNameChecking
 }
 
 task Pester {
@@ -125,7 +125,7 @@ task Pester {
   $configuration.TestResult.Enabled = $true
   $configuration.TestResult.OutputFormat = 'NUnitxml'
   $configuration.TestResult.OutputPath = $resultFile;
-  # $configuration.Filter.Tag = 'Current'
+  $configuration.Filter.Tag = 'Current'
   Invoke-Pester -Configuration $configuration
 }
 
