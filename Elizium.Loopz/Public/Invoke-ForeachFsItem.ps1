@@ -38,7 +38,7 @@ function Invoke-ForeachFsItem {
   )
 
   begin {
-    [int]$index = 0;
+    [int]$index = $PassThru.ContainsKey('LOOPZ.FOREACH-INDEX') ? $PassThru['LOOPZ.FOREACH-INDEX'] : 0;
     [int]$skipped = 0;
     [boolean]$broken = $false;
     [boolean]$trigger = $false;
@@ -95,6 +95,7 @@ function Invoke-ForeachFsItem {
   }
 
   end {
+    $PassThru['LOOPZ.FOREACH-INDEX'] = $index;
     $Summary.Invoke($index, $skipped, $trigger, $PassThru);
   }
 }

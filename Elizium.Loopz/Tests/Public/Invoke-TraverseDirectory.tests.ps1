@@ -34,7 +34,7 @@ Describe 'Invoke-TraverseDirectory' {
           [Parameter(Mandatory)]
           [boolean]$_trigger
         )
-        Write-Host "  [*] Directory: '$($_underscore)', type: $($_underscore.GetType())"
+        Write-Host "  [*] Directory: '$($_underscore.Name)', index: '$($_passThru['LOOPZ.FOREACH-INDEX'])'"
         @{ Product = $_underscore }
       }
 
