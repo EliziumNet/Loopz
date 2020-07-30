@@ -7,18 +7,7 @@ Describe 'Invoke-TraverseDirectory' {
 
   Context 'given: directory tree' {
     It 'Should: traverse' -tag 'Current' {
-      $sourcePath = '.\Tests\Data\traverse\';
-      $destinationPath = '~\dev\TEST\';
-
-      [string]$resolvedSourcePath = Convert-Path $sourcePath;
-      [string]$destinationPath = Convert-Path $destinationPath;
-
-      [System.Collections.Hashtable]$passThru = @{
-        # Do NOT use Resolve-Path with a wild-card
-        #
-        'ROOT-SOURCE'      = $resolvedSourcePath
-        'ROOT-DESTINATION' = $destinationPath;
-      }
+      [string]$resolvedSourcePath = Convert-Path '.\Tests\Data\traverse\';
 
       [scriptblock]$feDirectoryBlock = {
         param(
@@ -34,12 +23,22 @@ Describe 'Invoke-TraverseDirectory' {
           [Parameter(Mandatory)]
           [boolean]$_trigger
         )
-        Write-Host "  [*] Directory: '$($_underscore.Name)', index: '$($_passThru['LOOPZ.FOREACH-INDEX'])'"
+
+        Write-Host "  [-] Directory: '$($_underscore.Name)', index: '$($_passThru['LOOPZ.FOREACH-INDEX'])'"
         @{ Product = $_underscore }
       }
 
-      Invoke-TraverseDirectory -Path $resolvedSourcePath -PassThru $passThru `
-        -SourceDirectoryBlock $feDirectoryBlock;
+      [scriptblock]$summary = {
+        param(
+          [Parameter(Mandatory)]
+          [System.Collections.Hashtable]$_passThru
+        )
+        $index = $_passThru['LOOPZ.FOREACH-INDEX'];
+        $index | Should -Be 19;
+      }
+
+      Invoke-TraverseDirectory -Path $resolvedSourcePath `
+        -SourceDirectoryBlock $feDirectoryBlock -Summary $summary;
     }
   }
 }

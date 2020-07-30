@@ -24,7 +24,10 @@ function Invoke-ForeachFsItem {
 
     [Parameter(ParameterSetName = 'InvokeScriptBlock')]
     [Parameter(ParameterSetName = 'InvokeFunction')]
-    [scriptblock]$Summary = ( { }),
+    [scriptblock]$Summary = (
+      # $index, $skipped, $trigger, $PassThru
+      { }
+    ),
 
     [Parameter(ParameterSetName = 'InvokeScriptBlock')]
     [Parameter(ParameterSetName = 'InvokeFunction')]
@@ -38,7 +41,8 @@ function Invoke-ForeachFsItem {
   )
 
   begin {
-    [int]$index = $PassThru.ContainsKey('LOOPZ.FOREACH-INDEX') ? $PassThru['LOOPZ.FOREACH-INDEX'] : 0;
+    [boolean]$manageIndex = -not($PassThru.ContainsKey('LOOPZ.FOREACH-INDEX'));
+    [int]$index = $manageIndex ? 0 : $PassThru['LOOPZ.FOREACH-INDEX'];
     [int]$skipped = 0;
     [boolean]$broken = $false;
     [boolean]$trigger = $false;
@@ -54,48 +58,62 @@ function Invoke-ForeachFsItem {
       if ( $acceptAll -or ($Directory.ToBool() -and $itemIsDirectory) -or
         ($File.ToBool() -and -not($itemIsDirectory)) ) {
         if ($Condition.Invoke($pipelineItem)) {
-
-          if ('InvokeScriptBlock' -eq $PSCmdlet.ParameterSetName) {
-            $result = Invoke-Command -ScriptBlock $Block -ArgumentList @(
-              $pipelineItem, $index, $PassThru, $trigger
-            );
-          }
-          elseif ('InvokeFunction' -eq $PSCmdlet.ParameterSetName) {
-            $parameters = @{
-              Underscore = $pipelineItem;
-              Index      = $index;
-              PassThru   = $PassThru;
-              Trigger    = $trigger;
+          try {
+            if ('InvokeScriptBlock' -eq $PSCmdlet.ParameterSetName) {
+              $result = Invoke-Command -ScriptBlock $Block -ArgumentList @(
+                $pipelineItem, $index, $PassThru, $trigger;
+              );
             }
-            $result = & $Functee @parameters;
-          }
-          $index++;
-
-          if ($result) {
-            if ($result.psobject.properties.match('Trigger') -and $result.Trigger) {
-              $trigger = $true;
-            }
-
-            if ($result.psobject.properties.match('Break') -and $result.Break) {
-              $broken = $true;
-            }
-
-            if ($result.psobject.properties.match('Product') -and $result.Product) {
-              $result.Product;
+            elseif ('InvokeFunction' -eq $PSCmdlet.ParameterSetName) {
+              $parameters = @{
+                Underscore = $pipelineItem;
+                Index      = $index;
+                PassThru   = $PassThru;
+                Trigger    = $trigger;
+              }
+              $result = & $Functee @parameters;
             }
           }
+          catch {
+            Write-Error "Foreach Error: ($_), for item: '$($pipelineItem.Name)'";
+          }
+          finally {
+            if ($manageIndex) {
+              $index++;
+            } else {
+              $index = $PassThru['LOOPZ.FOREACH-INDEX'];
+            }
+
+            if ($result) {
+              if ($result.psobject.properties.match('Trigger') -and $result.Trigger) {
+                $trigger = $true;
+              }
+
+              if ($result.psobject.properties.match('Break') -and $result.Break) {
+                $broken = $true;
+              }
+
+              if ($result.psobject.properties.match('Product') -and $result.Product) {
+                $result.Product;
+              }
+            }
+          }
+        } else {
+          # IDEA! We could allow the user to provide an extra script block which we
+          # invoke for skipped items and set a string containing the reason why it was
+          # skipped. 
+          $null = $skipped++;
         }
       }
       else {
-        $skipped++;
+        $null = $skipped++;
       }
     } else {
-      $skipped++;
+      $null = $skipped++;
     }
   }
 
   end {
-    $PassThru['LOOPZ.FOREACH-INDEX'] = $index;
     $Summary.Invoke($index, $skipped, $trigger, $PassThru);
   }
 }
