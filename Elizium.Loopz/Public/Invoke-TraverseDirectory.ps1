@@ -7,11 +7,12 @@ function Invoke-TraverseDirectory {
     [Parameter(Mandatory)]
     [ValidateScript( { Test-path -Path $_ })]
     [String]$Path,
-  
+
     [Parameter()]
     [ValidateScript( { -not($_ -eq $null) })]
     [scriptblock]$Condition = (
       {
+        [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', '')]
         param([System.IO.DirectoryInfo]$directoryInfo)
         return $true;
       }
@@ -25,17 +26,15 @@ function Invoke-TraverseDirectory {
     [scriptblock]$SourceDirectoryBlock,
 
     [Parameter()]
-    [scriptblock]$Summary = (
-      {
-      }
-    )
+    [scriptblock]$Summary = ( {} )
   )
 
   [scriptblock]$recurseTraverseDirectory = {
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', '')]
     param(
       [Parameter(Mandatory)]
       [System.IO.DirectoryInfo]$_directory,
-  
+
       [Parameter()]
       [ValidateScript( { -not($_ -eq $null) })]
       [scriptblock]$_condition,
@@ -51,7 +50,6 @@ function Invoke-TraverseDirectory {
       [boolean]$_trigger
     )
 
-    Write-Host "===> recurseTraverseDirectory, directory: $($_directory.Name)"
     $index = $_passThru['LOOPZ.FOREACH-INDEX'];
 
     try {
@@ -63,11 +61,11 @@ function Invoke-TraverseDirectory {
     finally {
       $_passThru['LOOPZ.FOREACH-INDEX']++;
     }
-    
+
 
     [string]$fullName = $_directory.FullName;
     [System.IO.DirectoryInfo[]]$directoryInfos = Get-ChildItem -Path $fullName `
-      -Directory;
+      -Directory | Where-Object { $_condition.Invoke($_) };
 
     [scriptblock]$adapter = $PassThru['LOOPZ.TRAVERSE-DIRECTORY.ADAPTOR'];
 
@@ -78,6 +76,7 @@ function Invoke-TraverseDirectory {
   } # recurseTraverseDirectory
 
   [scriptblock]$adapter = {
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', '')]
     param(
       [Parameter(Mandatory)]
       [System.IO.DirectoryInfo]$_underscore,
@@ -91,10 +90,10 @@ function Invoke-TraverseDirectory {
       [Parameter(Mandatory)]
       [boolean]$_trigger
     )
-    Write-Host "===> Running adapter for '$($_underscore.Name)', _index: $_index, PT-INDEX: $($_passThru['LOOPZ.FOREACH-INDEX'])";
+
     [scriptblock]$adapted = $_passThru['LOOPZ.TRAVERSE-DIRECTORY.ADAPTED'];
 
-    $result = Invoke-Command -ScriptBlock $adapted -ArgumentList @(
+    Invoke-Command -ScriptBlock $adapted -ArgumentList @(
       $_underscore,
       $_passThru['LOOPZ.TRAVERSE-DIRECTORY.CONDITION'],
       $_passThru,
@@ -105,7 +104,6 @@ function Invoke-TraverseDirectory {
 
   # Handle top level directory, before recursing through child directories
   #
-  Write-Host "---> Invoke-TraverseDirectory, path: $Path"
 
   [System.IO.DirectoryInfo]$directory = Get-Item -Path $Path;
 
@@ -135,7 +133,7 @@ function Invoke-TraverseDirectory {
     $PassThru['LOOPZ.FOREACH-INDEX']++;
 
     [System.IO.DirectoryInfo[]]$directoryInfos = Get-ChildItem -Path $Path `
-      -Directory
+      -Directory | Where-Object { $Condition.Invoke($_) }
 
     if ($directoryInfos) {
       $directoryInfos | Invoke-ForeachFsItem -Directory -Block $adapter `

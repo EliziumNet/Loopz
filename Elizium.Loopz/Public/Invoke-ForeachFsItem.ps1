@@ -1,4 +1,4 @@
-
+﻿
 function Invoke-ForeachFsItem {
   [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', '')]
   [CmdletBinding(DefaultParameterSetName = 'InvokeScriptBlock')]
@@ -101,7 +101,7 @@ function Invoke-ForeachFsItem {
         } else {
           # IDEA! We could allow the user to provide an extra script block which we
           # invoke for skipped items and set a string containing the reason why it was
-          # skipped. 
+          # skipped.
           $null = $skipped++;
         }
       }

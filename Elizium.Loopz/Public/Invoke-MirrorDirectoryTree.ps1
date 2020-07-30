@@ -1,4 +1,4 @@
-
+﻿
 function Invoke-MirrorDirectoryTree {
   [CmdletBinding()]
   param
@@ -6,7 +6,7 @@ function Invoke-MirrorDirectoryTree {
     [Parameter(Mandatory)]
     [ValidateScript( { Test-path -Path $_; })]
     [String]$SourcePath,
-  
+
     [Parameter(Mandatory)]
     [String]$DestinationPath,
 
@@ -45,14 +45,14 @@ function Invoke-MirrorDirectoryTree {
   [System.IO.DirectoryInfo[]]$sourceDirectoryInfos = Get-ChildItem -Path $sourcePathWithWildCard `
     -Directory -Include $DirectoryIncludes;
   $sourceDirectoryInfos | Invoke-ForeachFsItem -Directory -Block $SourceDirectoryBlock -PassThru $PassThru;
-  
+
   # Deal with top level files for this directory
   # WARNING: you can't use wild card with LiteralPath
   #
   [System.IO.FileInfo[]]$sourceFileInfos = Get-ChildItem -Path $sourcePathWithWildCard `
     -File -Include $inclusions;
   $sourceFileInfos | Invoke-ForeachFsItem -File -Block $SourceFileBlock -PassThru $PassThru;
-  
+
   # Convert directory contents
   #
   [scriptblock]$doTraversal = { param(
@@ -91,7 +91,7 @@ function Invoke-MirrorDirectoryTree {
       -SourceFileBlock $SourceFileBlock -SourceDirectoryBlock $SourceDirectoryBlock;
 
     return @{ Message = "*** Convert directory contents";
-      Product = $_underscore; Colour = $contentsColour 
+      Product = $_underscore; Colour = $contentsColour
     };
 
     # Finally traverse this directory's child directories
