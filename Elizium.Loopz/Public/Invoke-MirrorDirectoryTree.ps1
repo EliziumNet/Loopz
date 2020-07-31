@@ -1,77 +1,62 @@
-﻿
-function Invoke-MirrorDirectoryTree {
-  [CmdletBinding()]
+﻿function Invoke-MirrorDirectoryTree {
+  [CmdletBinding(SupportsShouldProcess)]
+  [Alias('imdt', 'Mirror-Directory')]
   param
   (
     [Parameter(Mandatory)]
     [ValidateScript( { Test-path -Path $_; })]
-    [String]$SourcePath,
+    [String]$Path,
 
     [Parameter(Mandatory)]
     [String]$DestinationPath,
 
-    [Parameter()]
-    [String[]]$Suffixes = @('*'),
-
+    # The include/exclude parameters are collections of filters (can contain a *).
+    # If an entry does not include a *, it is treated as a suffix for files
+    # and ignored for directories.
+    #
     [Parameter()]
     [String[]]$DirectoryIncludes = @('*'),
 
-    [Parameter(Mandatory)]
-    [System.Collections.Hashtable]$PassThru,
-
-    [Parameter(Mandatory)]
-    [scriptblock]$SourceFileBlock,
+    [Parameter()]
+    [String[]]$DirectoryExcludes = @(),
 
     [Parameter()]
-    [scriptblock]$SourceDirectoryBlock = ( { return $true; })
+    [String[]]$FileIncludes = @('*'),
+
+    [Parameter()]
+    [String[]]$FileExcludes = @(),
+
+    [Parameter()]
+    [System.Collections.Hashtable]$PassThru = @{},
+
+    [Parameter()]
+    [scriptblock]$DestinationFileBlock = ( {} ),
+
+    [Parameter()]
+    [scriptblock]$DirectoryBlock = ( {} )
   )
 
-  Write-Host "Invoke-MirrorDirectoryTree >>> SourcePath: '$SourcePath'"
-  [string[]]$inclusions = @();
-  $Suffixes | ForEach-Object {
-    $inclusions += $_.StartsWith('*.') ? $_ : ('*.' + $_)
-  }
+  [scriptblock]$doMirrorBlock = {
+    param(
+      [Parameter(Mandatory)]
+      [System.IO.DirectoryInfo]$_underscore,
 
-  $sourcePathWithWildCard = $SourcePath.Contains('*') ? $SourcePath : (Join-Path -Path $SourcePath -ChildPath '*');
+      [Parameter(Mandatory)]
+      [int]$_index,
 
-  Write-Host "Invoke-MirrorDirectoryTree >>> sourcePathWithWildCard: '$sourcePathWithWildCard'"
+      [Parameter(Mandatory)]
+      [System.Collections.Hashtable]$_passThru,
 
-  # Invoke the source directory block for this directory
-  #
-  # $SourceDirectoryBlock.Invoke($sourcePath, $PassThru);
-
-  # Finally traverse this directory's child directories
-  #
-  [System.IO.DirectoryInfo[]]$sourceDirectoryInfos = Get-ChildItem -Path $sourcePathWithWildCard `
-    -Directory -Include $DirectoryIncludes;
-  $sourceDirectoryInfos | Invoke-ForeachFsItem -Directory -Block $SourceDirectoryBlock -PassThru $PassThru;
-
-  # Deal with top level files for this directory
-  # WARNING: you can't use wild card with LiteralPath
-  #
-  [System.IO.FileInfo[]]$sourceFileInfos = Get-ChildItem -Path $sourcePathWithWildCard `
-    -File -Include $inclusions;
-  $sourceFileInfos | Invoke-ForeachFsItem -File -Block $SourceFileBlock -PassThru $PassThru;
-
-  # Convert directory contents
-  #
-  [scriptblock]$doTraversal = { param(
-      $_underscore,
-      $_index,
-      $_passThru,
-      $_trigger
+      [Parameter(Mandatory)]
+      [boolean]$_trigger
     )
 
-    # Argh, this looks like mirror directory not traverse. Big blunder here.
-    #
+    # Write-Host "[+] >>> doMirrorBlock: $($_underscore.Name)";
 
-    # BUG: Make sure that ROOT-SOURCE ends with /* so that include/exclude works
-    # Why the F is rootSource an array of objects instead of a string?
-    $rootSource = $_passThru['ROOT-SOURCE'];
-    $rootDestination = $_passThru['ROOT-DESTINATION'];
+    [string]$rootSource = $_passThru['LOOPZ.MIRROR.ROOT-SOURCE'];
+    [string]$rootDestination = $_passThru['LOOPZ.MIRROR.ROOT-DESTINATION'];
 
     $sourceDirectoryFullName = $_underscore.FullName;
-    $contentsColour = "Green";
 
     # sourceDirectoryFullName must end with directory separator
     #
@@ -80,27 +65,68 @@ function Invoke-MirrorDirectoryTree {
     }
 
     $destinationBranch = remove-SingleSubString -Target $sourceDirectoryFullName -Subtract $rootSource;
-    $destinationDirectory = Join-Path -Path $rootDestination  -ChildPath $destinationBranch;
-    # Write-Host "@@@ sourceDirectoryFullName: $sourceDirectoryFullName"
-    # Write-Host "--- Subtracting ROOT-SOURCE: '$rootSource' from '$sourceDirectoryFullName'";
-    # Write-Host "+++ destination directory: $destinationDirectory"
-    # Write-PairInColour @( ("destination directory", "Yellow"), ($destinationDirectory, "Red") );
+    $destinationDirectory = Join-Path -Path $rootDestination -ChildPath $destinationBranch;
 
-    Invoke-MirrorDirectoryTree -SourcePath $sourceDirectoryFullName -DestinationPath $destinationDirectory `
-      -Suffixes $inclusions -DirectoryIncludes $DirectoryIncludes -PassThru $_passThru `
-      -SourceFileBlock $SourceFileBlock -SourceDirectoryBlock $SourceDirectoryBlock;
+    [boolean]$whatIf = $_passThru.ContainsKey('LOOPZ.MIRROR.WHAT-IF') -and ($_passThru['LOOPZ.MIRROR.WHAT-IF']);
+    Write-Host "[+] >>> doMirrorBlock: destinationDirectory: '$destinationDirectory'";
+  
+    if ($_passThru.ContainsKey('LOOPZ.MIRROR.CREATE-DIR')) {
+      Write-Host "    [-] Creating destination branch directory: '$destinationBranch'";
 
-    return @{ Message = "*** Convert directory contents";
-      Product = $_underscore; Colour = $contentsColour
-    };
+      $destinationInfo = (Test-Path -Path $destinationDirectory) `
+        ? (Get-Item -Path $destinationDirectory) `
+        : (New-Item -ItemType 'Directory' -Path $destinationDirectory -WhatIf:$whatIf);
+    }
+    else {
+      Write-Host "    [-] Creating destination branch directory INFO obj: '$destinationBranch'";
+      $destinationInfo = New-Object -TypeName System.IO.DirectoryInfo ($destinationDirectory);
+    }
 
-    # Finally traverse this directory's child directories
-    #
-    # [System.IO.DirectoryInfo[]]$sourceDirectoryInfos = Get-ChildItem -Path $sourcePathWithWildCard `
-    #   -Directory -Include $DirectoryIncludes;
-    $sourceDirectoryInfos | Invoke-ForeachFsItem -Directory -Block $doTraversal -PassThru $PassThru;
-  } # doTraversal
-}
+    if ($_passThru.ContainsKey('LOOPZ.MIRROR.COPY-FILES')) {
+      Write-Host "    [-] Creating files for branch directory: '$destinationBranch'"
+    }
 
+    $_passThru['LOOPZ.MIRROR.DESTINATION'] = $destinationInfo;
+    [scriptblock]$directoryBlock = $_passThru['LOOPZ.MIRROR.DIRECTORY-BLOCK'];
 
+    try {
+      $directoryBlock.Invoke($_underscore, $_index, $_passThru, $_trigger);
+    }
+    catch {
+      Write-Error "function invoke error doMirrorBlock: error ($_) occurred for '$destinationBranch'"
+    }
 
+    @{ Product = $destinationInfo }
+  } #doMirrorBlock
+
+  [scriptblock]$summary = {
+    param(
+      [Parameter(Mandatory)]
+      [System.Collections.Hashtable]$_passThru
+    )
+  }
+
+  [string]$resolvedSourcePath = Convert-Path $Path;
+  [string]$resolvedDestinationPath = Convert-Path $DestinationPath;
+
+  $PassThru['LOOPZ.MIRROR.ROOT-SOURCE'] = $resolvedSourcePath;
+  $PassThru['LOOPZ.MIRROR.ROOT-DESTINATION'] = $resolvedDestinationPath;
+  $PassThru['LOOPZ.MIRROR.DIRECTORY-BLOCK'] = $DirectoryBlock;
+
+  if ($PSBoundParameters.ContainsKey('WhatIf')) {
+    $PassThru['LOOPZ.MIRROR.WHAT-IF'] = $true;
+  }
+
+  [scriptblock]$filterDirectories = {
+    [OutputType([boolean])]
+    param(
+      [System.IO.DirectoryInfo]$directoryInfo
+    )
+    Select-Directory -DirectoryInfo $directoryInfo `
+      -Includes $DirectoryIncludes -Excludes $DirectoryExcludes;
+  }
+
+  Invoke-TraverseDirectory -Path $resolvedSourcePath `
+    -SourceDirectoryBlock $doMirrorBlock -PassThru $PassThru -Summary $summary `
+    -Condition $filterDirectories;
+} # Invoke-MirrorDirectoryTree

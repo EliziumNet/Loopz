@@ -6,7 +6,7 @@ Describe 'Invoke-TraverseDirectory' {
   }
 
   Context 'given: directory tree' {
-    It 'Should: traverse' -tag 'Current' {
+    It 'Should: traverse' {
       [string]$resolvedSourcePath = Convert-Path '.\Tests\Data\traverse\';
 
       [scriptblock]$feDirectoryBlock = {

@@ -1,12 +1,24 @@
 
-Describe 'Invoke-MirrorDirectoryTree' -Skip {
+Describe 'Invoke-MirrorDirectoryTree' {
   BeforeAll {
     Get-Module Elizium.Loopz | Remove-Module
     Import-Module .\Output\Elizium.Loopz\Elizium.Loopz.psm1 `
       -ErrorAction 'stop' -DisableNameChecking
   }
-
   Context 'given: directory tree' {
+    It 'Should: mirror' {
+      [string]$sourcePath = '.\Tests\Data\traverse\';
+      [string]$destinationPath = '~\dev\TEST\';
+
+      [System.Collections.Hashtable]$passThru = @{
+        'LOOPZ.MIRROR.CREATE-DIR'       = $true;
+      }
+
+      Invoke-MirrorDirectoryTree -Path $sourcePath -DestinationPath $destinationPath -PassThru $passThru -WhatIf;
+    }
+  }
+
+  Context 'given: directory tree' -Skip {
     It 'Should: traverse' {
       $sourcePath = '.\Tests\Data\traverse\';
       $destinationPath = '~\dev\TEST\';
@@ -18,8 +30,9 @@ Describe 'Invoke-MirrorDirectoryTree' -Skip {
       [System.Collections.Hashtable]$passThru = @{
         # Do NOT use Resolve-Path with a wild-card
         #
-        'ROOT-SOURCE'      = $resolvedSourcePath
-        'ROOT-DESTINATION' = $destinationPath;
+        'LOOPZ.MIRROR.ROOT-SOURCE'      = $resolvedSourcePath
+        'LOOPZ.MIRROR.ROOT-DESTINATION' = $destinationPath;
+        'LOOPZ.MIRROR.CREATE-DIR'       = $true; # 'LOOPZ.MIRROR.CREATE-DIR'
       }
 
       [scriptblock]$feSourceFileblock = {
@@ -60,7 +73,7 @@ Describe 'Invoke-MirrorDirectoryTree' -Skip {
 
       Invoke-MirrorDirectoryTree -SourcePath $sourcePath -DestinationPath $destinationPath `
         -PassThru $passThru `
-        -SourceFileBlock $feSourceFileblock -SourceDirectoryBlock $feDirectoryFileBlock;
+        -SourceFileBlock $feSourceFileblock -SourceDirectoryBlock $feDirectoryFileBlock -WhatIf;
     }
   }
 }
