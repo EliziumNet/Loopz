@@ -30,7 +30,7 @@
     [System.Collections.Hashtable]$PassThru = @{},
 
     [Parameter()]
-    [scriptblock]$DestinationFileBlock = ( {} ),
+    [scriptblock]$DestinationFileBlock = ( {} ), # Should we just delete this, not really required?
 
     [Parameter()]
     [scriptblock]$DirectoryBlock = ( {} )
@@ -68,22 +68,31 @@
     $destinationDirectory = Join-Path -Path $rootDestination -ChildPath $destinationBranch;
 
     [boolean]$whatIf = $_passThru.ContainsKey('LOOPZ.MIRROR.WHAT-IF') -and ($_passThru['LOOPZ.MIRROR.WHAT-IF']);
-    Write-Host "[+] >>> doMirrorBlock: destinationDirectory: '$destinationDirectory'";
+    Write-Debug "[+] >>> doMirrorBlock: destinationDirectory: '$destinationDirectory'";
   
     if ($_passThru.ContainsKey('LOOPZ.MIRROR.CREATE-DIR')) {
-      Write-Host "    [-] Creating destination branch directory: '$destinationBranch'";
+      Write-Debug "    [-] Creating destination branch directory: '$destinationBranch'";
 
       $destinationInfo = (Test-Path -Path $destinationDirectory) `
         ? (Get-Item -Path $destinationDirectory) `
         : (New-Item -ItemType 'Directory' -Path $destinationDirectory -WhatIf:$whatIf);
     }
     else {
-      Write-Host "    [-] Creating destination branch directory INFO obj: '$destinationBranch'";
+      Write-Debug "    [-] Creating destination branch directory INFO obj: '$destinationBranch'";
       $destinationInfo = New-Object -TypeName System.IO.DirectoryInfo ($destinationDirectory);
     }
 
     if ($_passThru.ContainsKey('LOOPZ.MIRROR.COPY-FILES')) {
-      Write-Host "    [-] Creating files for branch directory: '$destinationBranch'"
+      Write-Debug "    [-] Creating files for branch directory: '$destinationBranch'";
+
+      # To use the include/exclude parameters on Copy-Item, the Path specified
+      # must end in /*. We only need to add the star though because we added the /
+      # previously.
+      #
+      [string]$sourceDirectoryWithWildCard = $sourceDirectoryFullName + '*';
+
+      Copy-Item -Path $sourceDirectoryWithWildCard -Include $FileIncludes -Exclude $FileExcludes `
+        -Destination $destinationDirectory -WhatIf:$whatIf;
     }
 
     $_passThru['LOOPZ.MIRROR.DESTINATION'] = $destinationInfo;
@@ -93,7 +102,7 @@
       $directoryBlock.Invoke($_underscore, $_index, $_passThru, $_trigger);
     }
     catch {
-      Write-Error "function invoke error doMirrorBlock: error ($_) occurred for '$destinationBranch'"
+      Write-Error "function invoke error doMirrorBlock: error ($_) occurred for '$destinationBranch'";
     }
 
     @{ Product = $destinationInfo }

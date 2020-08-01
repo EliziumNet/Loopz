@@ -155,7 +155,7 @@ Describe 'Select-Directory' {
 
   Context 'given: Case sensitive' {
     Context 'and: Matching Include Filter, but differs in case' {
-      It 'should: be case insensitive and select the directory (return true)' -Tag 'Current' {
+      It 'should: be case insensitive and select the directory (return false)' -Tag 'Current' {
         [string[]]$includes = @('fields*');
         [string[]]$excludes = @();
 

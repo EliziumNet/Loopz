@@ -5,18 +5,103 @@ Describe 'Invoke-MirrorDirectoryTree' {
     Import-Module .\Output\Elizium.Loopz\Elizium.Loopz.psm1 `
       -ErrorAction 'stop' -DisableNameChecking
   }
-  Context 'given: directory tree' {
-    It 'Should: mirror' {
-      [string]$sourcePath = '.\Tests\Data\traverse\';
-      [string]$destinationPath = '~\dev\TEST\';
 
-      [System.Collections.Hashtable]$passThru = @{
-        'LOOPZ.MIRROR.CREATE-DIR'       = $true;
+  # WhatIf set on function calls. This makes the test output very chatty, but if there are
+  # no errors in the output, the tests are considered to have passed. This could be done
+  # using TestDrive and checking existence of files/directories, but this would slow the
+  # tests down further as real test resources are created and destroyed.
+  #
+
+  Context 'given: no filters applied' {
+    Context 'given: directory tree without Creation option specified' {
+      It 'Should: traverse without creating files or directories' {
+        [string]$sourcePath = '.\Tests\Data\traverse\';
+        [string]$destinationPath = '~\dev\TEST\';
+
+        Invoke-MirrorDirectoryTree -Path $sourcePath `
+          -DestinationPath $destinationPath -WhatIf;
       }
-
-      Invoke-MirrorDirectoryTree -Path $sourcePath -DestinationPath $destinationPath -PassThru $passThru -WhatIf;
     }
-  }
+
+    Context 'given: directory tree with Directory Creation option specified' {
+      It 'Should: traverse creating directories only' {
+        [string]$sourcePath = '.\Tests\Data\traverse\';
+        [string]$destinationPath = '~\dev\TEST\';
+
+        [System.Collections.Hashtable]$passThru = @{
+          'LOOPZ.MIRROR.CREATE-DIR' = $true;
+        }
+
+        Invoke-MirrorDirectoryTree -Path $sourcePath `
+          -DestinationPath $destinationPath -PassThru $passThru -WhatIf;
+      }
+    }
+
+    Context 'given: directory tree with Directory and File Creation options specified' {
+      It 'Should: traverse creating files and directories' {
+        [string]$sourcePath = '.\Tests\Data\traverse\';
+        [string]$destinationPath = '~\dev\TEST\';
+
+        [System.Collections.Hashtable]$passThru = @{
+          'LOOPZ.MIRROR.CREATE-DIR' = $true;
+          'LOOPZ.MIRROR.COPY-FILES' = $true;
+        }
+
+        Invoke-MirrorDirectoryTree -Path $sourcePath `
+          -DestinationPath $destinationPath -PassThru $passThru -WhatIf;
+      }
+    }
+  } # given: no filters applied
+
+  Context 'given: Include file filters applied' {
+    Context 'and: directory tree with Directory and File Creation options specified' {
+      It 'Should: traverse creating files and directories' {
+        [string]$sourcePath = '.\Tests\Data\traverse\';
+        [string]$destinationPath = '~\dev\TEST\';
+
+        [System.Collections.Hashtable]$passThru = @{
+          'LOOPZ.MIRROR.CREATE-DIR' = $true;
+          'LOOPZ.MIRROR.COPY-FILES' = $true;
+        }
+
+        Invoke-MirrorDirectoryTree -Path $sourcePath `
+          -DestinationPath $destinationPath -PassThru $passThru -FileIncludes @('cover.*') -WhatIf;
+      }
+    }
+  } # given: Include file filters applied
+
+  Context 'given: Exclude file filters applied' {
+    Context 'and: directory tree with Directory and File Creation options specified' {
+      It 'Should: traverse creating files and directories' {
+        [string]$sourcePath = '.\Tests\Data\traverse\';
+        [string]$destinationPath = '~\dev\TEST\';
+
+        [System.Collections.Hashtable]$passThru = @{
+          'LOOPZ.MIRROR.CREATE-DIR' = $true;
+          'LOOPZ.MIRROR.COPY-FILES' = $true;
+        }
+
+        Invoke-MirrorDirectoryTree -Path $sourcePath `
+          -DestinationPath $destinationPath -PassThru $passThru -FileExcludes @('*mp3*') -WhatIf;
+      }
+    }
+  } # given: Exclude file filters applied
+
+  Context 'given: Include file filters applied' {
+    Context 'and: directory tree with Directory and File Creation options specified' {
+      It 'Should: traverse creating files and directories' {
+        [string]$sourcePath = '.\Tests\Data\traverse\';
+        [string]$destinationPath = '~\dev\TEST\';
+
+        [System.Collections.Hashtable]$passThru = @{
+          'LOOPZ.MIRROR.CREATE-DIR' = $true;
+        }
+
+        Invoke-MirrorDirectoryTree -Path $sourcePath `
+          -DestinationPath $destinationPath -PassThru $passThru -DirectoryIncludes @('*o*') -WhatIf;
+      }
+    }
+  } # given: Include file filters applied
 
   Context 'given: directory tree' -Skip {
     It 'Should: traverse' {
@@ -32,7 +117,7 @@ Describe 'Invoke-MirrorDirectoryTree' {
         #
         'LOOPZ.MIRROR.ROOT-SOURCE'      = $resolvedSourcePath
         'LOOPZ.MIRROR.ROOT-DESTINATION' = $destinationPath;
-        'LOOPZ.MIRROR.CREATE-DIR'       = $true; # 'LOOPZ.MIRROR.CREATE-DIR'
+        'LOOPZ.MIRROR.CREATE-DIR'       = $true;
       }
 
       [scriptblock]$feSourceFileblock = {
