@@ -28,12 +28,8 @@ Describe 'Invoke-MirrorDirectoryTree' {
         [string]$sourcePath = '.\Tests\Data\traverse\';
         [string]$destinationPath = '~\dev\TEST\';
 
-        [System.Collections.Hashtable]$passThru = @{
-          'LOOPZ.MIRROR.CREATE-DIR' = $true;
-        }
-
         Invoke-MirrorDirectoryTree -Path $sourcePath `
-          -DestinationPath $destinationPath -PassThru $passThru -WhatIf;
+          -DestinationPath $destinationPath -CreateDirs -WhatIf;
       }
     }
 
@@ -42,13 +38,8 @@ Describe 'Invoke-MirrorDirectoryTree' {
         [string]$sourcePath = '.\Tests\Data\traverse\';
         [string]$destinationPath = '~\dev\TEST\';
 
-        [System.Collections.Hashtable]$passThru = @{
-          'LOOPZ.MIRROR.CREATE-DIR' = $true;
-          'LOOPZ.MIRROR.COPY-FILES' = $true;
-        }
-
         Invoke-MirrorDirectoryTree -Path $sourcePath `
-          -DestinationPath $destinationPath -PassThru $passThru -WhatIf;
+          -DestinationPath $destinationPath -CreateDirs -CopyFiles -WhatIf;
       }
     }
   } # given: no filters applied
@@ -59,13 +50,8 @@ Describe 'Invoke-MirrorDirectoryTree' {
         [string]$sourcePath = '.\Tests\Data\traverse\';
         [string]$destinationPath = '~\dev\TEST\';
 
-        [System.Collections.Hashtable]$passThru = @{
-          'LOOPZ.MIRROR.CREATE-DIR' = $true;
-          'LOOPZ.MIRROR.COPY-FILES' = $true;
-        }
-
         Invoke-MirrorDirectoryTree -Path $sourcePath `
-          -DestinationPath $destinationPath -PassThru $passThru -FileIncludes @('cover.*') -WhatIf;
+          -DestinationPath $destinationPath -CreateDirs -CopyFiles -FileIncludes @('cover.*') -WhatIf;
       }
     }
   } # given: Include file filters applied
@@ -76,13 +62,8 @@ Describe 'Invoke-MirrorDirectoryTree' {
         [string]$sourcePath = '.\Tests\Data\traverse\';
         [string]$destinationPath = '~\dev\TEST\';
 
-        [System.Collections.Hashtable]$passThru = @{
-          'LOOPZ.MIRROR.CREATE-DIR' = $true;
-          'LOOPZ.MIRROR.COPY-FILES' = $true;
-        }
-
         Invoke-MirrorDirectoryTree -Path $sourcePath `
-          -DestinationPath $destinationPath -PassThru $passThru -FileExcludes @('*mp3*') -WhatIf;
+          -DestinationPath $destinationPath -CreateDirs -CopyFiles -FileExcludes @('*mp3*') -WhatIf;
       }
     }
   } # given: Exclude file filters applied
@@ -93,12 +74,8 @@ Describe 'Invoke-MirrorDirectoryTree' {
         [string]$sourcePath = '.\Tests\Data\traverse\';
         [string]$destinationPath = '~\dev\TEST\';
 
-        [System.Collections.Hashtable]$passThru = @{
-          'LOOPZ.MIRROR.CREATE-DIR' = $true;
-        }
-
         Invoke-MirrorDirectoryTree -Path $sourcePath `
-          -DestinationPath $destinationPath -PassThru $passThru -DirectoryIncludes @('*o*') -WhatIf;
+          -DestinationPath $destinationPath -CreateDirs -DirectoryIncludes @('*o*') -WhatIf;
       }
     }
   } # given: Include file filters applied

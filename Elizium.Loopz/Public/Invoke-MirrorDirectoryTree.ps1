@@ -33,7 +33,13 @@
     [scriptblock]$DestinationFileBlock = ( {} ), # Should we just delete this, not really required?
 
     [Parameter()]
-    [scriptblock]$DirectoryBlock = ( {} )
+    [scriptblock]$DirectoryBlock = ( {} ),
+
+    [Parameter()]
+    [switch]$CreateDirs,
+
+    [Parameter()]
+    [switch]$CopyFiles
   )
 
   [scriptblock]$doMirrorBlock = {
@@ -70,7 +76,7 @@
     [boolean]$whatIf = $_passThru.ContainsKey('LOOPZ.MIRROR.WHAT-IF') -and ($_passThru['LOOPZ.MIRROR.WHAT-IF']);
     Write-Debug "[+] >>> doMirrorBlock: destinationDirectory: '$destinationDirectory'";
   
-    if ($_passThru.ContainsKey('LOOPZ.MIRROR.CREATE-DIR')) {
+    if ($CreateDirs.ToBool()) {
       Write-Debug "    [-] Creating destination branch directory: '$destinationBranch'";
 
       $destinationInfo = (Test-Path -Path $destinationDirectory) `
@@ -82,7 +88,7 @@
       $destinationInfo = New-Object -TypeName System.IO.DirectoryInfo ($destinationDirectory);
     }
 
-    if ($_passThru.ContainsKey('LOOPZ.MIRROR.COPY-FILES')) {
+    if ($CopyFiles.ToBool() -and $CreateDirs.ToBool()) {
       Write-Debug "    [-] Creating files for branch directory: '$destinationBranch'";
 
       # To use the include/exclude parameters on Copy-Item, the Path specified

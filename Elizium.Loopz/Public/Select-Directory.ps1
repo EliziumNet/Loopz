@@ -1,5 +1,9 @@
 
 function Select-Directory {
+  # When this is documented properly, mention that this function is required because the
+  # Include/Exclude parameters on Get-ChildItems/Copy-Item/Get-Item etc only work on
+  # files not directories.
+  #
   [OutputType([boolean])]
   param(
     [Parameter(Mandatory)]
