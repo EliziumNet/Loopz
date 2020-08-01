@@ -26,7 +26,10 @@ function Invoke-TraverseDirectory {
     [scriptblock]$SourceDirectoryBlock,
 
     [Parameter()]
-    [scriptblock]$Summary = ( {} )
+    [scriptblock]$Summary = ( {} ),
+
+    [Parameter()]
+    [switch]$Hoist
   )
 
   [scriptblock]$recurseTraverseDirectory = {
@@ -111,36 +114,70 @@ function Invoke-TraverseDirectory {
     [System.IO.FileAttributes]::Directory) -eq [System.IO.FileAttributes]::Directory;
 
   if ($itemIsDirectory) {
-    # The index of the top level directory is always 0
-    #
-    [int]$index = $PassThru['LOOPZ.FOREACH-INDEX'] = 0;
     [boolean]$trigger = $false;
 
+    # The index of the top level directory is always 0
+    #
+    [int]$index = 0;
+
+    if (-not($Hoist.ToBool())) {
+      # We only want to manage the index via $PassThru when we are recursing
+      #
+      $PassThru['LOOPZ.FOREACH-INDEX'] = $index;
+    }
+    
     # This is the top level invoke
     #
-    $SourceDirectoryBlock.Invoke($directory, $index, $PassThru, $trigger);
-
-    # Set up the adapter. (NB, can't use splatting because we're invoking a script block
-    # as opposed to a named function.)
-    #
-    $PassThru['LOOPZ.TRAVERSE-DIRECTORY.CONDITION'] = $Condition;
-    $PassThru['LOOPZ.TRAVERSE-DIRECTORY.BLOCK'] = $SourceDirectoryBlock;
-    $PassThru['LOOPZ.TRAVERSE-DIRECTORY.ADAPTED'] = $recurseTraverseDirectory;
-    $PassThru['LOOPZ.TRAVERSE-DIRECTORY.ADAPTOR'] = $adapter;
-
-    # Now perform start of recursive traversal
-    #
-    $PassThru['LOOPZ.FOREACH-INDEX']++;
-
-    [System.IO.DirectoryInfo[]]$directoryInfos = Get-ChildItem -Path $Path `
-      -Directory | Where-Object { $Condition.Invoke($_) }
-
-    if ($directoryInfos) {
-      $directoryInfos | Invoke-ForeachFsItem -Directory -Block $adapter `
-        -PassThru $PassThru -Condition $Condition;
+    try {
+      $SourceDirectoryBlock.Invoke($directory, $index, $PassThru, $trigger);
+    }
+    catch {
+      Write-Error "Invoke-TraverseDirectory(top-level) Error: ($_), for item: '$($directory.Name)'";
+    }
+    finally {
+      if ($Hoist.ToBool()) {
+        $index++;
+      } else {
+        $PassThru['LOOPZ.FOREACH-INDEX']++;
+        $index = $PassThru['LOOPZ.FOREACH-INDEX'];
+      }
     }
 
-    $index = $PassThru['LOOPZ.FOREACH-INDEX'];
+    if ($Hoist.ToBool()) {
+      # Perform non-recursive retrieval of descendant directories
+      #
+      [System.IO.DirectoryInfo[]]$directoryInfos = Get-ChildItem -Path $Path `
+        -Directory -Recurse | Where-Object { $Condition.Invoke($_) }
+
+      if ($directoryInfos) {
+        # No need to manage the index, let Invoke-ForeachFsItem do this for us,
+        # except we do need to inform Invoke-ForeachFsItem to start the index at
+        # +1, because 0 is for the top level directory which has already been
+        # handled.
+        #
+        $directoryInfos | Invoke-ForeachFsItem -Directory -Block $SourceDirectoryBlock `
+          -PassThru $PassThru -StartIndex $index;
+      }
+    } else {
+      # Set up the adapter. (NB, can't use splatting because we're invoking a script block
+      # as opposed to a named function.)
+      #
+      $PassThru['LOOPZ.TRAVERSE-DIRECTORY.CONDITION'] = $Condition;
+      $PassThru['LOOPZ.TRAVERSE-DIRECTORY.BLOCK'] = $SourceDirectoryBlock;
+      $PassThru['LOOPZ.TRAVERSE-DIRECTORY.ADAPTED'] = $recurseTraverseDirectory;
+      $PassThru['LOOPZ.TRAVERSE-DIRECTORY.ADAPTOR'] = $adapter;
+
+      # Now perform start of recursive traversal
+      #
+      [System.IO.DirectoryInfo[]]$directoryInfos = Get-ChildItem -Path $Path `
+        -Directory | Where-Object { $Condition.Invoke($_) }
+
+      if ($directoryInfos) {
+        $directoryInfos | Invoke-ForeachFsItem -Directory -Block $adapter `
+          -PassThru $PassThru -Condition $Condition;
+      }
+    }
+
     $Summary.Invoke($PassThru);
   }
   else {

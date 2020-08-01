@@ -37,12 +37,16 @@ function Invoke-ForeachFsItem {
     [Parameter(ParameterSetName = 'InvokeScriptBlock')]
     [Parameter(ParameterSetName = 'InvokeFunction')]
     [ValidateScript( { -not($PSBoundParameters.ContainsKey('File')) })]
-    [switch]$Directory
+    [switch]$Directory,
+
+    [Parameter(ParameterSetName = 'InvokeScriptBlock')]
+    [Parameter(ParameterSetName = 'InvokeFunction')]
+    [int]$StartIndex = 0
   )
 
   begin {
     [boolean]$manageIndex = -not($PassThru.ContainsKey('LOOPZ.FOREACH-INDEX'));
-    [int]$index = $manageIndex ? 0 : $PassThru['LOOPZ.FOREACH-INDEX'];
+    [int]$index = $manageIndex ? $StartIndex : $PassThru['LOOPZ.FOREACH-INDEX'];
     [int]$skipped = 0;
     [boolean]$broken = $false;
     [boolean]$trigger = $false;

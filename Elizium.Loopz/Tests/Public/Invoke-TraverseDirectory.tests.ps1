@@ -39,5 +39,53 @@ Describe 'Invoke-TraverseDirectory' {
       Invoke-TraverseDirectory -Path $resolvedSourcePath `
         -SourceDirectoryBlock $feDirectoryBlock -Summary $summary;
     }
+  } # given: directory tree
+
+  Context 'given: directory tree and Hoist specified' {
+    It 'Should: traverse child directories whose ancestors don\`t match filter' {
+      [string]$resolvedSourcePath = Convert-Path '.\Tests\Data\traverse\';
+
+      [string]$filter = '*e*';
+      [scriptblock]$feDirectoryBlock = {
+        param(
+          [Parameter(Mandatory)]
+          [System.IO.DirectoryInfo]$_underscore,
+
+          [Parameter(Mandatory)]
+          [int]$_index,
+
+          [Parameter(Mandatory)]
+          [System.Collections.Hashtable]$_passThru,
+
+          [Parameter(Mandatory)]
+          [boolean]$_trigger
+        )
+
+        Write-Host "[+] Traverse with Hoist; directory ($filter): '$($_underscore.Name)', index: $_index";
+        @{ Product = $_underscore }
+      }
+
+      [scriptblock]$summary = {
+        param(
+          [Parameter(Mandatory)]
+          [System.Collections.Hashtable]$_passThru
+        )
+      }
+
+      [scriptblock]$filterDirectories = {
+        [OutputType([boolean])]
+        param(
+          [System.IO.DirectoryInfo]$directoryInfo
+        )
+        [string[]]$directoryIncludes = @($filter);
+        [string[]]$directoryExcludes = @();
+
+        Select-Directory -DirectoryInfo $directoryInfo `
+          -Includes $directoryIncludes -Excludes $directoryExcludes;
+      }
+
+      Invoke-TraverseDirectory -Path $resolvedSourcePath -SourceDirectoryBlock $feDirectoryBlock `
+        -Summary $summary -Condition $filterDirectories -Hoist;
+    }
   }
 }

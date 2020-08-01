@@ -3,7 +3,10 @@ Describe 'Invoke-MirrorDirectoryTree' {
   BeforeAll {
     Get-Module Elizium.Loopz | Remove-Module
     Import-Module .\Output\Elizium.Loopz\Elizium.Loopz.psm1 `
-      -ErrorAction 'stop' -DisableNameChecking
+      -ErrorAction 'stop' -DisableNameChecking;
+
+    [string]$script:sourcePath = '.\Tests\Data\traverse\';
+    [string]$script:destinationPath = '~\dev\TEST\';
   }
 
   # WhatIf set on function calls. This makes the test output very chatty, but if there are
@@ -13,31 +16,22 @@ Describe 'Invoke-MirrorDirectoryTree' {
   #
 
   Context 'given: no filters applied' {
-    Context 'given: directory tree without Creation option specified' {
+    Context 'and: directory tree without Creation option specified' {
       It 'Should: traverse without creating files or directories' {
-        [string]$sourcePath = '.\Tests\Data\traverse\';
-        [string]$destinationPath = '~\dev\TEST\';
-
         Invoke-MirrorDirectoryTree -Path $sourcePath `
           -DestinationPath $destinationPath -WhatIf;
       }
     }
 
-    Context 'given: directory tree with Directory Creation option specified' {
+    Context 'and: directory tree with Directory Creation option specified' {
       It 'Should: traverse creating directories only' {
-        [string]$sourcePath = '.\Tests\Data\traverse\';
-        [string]$destinationPath = '~\dev\TEST\';
-
         Invoke-MirrorDirectoryTree -Path $sourcePath `
           -DestinationPath $destinationPath -CreateDirs -WhatIf;
       }
     }
 
-    Context 'given: directory tree with Directory and File Creation options specified' {
+    Context 'and: directory tree with Directory and File Creation options specified' {
       It 'Should: traverse creating files and directories' {
-        [string]$sourcePath = '.\Tests\Data\traverse\';
-        [string]$destinationPath = '~\dev\TEST\';
-
         Invoke-MirrorDirectoryTree -Path $sourcePath `
           -DestinationPath $destinationPath -CreateDirs -CopyFiles -WhatIf;
       }
@@ -47,9 +41,6 @@ Describe 'Invoke-MirrorDirectoryTree' {
   Context 'given: Include file filters applied' {
     Context 'and: directory tree with Directory and File Creation options specified' {
       It 'Should: traverse creating files and directories' {
-        [string]$sourcePath = '.\Tests\Data\traverse\';
-        [string]$destinationPath = '~\dev\TEST\';
-
         Invoke-MirrorDirectoryTree -Path $sourcePath `
           -DestinationPath $destinationPath -CreateDirs -CopyFiles -FileIncludes @('cover.*') -WhatIf;
       }
@@ -59,9 +50,6 @@ Describe 'Invoke-MirrorDirectoryTree' {
   Context 'given: Exclude file filters applied' {
     Context 'and: directory tree with Directory and File Creation options specified' {
       It 'Should: traverse creating files and directories' {
-        [string]$sourcePath = '.\Tests\Data\traverse\';
-        [string]$destinationPath = '~\dev\TEST\';
-
         Invoke-MirrorDirectoryTree -Path $sourcePath `
           -DestinationPath $destinationPath -CreateDirs -CopyFiles -FileExcludes @('*mp3*') -WhatIf;
       }
@@ -71,20 +59,23 @@ Describe 'Invoke-MirrorDirectoryTree' {
   Context 'given: Include file filters applied' {
     Context 'and: directory tree with Directory and File Creation options specified' {
       It 'Should: traverse creating files and directories' {
-        [string]$sourcePath = '.\Tests\Data\traverse\';
-        [string]$destinationPath = '~\dev\TEST\';
-
         Invoke-MirrorDirectoryTree -Path $sourcePath `
           -DestinationPath $destinationPath -CreateDirs -DirectoryIncludes @('*o*') -WhatIf;
       }
     }
   } # given: Include file filters applied
 
+  Context 'given: HoistDescendent specified' -Tag 'Current' {
+    Context 'and: Include directory filters applied' {
+      It 'Should: traverse creating files and hoisted descendant directories' {
+        Invoke-MirrorDirectoryTree -Path $sourcePath `
+          -DestinationPath $destinationPath -CreateDirs -DirectoryIncludes @('*e*') -Hoist -WhatIf;
+      }
+    }
+  }
+
   Context 'given: directory tree' -Skip {
     It 'Should: traverse' {
-      $sourcePath = '.\Tests\Data\traverse\';
-      $destinationPath = '~\dev\TEST\';
-
       # NEED A TRAILING /
       [string]$resolvedSourcePath = Convert-Path '.\Tests\Data\traverse';
       [string]$destinationPath = Convert-Path '~\dev\TEST';

@@ -30,16 +30,16 @@
     [System.Collections.Hashtable]$PassThru = @{},
 
     [Parameter()]
-    [scriptblock]$DestinationFileBlock = ( {} ), # Should we just delete this, not really required?
-
-    [Parameter()]
     [scriptblock]$DirectoryBlock = ( {} ),
 
     [Parameter()]
     [switch]$CreateDirs,
 
     [Parameter()]
-    [switch]$CopyFiles
+    [switch]$CopyFiles,
+
+    [Parameter()]
+    [switch]$Hoist
   )
 
   [scriptblock]$doMirrorBlock = {
@@ -143,5 +143,5 @@
 
   Invoke-TraverseDirectory -Path $resolvedSourcePath `
     -SourceDirectoryBlock $doMirrorBlock -PassThru $PassThru -Summary $summary `
-    -Condition $filterDirectories;
+    -Condition $filterDirectories -Hoist:$Hoist;
 } # Invoke-MirrorDirectoryTree
