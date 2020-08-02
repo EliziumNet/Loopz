@@ -46,7 +46,7 @@ function Invoke-ForeachFsItem {
     [Parameter(ParameterSetName = 'InvokeScriptBlock')]
     [Parameter(ParameterSetName = 'InvokeFunction')]
     [int]$StartIndex = 0
-  )
+  ) # param
 
   begin {
     [boolean]$manageIndex = -not($PassThru.ContainsKey('LOOPZ.FOREACH-INDEX'));

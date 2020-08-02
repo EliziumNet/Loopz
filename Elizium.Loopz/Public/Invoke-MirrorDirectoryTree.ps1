@@ -30,7 +30,14 @@
     [System.Collections.Hashtable]$PassThru = @{},
 
     [Parameter()]
-    [scriptblock]$DirectoryBlock = ( {} ),
+    [scriptblock]$Block = ( {
+        param(
+          [System.IO.DirectoryInfo]$underscore,
+          [int]$index,
+          [System.Collections.Hashtable]$passThru,
+          [boolean]$trigger
+        )
+      } ),
 
     [Parameter()]
     [switch]$CreateDirs,
@@ -42,16 +49,18 @@
     [switch]$Hoist,
 
     [Parameter()]
-    [scriptblock]$Summary = {
-      param(
-        [int]$index,
-        [int]$skipped,
-        [boolean]$trigger,
-        [System.Collections.Hashtable]$_passThru
-      )
-    }
-  )
+    [scriptblock]$Summary = ( {
+        param(
+          [int]$index,
+          [int]$skipped,
+          [boolean]$trigger,
+          [System.Collections.Hashtable]$_passThru
+        )
+      })
+  ) # param
 
+  # ================================================================== [doMirrorBlock] ===
+  #
   [scriptblock]$doMirrorBlock = {
     param(
       [Parameter(Mandatory)]
@@ -124,12 +133,14 @@
     @{ Product = $destinationInfo }
   } #doMirrorBlock
 
+  # ===================================================== [Invoke-MirrorDirectoryTree] ===
+
   [string]$resolvedSourcePath = Convert-Path $Path;
   [string]$resolvedDestinationPath = Convert-Path $DestinationPath;
 
   $PassThru['LOOPZ.MIRROR.ROOT-SOURCE'] = $resolvedSourcePath;
   $PassThru['LOOPZ.MIRROR.ROOT-DESTINATION'] = $resolvedDestinationPath;
-  $PassThru['LOOPZ.MIRROR.DIRECTORY-BLOCK'] = $DirectoryBlock;
+  $PassThru['LOOPZ.MIRROR.DIRECTORY-BLOCK'] = $Block;
 
   if ($PSBoundParameters.ContainsKey('WhatIf') -and ($true -eq $PSBoundParameters['WhatIf'])) {
     $PassThru['LOOPZ.MIRROR.WHAT-IF'] = $true;
@@ -145,6 +156,6 @@
   }
 
   Invoke-TraverseDirectory -Path $resolvedSourcePath `
-    -SourceDirectoryBlock $doMirrorBlock -PassThru $PassThru -Summary $Summary `
+    -Block $doMirrorBlock -PassThru $PassThru -Summary $Summary `
     -Condition $filterDirectories -Hoist:$Hoist;
 } # Invoke-MirrorDirectoryTree

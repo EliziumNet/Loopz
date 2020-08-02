@@ -1,14 +1,16 @@
 ﻿
 function Invoke-TraverseDirectory {
-  [CmdletBinding()]
+  [CmdletBinding(DefaultParameterSetName = 'InvokeScriptBlock')]
   [Alias('itd', 'Traverse-Directory')]
   param
   (
-    [Parameter(Mandatory)]
+    [Parameter(ParameterSetName = 'InvokeScriptBlock', Mandatory)]
+    [Parameter(ParameterSetName = 'InvokeFunction', Mandatory)]
     [ValidateScript( { Test-path -Path $_ })]
     [String]$Path,
 
-    [Parameter()]
+    [Parameter(ParameterSetName = 'InvokeScriptBlock')]
+    [Parameter(ParameterSetName = 'InvokeFunction')]
     [ValidateScript( { -not($_ -eq $null) })]
     [scriptblock]$Condition = (
       {
@@ -18,14 +20,24 @@ function Invoke-TraverseDirectory {
       }
     ),
 
-    [Parameter()]
+    [Parameter(ParameterSetName = 'InvokeScriptBlock')]
+    [Parameter(ParameterSetName = 'InvokeFunction')]
     [System.Collections.Hashtable]$PassThru = @{},
 
-    [Parameter()]
+    [Parameter(ParameterSetName = 'InvokeScriptBlock')]
     [ValidateScript( { -not($_ -eq $null) })]
-    [scriptblock]$SourceDirectoryBlock,
+    [scriptblock]$Block,
 
-    [Parameter()]
+    [Parameter(ParameterSetName = 'InvokeFunction', Mandatory)]
+    [ValidateScript( { -not([string]::IsNullOrEmpty($_)); })]
+    [string]$Functee,
+
+    [Parameter(ParameterSetName = 'InvokeFunction')]
+    [ValidateScript( { $_.Length -gt 0; })]
+    [System.Collections.Hashtable]$FuncteeParams = @{},
+
+    [Parameter(ParameterSetName = 'InvokeScriptBlock')]
+    [Parameter(ParameterSetName = 'InvokeFunction')]
     [scriptblock]$Summary = (
       param(
         [int]$Count,
@@ -35,56 +47,79 @@ function Invoke-TraverseDirectory {
       )
     ),
 
-    [Parameter()]
+    [Parameter(ParameterSetName = 'InvokeScriptBlock')]
+    [Parameter(ParameterSetName = 'InvokeFunction')]
     [switch]$Hoist
-  )
+  ) # param
 
-  [scriptblock]$recurseTraverseDirectory = {
+  # ======================================================= [recurseTraverseDirectory] ===
+  #
+  [scriptblock]$recurseTraverseDirectory = { # Invoked by adapter
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', '')]
     param(
-      [Parameter(Mandatory)]
-      [System.IO.DirectoryInfo]$_directory,
+      [Parameter(Position = 0, Mandatory)]
+      [System.IO.DirectoryInfo]$directoryInfo,
 
-      [Parameter()]
+      [Parameter(Position = 1)]
       [ValidateScript( { -not($_ -eq $null) })]
-      [scriptblock]$_condition,
+      [scriptblock]$condition,
 
-      [Parameter(Mandatory)]
+      [Parameter(Position = 2, Mandatory)]
       [ValidateScript( { -not($_ -eq $null) })]
-      [System.Collections.Hashtable]$_passThru,
+      [System.Collections.Hashtable]$passThru,
 
-      [Parameter()]
-      [scriptblock]$_directoryBlock,
+      [Parameter(Position = 3)]
+      [ValidateScript( { ($_ -is [scriptblock]) -or ($_ -is [string]) })]
+      $invokee, # (scriptblock or function name; hence un-typed parameter)
 
-      [Parameter()]
-      [boolean]$_trigger
+      [Parameter(Position = 4)]
+      [boolean]$trigger
     )
 
-    $index = $_passThru['LOOPZ.FOREACH-INDEX'];
+    $index = $passThru['LOOPZ.FOREACH-INDEX'];
 
     try {
-      $_directoryBlock.Invoke($_directory, $index, $_passThru, $_trigger);
+      if ($invokee -is [scriptblock]) {
+        $invokee.Invoke($directoryInfo, $index, $passThru, $trigger);
+      }
+      else {
+        [System.Collections.Hashtable]$parameters = $FuncteeParams;
+
+        # These are directory specific overwrites. The custom parameters
+        # will still be present
+        # 
+        $parameters['DirectoryInfo'] = $directory;
+        $parameters['Index'] = $index;
+        $parameters['PassThru'] = $PassThru;
+        $parameters['Trigger'] = $trigger;
+
+        & $Functee @parameters;
+
+        #
+        & $invokee @FuncteeParams;
+      }
     }
     catch {
-      Write-Error "recurseTraverseDirectory Error: ($_), for item: '$($_directory.Name)'";
+      Write-Error "recurseTraverseDirectory Error: ($_), for item: '$($directoryInfo.Name)'";
     }
     finally {
-      $_passThru['LOOPZ.FOREACH-INDEX']++;
+      $passThru['LOOPZ.FOREACH-INDEX']++;
     }
 
-
-    [string]$fullName = $_directory.FullName;
+    [string]$fullName = $directoryInfo.FullName;
     [System.IO.DirectoryInfo[]]$directoryInfos = Get-ChildItem -Path $fullName `
-      -Directory | Where-Object { $_condition.Invoke($_) };
+      -Directory | Where-Object { $condition.Invoke($_) };
 
     [scriptblock]$adapter = $PassThru['LOOPZ.TRAVERSE-DIRECTORY.ADAPTOR'];
 
     if ($directoryInfos) {
       $directoryInfos | Invoke-ForeachFsItem -Directory -Block $adapter `
-        -PassThru $PassThru -Condition $_condition -Summary $Summary;
+        -PassThru $PassThru -Condition $condition -Summary $Summary;
     }
   } # recurseTraverseDirectory
 
+  # ======================================================================== [adapter] ===
+  #
   [scriptblock]$adapter = {
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', '')]
     param(
@@ -103,14 +138,16 @@ function Invoke-TraverseDirectory {
 
     [scriptblock]$adapted = $_passThru['LOOPZ.TRAVERSE-DIRECTORY.ADAPTED'];
 
-    Invoke-Command -ScriptBlock $adapted -ArgumentList @(
+    $adapted.Invoke(
       $_underscore,
       $_passThru['LOOPZ.TRAVERSE-DIRECTORY.CONDITION'],
       $_passThru,
-      $PassThru['LOOPZ.TRAVERSE-DIRECTORY.BLOCK'],
+      $PassThru['LOOPZ.TRAVERSE-DIRECTORY.INVOKEE'],
       $_trigger
     );
   } # adapter
+
+  # ======================================================= [Invoke-TraverseDirectory] ===
 
   # Handle top level directory, before recursing through child directories
   #
@@ -127,6 +164,17 @@ function Invoke-TraverseDirectory {
     #
     [int]$index = 0;
 
+    if ('InvokeFunction' -eq $PSCmdlet.ParameterSetName) {
+      # set-up custom parameters
+      #
+      [System.Collections.Hashtable]$parameters = $FuncteeParams;
+      $parameters['Underscore'] = $directory;
+      $parameters['Index'] = $index;
+      $parameters['PassThru'] = $PassThru;
+      $parameters['Trigger'] = $trigger;
+      $PassThru['LOOPZ.TRAVERSE-DIRECTORY.INVOKEE.PARAMS'] = $parameters;
+    }
+
     if (-not($Hoist.ToBool())) {
       # We only want to manage the index via $PassThru when we are recursing
       #
@@ -136,7 +184,12 @@ function Invoke-TraverseDirectory {
     # This is the top level invoke
     #
     try {
-      $SourceDirectoryBlock.Invoke($directory, $index, $PassThru, $trigger);
+      if ('InvokeScriptBlock' -eq $PSCmdlet.ParameterSetName) {
+        $Block.Invoke($directory, $index, $PassThru, $trigger);
+      }
+      elseif ('InvokeFunction' -eq $PSCmdlet.ParameterSetName) {
+        & $Functee @parameters;
+      }
     }
     catch {
       Write-Error "Invoke-TraverseDirectory(top-level) Error: ($_), for item: '$($directory.Name)'";
@@ -163,8 +216,16 @@ function Invoke-TraverseDirectory {
         # +1, because 0 is for the top level directory which has already been
         # handled.
         #
-        $directoryInfos | Invoke-ForeachFsItem -Directory -Block $SourceDirectoryBlock `
-          -PassThru $PassThru -StartIndex $index -Summary $Summary;
+        if ('InvokeScriptBlock' -eq $PSCmdlet.ParameterSetName) {
+          $directoryInfos | Invoke-ForeachFsItem -Directory -Block $Block `
+            -PassThru $PassThru -StartIndex $index -Summary $Summary;
+        } else {
+          # Invoke-ForeachFsItem now has to change to use the custom parameters
+          # instead of using a fixed signature.
+          #
+          $directoryInfos | Invoke-ForeachFsItem -Directory -Functee $Functee `
+            -PassThru $PassThru -StartIndex $index -Summary $Summary;
+        }
       }
     }
     else {
@@ -172,9 +233,15 @@ function Invoke-TraverseDirectory {
       # as opposed to a named function.)
       #
       $PassThru['LOOPZ.TRAVERSE-DIRECTORY.CONDITION'] = $Condition;
-      $PassThru['LOOPZ.TRAVERSE-DIRECTORY.BLOCK'] = $SourceDirectoryBlock;
       $PassThru['LOOPZ.TRAVERSE-DIRECTORY.ADAPTED'] = $recurseTraverseDirectory;
       $PassThru['LOOPZ.TRAVERSE-DIRECTORY.ADAPTOR'] = $adapter;
+
+      if ('InvokeScriptBlock' -eq $PSCmdlet.ParameterSetName) {
+        $PassThru['LOOPZ.TRAVERSE-DIRECTORY.INVOKEE'] = $Block;
+      }
+      elseif ('InvokeFunction' -eq $PSCmdlet.ParameterSetName) {
+        $PassThru['LOOPZ.TRAVERSE-DIRECTORY.INVOKEE'] = $Functee;
+      }
 
       # Now perform start of recursive traversal
       #
@@ -194,4 +261,4 @@ function Invoke-TraverseDirectory {
   else {
     Write-Error "Path specified '$($Path)' is not a directory";
   }
-}
+} # Invoke-TraverseDirectory

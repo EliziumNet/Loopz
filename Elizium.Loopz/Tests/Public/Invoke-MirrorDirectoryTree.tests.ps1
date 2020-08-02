@@ -137,7 +137,7 @@ Describe 'Invoke-MirrorDirectoryTree' {
 
       Invoke-MirrorDirectoryTree -SourcePath $sourcePath -DestinationPath $destinationPath `
         -PassThru $passThru `
-        -SourceFileBlock $feSourceFileblock -SourceDirectoryBlock $feDirectoryFileBlock -WhatIf:$whatIf;
+        -SourceFileBlock $feSourceFileblock -Block $feDirectoryFileBlock -WhatIf:$whatIf;
     }
   }
 }
