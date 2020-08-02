@@ -125,6 +125,8 @@ function Invoke-ForeachFsItem {
   }
 
   end {
-    $Summary.Invoke($index, $skipped, $trigger, $PassThru);
+    if ($manageIndex) {
+      $Summary.Invoke($index, $skipped, $trigger, $PassThru);
+    }
   }
 }

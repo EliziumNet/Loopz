@@ -5,7 +5,7 @@ Describe 'Invoke-TraverseDirectory' {
       -ErrorAction 'stop' -DisableNameChecking
   }
 
-  Context 'given: directory tree' -Tag 'BROKEN' {
+  Context 'given: directory tree' {
     It 'Should: traverse' {
       [string]$resolvedSourcePath = Convert-Path '.\Tests\Data\traverse\';
 
@@ -75,7 +75,7 @@ Describe 'Invoke-TraverseDirectory' {
           [System.Collections.Hashtable]$_passThru
         )
 
-        Write-Warning "TBD (Invoke-TraverseDirectory.tests): Apply Assert"
+        $_count | Should -Be 11;
       }
 
       [scriptblock]$filterDirectories = {

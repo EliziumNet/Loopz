@@ -85,7 +85,7 @@
 
     [boolean]$whatIf = $_passThru.ContainsKey('LOOPZ.MIRROR.WHAT-IF') -and ($_passThru['LOOPZ.MIRROR.WHAT-IF']);
     Write-Debug "[+] >>> doMirrorBlock: destinationDirectory: '$destinationDirectory'";
-  
+
     if ($CreateDirs.ToBool()) {
       Write-Debug "    [-] Creating destination branch directory: '$destinationBranch'";
 

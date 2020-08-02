@@ -132,7 +132,7 @@ function Invoke-TraverseDirectory {
       #
       $PassThru['LOOPZ.FOREACH-INDEX'] = $index;
     }
-    
+
     # This is the top level invoke
     #
     try {
@@ -185,11 +185,11 @@ function Invoke-TraverseDirectory {
         $directoryInfos | Invoke-ForeachFsItem -Directory -Block $adapter `
           -PassThru $PassThru -Condition $Condition -Summary $Summary;
       }
-    }
 
-    [int]$skipped = 0;
-    [boolean]$trigger = $false;
-    $Summary.Invoke($index, $skipped, $trigger, $PassThru);
+      [int]$skipped = 0;
+      [boolean]$trigger = $false;
+      $Summary.Invoke($index, $skipped, $trigger, $PassThru);
+    }
   }
   else {
     Write-Error "Path specified '$($Path)' is not a directory";

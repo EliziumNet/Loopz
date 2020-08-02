@@ -1,4 +1,4 @@
-
+﻿
 Describe 'Invoke-MirrorDirectoryTree' {
   BeforeAll {
     Get-Module Elizium.Loopz | Remove-Module
@@ -6,7 +6,7 @@ Describe 'Invoke-MirrorDirectoryTree' {
       -ErrorAction 'stop' -DisableNameChecking;
 
     # WhatIf set on function calls. This makes the test output very chatty when set to true,
-    # but if there are no errors in the output, the tests are considered to have passed. 
+    # but if there are no errors in the output, the tests are considered to have passed.
     #
     [boolean]$script:whatIf = $false;
     [string]$script:sourcePath = '.\Tests\Data\traverse\';
@@ -75,7 +75,7 @@ Describe 'Invoke-MirrorDirectoryTree' {
             [System.Collections.Hashtable]$_passThru
           )
 
-          Write-Warning "(THIS IS INVOKED TWICE, NEEDS FIX) Hoist; Summary - Count: '$_count'"
+          $_count | Should -Be 11;
         }
 
         Invoke-MirrorDirectoryTree -Path $sourcePath `

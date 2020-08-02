@@ -125,7 +125,7 @@ task Pester {
   $configuration.TestResult.Enabled = $true
   $configuration.TestResult.OutputFormat = 'NUnitxml'
   $configuration.TestResult.OutputPath = $resultFile;
-  # $configuration.Filter.Tag = 'BROKEN'
+  # $configuration.Filter.Tag = 'Current'
   Invoke-Pester -Configuration $configuration
 }
 
