@@ -24,10 +24,14 @@ function Invoke-ForeachFsItem {
 
     [Parameter(ParameterSetName = 'InvokeScriptBlock')]
     [Parameter(ParameterSetName = 'InvokeFunction')]
-    [scriptblock]$Summary = (
-      # $index, $skipped, $trigger, $PassThru
-      { }
-    ),
+    [scriptblock]$Summary = ( {
+        param(
+          [int]$count,
+          [int]$skipped,
+          [boolean]$trigger,
+          [System.Collections.Hashtable]$passThru
+        )
+      }),
 
     [Parameter(ParameterSetName = 'InvokeScriptBlock')]
     [Parameter(ParameterSetName = 'InvokeFunction')]
@@ -84,7 +88,8 @@ function Invoke-ForeachFsItem {
           finally {
             if ($manageIndex) {
               $index++;
-            } else {
+            }
+            else {
               $index = $PassThru['LOOPZ.FOREACH-INDEX'];
             }
 
@@ -102,7 +107,8 @@ function Invoke-ForeachFsItem {
               }
             }
           }
-        } else {
+        }
+        else {
           # IDEA! We could allow the user to provide an extra script block which we
           # invoke for skipped items and set a string containing the reason why it was
           # skipped.
@@ -112,7 +118,8 @@ function Invoke-ForeachFsItem {
       else {
         $null = $skipped++;
       }
-    } else {
+    }
+    else {
       $null = $skipped++;
     }
   }

@@ -26,7 +26,14 @@ function Invoke-TraverseDirectory {
     [scriptblock]$SourceDirectoryBlock,
 
     [Parameter()]
-    [scriptblock]$Summary = ( {} ),
+    [scriptblock]$Summary = (
+      param(
+        [int]$Count,
+        [int]$Skipped,
+        [boolean]$Triggered,
+        [System.Collections.Hashtable]$PassThru
+      )
+    ),
 
     [Parameter()]
     [switch]$Hoist
@@ -74,7 +81,7 @@ function Invoke-TraverseDirectory {
 
     if ($directoryInfos) {
       $directoryInfos | Invoke-ForeachFsItem -Directory -Block $adapter `
-        -PassThru $PassThru -Condition $_condition;
+        -PassThru $PassThru -Condition $_condition -Summary $Summary;
     }
   } # recurseTraverseDirectory
 
@@ -137,7 +144,8 @@ function Invoke-TraverseDirectory {
     finally {
       if ($Hoist.ToBool()) {
         $index++;
-      } else {
+      }
+      else {
         $PassThru['LOOPZ.FOREACH-INDEX']++;
         $index = $PassThru['LOOPZ.FOREACH-INDEX'];
       }
@@ -156,9 +164,10 @@ function Invoke-TraverseDirectory {
         # handled.
         #
         $directoryInfos | Invoke-ForeachFsItem -Directory -Block $SourceDirectoryBlock `
-          -PassThru $PassThru -StartIndex $index;
+          -PassThru $PassThru -StartIndex $index -Summary $Summary;
       }
-    } else {
+    }
+    else {
       # Set up the adapter. (NB, can't use splatting because we're invoking a script block
       # as opposed to a named function.)
       #
@@ -174,11 +183,13 @@ function Invoke-TraverseDirectory {
 
       if ($directoryInfos) {
         $directoryInfos | Invoke-ForeachFsItem -Directory -Block $adapter `
-          -PassThru $PassThru -Condition $Condition;
+          -PassThru $PassThru -Condition $Condition -Summary $Summary;
       }
     }
 
-    $Summary.Invoke($PassThru);
+    [int]$skipped = 0;
+    [boolean]$trigger = $false;
+    $Summary.Invoke($index, $skipped, $trigger, $PassThru);
   }
   else {
     Write-Error "Path specified '$($Path)' is not a directory";

@@ -5,35 +5,34 @@ Describe 'Invoke-MirrorDirectoryTree' {
     Import-Module .\Output\Elizium.Loopz\Elizium.Loopz.psm1 `
       -ErrorAction 'stop' -DisableNameChecking;
 
+    # WhatIf set on function calls. This makes the test output very chatty when set to true,
+    # but if there are no errors in the output, the tests are considered to have passed. 
+    #
+    [boolean]$script:whatIf = $false;
     [string]$script:sourcePath = '.\Tests\Data\traverse\';
-    [string]$script:destinationPath = '~\dev\TEST\';
+    [string]$script:destinationPath = 'TestDrive:\dev\TEST\';
+    New-Item -ItemType 'Directory' -Path $destinationPath;
   }
-
-  # WhatIf set on function calls. This makes the test output very chatty, but if there are
-  # no errors in the output, the tests are considered to have passed. This could be done
-  # using TestDrive and checking existence of files/directories, but this would slow the
-  # tests down further as real test resources are created and destroyed.
-  #
 
   Context 'given: no filters applied' {
     Context 'and: directory tree without Creation option specified' {
       It 'Should: traverse without creating files or directories' {
         Invoke-MirrorDirectoryTree -Path $sourcePath `
-          -DestinationPath $destinationPath -WhatIf;
+          -DestinationPath $destinationPath -WhatIf:$whatIf;
       }
     }
 
     Context 'and: directory tree with Directory Creation option specified' {
       It 'Should: traverse creating directories only' {
         Invoke-MirrorDirectoryTree -Path $sourcePath `
-          -DestinationPath $destinationPath -CreateDirs -WhatIf;
+          -DestinationPath $destinationPath -CreateDirs -WhatIf:$whatIf;
       }
     }
 
     Context 'and: directory tree with Directory and File Creation options specified' {
       It 'Should: traverse creating files and directories' {
         Invoke-MirrorDirectoryTree -Path $sourcePath `
-          -DestinationPath $destinationPath -CreateDirs -CopyFiles -WhatIf;
+          -DestinationPath $destinationPath -CreateDirs -CopyFiles -WhatIf:$whatIf;
       }
     }
   } # given: no filters applied
@@ -42,7 +41,7 @@ Describe 'Invoke-MirrorDirectoryTree' {
     Context 'and: directory tree with Directory and File Creation options specified' {
       It 'Should: traverse creating files and directories' {
         Invoke-MirrorDirectoryTree -Path $sourcePath `
-          -DestinationPath $destinationPath -CreateDirs -CopyFiles -FileIncludes @('cover.*') -WhatIf;
+          -DestinationPath $destinationPath -CreateDirs -CopyFiles -FileIncludes @('cover.*') -WhatIf:$whatIf;
       }
     }
   } # given: Include file filters applied
@@ -51,7 +50,7 @@ Describe 'Invoke-MirrorDirectoryTree' {
     Context 'and: directory tree with Directory and File Creation options specified' {
       It 'Should: traverse creating files and directories' {
         Invoke-MirrorDirectoryTree -Path $sourcePath `
-          -DestinationPath $destinationPath -CreateDirs -CopyFiles -FileExcludes @('*mp3*') -WhatIf;
+          -DestinationPath $destinationPath -CreateDirs -CopyFiles -FileExcludes @('*mp3*') -WhatIf:$whatIf;
       }
     }
   } # given: Exclude file filters applied
@@ -60,19 +59,31 @@ Describe 'Invoke-MirrorDirectoryTree' {
     Context 'and: directory tree with Directory and File Creation options specified' {
       It 'Should: traverse creating files and directories' {
         Invoke-MirrorDirectoryTree -Path $sourcePath `
-          -DestinationPath $destinationPath -CreateDirs -DirectoryIncludes @('*o*') -WhatIf;
+          -DestinationPath $destinationPath -CreateDirs -DirectoryIncludes @('*o*') -WhatIf:$whatIf;
       }
     }
   } # given: Include file filters applied
 
-  Context 'given: HoistDescendent specified' -Tag 'Current' {
+  Context 'given: HoistDescendent specified' {
     Context 'and: Include directory filters applied' {
       It 'Should: traverse creating files and hoisted descendant directories' {
+        [scriptblock]$summary = {
+          param(
+            [int]$_count,
+            [int]$_skipped,
+            [boolean]$_triggered,
+            [System.Collections.Hashtable]$_passThru
+          )
+
+          Write-Warning "(THIS IS INVOKED TWICE, NEEDS FIX) Hoist; Summary - Count: '$_count'"
+        }
+
         Invoke-MirrorDirectoryTree -Path $sourcePath `
-          -DestinationPath $destinationPath -CreateDirs -DirectoryIncludes @('*e*') -Hoist -WhatIf;
+          -DestinationPath $destinationPath -CreateDirs -DirectoryIncludes @('*e*') `
+          -Hoist -Summary $summary -WhatIf:$whatIf;
       }
     }
-  }
+  } # given: HoistDescendent specified
 
   Context 'given: directory tree' -Skip {
     It 'Should: traverse' {
@@ -126,7 +137,7 @@ Describe 'Invoke-MirrorDirectoryTree' {
 
       Invoke-MirrorDirectoryTree -SourcePath $sourcePath -DestinationPath $destinationPath `
         -PassThru $passThru `
-        -SourceFileBlock $feSourceFileblock -SourceDirectoryBlock $feDirectoryFileBlock -WhatIf;
+        -SourceFileBlock $feSourceFileblock -SourceDirectoryBlock $feDirectoryFileBlock -WhatIf:$whatIf;
     }
   }
 }

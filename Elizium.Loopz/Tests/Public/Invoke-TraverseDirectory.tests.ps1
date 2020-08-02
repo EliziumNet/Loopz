@@ -5,7 +5,7 @@ Describe 'Invoke-TraverseDirectory' {
       -ErrorAction 'stop' -DisableNameChecking
   }
 
-  Context 'given: directory tree' {
+  Context 'given: directory tree' -Tag 'BROKEN' {
     It 'Should: traverse' {
       [string]$resolvedSourcePath = Convert-Path '.\Tests\Data\traverse\';
 
@@ -29,7 +29,9 @@ Describe 'Invoke-TraverseDirectory' {
 
       [scriptblock]$summary = {
         param(
-          [Parameter(Mandatory)]
+          [int]$_count,
+          [int]$_skipped,
+          [boolean]$_trigger,
           [System.Collections.Hashtable]$_passThru
         )
         $index = $_passThru['LOOPZ.FOREACH-INDEX'];
@@ -61,15 +63,19 @@ Describe 'Invoke-TraverseDirectory' {
           [boolean]$_trigger
         )
 
-        Write-Host "[+] Traverse with Hoist; directory ($filter): '$($_underscore.Name)', index: $_index";
+        Write-Debug "[+] Traverse with Hoist; directory ($filter): '$($_underscore.Name)', index: $_index";
         @{ Product = $_underscore }
       }
 
       [scriptblock]$summary = {
         param(
-          [Parameter(Mandatory)]
+          [int]$_count,
+          [int]$_skipped,
+          [boolean]$_trigger,
           [System.Collections.Hashtable]$_passThru
         )
+
+        Write-Warning "TBD (Invoke-TraverseDirectory.tests): Apply Assert"
       }
 
       [scriptblock]$filterDirectories = {

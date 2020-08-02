@@ -39,7 +39,17 @@
     [switch]$CopyFiles,
 
     [Parameter()]
-    [switch]$Hoist
+    [switch]$Hoist,
+
+    [Parameter()]
+    [scriptblock]$Summary = {
+      param(
+        [int]$index,
+        [int]$skipped,
+        [boolean]$trigger,
+        [System.Collections.Hashtable]$_passThru
+      )
+    }
   )
 
   [scriptblock]$doMirrorBlock = {
@@ -114,13 +124,6 @@
     @{ Product = $destinationInfo }
   } #doMirrorBlock
 
-  [scriptblock]$summary = {
-    param(
-      [Parameter(Mandatory)]
-      [System.Collections.Hashtable]$_passThru
-    )
-  }
-
   [string]$resolvedSourcePath = Convert-Path $Path;
   [string]$resolvedDestinationPath = Convert-Path $DestinationPath;
 
@@ -128,7 +131,7 @@
   $PassThru['LOOPZ.MIRROR.ROOT-DESTINATION'] = $resolvedDestinationPath;
   $PassThru['LOOPZ.MIRROR.DIRECTORY-BLOCK'] = $DirectoryBlock;
 
-  if ($PSBoundParameters.ContainsKey('WhatIf')) {
+  if ($PSBoundParameters.ContainsKey('WhatIf') -and ($true -eq $PSBoundParameters['WhatIf'])) {
     $PassThru['LOOPZ.MIRROR.WHAT-IF'] = $true;
   }
 
@@ -142,6 +145,6 @@
   }
 
   Invoke-TraverseDirectory -Path $resolvedSourcePath `
-    -SourceDirectoryBlock $doMirrorBlock -PassThru $PassThru -Summary $summary `
+    -SourceDirectoryBlock $doMirrorBlock -PassThru $PassThru -Summary $Summary `
     -Condition $filterDirectories -Hoist:$Hoist;
 } # Invoke-MirrorDirectoryTree
