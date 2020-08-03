@@ -13,11 +13,11 @@ function Test-HoistResult {
     [Parameter(Mandatory)]
     [boolean]$Trigger,
 
-    [Parameter(Mandatory=$false)] # make non mandatory is temporary
-    [string]$Format = "DEFAULT:___{0}___"
+    [Parameter(Mandatory=$false)]
+    [string]$Format = "These aren't the droids you're looking for, ..., move along, move along!:___{0}___"
   )
 
   [string]$result = $Format -f ($Underscore.Name);
-  Write-Host "Custom function; Test-HoistResult: '$result'";
+  Write-Debug "Custom function; Test-HoistResult: '$result'";
   @{ Product = $Underscore }
 }

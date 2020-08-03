@@ -1,5 +1,5 @@
 ﻿
-Describe 'Invoke-MirrorDirectoryTree' -Tag 'Current' {
+Describe 'Invoke-MirrorDirectoryTree' {
   BeforeAll {
     Get-Module Elizium.Loopz | Remove-Module
     Import-Module .\Output\Elizium.Loopz\Elizium.Loopz.psm1 `
@@ -20,6 +20,48 @@ Describe 'Invoke-MirrorDirectoryTree' -Tag 'Current' {
       It 'Should: traverse without creating files or directories' {
         Invoke-MirrorDirectoryTree -Path $sourcePath `
           -DestinationPath $destinationPath -WhatIf:$whatIf;
+      }
+    }
+
+    Context 'and: function specified' {
+      It 'Should: traverse and invoke function for each directory' -Tag 'Current' {
+        [System.Collections.Hashtable]$parameters = @{
+          'Format' = '---- {0} ----';
+        }
+        Invoke-MirrorDirectoryTree -Path $sourcePath `
+          -DestinationPath $destinationPath -CreateDirs `
+          -Functee 'Test-ShowMirror' -FuncteeParams $parameters -WhatIf:$whatIf;
+      }
+    }
+
+    Context 'and: script-block specified' {
+      It 'Should: traverse and invoke function for each directory' -Tag 'Current' {
+        [scriptblock]$testShowMirrorBlock = {
+          param(
+            [Parameter(Mandatory)]
+            [System.IO.DirectoryInfo]$Underscore,
+
+            [Parameter(Mandatory)]
+            [int]$Index,
+
+            [Parameter(Mandatory)]
+            [System.Collections.Hashtable]$PassThru,
+
+            [Parameter(Mandatory)]
+            [boolean]$Trigger,
+
+            [Parameter(Mandatory)]
+            [string]$Format = "DEFAULT: >>>> {0} >>>>"
+          )
+
+          [string]$result = $Format -f ($Underscore.Name);
+          Write-Debug "Custom function; Show-Mirror: '$result'";
+          @{ Product = $Underscore }
+        }
+
+        Invoke-MirrorDirectoryTree -Path $sourcePath `
+          -DestinationPath $destinationPath -CreateDirs `
+          -Block $testShowMirrorBlock -WhatIf:$whatIf;
       }
     }
 
@@ -129,60 +171,4 @@ Describe 'Invoke-MirrorDirectoryTree' -Tag 'Current' {
       }
     }
   } # given: HoistDescendent specified
-
-  Context 'given: directory tree' -Skip {
-    It 'Should: traverse' {
-      # NEED A TRAILING /
-      [string]$resolvedSourcePath = Convert-Path '.\Tests\Data\traverse';
-      [string]$destinationPath = Convert-Path '~\dev\TEST';
-
-      [System.Collections.Hashtable]$passThru = @{
-        # Do NOT use Resolve-Path with a wild-card
-        #
-        'LOOPZ.MIRROR.ROOT-SOURCE'      = $resolvedSourcePath
-        'LOOPZ.MIRROR.ROOT-DESTINATION' = $destinationPath;
-        'LOOPZ.MIRROR.CREATE-DIR'       = $true;
-      }
-
-      [scriptblock]$feSourceFileblock = {
-        param(
-          [Parameter(Mandatory)]
-          $_underscore,
-
-          [Parameter(Mandatory)]
-          [int]$_index,
-
-          [Parameter(Mandatory)]
-          [System.Collections.Hashtable]$_passThru,
-
-          [Parameter(Mandatory)]
-          [boolean]$_trigger
-        )
-        Write-Host "    [+] File: '$($_underscore.Name)'"
-        @{ Product = $_underscore }
-      }
-
-      [scriptblock]$feDirectoryFileBlock = {
-        param(
-          [Parameter(Mandatory)]
-          $_underscore,
-
-          [Parameter(Mandatory)]
-          [int]$_index,
-
-          [Parameter(Mandatory)]
-          [System.Collections.Hashtable]$_passThru,
-
-          [Parameter(Mandatory)]
-          [boolean]$_trigger
-        )
-        Write-Host "  [*] Directory: '$($_underscore)', type: $($_underscore.GetType())"
-        @{ Product = $_underscore }
-      }
-
-      Invoke-MirrorDirectoryTree -SourcePath $sourcePath -DestinationPath $destinationPath `
-        -PassThru $passThru `
-        -SourceFileBlock $feSourceFileblock -Block $feDirectoryFileBlock -WhatIf:$whatIf;
-    }
-  }
-}
+} # Invoke-MirrorDirectoryTree

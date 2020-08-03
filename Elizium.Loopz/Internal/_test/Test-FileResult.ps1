@@ -19,6 +19,6 @@ function Test-FileResult {
   )
 
   [string]$result = $Format -f ($Underscore.Name);
-  Write-Host "Custom function; Test-FileResult: '$result'";
+  Write-Debug "Custom function; Test-FileResult: '$result'";
   @{ Product = $Underscore }
 }

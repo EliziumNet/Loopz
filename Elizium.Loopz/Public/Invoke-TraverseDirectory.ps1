@@ -85,7 +85,7 @@ function Invoke-TraverseDirectory {
         $invokee.Invoke($directoryInfo, $index, $passThru, $trigger);
       }
       else {
-        [System.Collections.Hashtable]$parameters = $passThru['LOOPZ.TRAVERSE-DIRECTORY.INVOKEE.PARAMS'];
+        [System.Collections.Hashtable]$parameters = $passThru['LOOPZ.TRAVERSE.INVOKEE.PARAMS'];
 
         # These are directory specific overwrites. The custom parameters
         # will still be present
@@ -109,7 +109,7 @@ function Invoke-TraverseDirectory {
     [System.IO.DirectoryInfo[]]$directoryInfos = Get-ChildItem -Path $fullName `
       -Directory | Where-Object { $condition.Invoke($_) };
 
-    [scriptblock]$adapter = $PassThru['LOOPZ.TRAVERSE-DIRECTORY.ADAPTOR'];
+    [scriptblock]$adapter = $PassThru['LOOPZ.TRAVERSE.ADAPTOR'];
 
     if ($directoryInfos) {
       # adapter is always a script block, this has nothing to do with the invokee,
@@ -138,13 +138,13 @@ function Invoke-TraverseDirectory {
       [boolean]$_trigger
     )
 
-    [scriptblock]$adapted = $_passThru['LOOPZ.TRAVERSE-DIRECTORY.ADAPTED'];
+    [scriptblock]$adapted = $_passThru['LOOPZ.TRAVERSE.ADAPTED'];
 
     $adapted.Invoke(
       $_underscore,
-      $_passThru['LOOPZ.TRAVERSE-DIRECTORY.CONDITION'],
+      $_passThru['LOOPZ.TRAVERSE.CONDITION'],
       $_passThru,
-      $PassThru['LOOPZ.TRAVERSE-DIRECTORY.INVOKEE'],
+      $PassThru['LOOPZ.TRAVERSE.INVOKEE'],
       $_trigger
     );
   } # adapter
@@ -174,7 +174,7 @@ function Invoke-TraverseDirectory {
       $parameters['Index'] = $index;
       $parameters['PassThru'] = $PassThru;
       $parameters['Trigger'] = $trigger;
-      $PassThru['LOOPZ.TRAVERSE-DIRECTORY.INVOKEE.PARAMS'] = $parameters;
+      $PassThru['LOOPZ.TRAVERSE.INVOKEE.PARAMS'] = $parameters;
     }
 
     if (-not($Hoist.ToBool())) {
@@ -239,15 +239,15 @@ function Invoke-TraverseDirectory {
       # Set up the adapter. (NB, can't use splatting because we're invoking a script block
       # as opposed to a named function.)
       #
-      $PassThru['LOOPZ.TRAVERSE-DIRECTORY.CONDITION'] = $Condition;
-      $PassThru['LOOPZ.TRAVERSE-DIRECTORY.ADAPTED'] = $recurseTraverseDirectory;
-      $PassThru['LOOPZ.TRAVERSE-DIRECTORY.ADAPTOR'] = $adapter;
+      $PassThru['LOOPZ.TRAVERSE.CONDITION'] = $Condition;
+      $PassThru['LOOPZ.TRAVERSE.ADAPTED'] = $recurseTraverseDirectory;
+      $PassThru['LOOPZ.TRAVERSE.ADAPTOR'] = $adapter;
 
       if ('InvokeScriptBlock' -eq $PSCmdlet.ParameterSetName) {
-        $PassThru['LOOPZ.TRAVERSE-DIRECTORY.INVOKEE'] = $Block;
+        $PassThru['LOOPZ.TRAVERSE.INVOKEE'] = $Block;
       }
       elseif ('InvokeFunction' -eq $PSCmdlet.ParameterSetName) {
-        $PassThru['LOOPZ.TRAVERSE-DIRECTORY.INVOKEE'] = $Functee;
+        $PassThru['LOOPZ.TRAVERSE.INVOKEE'] = $Functee;
       }
 
       # Now perform start of recursive traversal

@@ -263,7 +263,7 @@ Describe 'Invoke-ForeachFsItem' {
             [string]$Format
           )
           [string]$result = $Format -f ($Underscore.Name);
-          Write-Host "Mocked Custom function; Test-FileResult: '$result'";
+          Write-Debug "Mocked Custom function; Test-FileResult: '$result'";
           @{ Product = $Underscore; }
         }
         [System.IO.FileInfo[]]$collection = @();

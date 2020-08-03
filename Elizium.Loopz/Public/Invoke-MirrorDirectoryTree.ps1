@@ -1,35 +1,42 @@
 ﻿function Invoke-MirrorDirectoryTree {
-  [CmdletBinding(SupportsShouldProcess)]
+  [CmdletBinding(SupportsShouldProcess, DefaultParameterSetName = 'InvokeScriptBlock')]
   [Alias('imdt', 'Mirror-Directory')]
   param
   (
-    [Parameter(Mandatory)]
+    [Parameter(Mandatory, ParameterSetName = 'InvokeScriptBlock')]
+    [Parameter(Mandatory, ParameterSetName = 'InvokeFunction')]
     [ValidateScript( { Test-path -Path $_; })]
     [String]$Path,
 
-    [Parameter(Mandatory)]
+    [Parameter(Mandatory, ParameterSetName = 'InvokeScriptBlock')]
+    [Parameter(Mandatory, ParameterSetName = 'InvokeFunction')]
     [String]$DestinationPath,
 
     # The include/exclude parameters are collections of filters (can contain a *).
     # If an entry does not include a *, it is treated as a suffix for files
     # and ignored for directories.
     #
-    [Parameter()]
+    [Parameter(ParameterSetName = 'InvokeScriptBlock')]
+    [Parameter(ParameterSetName = 'InvokeFunction')]
     [String[]]$DirectoryIncludes = @('*'),
 
-    [Parameter()]
+    [Parameter(ParameterSetName = 'InvokeScriptBlock')]
+    [Parameter(ParameterSetName = 'InvokeFunction')]
     [String[]]$DirectoryExcludes = @(),
 
-    [Parameter()]
+    [Parameter(ParameterSetName = 'InvokeScriptBlock')]
+    [Parameter(ParameterSetName = 'InvokeFunction')]
     [String[]]$FileIncludes = @('*'),
 
-    [Parameter()]
+    [Parameter(ParameterSetName = 'InvokeScriptBlock')]
+    [Parameter(ParameterSetName = 'InvokeFunction')]
     [String[]]$FileExcludes = @(),
 
-    [Parameter()]
+    [Parameter(ParameterSetName = 'InvokeScriptBlock')]
+    [Parameter(ParameterSetName = 'InvokeFunction')]
     [System.Collections.Hashtable]$PassThru = @{},
 
-    [Parameter()]
+    [Parameter(ParameterSetName = 'InvokeScriptBlock')]
     [scriptblock]$Block = ( {
         param(
           [System.IO.DirectoryInfo]$underscore,
@@ -39,16 +46,28 @@
         )
       } ),
 
-    [Parameter()]
+    [Parameter(ParameterSetName = 'InvokeFunction', Mandatory)]
+    [ValidateScript( { -not([string]::IsNullOrEmpty($_)); })]
+    [string]$Functee,
+
+    [Parameter(ParameterSetName = 'InvokeFunction')]
+    [ValidateScript( { $_.Length -gt 0; })]
+    [System.Collections.Hashtable]$FuncteeParams = @{},
+
+    [Parameter(ParameterSetName = 'InvokeScriptBlock')]
+    [Parameter(ParameterSetName = 'InvokeFunction')]
     [switch]$CreateDirs,
 
-    [Parameter()]
+    [Parameter(ParameterSetName = 'InvokeScriptBlock')]
+    [Parameter(ParameterSetName = 'InvokeFunction')]
     [switch]$CopyFiles,
 
-    [Parameter()]
+    [Parameter(ParameterSetName = 'InvokeScriptBlock')]
+    [Parameter(ParameterSetName = 'InvokeFunction')]
     [switch]$Hoist,
 
-    [Parameter()]
+    [Parameter(ParameterSetName = 'InvokeScriptBlock')]
+    [Parameter(ParameterSetName = 'InvokeFunction')]
     [scriptblock]$Summary = ( {
         param(
           [int]$index,
@@ -129,15 +148,44 @@
         -Destination $destinationDirectory -WhatIf:$whatIf;
     }
 
+    # To be consistent with Invoke-ForeachFsItem, the user function/block is invoked
+    # with the source directory info. The destination for this mirror operation is
+    # returned via 'LOOPZ.MIRROR.DESTINATION' within the PassThru.
+    # 
     $_passThru['LOOPZ.MIRROR.DESTINATION'] = $destinationInfo;
-    [scriptblock]$directoryBlock = $_passThru['LOOPZ.MIRROR.DIRECTORY-BLOCK'];
+
+    $invokee = $_passThru['LOOPZ.MIRROR.INVOKEE'];
 
     try {
-      $directoryBlock.Invoke($_underscore, $_index, $_passThru, $_trigger);
+      if ($invokee -is [scriptblock]) {
+        $invokee.Invoke($_underscore, $_index, $_passThru, $_trigger);
+      }
+      elseif ($invokee -is [string]) {
+        [System.Collections.Hashtable]$parameters = $_passThru['LOOPZ.MIRROR.INVOKEE.PARAMS'];
+        $parameters['Underscore'] = $_underscore;
+        $parameters['Index'] = $_index;
+        $parameters['PassThru'] = $_passThru;
+        $parameters['Trigger'] = $_trigger;
+        $parameters;
+
+        & $invokee @parameters;
+      }
+      else {
+        Write-Warning "User defined function/block not valid, not invoking.";
+      }
     }
     catch {
       Write-Error "function invoke error doMirrorBlock: error ($_) occurred for '$destinationBranch'";
     }
+
+    # [scriptblock]$directoryBlock = $_passThru['LOOPZ.MIRROR.INVOKEE'];
+
+    # try {
+    #   $directoryBlock.Invoke($_underscore, $_index, $_passThru, $_trigger);
+    # }
+    # catch {
+    #   Write-Error "function invoke error doMirrorBlock: error ($_) occurred for '$destinationBranch'";
+    # }
 
     @{ Product = $destinationInfo }
   } #doMirrorBlock
@@ -149,7 +197,14 @@
 
   $PassThru['LOOPZ.MIRROR.ROOT-SOURCE'] = $resolvedSourcePath;
   $PassThru['LOOPZ.MIRROR.ROOT-DESTINATION'] = $resolvedDestinationPath;
-  $PassThru['LOOPZ.MIRROR.DIRECTORY-BLOCK'] = $Block;
+
+  if ('InvokeScriptBlock' -eq $PSCmdlet.ParameterSetName) {
+    $PassThru['LOOPZ.MIRROR.INVOKEE'] = $Block;
+  }
+  else {
+    $PassThru['LOOPZ.MIRROR.INVOKEE'] = $Functee;
+    $PassThru['LOOPZ.MIRROR.INVOKEE.PARAMS'] = $FuncteeParams;
+  }
 
   if ($PSBoundParameters.ContainsKey('WhatIf') -and ($true -eq $PSBoundParameters['WhatIf'])) {
     $PassThru['LOOPZ.MIRROR.WHAT-IF'] = $true;
@@ -167,4 +222,25 @@
   Invoke-TraverseDirectory -Path $resolvedSourcePath `
     -Block $doMirrorBlock -PassThru $PassThru -Summary $Summary `
     -Condition $filterDirectories -Hoist:$Hoist;
+
+  # [System.Collections.Hashtable]$parametersTraverse = @{
+  #   'Path'      = $resolvedSourcePath;
+  #   'PassThru'  = $PassThru;
+  #   'Summary'   = $Summary;
+  #   'Condition' = $filterDirectories;
+  # }
+
+  # if ($Hoist.ToBool()) {
+  #   $parametersTraverse['Hoist'] = $true;
+  # }
+
+  # if ('InvokeScriptBlock' -eq $PSCmdlet.ParameterSetName) {
+  #   $parametersTraverse['Block'] = $doMirrorBlock;
+  # }
+  # else {
+  #   $parametersTraverse['Functee'] = $Functee;
+  #   $parametersTraverse['FuncteeParams'] = $FuncteeParams;
+  # }
+
+  # & 'Invoke-TraverseDirectory' @parametersTraverse;
 } # Invoke-MirrorDirectoryTree
