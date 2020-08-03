@@ -18,6 +18,9 @@ function Invoke-ForeachFsItem {
     [ValidateScript( { -not([string]::IsNullOrEmpty($_)); })]
     [string]$Functee,
 
+    [Parameter(ParameterSetName = 'InvokeFunction')]
+    [string]$FuncteeParamsKey,
+
     [Parameter(ParameterSetName = 'InvokeScriptBlock')]
     [Parameter(ParameterSetName = 'InvokeFunction')]
     [System.Collections.Hashtable]$PassThru = @{},
@@ -73,12 +76,14 @@ function Invoke-ForeachFsItem {
               );
             }
             elseif ('InvokeFunction' -eq $PSCmdlet.ParameterSetName) {
-              $parameters = @{
-                Underscore = $pipelineItem;
-                Index      = $index;
-                PassThru   = $PassThru;
-                Trigger    = $trigger;
-              }
+              $parameters = $PassThru.ContainsKey($FuncteeParamsKey) `
+                ? $PassThru[$FuncteeParamsKey]: @{};
+
+              $parameters['Underscore'] = $pipelineItem;
+              $parameters['Index'] = $index;
+              $parameters['PassThru'] = $PassThru;
+              $parameters['Trigger'] = $trigger;
+
               $result = & $Functee @parameters;
             }
           }

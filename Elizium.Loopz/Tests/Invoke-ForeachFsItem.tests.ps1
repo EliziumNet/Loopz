@@ -1,5 +1,5 @@
 
-Describe 'Invoke-ForeachFsItem' -tag 'Current' {
+Describe 'Invoke-ForeachFsItem' {
   BeforeAll {
     Get-Module Elizium.Loopz | Remove-Module
     Import-Module .\Output\Elizium.Loopz\Elizium.Loopz.psm1 `
@@ -131,7 +131,8 @@ Describe 'Invoke-ForeachFsItem' -tag 'Current' {
 
             if ($Index -eq 2) {
               @{ Product = $FileInfo; Break = $true }
-            } else {
+            }
+            else {
               @{ Product = $FileInfo; }
             }
           }
@@ -249,6 +250,43 @@ Describe 'Invoke-ForeachFsItem' -tag 'Current' {
       }
     }
   } # given: invoke named function
+
+  Context 'given: invoke named function with additional param(s)' {
+    Context 'and: files piped from different directories' {
+      It 'should: send objects out of the pipeline' {
+        Mock -ModuleName Elizium.Loopz Test-FileResult -Verifiable {
+          param(
+            [System.IO.FileInfo]$Underscore,
+            [int]$Index,
+            [System.Collections.Hashtable]$PassThru,
+            [boolean]$Trigger,
+            [string]$Format
+          )
+          [string]$result = $Format -f ($Underscore.Name);
+          Write-Host "Mocked Custom function; Test-FileResult: '$result'";
+          @{ Product = $Underscore; }
+        }
+        [System.IO.FileInfo[]]$collection = @();
+        [string]$directoryPath = './Tests/Data/fefsi';
+
+        [System.Collections.Hashtable]$parameters = @{
+          'Format' = '*** [{0}] ***'
+        }
+        [string]$parametersKey = 'LOOPZ.TEST-CASE.INVOKEE.PARAMS';
+        [System.Collections.Hashtable]$passThru = @{
+          'LOOPZ.TEST-CASE.INVOKEE.PARAMS' = $parameters;
+        }
+
+        Get-ChildItem $directoryPath -Recurse -File | Invoke-ForeachFsItem -Functee 'Test-FileResult' `
+          -FuncteeParamsKey $parametersKey -PassThru $passThru | ForEach-Object {
+          $collection += $_;
+        }
+
+        $collection.Length | Should -Be 8;
+        Assert-MockCalled Test-FileResult -ModuleName Elizium.Loopz -Times $collection.Length;
+      }
+    }
+  } # given: invoke named function with additional param(s)
 
   Context 'given: File flag specified' {
     Context 'and: files piped from same directory' {

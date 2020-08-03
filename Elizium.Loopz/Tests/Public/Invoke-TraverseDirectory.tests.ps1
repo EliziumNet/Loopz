@@ -102,7 +102,7 @@ Describe 'Invoke-TraverseDirectory' {
 
   Context 'given: custom function specified' {
     Context 'and: directory tree and Hoist specified' {
-      It 'should: traverse child directories whose ancestors don\`t match filter' -Tag 'Current' {
+      It 'should: traverse child directories whose ancestors don\`t match filter' {
 
 
         [scriptblock]$summary = {

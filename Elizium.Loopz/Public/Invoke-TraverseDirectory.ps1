@@ -79,24 +79,23 @@ function Invoke-TraverseDirectory {
     $index = $passThru['LOOPZ.FOREACH-INDEX'];
 
     try {
+      # This is the local invoke, for the current directory
+      #
       if ($invokee -is [scriptblock]) {
         $invokee.Invoke($directoryInfo, $index, $passThru, $trigger);
       }
       else {
-        [System.Collections.Hashtable]$parameters = $FuncteeParams;
+        [System.Collections.Hashtable]$parameters = $passThru['LOOPZ.TRAVERSE-DIRECTORY.INVOKEE.PARAMS'];
 
         # These are directory specific overwrites. The custom parameters
         # will still be present
         # 
         $parameters['DirectoryInfo'] = $directory;
         $parameters['Index'] = $index;
-        $parameters['PassThru'] = $PassThru;
+        $parameters['PassThru'] = $passThru;
         $parameters['Trigger'] = $trigger;
 
-        & $Functee @parameters;
-
-        #
-        & $invokee @FuncteeParams;
+        & $invokee @parameters;
       }
     }
     catch {
@@ -113,6 +112,9 @@ function Invoke-TraverseDirectory {
     [scriptblock]$adapter = $PassThru['LOOPZ.TRAVERSE-DIRECTORY.ADAPTOR'];
 
     if ($directoryInfos) {
+      # adapter is always a script block, this has nothing to do with the invokee,
+      # which may be a script block or a named function(functee)
+      #
       $directoryInfos | Invoke-ForeachFsItem -Directory -Block $adapter `
         -PassThru $PassThru -Condition $condition -Summary $Summary;
     }
@@ -219,12 +221,16 @@ function Invoke-TraverseDirectory {
         if ('InvokeScriptBlock' -eq $PSCmdlet.ParameterSetName) {
           $directoryInfos | Invoke-ForeachFsItem -Directory -Block $Block `
             -PassThru $PassThru -StartIndex $index -Summary $Summary;
-        } else {
+        }
+        else {
           # Invoke-ForeachFsItem now has to change to use the custom parameters
           # instead of using a fixed signature.
+          # TBD: The function parameters are already prepared above for the
+          # top-level invoke, we just re-use for further iterations
           #
           $directoryInfos | Invoke-ForeachFsItem -Directory -Functee $Functee `
-            -PassThru $PassThru -StartIndex $index -Summary $Summary;
+            -FuncteeParamsKey 'LOOPZ.TRAVERSE-DIRECTORY.INVOKEE.PARAMS' -PassThru $PassThru `
+            -StartIndex $index -Summary $Summary;
         }
       }
     }
