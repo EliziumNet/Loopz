@@ -272,13 +272,9 @@ Describe 'Invoke-ForeachFsItem' {
         [System.Collections.Hashtable]$parameters = @{
           'Format' = '*** [{0}] ***'
         }
-        [string]$parametersKey = 'LOOPZ.TEST-CASE.INVOKEE.PARAMS';
-        [System.Collections.Hashtable]$passThru = @{
-          'LOOPZ.TEST-CASE.INVOKEE.PARAMS' = $parameters;
-        }
 
         Get-ChildItem $directoryPath -Recurse -File | Invoke-ForeachFsItem -Functee 'Test-FileResult' `
-          -FuncteeParamsKey $parametersKey -PassThru $passThru | ForEach-Object {
+          -FuncteeParams $parameters | ForEach-Object {
           $collection += $_;
         }
 

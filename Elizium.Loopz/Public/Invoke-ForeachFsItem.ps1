@@ -19,7 +19,7 @@ function Invoke-ForeachFsItem {
     [string]$Functee,
 
     [Parameter(ParameterSetName = 'InvokeFunction')]
-    [string]$FuncteeParamsKey,
+    [System.Collections.Hashtable]$FuncteeParams = @{},
 
     [Parameter(ParameterSetName = 'InvokeScriptBlock')]
     [Parameter(ParameterSetName = 'InvokeFunction')]
@@ -76,8 +76,7 @@ function Invoke-ForeachFsItem {
               );
             }
             elseif ('InvokeFunction' -eq $PSCmdlet.ParameterSetName) {
-              $parameters = $PassThru.ContainsKey($FuncteeParamsKey) `
-                ? $PassThru[$FuncteeParamsKey]: @{};
+              [System.Collections.Hashtable]$parameters = $FuncteeParams.Clone();
 
               $parameters['Underscore'] = $pipelineItem;
               $parameters['Index'] = $index;

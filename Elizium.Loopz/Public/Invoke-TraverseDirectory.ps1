@@ -218,20 +218,21 @@ function Invoke-TraverseDirectory {
         # +1, because 0 is for the top level directory which has already been
         # handled.
         #
+        [System.Collections.Hashtable]$parametersFeFsItem = @{
+          'Directory' = $true;
+          'PassThru'  = $PassThru;
+          'StartIndex' = $index;
+          'Summary' = $Summary;
+        }
+
         if ('InvokeScriptBlock' -eq $PSCmdlet.ParameterSetName) {
-          $directoryInfos | Invoke-ForeachFsItem -Directory -Block $Block `
-            -PassThru $PassThru -StartIndex $index -Summary $Summary;
+          $parametersFeFsItem['Block'] = $Block;
+        } else {
+          $parametersFeFsItem['Functee'] = $Functee;
+          $parametersFeFsItem['FuncteeParams'] = $FuncteeParams;
         }
-        else {
-          # Invoke-ForeachFsItem now has to change to use the custom parameters
-          # instead of using a fixed signature.
-          # TBD: The function parameters are already prepared above for the
-          # top-level invoke, we just re-use for further iterations
-          #
-          $directoryInfos | Invoke-ForeachFsItem -Directory -Functee $Functee `
-            -FuncteeParamsKey 'LOOPZ.TRAVERSE-DIRECTORY.INVOKEE.PARAMS' -PassThru $PassThru `
-            -StartIndex $index -Summary $Summary;
-        }
+
+        $directoryInfos | & 'Invoke-ForeachFsItem' @parametersFeFsItem;
       }
     }
     else {
