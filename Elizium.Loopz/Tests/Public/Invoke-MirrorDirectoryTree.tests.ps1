@@ -1,12 +1,13 @@
 ﻿
-Describe 'Invoke-MirrorDirectoryTree' {
+Describe 'Invoke-MirrorDirectoryTree' -Tag 'Current' {
   BeforeAll {
     Get-Module Elizium.Loopz | Remove-Module
     Import-Module .\Output\Elizium.Loopz\Elizium.Loopz.psm1 `
       -ErrorAction 'stop' -DisableNameChecking;
 
-    # WhatIf set on function calls. This makes the test output very chatty when set to true,
-    # but if there are no errors in the output, the tests are considered to have passed.
+    # WhatIf set on function calls. This makes the test output very chatty when set to true.
+    # WARNING: setting whatIf to true will break the tests, but you can see the directory and
+    # file locations.
     #
     [boolean]$script:whatIf = $false;
     [string]$script:sourcePath = '.\Tests\Data\traverse\';
@@ -26,6 +27,8 @@ Describe 'Invoke-MirrorDirectoryTree' {
       It 'Should: traverse creating directories only' {
         Invoke-MirrorDirectoryTree -Path $sourcePath `
           -DestinationPath $destinationPath -CreateDirs -WhatIf:$whatIf;
+
+        Test-Path -Path (Join-Path -Path $destinationPath -ChildPath 'Audio') | Should -BeTrue;
       }
     }
 
@@ -33,6 +36,9 @@ Describe 'Invoke-MirrorDirectoryTree' {
       It 'Should: traverse creating files and directories' {
         Invoke-MirrorDirectoryTree -Path $sourcePath `
           -DestinationPath $destinationPath -CreateDirs -CopyFiles -WhatIf:$whatIf;
+
+        Test-Path -Path (Join-Path -Path $destinationPath -ChildPath 'Audio') | Should -BeTrue;
+        Test-Path -Path (Join-Path -Path $destinationPath -ChildPath 'Audio\audio-catalogue.txt') | Should -BeTrue;
       }
     }
   } # given: no filters applied
@@ -42,8 +48,39 @@ Describe 'Invoke-MirrorDirectoryTree' {
       It 'Should: traverse creating files and directories' {
         Invoke-MirrorDirectoryTree -Path $sourcePath `
           -DestinationPath $destinationPath -CreateDirs -CopyFiles -FileIncludes @('cover.*') -WhatIf:$whatIf;
+
+        Test-Path -Path (Join-Path -Path $destinationPath -ChildPath 'Audio') | Should -BeTrue;
+        Test-Path -Path (Join-Path -Path $destinationPath `
+            -ChildPath 'Audio\GOTHIC\Fields Of The Nephilim\Earth Inferno\cover.fotn.earth-inferno.jpg.txt') | Should -BeTrue;
+        Test-Path -Path (Join-Path -Path $destinationPath -ChildPath 'Audio\audio-catalogue.txt') | Should -BeFalse;
       }
     }
+
+    Context 'and: filter without wild-card' {
+      Context 'and: filter without preceding "."' {
+        It 'Should: traverse creating files and directories' {
+          Invoke-MirrorDirectoryTree -Path $sourcePath `
+            -DestinationPath $destinationPath -CreateDirs -CopyFiles -FileIncludes @('jpg.txt') -WhatIf:$whatIf;
+
+          Test-Path -Path (Join-Path -Path $destinationPath -ChildPath 'Audio') | Should -BeTrue;
+          Test-Path -Path (Join-Path -Path $destinationPath `
+              -ChildPath 'Audio\GOTHIC\Fields Of The Nephilim\Earth Inferno\cover.fotn.earth-inferno.jpg.txt') | Should -BeTrue;
+          Test-Path -Path (Join-Path -Path $destinationPath -ChildPath 'Audio\audio-catalogue.txt') | Should -BeFalse;
+        }
+      }
+
+      Context 'and: filter with preceding "."' {
+        It 'Should: traverse creating files and directories' {
+          Invoke-MirrorDirectoryTree -Path $sourcePath `
+            -DestinationPath $destinationPath -CreateDirs -CopyFiles -FileIncludes @('.jpg.txt') -WhatIf:$whatIf;
+
+          Test-Path -Path (Join-Path -Path $destinationPath -ChildPath 'Audio') | Should -BeTrue;
+          Test-Path -Path (Join-Path -Path $destinationPath `
+              -ChildPath 'Audio\GOTHIC\Fields Of The Nephilim\Earth Inferno\cover.fotn.earth-inferno.jpg.txt') | Should -BeTrue;
+          Test-Path -Path (Join-Path -Path $destinationPath -ChildPath 'Audio\audio-catalogue.txt') | Should -BeFalse;
+        }
+      }
+    } # and: filter without wild-card
   } # given: Include file filters applied
 
   Context 'given: Exclude file filters applied' {
@@ -51,6 +88,12 @@ Describe 'Invoke-MirrorDirectoryTree' {
       It 'Should: traverse creating files and directories' {
         Invoke-MirrorDirectoryTree -Path $sourcePath `
           -DestinationPath $destinationPath -CreateDirs -CopyFiles -FileExcludes @('*mp3*') -WhatIf:$whatIf;
+
+        Test-Path -Path (Join-Path -Path $destinationPath -ChildPath 'Audio') | Should -BeTrue;
+        Test-Path -Path (Join-Path -Path $destinationPath `
+            -ChildPath 'Audio\GOTHIC\Fields Of The Nephilim\Earth Inferno\cover.fotn.earth-inferno.jpg.txt') | Should -BeTrue;
+        Test-Path -Path (Join-Path -Path $destinationPath `
+            -ChildPath 'Audio\MINIMAL\Plastikman\Consumed\A1 - Contain.mp3.txt') | Should -BeFalse;
       }
     }
   } # given: Exclude file filters applied
@@ -60,6 +103,8 @@ Describe 'Invoke-MirrorDirectoryTree' {
       It 'Should: traverse creating files and directories' {
         Invoke-MirrorDirectoryTree -Path $sourcePath `
           -DestinationPath $destinationPath -CreateDirs -DirectoryIncludes @('*o*') -WhatIf:$whatIf;
+
+        Test-Path -Path (Join-Path -Path $destinationPath -ChildPath 'Audio') | Should -BeTrue;
       }
     }
   } # given: Include file filters applied

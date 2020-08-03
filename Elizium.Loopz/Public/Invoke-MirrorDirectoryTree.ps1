@@ -116,7 +116,16 @@
       #
       [string]$sourceDirectoryWithWildCard = $sourceDirectoryFullName + '*';
 
-      Copy-Item -Path $sourceDirectoryWithWildCard -Include $FileIncludes -Exclude $FileExcludes `
+      [string[]]$adjustedFileIncludes = $FileIncludes | ForEach-Object {
+        $_.Contains('*') ? $_ : "*.$_".Replace('..', '.');
+      }
+
+      [string[]]$adjustedFileExcludes = $FileExcludes | ForEach-Object {
+        $_.Contains('*') ? $_ : "*.$_".Replace('..', '.');
+      }
+
+      Copy-Item -Path $sourceDirectoryWithWildCard `
+        -Include $adjustedFileIncludes -Exclude $adjustedFileExcludes `
         -Destination $destinationDirectory -WhatIf:$whatIf;
     }
 
