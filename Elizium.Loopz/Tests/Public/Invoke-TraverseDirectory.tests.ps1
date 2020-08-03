@@ -14,7 +14,7 @@ Describe 'Invoke-TraverseDirectory' {
       [string[]]$directoryIncludes = @($filter);
       [string[]]$directoryExcludes = @();
 
-      Select-Directory -DirectoryInfo $directoryInfo `
+      Select-FsItem -Name $directoryInfo.Name `
         -Includes $directoryIncludes -Excludes $directoryExcludes;
     }
 
@@ -24,8 +24,6 @@ Describe 'Invoke-TraverseDirectory' {
   Context 'given: custom scriptblock specified' {
     Context 'and: directory tree' {
       It 'should: traverse' {
-        # [string]$resolvedSourcePath = Convert-Path $sourcePath;
-
         [scriptblock]$feDirectoryBlock = {
           param(
             [Parameter(Mandatory)]
@@ -62,8 +60,6 @@ Describe 'Invoke-TraverseDirectory' {
 
     Context 'and: directory tree and Hoist specified' {
       It 'should: traverse child directories whose ancestors don\`t match filter' {
-        # [string]$resolvedSourcePath = Convert-Path $sourcePath;
-
         [scriptblock]$feDirectoryBlock = {
           param(
             [Parameter(Mandatory)]
@@ -103,8 +99,6 @@ Describe 'Invoke-TraverseDirectory' {
   Context 'given: custom function specified' {
     Context 'and: directory tree and Hoist specified' {
       It 'should: traverse child directories whose ancestors don\`t match filter' {
-
-
         [scriptblock]$summary = {
           param(
             [int]$_count,
@@ -124,4 +118,4 @@ Describe 'Invoke-TraverseDirectory' {
       }
     }
   } # given: custom function specified
-}
+} # Invoke-TraverseDirectory

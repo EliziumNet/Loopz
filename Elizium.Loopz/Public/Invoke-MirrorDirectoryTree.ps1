@@ -178,15 +178,6 @@
       Write-Error "function invoke error doMirrorBlock: error ($_) occurred for '$destinationBranch'";
     }
 
-    # [scriptblock]$directoryBlock = $_passThru['LOOPZ.MIRROR.INVOKEE'];
-
-    # try {
-    #   $directoryBlock.Invoke($_underscore, $_index, $_passThru, $_trigger);
-    # }
-    # catch {
-    #   Write-Error "function invoke error doMirrorBlock: error ($_) occurred for '$destinationBranch'";
-    # }
-
     @{ Product = $destinationInfo }
   } #doMirrorBlock
 
@@ -215,32 +206,11 @@
     param(
       [System.IO.DirectoryInfo]$directoryInfo
     )
-    Select-Directory -DirectoryInfo $directoryInfo `
+    Select-FsItem -Name $directoryInfo.Name `
       -Includes $DirectoryIncludes -Excludes $DirectoryExcludes;
   }
 
   Invoke-TraverseDirectory -Path $resolvedSourcePath `
     -Block $doMirrorBlock -PassThru $PassThru -Summary $Summary `
     -Condition $filterDirectories -Hoist:$Hoist;
-
-  # [System.Collections.Hashtable]$parametersTraverse = @{
-  #   'Path'      = $resolvedSourcePath;
-  #   'PassThru'  = $PassThru;
-  #   'Summary'   = $Summary;
-  #   'Condition' = $filterDirectories;
-  # }
-
-  # if ($Hoist.ToBool()) {
-  #   $parametersTraverse['Hoist'] = $true;
-  # }
-
-  # if ('InvokeScriptBlock' -eq $PSCmdlet.ParameterSetName) {
-  #   $parametersTraverse['Block'] = $doMirrorBlock;
-  # }
-  # else {
-  #   $parametersTraverse['Functee'] = $Functee;
-  #   $parametersTraverse['FuncteeParams'] = $FuncteeParams;
-  # }
-
-  # & 'Invoke-TraverseDirectory' @parametersTraverse;
 } # Invoke-MirrorDirectoryTree

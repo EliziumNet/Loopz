@@ -1,5 +1,5 @@
 
-function Select-Directory {
+function Select-FsItem {
   # When this is documented properly, mention that this function is required because the
   # Include/Exclude parameters on Get-ChildItems/Copy-Item/Get-Item etc only work on
   # files not directories.
@@ -7,7 +7,7 @@ function Select-Directory {
   [OutputType([boolean])]
   param(
     [Parameter(Mandatory)]
-    [System.IO.DirectoryInfo]$DirectoryInfo,
+    [string]$Name,
 
     [Parameter()]
     [string[]]$Includes = @(),
@@ -32,11 +32,11 @@ function Select-Directory {
   [string[]]$validExcludes = @($Excludes | Where-Object { $_.Contains('*') })
 
   [boolean]$resolvedInclude = $validIncludes `
-    ? (select-ResolvedDirectory -DirectoryInfo $DirectoryInfo -Filter $Includes -Case:$Case) `
+    ? (select-ResolvedFsItem -FsItem $Name -Filter $Includes -Case:$Case) `
     : $false;
 
   [boolean]$resolvedExclude = $validExcludes `
-    ? (select-ResolvedDirectory -DirectoryInfo $DirectoryInfo -Filter $Excludes -Case:$Case) `
+    ? (select-ResolvedFsItem -FsItem $Name -Filter $Excludes -Case:$Case) `
     : $false;
 
   ($resolvedInclude) -and -not($resolvedExclude)

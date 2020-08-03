@@ -1,8 +1,8 @@
-  function select-ResolvedDirectory {
+  function select-ResolvedFsItem {
     [OutputType([boolean])]
     param(
       [Parameter(Mandatory)]
-      [System.IO.DirectoryInfo]$DirectoryInfo,
+      [string]$FsItem,
 
       [Parameter(Mandatory)]
       [AllowEmptyCollection()]
@@ -17,8 +17,8 @@
 
     do {
       $liked = $Case.ToBool() `
-        ? $DirectoryInfo.Name -CLike $Filter[$counter] `
-        : $DirectoryInfo.Name -Like $Filter[$counter];
+        ? $FsItem -CLike $Filter[$counter] `
+        : $FsItem -Like $Filter[$counter];
       $counter++;
     } while (-not($liked) -and ($counter -lt $Filter.Count));
 

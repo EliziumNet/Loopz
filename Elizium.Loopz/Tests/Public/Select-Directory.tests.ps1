@@ -1,5 +1,5 @@
 
-Describe 'Select-Directory' {
+Describe 'Select-FsItem' {
   BeforeAll {
     Get-Module Elizium.Loopz | Remove-Module
     Import-Module .\Output\Elizium.Loopz\Elizium.Loopz.psm1 `
@@ -15,7 +15,7 @@ Describe 'Select-Directory' {
         [string[]]$includes = @('Fields*');
         [string[]]$excludes = @();
 
-        Select-Directory -DirectoryInfo $directoryInfo `
+        Select-FsItem -Name $directoryInfo.Name `
           -Includes $includes -Excludes $excludes | Should -BeTrue;
       }
 
@@ -24,7 +24,7 @@ Describe 'Select-Directory' {
           [string[]]$includes = @('Fields*');
           [string[]]$excludes = @('Pop*');
 
-          Select-Directory -DirectoryInfo $directoryInfo `
+          Select-FsItem -Name $directoryInfo.Name `
             -Includes $includes -Excludes $excludes | Should -BeTrue;
         }
       }
@@ -34,7 +34,7 @@ Describe 'Select-Directory' {
           [string[]]$includes = @('Fields*');
           [string[]]$excludes = @('*Nephilim*');
 
-          Select-Directory -DirectoryInfo $directoryInfo `
+          Select-FsItem -Name $directoryInfo.Name `
             -Includes $includes -Excludes $excludes | Should -BeFalse;
         }
       }
@@ -44,7 +44,7 @@ Describe 'Select-Directory' {
           [string[]]$includes = @('Fields*');
           [string[]]$excludes = @('Nephilim');
 
-          Select-Directory -DirectoryInfo $directoryInfo `
+          Select-FsItem -Name $directoryInfo.Name `
             -Includes $includes -Excludes $excludes | Should -BeTrue;
         }
       }
@@ -55,7 +55,7 @@ Describe 'Select-Directory' {
         [string[]]$includes = @('fields*');
         [string[]]$excludes = @();
 
-        Select-Directory -DirectoryInfo $directoryInfo `
+        Select-FsItem -Name $directoryInfo.Name `
           -Includes $includes -Excludes $excludes | Should -BeTrue;
       }
     }
@@ -65,7 +65,7 @@ Describe 'Select-Directory' {
         [string[]]$includes = @('Rock*');
         [string[]]$excludes = @();
 
-        Select-Directory -DirectoryInfo $directoryInfo `
+        Select-FsItem -Name $directoryInfo.Name `
           -Includes $includes -Excludes $excludes | Should -BeFalse;
       }
     }
@@ -75,7 +75,7 @@ Describe 'Select-Directory' {
         [string[]]$includes = @('Rock');
         [string[]]$excludes = @();
 
-        Select-Directory -DirectoryInfo $directoryInfo `
+        Select-FsItem -Name $directoryInfo.Name `
           -Includes $includes -Excludes $excludes | Should -BeFalse;
       }
     }
@@ -87,7 +87,7 @@ Describe 'Select-Directory' {
         [string[]]$includes = @('Fields*', 'Goth*', '*Of');
         [string[]]$excludes = @();
 
-        Select-Directory -DirectoryInfo $directoryInfo `
+        Select-FsItem -Name $directoryInfo.Name `
           -Includes $includes -Excludes $excludes | Should -BeTrue;
       }
 
@@ -96,7 +96,7 @@ Describe 'Select-Directory' {
           [string[]]$includes = @('Fields*');
           [string[]]$excludes = @('Pop*', 'Prog*', 'Techno*');
 
-          Select-Directory -DirectoryInfo $directoryInfo `
+          Select-FsItem -Name $directoryInfo.Name `
             -Includes $includes -Excludes $excludes | Should -BeTrue;
         }
       }
@@ -106,7 +106,7 @@ Describe 'Select-Directory' {
           [string[]]$includes = @('Fields*');
           [string[]]$excludes = @('Pop*', 'Prog*', 'Techno*', '*Nephilim*');
 
-          Select-Directory -DirectoryInfo $directoryInfo `
+          Select-FsItem -Name $directoryInfo.Name `
             -Includes $includes -Excludes $excludes | Should -BeFalse;
         }
       }
@@ -116,7 +116,7 @@ Describe 'Select-Directory' {
           [string[]]$includes = @('Fields*');
           [string[]]$excludes = @('Pop*', 'Prog*', 'Techno*', 'Nephilim');
 
-          Select-Directory -DirectoryInfo $directoryInfo `
+          Select-FsItem -Name $directoryInfo.Name `
             -Includes $includes -Excludes $excludes | Should -BeTrue;
         }
       }
@@ -127,7 +127,7 @@ Describe 'Select-Directory' {
         [string[]]$includes = @('Rock*', 'Pop*', 'Techno*');
         [string[]]$excludes = @();
 
-        Select-Directory -DirectoryInfo $directoryInfo `
+        Select-FsItem -Name $directoryInfo.Name `
           -Includes $includes -Excludes $excludes | Should -BeFalse;
       }
     }
@@ -137,7 +137,7 @@ Describe 'Select-Directory' {
         [string[]]$includes = @('Rock', 'Pop', 'Techno');
         [string[]]$excludes = @();
 
-        Select-Directory -DirectoryInfo $directoryInfo `
+        Select-FsItem -Name $directoryInfo.Name `
           -Includes $includes -Excludes $excludes | Should -BeFalse;
       }
     }
@@ -148,7 +148,7 @@ Describe 'Select-Directory' {
       [string[]]$includes = @();
       [string[]]$excludes = @();
 
-      Select-Directory -DirectoryInfo $directoryInfo `
+      Select-FsItem -Name $directoryInfo.Name `
         -Includes $includes -Excludes $excludes | Should -BeFalse;
     }
   }
@@ -159,9 +159,9 @@ Describe 'Select-Directory' {
         [string[]]$includes = @('fields*');
         [string[]]$excludes = @();
 
-        Select-Directory -DirectoryInfo $directoryInfo `
+        Select-FsItem -Name $directoryInfo.Name `
           -Includes $includes -Excludes $excludes -Case | Should -BeFalse;
       }
     }
   }
-} # Select-Directory
+} # Select-FsItem
