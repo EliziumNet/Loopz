@@ -5,6 +5,7 @@
   # of the test fixture) and see its definition to be invoked.
   #
   [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSShouldProcess', '')]
+  [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', '')]
   [CmdletBinding(SupportsShouldProcess)]
   param(
     [Parameter(Mandatory)]

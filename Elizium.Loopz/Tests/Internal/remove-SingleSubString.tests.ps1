@@ -1,5 +1,5 @@
 
-Describe 'remove-SingleSubString' {
+Describe 'edit-RemoveSingleSubString' {
   BeforeAll {
     Get-Module Elizium.Loopz | Remove-Module
     Import-Module .\Output\Elizium.Loopz\Elizium.Loopz.psm1 `
@@ -16,7 +16,7 @@ Describe 'remove-SingleSubString' {
         @{ Subtract = 'Fox'; Expected = 'The quick brown fox' }
       ) {
         $target = 'The quick brown fox';
-        remove-SingleSubString -Target $target -Subtract $Subtract | `
+        edit-RemoveSingleSubString -Target $target -Subtract $Subtract | `
           Should -BeExactly $Expected;
       }
     }
@@ -26,7 +26,7 @@ Describe 'remove-SingleSubString' {
         $target = 'The quick brown fox';
         $subtract = 'O';
         $expected = 'The quick brwn fox'
-        remove-SingleSubString -Target $target -Subtract $subtract -Insensitive | `
+        edit-RemoveSingleSubString -Target $target -Subtract $subtract -Insensitive | `
           Should -BeExactly $expected;
       }
     }
@@ -42,7 +42,7 @@ Describe 'remove-SingleSubString' {
         @{ Subtract = 'Dub'; Expected = 'The naked and the dub' }
       ) {
         $target = 'The naked and the dub';
-        remove-SingleSubString -Target $target -Subtract $Subtract -Last | `
+        edit-RemoveSingleSubString -Target $target -Subtract $Subtract -Last | `
           Should -BeExactly $Expected;
       }
     }
@@ -52,7 +52,7 @@ Describe 'remove-SingleSubString' {
         $target = 'The naked and the dead';
         $subtract = 'DEAD';
         $expected = 'The naked and the '
-        remove-SingleSubString -Target $target -Subtract $subtract -Insensitive | `
+        edit-RemoveSingleSubString -Target $target -Subtract $subtract -Insensitive | `
           Should -BeExactly $expected;
       }
     }

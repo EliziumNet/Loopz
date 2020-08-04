@@ -1,8 +1,8 @@
 
-function remove-SingleSubString {
+function edit-RemoveSingleSubString {
   <#
 .NAME
-  remove-SingleSubString
+  edit-RemoveSingleSubString
 
 .SYNOPSIS
   Removes a sub-string from the target string provided.
@@ -27,6 +27,7 @@ function remove-SingleSubString {
 #>
   [Alias('Subtract-Single', 'rm-subs')]
   [CmdletBinding(DefaultParameterSetName = 'Single')]
+  [OutputType([string])]
   param
   (
     [Parameter(ParameterSetName = 'Single')]

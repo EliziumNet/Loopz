@@ -38,6 +38,7 @@
 
     [Parameter(ParameterSetName = 'InvokeScriptBlock')]
     [scriptblock]$Block = ( {
+        [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', '')]
         param(
           [System.IO.DirectoryInfo]$underscore,
           [int]$index,
@@ -73,6 +74,7 @@
     [Parameter(ParameterSetName = 'InvokeScriptBlock')]
     [Parameter(ParameterSetName = 'InvokeFunction')]
     [scriptblock]$Summary = ( {
+        [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', '')]
         param(
           [int]$index,
           [int]$skipped,
@@ -112,7 +114,7 @@
       $sourceDirectoryFullName += [System.IO.Path]::DirectorySeparatorChar;
     }
 
-    $destinationBranch = remove-SingleSubString -Target $sourceDirectoryFullName -Subtract $rootSource;
+    $destinationBranch = edit-RemoveSingleSubString -Target $sourceDirectoryFullName -Subtract $rootSource;
     $destinationDirectory = Join-Path -Path $rootDestination -ChildPath $destinationBranch;
 
     [boolean]$whatIf = $_passThru.ContainsKey('LOOPZ.MIRROR.WHAT-IF') -and ($_passThru['LOOPZ.MIRROR.WHAT-IF']);

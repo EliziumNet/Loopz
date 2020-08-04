@@ -42,14 +42,15 @@ function Invoke-TraverseDirectory {
 
     [Parameter(ParameterSetName = 'InvokeScriptBlock')]
     [Parameter(ParameterSetName = 'InvokeFunction')]
-    [scriptblock]$Summary = (
-      param(
-        [int]$Count,
-        [int]$Skipped,
-        [boolean]$Triggered,
-        [System.Collections.Hashtable]$PassThru
-      )
-    ),
+    [scriptblock]$Summary = ( {
+        [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', '')]
+        param(
+          [int]$Count,
+          [int]$Skipped,
+          [boolean]$Triggered,
+          [System.Collections.Hashtable]$PassThru
+        )
+      }),
 
     [Parameter(ParameterSetName = 'InvokeScriptBlock')]
     [Parameter(ParameterSetName = 'InvokeFunction')]
@@ -90,9 +91,9 @@ function Invoke-TraverseDirectory {
 
         if ($passThru.ContainsKey('LOOPZ.TRAVERSE.INVOKEE.PARAMS') -and
           ($passThru['LOOPZ.TRAVERSE.INVOKEE.PARAMS'] -gt 0)) {
-            $passThru['LOOPZ.TRAVERSE.INVOKEE.PARAMS'] | ForEach-Object {
-              $positional += $_;
-            }
+          $passThru['LOOPZ.TRAVERSE.INVOKEE.PARAMS'] | ForEach-Object {
+            $positional += $_;
+          }
         }
         $invokee.Invoke($positional);
       }
@@ -188,24 +189,25 @@ function Invoke-TraverseDirectory {
       $parameters['PassThru'] = $PassThru;
       $parameters['Trigger'] = $trigger;
       $PassThru['LOOPZ.TRAVERSE.INVOKEE.PARAMS'] = $parameters;
-    } elseif ('InvokeScriptBlock' -eq $PSCmdlet.ParameterSetName) {
-        $positional = @($directory, $index, $PassThru, $trigger);
+    }
+    elseif ('InvokeScriptBlock' -eq $PSCmdlet.ParameterSetName) {
+      $positional = @($directory, $index, $PassThru, $trigger);
 
-        if ($BlockParams.Count -gt 0) {
-          $BlockParams | Foreach-Object {
-            $positional += $_;
-          }
+      if ($BlockParams.Count -gt 0) {
+        $BlockParams | Foreach-Object {
+          $positional += $_;
         }
+      }
 
-        # Note, for the positional parameters, we can only pass in the additional
-        # custom parameters provided by the client here via the PassThru otherwise
-        # we could accidentally build up the array of positional parameters with
-        # duplicated entries. This is in contrast to splatted arguments for function
-        # invokes where parameter names are paired with parameter values in a
-        # hashtable and naturally prevent duplicated entries. This is why we set
-        # 'LOOPZ.TRAVERSE.INVOKEE.PARAMS' to $BlockParams and not $positional.
-        #
-        $PassThru['LOOPZ.TRAVERSE.INVOKEE.PARAMS'] = $BlockParams;
+      # Note, for the positional parameters, we can only pass in the additional
+      # custom parameters provided by the client here via the PassThru otherwise
+      # we could accidentally build up the array of positional parameters with
+      # duplicated entries. This is in contrast to splatted arguments for function
+      # invokes where parameter names are paired with parameter values in a
+      # hashtable and naturally prevent duplicated entries. This is why we set
+      # 'LOOPZ.TRAVERSE.INVOKEE.PARAMS' to $BlockParams and not $positional.
+      #
+      $PassThru['LOOPZ.TRAVERSE.INVOKEE.PARAMS'] = $BlockParams;
     }
 
     if (-not($Hoist.ToBool())) {
@@ -250,16 +252,17 @@ function Invoke-TraverseDirectory {
         # handled.
         #
         [System.Collections.Hashtable]$parametersFeFsItem = @{
-          'Directory' = $true;
-          'PassThru'  = $PassThru;
+          'Directory'  = $true;
+          'PassThru'   = $PassThru;
           'StartIndex' = $index;
-          'Summary' = $Summary;
+          'Summary'    = $Summary;
         }
 
         if ('InvokeScriptBlock' -eq $PSCmdlet.ParameterSetName) {
           $parametersFeFsItem['Block'] = $Block;
           $parametersFeFsItem['BlockParams'] = $BlockParams;
-        } else {
+        }
+        else {
           $parametersFeFsItem['Functee'] = $Functee;
           $parametersFeFsItem['FuncteeParams'] = $FuncteeParams;
         }

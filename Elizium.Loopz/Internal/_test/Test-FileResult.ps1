@@ -1,6 +1,6 @@
 
-
 function Test-FileResult {
+  [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', '')]
   param(
     [Parameter(Mandatory)]
     [System.IO.FileInfo]$Underscore,

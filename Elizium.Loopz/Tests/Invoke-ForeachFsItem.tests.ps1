@@ -7,6 +7,7 @@ Describe 'Invoke-ForeachFsItem' {
 
     [scriptblock]$script:commonBlock = {
       param(
+        [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', '')]
         [System.IO.FileInfo]$FileInfo,
         [int]$Index,
         [System.Collections.Hashtable]$PassThru,
@@ -26,6 +27,7 @@ Describe 'Invoke-ForeachFsItem' {
 
         [scriptblock]$block = {
           param(
+            [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', '')]
             [System.IO.FileInfo]$FileInfo,
             [int]$Index,
             [System.Collections.Hashtable]$PassThru,
@@ -48,6 +50,7 @@ Describe 'Invoke-ForeachFsItem' {
 
         [scriptblock]$block = {
           param(
+            [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', '')]
             [System.IO.FileInfo]$FileInfo,
             [int]$Index,
             [System.Collections.Hashtable]$PassThru,
@@ -71,6 +74,7 @@ Describe 'Invoke-ForeachFsItem' {
 
       [scriptblock]$block = {
         param(
+          [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', '')]
           [System.IO.FileInfo]$FileInfo,
           [int]$Index,
           [System.Collections.Hashtable]$PassThru,
@@ -99,6 +103,7 @@ Describe 'Invoke-ForeachFsItem' {
     Context 'and: files piped from different directories' {
       It 'should: invoke all' {
         [scriptblock]$summary = {
+          [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', '')]
           param(
             [int]$Count,
             [int]$Skipped,
@@ -123,6 +128,7 @@ Describe 'Invoke-ForeachFsItem' {
           [scriptblock]$block = {
             [OutputType([PSCustomObject])]
             param(
+              [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', '')]
               [System.IO.FileInfo]$FileInfo,
               [int]$Index,
               [System.Collections.Hashtable]$PassThru,
@@ -139,6 +145,7 @@ Describe 'Invoke-ForeachFsItem' {
 
           [scriptblock]$summary = {
             param(
+              [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', '')]
               [int]$Count,
               [int]$Skipped,
               [boolean]$Triggered,
@@ -160,6 +167,7 @@ Describe 'Invoke-ForeachFsItem' {
         It 'should: invoke all' {
           [scriptblock]$block = {
             param(
+              [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', '')]
               [System.IO.FileInfo]$FileInfo,
               [int]$Index,
               [System.Collections.Hashtable]$PassThru,
@@ -173,6 +181,7 @@ Describe 'Invoke-ForeachFsItem' {
 
           [scriptblock]$summary = {
             param(
+              [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', '')]
               [int]$Count,
               [int]$Skipped,
               [boolean]$Triggered,
@@ -192,6 +201,7 @@ Describe 'Invoke-ForeachFsItem' {
         It 'should: invoke all and properties passed through (via PassThru)' {
           [scriptblock]$block = {
             param(
+              [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', '')]
               [System.IO.FileInfo]$FileInfo,
               [int]$Index,
               [System.Collections.Hashtable]$PassThru,
@@ -204,6 +214,7 @@ Describe 'Invoke-ForeachFsItem' {
 
           [scriptblock]$summary = {
             param(
+              [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', '')]
               [int]$Count,
               [int]$Skipped,
               [boolean]$Triggered,
@@ -229,6 +240,7 @@ Describe 'Invoke-ForeachFsItem' {
       It 'should: send objects out of the pipeline' {
         Mock -ModuleName Elizium.Loopz invoke-Dummy -Verifiable {
           param(
+            [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', '')]
             [Alias('Underscore')]
             [System.IO.FileInfo]$FileInfo,
             [int]$Index,
@@ -256,6 +268,7 @@ Describe 'Invoke-ForeachFsItem' {
       It 'should: send objects out of the pipeline' {
         Mock -ModuleName Elizium.Loopz Test-FileResult -Verifiable {
           param(
+            [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', '')]
             [System.IO.FileInfo]$Underscore,
             [int]$Index,
             [System.Collections.Hashtable]$PassThru,
@@ -293,6 +306,7 @@ Describe 'Invoke-ForeachFsItem' {
 
         [scriptblock]$block = {
           param(
+            [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', '')]
             [System.IO.FileInfo]$FileInfo,
             [int]$Index,
             [System.Collections.Hashtable]$PassThru,
@@ -317,6 +331,7 @@ Describe 'Invoke-ForeachFsItem' {
 
         [scriptblock]$block = {
           param(
+            [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', '')]
             [System.IO.FileInfo]$FileInfo,
             [int]$Index,
             [System.Collections.Hashtable]$PassThru,
@@ -343,6 +358,7 @@ Describe 'Invoke-ForeachFsItem' {
 
         [scriptblock]$block = {
           param(
+            [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', '')]
             [System.IO.DirectoryInfo]$DirInfo,
             [int]$Index,
             [System.Collections.Hashtable]$PassThru,
@@ -368,6 +384,7 @@ Describe 'Invoke-ForeachFsItem' {
 
       [scriptblock]$block = {
         param(
+          [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', '')]
           [System.IO.DirectoryInfo]$DirInfo,
           [int]$Index,
           [System.Collections.Hashtable]$PassThru,
