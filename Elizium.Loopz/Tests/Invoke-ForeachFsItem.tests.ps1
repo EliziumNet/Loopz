@@ -359,4 +359,32 @@ Describe 'Invoke-ForeachFsItem' {
       }
     } # and: single directory piped
   } # given: Directory flag specified
+
+  Context 'given: scriptblock with additional custom parameters' {
+    It 'should: invoke scriptblock with additional parameters' {
+      $container = @{
+        count = 0
+      }
+
+      [scriptblock]$block = {
+        param(
+          [System.IO.DirectoryInfo]$DirInfo,
+          [int]$Index,
+          [System.Collections.Hashtable]$PassThru,
+          [boolean]$Trigger,
+          [string]$Format
+        )
+        $container.count++;
+        [string]$result = $Format -f ($DirInfo.Name);
+        Write-Debug "*** Custom block: '$result'";
+        @{ Product = $DirInfo }
+      }
+
+      [string]$directoryPath = './Tests/Data/fefsi';
+      $parameters = , @("!!! {0} !!!");
+      Get-ChildItem $directoryPath | Invoke-ForeachFsItem `
+        -Block $block -BlockParams $parameters -Directory;
+      $container.count | Should -Be 1;
+    }
+  }
 } # Invoke-ForeachFsItem

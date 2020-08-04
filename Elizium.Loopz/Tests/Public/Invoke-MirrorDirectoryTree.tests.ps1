@@ -24,7 +24,7 @@ Describe 'Invoke-MirrorDirectoryTree' {
     }
 
     Context 'and: function specified' {
-      It 'Should: traverse and invoke function for each directory' -Tag 'Current' {
+      It 'Should: traverse and invoke function for each directory' {
         [System.Collections.Hashtable]$parameters = @{
           'Format' = '---- {0} ----';
         }
@@ -34,8 +34,36 @@ Describe 'Invoke-MirrorDirectoryTree' {
       }
     }
 
+    Context 'and: script block with extra custom parameters specified' {
+      It 'Should: traverse and invoke scrip block for each directory' {
+        $container = @{
+          count = 0;
+        };
+
+        [scriptblock]$block = {
+          param(
+            [System.IO.DirectoryInfo]$DirInfo,
+            [int]$Index,
+            [System.Collections.Hashtable]$PassThru,
+            [boolean]$Trigger,
+            [string]$Format
+          )
+          $container.count++;
+          [string]$result = $Format -f ($DirInfo.Name);
+          Write-Debug "### Custom block: '$result'";
+          @{ Product = $DirInfo }
+        }
+        $parameters = , @('---- {0} ----');
+
+        Invoke-MirrorDirectoryTree -Path $sourcePath `
+          -DestinationPath $destinationPath -CreateDirs `
+          -Block $block -BlockParams $parameters -WhatIf:$whatIf;
+        $container.count | Should -Be 19;
+      }
+    }
+
     Context 'and: script-block specified' {
-      It 'Should: traverse and invoke function for each directory' -Tag 'Current' {
+      It 'Should: traverse and invoke function for each directory' {
         [scriptblock]$testShowMirrorBlock = {
           param(
             [Parameter(Mandatory)]

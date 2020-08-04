@@ -28,6 +28,10 @@ function Invoke-TraverseDirectory {
     [ValidateScript( { -not($_ -eq $null) })]
     [scriptblock]$Block,
 
+    [Parameter(ParameterSetName = 'InvokeScriptBlock')]
+    [ValidateScript( { $_ -is [Array] })]
+    $BlockParams = @(),
+
     [Parameter(ParameterSetName = 'InvokeFunction', Mandatory)]
     [ValidateScript( { -not([string]::IsNullOrEmpty($_)); })]
     [string]$Functee,
@@ -82,14 +86,23 @@ function Invoke-TraverseDirectory {
       # This is the local invoke, for the current directory
       #
       if ($invokee -is [scriptblock]) {
-        $invokee.Invoke($directoryInfo, $index, $passThru, $trigger);
+        $positional = @($directoryInfo, $index, $passThru, $trigger);
+
+        if ($passThru.ContainsKey('LOOPZ.TRAVERSE.INVOKEE.PARAMS') -and
+          ($passThru['LOOPZ.TRAVERSE.INVOKEE.PARAMS'] -gt 0)) {
+            $passThru['LOOPZ.TRAVERSE.INVOKEE.PARAMS'] | ForEach-Object {
+              $positional += $_;
+            }
+        }
+        $invokee.Invoke($positional);
       }
       else {
-        [System.Collections.Hashtable]$parameters = $passThru['LOOPZ.TRAVERSE.INVOKEE.PARAMS'];
+        [System.Collections.Hashtable]$parameters = $passThru.ContainsKey('LOOPZ.TRAVERSE.INVOKEE.PARAMS') `
+          ? $passThru['LOOPZ.TRAVERSE.INVOKEE.PARAMS'] : @{};
 
         # These are directory specific overwrites. The custom parameters
         # will still be present
-        # 
+        #
         $parameters['DirectoryInfo'] = $directory;
         $parameters['Index'] = $index;
         $parameters['PassThru'] = $passThru;
@@ -169,12 +182,30 @@ function Invoke-TraverseDirectory {
     if ('InvokeFunction' -eq $PSCmdlet.ParameterSetName) {
       # set-up custom parameters
       #
-      [System.Collections.Hashtable]$parameters = $FuncteeParams;
+      [System.Collections.Hashtable]$parameters = $FuncteeParams.Clone();
       $parameters['Underscore'] = $directory;
       $parameters['Index'] = $index;
       $parameters['PassThru'] = $PassThru;
       $parameters['Trigger'] = $trigger;
       $PassThru['LOOPZ.TRAVERSE.INVOKEE.PARAMS'] = $parameters;
+    } elseif ('InvokeScriptBlock' -eq $PSCmdlet.ParameterSetName) {
+        $positional = @($directory, $index, $PassThru, $trigger);
+
+        if ($BlockParams.Count -gt 0) {
+          $BlockParams | Foreach-Object {
+            $positional += $_;
+          }
+        }
+
+        # Note, for the positional parameters, we can only pass in the additional
+        # custom parameters provided by the client here via the PassThru otherwise
+        # we could accidentally build up the array of positional parameters with
+        # duplicated entries. This is in contrast to splatted arguments for function
+        # invokes where parameter names are paired with parameter values in a
+        # hashtable and naturally prevent duplicated entries. This is why we set
+        # 'LOOPZ.TRAVERSE.INVOKEE.PARAMS' to $BlockParams and not $positional.
+        #
+        $PassThru['LOOPZ.TRAVERSE.INVOKEE.PARAMS'] = $BlockParams;
     }
 
     if (-not($Hoist.ToBool())) {
@@ -187,7 +218,7 @@ function Invoke-TraverseDirectory {
     #
     try {
       if ('InvokeScriptBlock' -eq $PSCmdlet.ParameterSetName) {
-        $Block.Invoke($directory, $index, $PassThru, $trigger);
+        $Block.Invoke($positional);
       }
       elseif ('InvokeFunction' -eq $PSCmdlet.ParameterSetName) {
         & $Functee @parameters;
@@ -227,6 +258,7 @@ function Invoke-TraverseDirectory {
 
         if ('InvokeScriptBlock' -eq $PSCmdlet.ParameterSetName) {
           $parametersFeFsItem['Block'] = $Block;
+          $parametersFeFsItem['BlockParams'] = $BlockParams;
         } else {
           $parametersFeFsItem['Functee'] = $Functee;
           $parametersFeFsItem['FuncteeParams'] = $FuncteeParams;

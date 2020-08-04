@@ -46,12 +46,16 @@
         )
       } ),
 
+    [Parameter(ParameterSetName = 'InvokeScriptBlock')]
+    [ValidateScript( { $_ -is [Array] })]
+    $BlockParams = @(),
+
     [Parameter(ParameterSetName = 'InvokeFunction', Mandatory)]
     [ValidateScript( { -not([string]::IsNullOrEmpty($_)); })]
     [string]$Functee,
 
     [Parameter(ParameterSetName = 'InvokeFunction')]
-    [ValidateScript( { $_.Length -gt 0; })]
+    [ValidateScript( { $_.Count -gt 0; })]
     [System.Collections.Hashtable]$FuncteeParams = @{},
 
     [Parameter(ParameterSetName = 'InvokeScriptBlock')]
@@ -151,22 +155,30 @@
     # To be consistent with Invoke-ForeachFsItem, the user function/block is invoked
     # with the source directory info. The destination for this mirror operation is
     # returned via 'LOOPZ.MIRROR.DESTINATION' within the PassThru.
-    # 
+    #
     $_passThru['LOOPZ.MIRROR.DESTINATION'] = $destinationInfo;
 
     $invokee = $_passThru['LOOPZ.MIRROR.INVOKEE'];
 
     try {
       if ($invokee -is [scriptblock]) {
-        $invokee.Invoke($_underscore, $_index, $_passThru, $_trigger);
+        $positional = @($_underscore, $_index, $_passThru, $_trigger);
+
+        if ($_passThru.ContainsKey('LOOPZ.MIRROR.INVOKEE.PARAMS')) {
+          $_passThru['LOOPZ.MIRROR.INVOKEE.PARAMS'] | ForEach-Object {
+            $positional += $_;
+          }
+        }
+
+        $invokee.Invoke($positional);
       }
       elseif ($invokee -is [string]) {
-        [System.Collections.Hashtable]$parameters = $_passThru['LOOPZ.MIRROR.INVOKEE.PARAMS'];
+        [System.Collections.Hashtable]$parameters = $_passThru.ContainsKey('LOOPZ.MIRROR.INVOKEE.PARAMS') `
+          ? $_passThru['LOOPZ.MIRROR.INVOKEE.PARAMS'] : @{};
         $parameters['Underscore'] = $_underscore;
         $parameters['Index'] = $_index;
         $parameters['PassThru'] = $_passThru;
         $parameters['Trigger'] = $_trigger;
-        $parameters;
 
         & $invokee @parameters;
       }
@@ -191,10 +203,17 @@
 
   if ('InvokeScriptBlock' -eq $PSCmdlet.ParameterSetName) {
     $PassThru['LOOPZ.MIRROR.INVOKEE'] = $Block;
+
+    if ($BlockParams.Count -gt 0) {
+      $PassThru['LOOPZ.MIRROR.INVOKEE.PARAMS'] = $BlockParams;
+    }
   }
   else {
     $PassThru['LOOPZ.MIRROR.INVOKEE'] = $Functee;
-    $PassThru['LOOPZ.MIRROR.INVOKEE.PARAMS'] = $FuncteeParams;
+
+    if ($FuncteeParams.Count -gt 0) {
+      $PassThru['LOOPZ.MIRROR.INVOKEE.PARAMS'] = $FuncteeParams.Clone();
+    }
   }
 
   if ($PSBoundParameters.ContainsKey('WhatIf') -and ($true -eq $PSBoundParameters['WhatIf'])) {

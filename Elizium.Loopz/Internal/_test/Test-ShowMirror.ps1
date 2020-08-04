@@ -1,4 +1,4 @@
-
+﻿
     function Test-ShowMirror {
       param(
         [Parameter(Mandatory)]
@@ -21,4 +21,3 @@
       Write-Debug "Custom function; Show-Mirror: '$result'";
       @{ Product = $Underscore }
     }
-    

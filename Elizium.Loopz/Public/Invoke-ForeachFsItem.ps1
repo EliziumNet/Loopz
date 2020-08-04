@@ -14,6 +14,10 @@ function Invoke-ForeachFsItem {
     [Parameter(ParameterSetName = 'InvokeScriptBlock', Mandatory)]
     [scriptblock]$Block,
 
+    [Parameter(ParameterSetName = 'InvokeScriptBlock')]
+    [ValidateScript({ $_ -is [Array]})]
+    $BlockParams = @(),
+
     [Parameter(ParameterSetName = 'InvokeFunction', Mandatory)]
     [ValidateScript( { -not([string]::IsNullOrEmpty($_)); })]
     [string]$Functee,
@@ -71,9 +75,15 @@ function Invoke-ForeachFsItem {
         if ($Condition.Invoke($pipelineItem)) {
           try {
             if ('InvokeScriptBlock' -eq $PSCmdlet.ParameterSetName) {
-              $result = Invoke-Command -ScriptBlock $Block -ArgumentList @(
-                $pipelineItem, $index, $PassThru, $trigger;
-              );
+              $positional = @($pipelineItem, $index, $PassThru, $trigger);
+
+              if ($BlockParams.Length -gt 0) {
+                $BlockParams | ForEach-Object {
+                  $positional += $_;
+                }
+              }
+
+              $result = Invoke-Command -ScriptBlock $Block -ArgumentList $positional;
             }
             elseif ('InvokeFunction' -eq $PSCmdlet.ParameterSetName) {
               [System.Collections.Hashtable]$parameters = $FuncteeParams.Clone();
