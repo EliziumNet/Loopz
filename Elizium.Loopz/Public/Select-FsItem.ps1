@@ -1,9 +1,39 @@
 
 function Select-FsItem {
-  # When this is documented properly, mention that this function is required because the
-  # Include/Exclude parameters on Get-ChildItems/Copy-Item/Get-Item etc only work on
-  # files not directories.
-  #
+  <#
+  .NAME
+    Select-FsItem
+
+  .SYNOPSIS
+    A predication function that indicates whether an item identified by the Name matches
+  the include/exclude filters specified.
+
+  .DESCRIPTION
+    Use this utility function to help specify a Condition for Invoke-TraverseDirectory.
+  This function is partly required because the Include/Exclude parameters on functions
+  such as Get-ChildItems/Copy-Item/Get-Item etc only work on files not directories. 
+
+  .PARAMETER Name
+    A string to be matched against the filters.
+
+  .PARAMETER Includes
+      An array containing a list of filters, each must contain a wild-card ('*'). If a
+  particular filter does not contain a wild-card, then it will be ignored. If Name matches
+  any of the filters in Includes, and are not Excluded, the result will be true.
+
+  .PARAMETER Excludes
+    An array containing a list of filters, each must contain a wild-card ('*'). If a
+  particular filter does not contain a wild-card, then it will be ignored. If the Name
+  matches any of the filters in the list, will cause the end result to be false.
+  Any match in the Excludes overrides a match in Includes, so an item
+  that is matched in Include, can be excluded by the Exclude.
+
+  .PARAMETER Case
+    Switch parameter which controls case sensitivity of inclusion/exclusion. By default
+  filtering is case insensitive. When The Case switch is specified, filtering is case
+  sensitive.
+  #>
+
   [OutputType([boolean])]
   param(
     [Parameter(Mandatory)]
@@ -40,4 +70,4 @@ function Select-FsItem {
     : $false;
 
   ($resolvedInclude) -and -not($resolvedExclude)
-}
+} # Select-FsItem

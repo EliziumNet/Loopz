@@ -185,7 +185,7 @@ Describe 'Invoke-MirrorDirectoryTree' {
         [scriptblock]$summary = {
           param(
             [int]$_count,
-            [int]$_skipped,
+            [int]$_skipped, 
             [boolean]$_triggered,
             [System.Collections.Hashtable]$_passThru
           )
