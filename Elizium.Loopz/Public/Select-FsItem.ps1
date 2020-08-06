@@ -5,7 +5,7 @@ function Select-FsItem {
     Select-FsItem
 
   .SYNOPSIS
-    A predication function that indicates whether an item identified by the Name matches
+    A predicate function that indicates whether an item identified by the Name matches
   the include/exclude filters specified.
 
   .DESCRIPTION

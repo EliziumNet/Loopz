@@ -83,7 +83,7 @@
   what it does silently and Write-HostFeItemDecorator handles generation of output. It
   invokes the function defined in 'LOOPZ.FOREACH-DECORATOR.FUNCTION-NAME' and generates
   corresponding output. It happens to use the console colouring facility provided by a
-  a dependency Elizium.Krayola to creating colourful in a predefined format via the
+  a dependency Elizium.Krayola to create colourful output in a predefined format via the
   Krayola Theme.
 
   Note, Write-HostFeItemDecorator does not forward additional parameters to the decorated
