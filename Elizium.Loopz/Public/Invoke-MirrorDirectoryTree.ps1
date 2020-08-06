@@ -8,7 +8,8 @@
   or function as it goes.
 
   .DESCRIPTION
-    2 parameters set are defined, one for invoking a named function (InvokeFunction) and
+    Copies a source directory tree to a new location applying custom functionality for each
+  directory. 2 parameters set are defined, one for invoking a named function (InvokeFunction) and
   the other (InvokeScriptBlock, the default) for invoking a scriptblock. An optional
   Summary script block can be specified which will be invoked at the end of the mirroring
   batch.
@@ -125,7 +126,7 @@
     consequences.
     * PassThru: (see PassThru previously described)
 
-  .EXAMPLE
+  .EXAMPLE 1
     Invoke a named function for every directory in the source tree and mirror every
   directory in the destination tree. The invoked function has an extra parameter in it's
   signature, so the extra parameters must be passed in via FuncteeParams (the standard
@@ -149,7 +150,7 @@
     -DestinationPath './Tests/Data/mirror' -CreateDirs `
     -Functee 'Test-Mirror' -FuncteeParams $parameters;
 
-  .EXAMPLE
+  .EXAMPLE 2
   Invoke a script-block for every directory in the source tree and copy all files
 
   Invoke-MirrorDirectoryTree -Path './Tests/Data/fefsi' `
@@ -163,7 +164,7 @@
       ...
     };
 
-  .EXAMPLE
+  .EXAMPLE 3
   Mirror a directory tree, including only directories beginning with A (filter A*)
 
   Invoke-MirrorDirectoryTree -Path './Tests/Data/fefsi' -DestinationPath './Tests/Data/mirror' `
@@ -177,7 +178,7 @@
   the "mp3" directory, would be filtered out.
   See the following example for a resolution.
 
-  .EXAMPLE
+  .EXAMPLE 4
   Mirror a directory tree, including only directories beginning with A (filter A*) regardless of
   the matching of intermediate ancestors (specifying -Hoist flag resolves the possible
   issue in the previous example)
@@ -190,7 +191,7 @@
   ignored and there are no remaining filters that are able to include any directory, so no
   directory passes the filter.
 
-  .EXAMPLE
+  .EXAMPLE 5
   Mirror a directory tree, including files with either .flac or .wav suffix
 
   Invoke-MirrorDirectoryTree -Path './Tests/Data/fefsi' -DestinationPath './Tests/Data/mirror' `
@@ -199,7 +200,7 @@
   Note that for files, a filter may or may not contain a wild-card. If the wild-card is missing
   then it is automatically treated as a file suffix; so 'flac' means '*.flac'.
 
-  .EXAMPLE
+  .EXAMPLE 6
   Mirror a directory tree copying over just flac files
 
   [scriptblock]$summary = {

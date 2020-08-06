@@ -156,6 +156,12 @@ task ApplyFix {
   Invoke-ScriptAnalyzer -Path .\ -Recurse -Fix
 }
 
+# Before this can be run, this must be run first
+# New-MarkdownHelp -Module <Module> -OutputFolder .\docs
+# (run from the module root, not the repo root)
+# Then update the {{ ... }} place holders in the md files.
+# the docs task generates the external help from the md files
+#
 task Docs {
   New-ExternalHelp $script:ModuleRoot\docs `
     -OutputPath $script:OutPutFolder\$script:ModuleName\en-GB

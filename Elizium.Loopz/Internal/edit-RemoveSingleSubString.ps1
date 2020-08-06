@@ -8,8 +8,8 @@ function edit-RemoveSingleSubString {
   Removes a sub-string from the target string provided.
 
 .DESCRIPTION
-  Either the first or the last occurence of a single can be removed depending on
-  wether the Last flag has been set.
+  Either the first or the last occurrence of a single can be removed depending on
+  whether the Last flag has been set.
 
 .PARAMETER Target
   The string from which the subtraction is to occur.
@@ -22,7 +22,7 @@ function edit-RemoveSingleSubString {
   sensitive.
 
 .PARAMETER Last
-  Flag to indicate wether the last occurence of a sub string is to be removed from the
+  Flag to indicate whether the last occurrence of a sub string is to be removed from the
   Target.
 #>
   [Alias('Subtract-Single', 'rm-subs')]

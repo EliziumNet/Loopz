@@ -15,7 +15,7 @@
     dictates the value of WhatIf. This way, we only need a single value in the PassThru, rather
     than having to represent SupportShouldProcess explicitly with another value.
       The PastThru must contain either a 'FUNCTION-NAME' entry meaning a named function is
-    being decorated or 'BLOCK' mean a script block is being decorated, but not both.
+    being decorated or 'BLOCK' meaning a script block is being decorated, but not both.
       PassThru must also contain either 'ITEM-LABEL' or 'PROPERTIES'. If there is only a single
     item that must be written out, then the user can specify a single value for 'ITEM-LABEL'
     and an accompanying 'ITEM-VALUE'. If there are multiple values, then 'PROPERTIES' must
@@ -23,7 +23,7 @@
       By default, to render the value displayed, ToString() is called. However, the result item
     may not have a ToString() method, in this case, the user should provide a custom script-block
     to determines how the value is constructed. This can be done by assigning a custom script-block
-    to the 'GET-RESULT' entry in PassThru. 
+    to the 'GET-RESULT' entry in PassThru.
       This function is designed to be used with Invoke-ForeachFsItem and as such, it's signature
     needs to match that required by Invoke-ForeachFsItem. Any additional parameters can be
     passed in via the PassThru.
@@ -36,7 +36,7 @@
     The current pipeline object.
 
   .PARAMETER $Index
-    the 0 based index representing current item in the pipeline.
+    The 0 based index representing current item in the pipeline.
 
   .PARAMETER $PassThru
     A hash table containing miscellaneous information gathered internally
@@ -54,7 +54,7 @@
   .RETURNS
     The result of invoking the decorated script-block.
 
-  .EXAMPLE
+  .EXAMPLE 1
 
   function Test-FN {
     param(
@@ -76,13 +76,13 @@
     'CLIENT.FORMAT' = '=== [{0}] -- [{1}] ==='
   }
 
-  Get-ChildItem ... | Invoke-ForeachFsItem -Path '<blah>' -PassThru $passThru
+  Get-ChildItem ... | Invoke-ForeachFsItem -Path <path> -PassThru $passThru
     -Functee 'Write-HostFeItemDecorator'
 
     So, Test-FN is not concerned about writing any output to the console, it simply does
   what it does silently and Write-HostFeItemDecorator handles generation of output. It
   invokes the function defined in 'LOOPZ.FOREACH-DECORATOR.FUNCTION-NAME' and generates
-  corresponding output. It happens to use the console colouring facility provided by a 
+  corresponding output. It happens to use the console colouring facility provided by a
   a dependency Elizium.Krayola to creating colourful in a predefined format via the
   Krayola Theme.
 

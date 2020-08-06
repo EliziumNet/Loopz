@@ -99,7 +99,7 @@ function Invoke-ForeachFsItem {
   batch.
     Normal use of ForeachFsItem does not require StartIndex to be specified.
 
-  .EXAMPLE
+  .EXAMPLE 1
   Invoke a script-block to handle .txt file objects from the same directory (without -Recurse):
   (NB: first parameter is of type FileInfo, -File specified on Get-ChildItem and
   Invoke-ForeachFsItem. If Get-ChildItem is missing -File, then any Directory objects passed in
@@ -119,7 +119,7 @@ function Invoke-ForeachFsItem {
     Get-ChildItem './Tests/Data/fefsi' -Recurse -Filter '*.txt' -File | `
       Invoke-ForeachFsItem -File -Block $block;
 
-  .EXAMPLE
+  .EXAMPLE 2
   Invoke a function with additional parameters to handle directory objects from multiple directories
   (with -Recurse):
 
@@ -140,7 +140,7 @@ function Invoke-ForeachFsItem {
   Get-ChildItem './Tests/Data/fefsi' -Recurse -Directory | `
     Invoke-ForeachFsItem -Directory -Functee 'invoke-Target' -FuncteeParams $parameters
 
-  .EXAMPLE
+  .EXAMPLE 3
   Invoke a script-block to handle empty .txt file objects from the same directory (without -Recurse):
     [scriptblock]$block = {
       param(
@@ -162,7 +162,7 @@ function Invoke-ForeachFsItem {
     Get-ChildItem './Tests/Data/fefsi' -Recurse -Filter '*.txt' -File | Invoke-ForeachFsItem `
       -Block $block -File -condition $fileIsEmpty;
 
-  .EXAMPLE
+  .EXAMPLE 4
   Invoke a script-block only for directories whose name starts with "A" from the same
   directory (without -Recurse); Note the use of the LOOPZ function "Select-FsItem" in the
   directory include filter:

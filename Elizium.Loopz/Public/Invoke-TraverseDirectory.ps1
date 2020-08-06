@@ -9,10 +9,11 @@ function Invoke-TraverseDirectory {
   as it goes.
 
   .DESCRIPTION
-    2 parameters set are defined, one for invoking a named function (InvokeFunction) and
-  the other (InvokeScriptBlock, the default) for invoking a scriptblock. An optional
-  Summary script block can be specified which will be invoked at the end of the traversal
-  batch.
+    Navigates a directory tree applying custom functionality for each directory. A Condition
+  script-block can be applied for conditional functionality. 2 parameters set are defined, one
+  for invoking a named function (InvokeFunction) and the other (InvokeScriptBlock, the default)
+  for invoking a scriptblock. An optional Summary script block can be specified which will be
+  invoked at the end of the traversal batch.
 
   .PARAMETER Path
     The source Path denoting the root of the directory tree to be traversed.
@@ -87,7 +88,7 @@ function Invoke-TraverseDirectory {
   that does match the Condition will be traversed even though any of its ancestors may not match the
   same Condition.
 
-  .EXAMPLE
+  .EXAMPLE 1
     Invoke a script-block for every directory in the source tree.
 
     [scriptblock]$block = {
@@ -102,7 +103,7 @@ function Invoke-TraverseDirectory {
 
   Invoke-TraverseDirectory -Path './Tests/Data/fefsi' -Block $block
 
-  .EXAMPLE
+  .EXAMPLE 2
     Invoke a named function with extra parameters for every directory in the source tree.
 
   function Test-Traverse {
@@ -122,7 +123,7 @@ function Invoke-TraverseDirectory {
   Invoke-TraverseDirectory -Path './Tests/Data/fefsi' `
     -Functee 'Test-Traverse' -FuncteeParams $parameters;
 
-  .EXAMPLE
+  .EXAMPLE 3
   Invoke a named function, including only directories beginning with A (filter A*)
 
   function Test-Traverse {
@@ -150,7 +151,7 @@ function Invoke-TraverseDirectory {
   Note the possible issue with this example is that any descendants named A... which are located
   under an ancestor which is not named A..., will not be processed by the provided function
 
-  .EXAMPLE (Invoke a named function, including only directories beginning with A (filter A*))
+  .EXAMPLE 4
   Mirror a directory tree, including only directories beginning with A (filter A*) regardless of
   the matching of intermediate ancestors (specifying -Hoist flag resolves the possible
   issue in the previous example)
@@ -269,7 +270,7 @@ function Invoke-TraverseDirectory {
     try {
       # This is the local invoke, for the current directory
       #
-      # TODO: check the trigger on the invoke return result
+      # TODO: (issue #18) check the trigger on the invoke return result
       #
       if ($invokee -is [scriptblock]) {
         $positional = @($directoryInfo, $index, $passThru, $trigger);

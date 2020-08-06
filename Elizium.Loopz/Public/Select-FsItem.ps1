@@ -32,6 +32,24 @@ function Select-FsItem {
     Switch parameter which controls case sensitivity of inclusion/exclusion. By default
   filtering is case insensitive. When The Case switch is specified, filtering is case
   sensitive.
+
+  .EXAMPLE 1
+    Define a Condition that allows only directories beginning with A, but also excludes
+    any directory containing '_' or '-'.
+
+    [scriptblock]$filterDirectories = {
+      [OutputType([boolean])]
+      param(
+        [System.IO.DirectoryInfo]$directoryInfo
+      )
+      [string[]]$directoryIncludes = @('A*');
+      [string[]]$directoryExcludes = @('*_*', '*-*');
+
+      Select-FsItem -Name $directoryInfo.Name `
+        -Includes $directoryIncludes -Excludes $directoryExcludes;
+
+      Invoke-TraverseDirectory -Path <path> -Block <block> -Condition $filterDirectories;
+    }
   #>
 
   [OutputType([boolean])]
