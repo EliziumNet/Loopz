@@ -9,21 +9,24 @@
 
   .DESCRIPTION
     The function being decorated may or may not Support ShouldProcess. If it does, then the
-    client should add 'WHAT-IF' to the pass through, set to the current value of WhatIf;
-    or more accurately the existence of 'WhatIf' in PSBoundParameters. Or another way of putting
-    it is, the presence of WHAT-IF indicates SupportsShouldProcess, and the value of WHAT-IF
-    dictates the value of WhatIf. This way, we only need a single value in the PassThru, rather
-    than having to represent SupportShouldProcess explicitly with another value.
-      The PastThru must contain either a 'FUNCTION-NAME' entry meaning a named function is
-    being decorated or 'BLOCK' meaning a script block is being decorated, but not both.
-      PassThru must also contain either 'ITEM-LABEL' or 'PROPERTIES'. If there is only a single
-    item that must be written out, then the user can specify a single value for 'ITEM-LABEL'
-    and an accompanying 'ITEM-VALUE'. If there are multiple values, then 'PROPERTIES' must
-    be specified and set to an array of key/value string pairs (so its an array of 2 item arrays).
+    client should add 'LOOPZ.WH-FOREACH-DECORATOR.WHAT-IF' to the pass through, set to the
+    current value of WhatIf; or more accurately the existence of 'WhatIf' in PSBoundParameters.
+    Or another way of putting it is, the presence of WHAT-IF indicates SupportsShouldProcess,
+    and the value of WHAT-IF dictates the value of WhatIf. This way, we only need a single value
+    in the PassThru, rather than having to represent SupportShouldProcess explicitly with another value.
+      The PastThru must contain either a 'LOOPZ.WH-FOREACH-DECORATOR.FUNCTION-NAME' entry meaning
+    a named function is being decorated or 'LOOPZ.WH-FOREACH-DECORATOR.BLOCK' meaning a script
+    block is being decorated, but not both.
+      PassThru must also contain either 'LOOPZ.WH-FOREACH-DECORATOR.ITEM-LABEL' or
+    'LOOPZ.WH-FOREACH-DECORATOR.PROPERTIES'. If there is only a single item that must be written
+    out, then the user can specify a single value for 'LOOPZ.WH-FOREACH-DECORATOR.ITEM-LABEL'
+    and an accompanying 'LOOPZ.WH-FOREACH-DECORATOR.ITEM-VALUE'. If there are multiple values, then
+    'LOOPZ.WH-FOREACH-DECORATOR.PROPERTIES' must be specified and set to an array of key/value
+    string pairs (so its an array of 2 item arrays).
       By default, to render the value displayed, ToString() is called. However, the result item
     may not have a ToString() method, in this case, the user should provide a custom script-block
     to determines how the value is constructed. This can be done by assigning a custom script-block
-    to the 'GET-RESULT' entry in PassThru.
+    to the 'LOOPZ.WH-FOREACH-DECORATOR.GET-RESULT' entry in PassThru.
       This function is designed to be used with Invoke-ForeachFsItem and as such, it's signature
     needs to match that required by Invoke-ForeachFsItem. Any additional parameters can be
     passed in via the PassThru.
@@ -70,9 +73,9 @@
   }
 
   [Systems.Collection.Hashtable]$passThru = @{
-    'LOOPZ.FOREACH-DECORATOR.FUNCTION-NAME' = 'Test-FN';
-    'LOOPZ.FOREACH-DECORATOR.ITEM-LABEL' = 'Widget'
-    'LOOPZ.FOREACH-DECORATOR.ITEM-VALUE' = $widget,
+    'LOOPZ.WH-FOREACH-DECORATOR.FUNCTION-NAME' = 'Test-FN';
+    'LOOPZ.WH-FOREACH-DECORATOR.ITEM-LABEL' = 'Widget'
+    'LOOPZ.WH-FOREACH-DECORATOR.ITEM-VALUE' = $widget,
     'CLIENT.FORMAT' = '=== [{0}] -- [{1}] ==='
   }
 
@@ -81,7 +84,7 @@
 
     So, Test-FN is not concerned about writing any output to the console, it simply does
   what it does silently and Write-HostFeItemDecorator handles generation of output. It
-  invokes the function defined in 'LOOPZ.FOREACH-DECORATOR.FUNCTION-NAME' and generates
+  invokes the function defined in 'LOOPZ.WH-FOREACH-DECORATOR.FUNCTION-NAME' and generates
   corresponding output. It happens to use the console colouring facility provided by a
   a dependency Elizium.Krayola to create colourful output in a predefined format via the
   Krayola Theme.
@@ -110,8 +113,10 @@
       Mandatory = $true
     )]
     [ValidateScript( {
-        return ($_.ContainsKey('FUNCTION-NAME') -xor $_.ContainsKey('BLOCK')) -and
-          ($_.ContainsKey('ITEM-LABEL') -xor $_.ContainsKey('PROPERTIES'))
+        return ($_.ContainsKey('LOOPZ.WH-FOREACH-DECORATOR.FUNCTION-NAME') -xor
+          $_.ContainsKey('LOOPZ.WH-FOREACH-DECORATOR.BLOCK')) -and
+        ($_.ContainsKey('LOOPZ.WH-FOREACH-DECORATOR.ITEM-LABEL') -xor
+          $_.ContainsKey('LOOPZ.WH-FOREACH-DECORATOR.PROPERTIES'))
       })]
     [System.Collections.Hashtable]
     $PassThru,
@@ -124,16 +129,17 @@
     param($result)
     try {
       $result.ToString();
-    } catch {
-      Write-Error "Default get-result function failed, consider defining custom function as 'GET-RESULT' in PassThru"
+    }
+    catch {
+      Write-Error "Default get-result function failed, consider defining custom function as 'LOOPZ.WH-FOREACH-DECORATOR.GET-RESULT' in PassThru"
     }
   }
 
   [scriptblock]$decorator = {
     param ($_underscore, $_index, $_passthru, $_trigger)
 
-    if ($_passthru.Contains('FUNCTION-NAME')) {
-      [string]$functee = $_passthru['FUNCTION-NAME'];
+    if ($_passthru.Contains('LOOPZ.WH-FOREACH-DECORATOR.FUNCTION-NAME')) {
+      [string]$functee = $_passthru['LOOPZ.WH-FOREACH-DECORATOR.FUNCTION-NAME'];
 
       [System.Collections.Hashtable]$parameters = @{
         'Underscore' = $_underscore;
@@ -141,14 +147,14 @@
         'PassThru'   = $_passthru;
         'Trigger'    = $_trigger;
       }
-      if ($_passthru.Contains('WHAT-IF')) {
-        $parameters['WhatIf'] = $_passthru['WHAT-IF'];
+      if ($_passthru.Contains('LOOPZ.WH-FOREACH-DECORATOR.WHAT-IF')) {
+        $parameters['WhatIf'] = $_passthru['LOOPZ.WH-FOREACH-DECORATOR.WHAT-IF'];
       }
 
       return & $functee @parameters;
     }
-    elseif ($_passthru.Contains('BLOCK')) {
-      [scriptblock]$block = $_passthru['BLOCK'];
+    elseif ($_passthru.Contains('LOOPZ.WH-FOREACH-DECORATOR.BLOCK')) {
+      [scriptblock]$block = $_passthru['LOOPZ.WH-FOREACH-DECORATOR.BLOCK'];
 
       return $block.Invoke($_underscore, $_index, $_passthru, $_trigger);
     }
@@ -156,12 +162,13 @@
 
   $invokeResult = $decorator.Invoke($Underscore, $Index, $PassThru, $Trigger);
 
-  [string]$message = $PassThru['MESSAGE'];
-  [string]$itemLabel = $PassThru['ITEM-LABEL'];
-  [string]$itemValue = $PassThru['ITEM-VALUE'];
+  [string]$message = $PassThru['LOOPZ.WH-FOREACH-DECORATOR.MESSAGE'];
+  [string]$itemLabel = $PassThru['LOOPZ.WH-FOREACH-DECORATOR.ITEM-LABEL'];
+  [string]$itemValue = $PassThru['LOOPZ.WH-FOREACH-DECORATOR.ITEM-VALUE'];
   [string]$productValue = [string]::Empty;
 
-  $getResult = $PassThru.Contains('GET-RESULT') ? $PassThru['GET-RESULT'] : $defaultGetResult;
+  $getResult = $PassThru.Contains('LOOPZ.WH-FOREACH-DECORATOR.GET-RESULT') `
+    ? $PassThru['LOOPZ.WH-FOREACH-DECORATOR.GET-RESULT'] : $defaultGetResult;
 
   [string[][]]$themedPairs = @(, @('No', $("{0,3}" -f ($Index + 1))));
 
@@ -170,7 +177,8 @@
   [string]$productLabel = '';
   if ($invokeResult -and $invokeResult.Product) {
     $productValue = $getResult.Invoke($invokeResult.Product);
-    $productLabel = $PassThru.ContainsKey('PRODUCT-LABEL') ? $PassThru['PRODUCT-LABEL'] : 'Product';
+    $productLabel = $PassThru.ContainsKey('LOOPZ.WH-FOREACH-DECORATOR.PRODUCT-LABEL') `
+      ? $PassThru['LOOPZ.WH-FOREACH-DECORATOR.PRODUCT-LABEL'] : 'Product';
 
     if (-not([string]::IsNullOrWhiteSpace($productLabel))) {
       $themedPairs += , @($productLabel, $productValue);
@@ -179,8 +187,8 @@
 
   # PROPERTIES or ITEM-LABEL/ITEM-VALUE
   #
-  if ($PassThru.Contains('PROPERTIES')) {
-    $properties = $PassThru['PROPERTIES'];
+  if ($PassThru.Contains('LOOPZ.WH-FOREACH-DECORATOR.PROPERTIES')) {
+    $properties = $PassThru['LOOPZ.WH-FOREACH-DECORATOR.PROPERTIES'];
 
     if ($properties) {
       if ($properties -is [Array]) {
@@ -188,22 +196,24 @@
         $themedPairs += $properties;
       }
       else {
-        Write-Warning "Custom 'PROPERTIES' in PassThru is not an array, skipping (type: $($properties.GetType()))"
-        $themedPairs += , @('PROPERTIES', 'Malformed');
+        Write-Warning "Custom 'LOOPZ.WH-FOREACH-DECORATOR.PROPERTIES' in PassThru is not an array, skipping (type: $($properties.GetType()))"
+        $themedPairs += , @('LOOPZ.WH-FOREACH-DECORATOR.PROPERTIES', 'Malformed');
       }
-    } else {
+    }
+    else {
       Write-Warning "null custom properties defined in PassThru"
-      $themedPairs += , @('PROPERTIES', 'Malformed (null)');
+      $themedPairs += , @('LOOPZ.WH-FOREACH-DECORATOR.PROPERTIES', 'Malformed (null)');
     }
 
-  } else {
+  }
+  else {
     $themedPairs += , @($itemLabel, $itemValue);
   }
 
   # Write with a Krayola Theme
   #
-  [System.Collections.Hashtable]$krayolaTheme = $PassThru.ContainsKey('KRAYOLA-THEME') ?
-    $PassThru['KRAYOLA-THEME'] : (Get-KrayolaTheme);
+  [System.Collections.Hashtable]$krayolaTheme = $PassThru.ContainsKey('LOOPZ.WH-FOREACH-DECORATOR.KRAYOLA-THEME') `
+    ? $PassThru['LOOPZ.WH-FOREACH-DECORATOR.KRAYOLA-THEME'] : (Get-KrayolaTheme);
 
   [System.Collections.Hashtable]$parameters = @{}
   $parameters['Pairs'] = $themedPairs;

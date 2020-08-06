@@ -9,7 +9,7 @@ schema: 2.0.0
 
 ## SYNOPSIS
 
-Wraps a function or scriptblock as a decorator writing appropriate user interface
+Wraps a function or script-block as a decorator writing appropriate user interface
 info to the host for each entry in the pipeline.
 
 ## SYNTAX
@@ -22,24 +22,27 @@ Write-HostFeItemDecorator [-Underscore] <Object> [-Index] <Int32> [-PassThru] <H
 ## DESCRIPTION
 
 The function being decorated may or may not Support ShouldProcess. If it does, then the
-client should add 'WHAT-IF' to the pass through, set to the current value of WhatIf;
-or more accurately the existence of 'WhatIf' in PSBoundParameters. Or another way of putting
-it is, the presence of WHAT-IF indicates SupportsShouldProcess, and the value of WHAT-IF
-dictates the value of WhatIf. This way, we only need a single value in the PassThru, rather
-than having to represent SupportShouldProcess explicitly with another value.
+client should add 'LOOPZ.WH-FOREACH-DECORATOR.WHAT-IF' to the pass through, set to the current
+value of WhatIf; or more accurately the existence of 'WhatIf' in PSBoundParameters. Or another
+way of putting it is, the presence of WHAT-IF indicates SupportsShouldProcess, and the value of
+'LOOPZ.WH-FOREACH-DECORATOR.WHAT-IF' dictates the value of WhatIf. This way, we only need a single
+value in the PassThru, rather than having to represent SupportShouldProcess explicitly with
+another value.
 
-  The PastThru must contain either a 'FUNCTION-NAME' entry meaning a named function is
-being decorated or 'BLOCK' meaning a script block is being decorated, but not both.
+  The PastThru must contain either a 'LOOPZ.WH-FOREACH-DECORATOR.FUNCTION-NAME' entry meaning a named function is
+being decorated or 'LOOPZ.WH-FOREACH-DECORATOR.BLOCK' meaning a script block is being
+decorated, but not both.
 
-  PassThru must also contain either 'ITEM-LABEL' or 'PROPERTIES'. If there is only a single
-item that must be written out, then the user can specify a single value for 'ITEM-LABEL'
-and an accompanying 'ITEM-VALUE'. If there are multiple values, then 'PROPERTIES' must
-be specified and set to an array of key/value string pairs (so its an array of 2 item arrays).
+  PassThru must also contain either 'LOOPZ.WH-FOREACH-DECORATOR.ITEM-LABEL' or
+'LOOPZ.WH-FOREACH-DECORATOR.PROPERTIES'. If there is only a single item that must be written out,
+then the user can specify a single value for 'LOOPZ.WH-FOREACH-DECORATOR.ITEM-LABEL' and an accompanying
+'LOOPZ.WH-FOREACH-DECORATOR.ITEM-VALUE'. If there are multiple values, then 'LOOPZ.WH-FOREACH-DECORATOR.PROPERTIES' must be specified and set to an array of key/value string pairs (so its an array of 2
+item arrays).
 
   By default, to render the value displayed, ToString() is called. However, the result item
 may not have a ToString() method, in this case, the user should provide a custom script-block
 to determines how the value is constructed. This can be done by assigning a custom script-block
-to the 'GET-RESULT' entry in PassThru.
+to the 'LOOPZ.WH-FOREACH-DECORATOR.GET-RESULT' entry in PassThru.
 
   This function is designed to be used with Invoke-ForeachFsItem and as such, it's signature
 needs to match that required by Invoke-ForeachFsItem. Any additional parameters can be
@@ -69,9 +72,9 @@ commands  that product output to the terminal in a consistent manner.
   }
 
   [Systems.Collection.Hashtable]$passThru = @{
-    'LOOPZ.FOREACH-DECORATOR.FUNCTION-NAME' = 'Test-FN';
-    'LOOPZ.FOREACH-DECORATOR.ITEM-LABEL' = 'Widget'
-    'LOOPZ.FOREACH-DECORATOR.ITEM-VALUE' = $widget,
+    'LOOPZ.WH-FOREACH-DECORATOR.FUNCTION-NAME' = 'Test-FN';
+    'LOOPZ.WH-FOREACH-DECORATOR.ITEM-LABEL' = 'Widget'
+    'LOOPZ.WH-FOREACH-DECORATOR.ITEM-VALUE' = $widget,
     'CLIENT.FORMAT' = '=== [{0}] -- [{1}] ==='
   }
 
@@ -81,7 +84,7 @@ commands  that product output to the terminal in a consistent manner.
 
   So, Test-FN is not concerned about writing any output to the console, it simply does
 what it does silently and Write-HostFeItemDecorator handles generation of output. It
-invokes the function defined in 'LOOPZ.FOREACH-DECORATOR.FUNCTION-NAME' and generates
+invokes the function defined in 'LOOPZ.WH-FOREACH-DECORATOR.FUNCTION-NAME' and generates
 corresponding output. It happens to use the console colouring facility provided by a
 a dependency Elizium.Krayola to create colourful output in a predefined format via the
 Krayola Theme.

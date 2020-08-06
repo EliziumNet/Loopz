@@ -23,14 +23,14 @@ Describe 'Write-HostFeItemDecorator' {
         Mock Write-ThemedPairsInColour -ModuleName Elizium.Loopz { }
 
         [System.Collections.Hashtable]$passThru = @{
-          'FUNCTION-NAME' = 'get-AnswerAdvancedFn';
-          'ANSWER'        = 'Fourty Two';
-          'MESSAGE'       = 'Test Advanced Function';
-          'KRAYOLA-THEME' = $(Get-KrayolaTheme);
-          'ITEM-LABEL'    = 'Question';
-          'ITEM-VALUE'    = 'The Wrong Answer';
-          'PRODUCT-LABEL' = 'Test product';
-          'WHAT-IF'       = $false;
+          'LOOPZ.WH-FOREACH-DECORATOR.FUNCTION-NAME' = 'get-AnswerAdvancedFn';
+          'ANSWER'                                   = 'Fourty Two';
+          'LOOPZ.WH-FOREACH-DECORATOR.MESSAGE'       = 'Test Advanced Function';
+          'LOOPZ.WH-FOREACH-DECORATOR.KRAYOLA-THEME'                            = $(Get-KrayolaTheme);
+          'LOOPZ.WH-FOREACH-DECORATOR.ITEM-LABEL'    = 'Question';
+          'LOOPZ.WH-FOREACH-DECORATOR.ITEM-VALUE'    = 'The Wrong Answer';
+          'LOOPZ.WH-FOREACH-DECORATOR.PRODUCT-LABEL' = 'Test product';
+          'LOOPZ.WH-FOREACH-DECORATOR.WHAT-IF'       = $false;
         }
 
         $underscore = 'What is the answer to the universe';
@@ -63,14 +63,14 @@ Describe 'Write-HostFeItemDecorator' {
         }
 
         [System.Collections.Hashtable]$passThru = @{
-          'BLOCK'         = $block;
-          'ANSWER'        = 'Fourty Two';
-          'MESSAGE'       = 'Test Advanced Function';
-          'KRAYOLA-THEME' = $(Get-KrayolaTheme);
-          'ITEM-LABEL'    = 'Question';
-          'ITEM-VALUE'    = 'The Wrong Answer';
-          'PRODUCT-LABEL' = 'Test product';
-          'WHAT-IF'       = $false;
+          'LOOPZ.WH-FOREACH-DECORATOR.BLOCK'         = $block;
+          'ANSWER'                                   = 'Fourty Two';
+          'LOOPZ.WH-FOREACH-DECORATOR.MESSAGE'       = 'Test Advanced Function';
+          'LOOPZ.WH-FOREACH-DECORATOR.KRAYOLA-THEME'                            = $(Get-KrayolaTheme);
+          'LOOPZ.WH-FOREACH-DECORATOR.ITEM-LABEL'    = 'Question';
+          'LOOPZ.WH-FOREACH-DECORATOR.ITEM-VALUE'    = 'The Wrong Answer';
+          'LOOPZ.WH-FOREACH-DECORATOR.PRODUCT-LABEL' = 'Test product';
+          'LOOPZ.WH-FOREACH-DECORATOR.WHAT-IF'       = $false;
         }
 
         $underscore = 'What is the answer to the universe';
@@ -100,13 +100,13 @@ Describe 'Write-HostFeItemDecorator' {
       @{ Description = 'PassThru with PROPERTIES incorrectly defined as null' }
     ) {
       [System.Collections.Hashtable]$passThru = @{
-        'FUNCTION-NAME' = 'get-AnswerAdvancedFn';
-        'ANSWER'        = 'Fourty Two';
-        'MESSAGE'       = 'Test Advanced Function';
-        'KRAYOLA-THEME' = $(Get-KrayolaTheme);
-        'PROPERTIES'    = $tests[$Description];
-        'PRODUCT-LABEL' = 'Test product';
-        'WHAT-IF'       = $false;
+        'LOOPZ.WH-FOREACH-DECORATOR.FUNCTION-NAME' = 'get-AnswerAdvancedFn';
+        'ANSWER'                                   = 'Fourty Two';
+        'LOOPZ.WH-FOREACH-DECORATOR.MESSAGE'       = 'Test Advanced Function';
+        'LOOPZ.WH-FOREACH-DECORATOR.KRAYOLA-THEME'                            = $(Get-KrayolaTheme);
+        'LOOPZ.WH-FOREACH-DECORATOR.PROPERTIES'    = $tests[$Description];
+        'LOOPZ.WH-FOREACH-DECORATOR.PRODUCT-LABEL' = 'Test product';
+        'LOOPZ.WH-FOREACH-DECORATOR.WHAT-IF'       = $false;
       }
 
       $underscore = 'What is the answer to the universe';
