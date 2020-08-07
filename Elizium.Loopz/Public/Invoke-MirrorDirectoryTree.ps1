@@ -173,7 +173,7 @@
   Note the possible issue with this example is that any descendants named A... which are located
   under an ancestor which is not named A..., will not be mirrored;
 
-  eg './Tests/Data/fefsi/Audio/mp3/A/Androgynous Androgynous', even though "Audio", "A" and
+  eg './Tests/Data/fefsi/Audio/mp3/A/Amorphous Androgynous', even though "Audio", "A" and
   "Amorphous Androgynous" clearly match the A* filter, they will not be mirrored because
   the "mp3" directory, would be filtered out.
   See the following example for a resolution.

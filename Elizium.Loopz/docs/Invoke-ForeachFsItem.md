@@ -113,8 +113,6 @@ Invoke a script-block to handle empty .txt file objects from the same directory 
     -Block $block -File -condition $fileIsEmpty;
 ```
 
-{{ Add example description here }}
-
 ### Example 4
 
 Invoke a script-block only for directories whose name starts with "A" from the same

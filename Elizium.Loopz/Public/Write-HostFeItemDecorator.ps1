@@ -33,7 +33,7 @@
       The rationale behind Write-HostFeItemDecorator is to maintain separation of concerns
     that allows development of functions that could be used with Invoke-ForeachFsItem which do
     not contain any UI related code. This strategy also helps for the development of different
-    commands  that product output to the terminal in a consistent manner.
+    commands that produce output to the terminal in a consistent manner.
 
   .PARAMETER $Underscore
     The current pipeline object.

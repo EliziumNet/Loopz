@@ -39,19 +39,16 @@ then the user can specify a single value for 'LOOPZ.WH-FOREACH-DECORATOR.ITEM-LA
 'LOOPZ.WH-FOREACH-DECORATOR.ITEM-VALUE'. If there are multiple values, then 'LOOPZ.WH-FOREACH-DECORATOR.PROPERTIES' must be specified and set to an array of key/value string pairs (so its an array of 2
 item arrays).
 
-  By default, to render the value displayed, ToString() is called. However, the result item
-may not have a ToString() method, in this case, the user should provide a custom script-block
-to determines how the value is constructed. This can be done by assigning a custom script-block
-to the 'LOOPZ.WH-FOREACH-DECORATOR.GET-RESULT' entry in PassThru.
+  By default, to render the value displayed, ToString() is called. However, the result item (value returned from custom function/script-block) may not have a ToString() method, in this case (you will see an error indicating ToString method not being available), the user should provide a custom script-block to determines how the value is constructed. This can be done by assigning a custom script-block to the 'LOOPZ.WH-FOREACH-DECORATOR.GET-RESULT' entry in PassThru.
 
   This function is designed to be used with Invoke-ForeachFsItem and as such, it's signature
 needs to match that required by Invoke-ForeachFsItem. Any additional parameters can be
-passed in via the PassThru.
+passed in via the PassThru (create a new namespaced key eg 'YOUR-MODULE-NAME.CMD-NAME.PARAMS' assigned to the extra parameters collection, and then in the function/script-block, read the extra parameters from the same key you assign).
 
   The rationale behind Write-HostFeItemDecorator is to maintain separation of concerns
 that allows development of functions that could be used with Invoke-ForeachFsItem which do
 not contain any UI related code. This strategy also helps for the development of different
-commands  that product output to the terminal in a consistent manner.
+commands that produce output to the terminal in a consistent manner.
 
 ## EXAMPLES
 
@@ -86,7 +83,7 @@ commands  that product output to the terminal in a consistent manner.
 what it does silently and Write-HostFeItemDecorator handles generation of output. It
 invokes the function defined in 'LOOPZ.WH-FOREACH-DECORATOR.FUNCTION-NAME' and generates
 corresponding output. It happens to use the console colouring facility provided by a
-a dependency Elizium.Krayola to create colourful output in a predefined format via the
+dependency Elizium.Krayola to create colourful output in a predefined format via the
 Krayola Theme.
 
 Note, Write-HostFeItemDecorator does not forward additional parameters to the decorated
@@ -136,7 +133,7 @@ A boolean value, useful for state changing idempotent operations. At the end
 of the batch, the state of the trigger indicates whether any of the items were actioned.
 When the script block is invoked, the trigger should indicate if the trigger was pulled for
 any of the items so far processed in the batch. This is the responsibility of the
-client's block implementation.
+client's script-block/function implementation.
 
 ```yaml
 Type: Boolean
