@@ -281,7 +281,7 @@ function Invoke-TraverseDirectory {
             $positional += $_;
           }
         }
-        $invokee.Invoke($positional);
+        $result = $invokee.Invoke($positional);
       }
       else {
         [System.Collections.Hashtable]$parameters = $passThru.ContainsKey('LOOPZ.TRAVERSE.INVOKEE.PARAMS') `
@@ -290,16 +290,17 @@ function Invoke-TraverseDirectory {
         # These are directory specific overwrites. The custom parameters
         # will still be present
         #
-        $parameters['DirectoryInfo'] = $directory;
+        $parameters['Underscore'] = $directoryInfo;
         $parameters['Index'] = $index;
         $parameters['PassThru'] = $passThru;
         $parameters['Trigger'] = $trigger;
 
-        & $invokee @parameters;
+        $result = & $invokee @parameters;
       }
     }
     catch {
-      Write-Error "recurseTraverseDirectory Error: ($_), for item: '$($directoryInfo.Name)'";
+      Write-Error "recurseTraverseDirectory Error: ($_), for item: '$($directoryInfo.Name)'"
+        -ErrorAction Continue;
     }
     finally {
       $passThru['LOOPZ.FOREACH-INDEX']++;
@@ -318,6 +319,8 @@ function Invoke-TraverseDirectory {
       $directoryInfos | Invoke-ForeachFsItem -Directory -Block $adapter `
         -PassThru $PassThru -Condition $condition -Summary $Summary;
     }
+
+    return $result;
   } # recurseTraverseDirectory
 
   # ======================================================================== [adapter] ===
@@ -361,6 +364,7 @@ function Invoke-TraverseDirectory {
 
   if ($itemIsDirectory) {
     [boolean]$trigger = $false;
+    [boolean]$broken = $false;
 
     # The index of the top level directory is always 0
     #
@@ -408,10 +412,10 @@ function Invoke-TraverseDirectory {
       # TODO: check the trigger on the invoke return result
       #
       if ('InvokeScriptBlock' -eq $PSCmdlet.ParameterSetName) {
-        $Block.Invoke($positional);
+        $result = $Block.Invoke($positional);
       }
       elseif ('InvokeFunction' -eq $PSCmdlet.ParameterSetName) {
-        & $Functee @parameters;
+        $result = & $Functee @parameters;
       }
     }
     catch {
@@ -425,6 +429,14 @@ function Invoke-TraverseDirectory {
         $PassThru['LOOPZ.FOREACH-INDEX']++;
         $index = $PassThru['LOOPZ.FOREACH-INDEX'];
       }
+    }
+
+    if ($result.psobject.properties.match('Trigger') -and $result.Trigger) {
+      $trigger = $true;
+    }
+
+    if ($result.psobject.properties.match('Break') -and $result.Break) {
+      $broken = $true;
     }
 
     if ($Hoist.ToBool()) {
@@ -480,11 +492,12 @@ function Invoke-TraverseDirectory {
 
       if ($directoryInfos) {
         $directoryInfos | Invoke-ForeachFsItem -Directory -Block $adapter `
-          -PassThru $PassThru -Condition $Condition -Summary $Summary;
+          -StartIndex $index -PassThru $PassThru -Condition $Condition -Summary $Summary;
       }
 
       [int]$skipped = 0;
-      [boolean]$trigger = $false;
+      $index = $PassThru['LOOPZ.FOREACH-INDEX'];
+      $trigger = $PassThru['LOOPZ.FOREACH.TRIGGER'];
       $Summary.Invoke($index, $skipped, $trigger, $PassThru);
     }
   }

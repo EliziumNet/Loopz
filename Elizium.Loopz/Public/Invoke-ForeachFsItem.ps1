@@ -327,6 +327,7 @@ function Invoke-ForeachFsItem {
   }
 
   end {
+    $PassThru['LOOPZ.FOREACH.TRIGGER'] = $trigger;
     if ($manageIndex) {
       $Summary.Invoke($index, $skipped, $trigger, $PassThru);
     }
