@@ -248,7 +248,7 @@ function Invoke-ForeachFsItem {
     [int]$index = $manageIndex ? $StartIndex : $PassThru['LOOPZ.FOREACH-INDEX'];
     [int]$skipped = 0;
     [boolean]$broken = $false;
-    [boolean]$trigger = $false;
+    [boolean]$trigger = $PassThru.ContainsKey('LOOPZ.FOREACH.TRIGGER');
   }
 
   process {
@@ -297,6 +297,7 @@ function Invoke-ForeachFsItem {
 
             if ($result) {
               if ($result.psobject.properties.match('Trigger') -and $result.Trigger) {
+                $PassThru['LOOPZ.FOREACH.TRIGGER'] = $true;
                 $trigger = $true;
               }
 

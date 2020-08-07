@@ -131,7 +131,7 @@
       $result.ToString();
     }
     catch {
-      Write-Error "Default get-result function failed, consider defining custom function as 'LOOPZ.WH-FOREACH-DECORATOR.GET-RESULT' in PassThru"
+      Write-Error "Default get-result function failed, consider defining custom function as 'LOOPZ.WH-FOREACH-DECORATOR.GET-RESULT' in PassThru";
     }
   }
 

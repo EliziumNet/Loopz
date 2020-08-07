@@ -15,6 +15,7 @@ function Test-FireEXBreak {
     [boolean]$Trigger
   )
   $break = ('EX' -eq $Underscore.Name);
+  Write-Host "  [-] Test-FireEXBreak(index: $Index): directory: $($Underscore.Name)";
   @{ Product = $Underscore; Break = $break }
 }
 

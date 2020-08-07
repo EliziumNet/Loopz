@@ -124,7 +124,7 @@ Describe 'Invoke-TraverseDirectory' {
       Context 'and: single iteration' {
         It 'should: set trigger' {
           [string]$sourcePath = (Convert-Path '.\Tests\Data\traverse\Audio\MINIMAL\Richie Hawtin');
-          Write-Host "[+] === path: $sourcePath";
+          Write-Debug "[+] === path: $sourcePath";
 
           [scriptblock]$traverseBlock = {
             param(
@@ -133,7 +133,7 @@ Describe 'Invoke-TraverseDirectory' {
               [System.Collections.Hashtable]$_passThru,
               [boolean]$_trigger
             )
-            Write-Host "  [-] TEST-BLOCK(index: $_index): directory: $($_underscore.Name)";
+            Write-Debug "  [-] TEST-BLOCK(index: $_index): directory: $($_underscore.Name)";
             @{ Product = $_underscore; Trigger = $true }
           }
 
@@ -145,7 +145,7 @@ Describe 'Invoke-TraverseDirectory' {
               [System.Collections.Hashtable]$_passThru
             )
 
-            Write-Host "--> TEST-SUMMARY(block/trigger/single): Count: $_count, Skipped: $_skipped, Trigger: $_trigger";
+            Write-Debug "--> TEST-SUMMARY(block/trigger/single): Count: $_count, Skipped: $_skipped, Trigger: $_trigger";
             $_trigger | Should -BeTrue;
           }
 
@@ -157,7 +157,7 @@ Describe 'Invoke-TraverseDirectory' {
       Context 'and: multiple iterations' {
         It 'should: set trigger' {
           [string]$sourcePath = (Convert-Path '.\Tests\Data\traverse\Audio\MINIMAL\Plastikman');
-          Write-Host "[+] === path: $sourcePath";
+          Write-Debug "[+] === path: $sourcePath";
 
           [scriptblock]$traverseBlock = {
             param(
@@ -172,7 +172,7 @@ Describe 'Invoke-TraverseDirectory' {
               $trigger = $true;
             }
 
-            Write-Host "  [-] TEST-BLOCK(index: $_index, trigger: $_trigger): directory: $($_underscore.Name)";
+            Write-Debug "  [-] TEST-BLOCK(index: $_index, trigger: $_trigger): directory: $($_underscore.Name)";
             @{ Product = $_underscore; Trigger = $trigger }
           }
 
@@ -184,7 +184,7 @@ Describe 'Invoke-TraverseDirectory' {
               [System.Collections.Hashtable]$_passThru
             )
 
-            Write-Host "--> TEST-SUMMARY(block/trigger/multi): Count: $_count, Skipped: $_skipped, Trigger: $_trigger";
+            Write-Debug "--> TEST-SUMMARY(block/trigger/multi): Count: $_count, Skipped: $_skipped, Trigger: $_trigger";
             $_trigger | Should -BeTrue;
           }
 
@@ -195,7 +195,7 @@ Describe 'Invoke-TraverseDirectory' {
         Context 'and: Hoist' {
           It 'should: set trigger' {
             [string]$sourcePath = (Convert-Path '.\Tests\Data\traverse\Audio\MINIMAL\Plastikman');
-            Write-Host "[+] === path: $sourcePath";
+            Write-Debug "[+] === path: $sourcePath";
 
             [scriptblock]$traverseBlock = {
               param(
@@ -210,7 +210,7 @@ Describe 'Invoke-TraverseDirectory' {
                 $trigger = $true;
               }
 
-              Write-Host "  [-] TEST-BLOCK(index: $_index, trigger: $_trigger): directory: $($_underscore.Name)";
+              Write-Debug "  [-] TEST-BLOCK(index: $_index, trigger: $_trigger): directory: $($_underscore.Name)";
               @{ Product = $_underscore; Trigger = $trigger }
             }
 
@@ -222,7 +222,7 @@ Describe 'Invoke-TraverseDirectory' {
                 [System.Collections.Hashtable]$_passThru
               )
 
-              Write-Host "--> TEST-SUMMARY(block/trigger/multi/hoist): Count: $_count, Skipped: $_skipped, Trigger: $_trigger";
+              Write-Debug "--> TEST-SUMMARY(block/trigger/multi/hoist): Count: $_count, Skipped: $_skipped, Trigger: $_trigger";
               $_trigger | Should -BeTrue;
             }
 
@@ -235,9 +235,9 @@ Describe 'Invoke-TraverseDirectory' {
 
     Context 'and: break is fired' {
       Context 'and: single iteration' {
-        It 'should: set break' {
+        It 'should: stop iterating' {
           [string]$sourcePath = (Convert-Path '.\Tests\Data\traverse\Audio\MINIMAL\Richie Hawtin');
-          Write-Host "[+] === path: $sourcePath";
+          Write-Debug "[+] === path: $sourcePath";
 
           $container = @{
             count = 0
@@ -249,7 +249,7 @@ Describe 'Invoke-TraverseDirectory' {
               [System.Collections.Hashtable]$_passThru,
               [boolean]$_trigger
             )
-            Write-Host "  [-] TEST-BLOCK(index: $_index): directory: $($_underscore.Name)";
+            Write-Debug "  [-] TEST-BLOCK(index: $_index): directory: $($_underscore.Name)";
             $container.count++;
             @{ Product = $_underscore; Break = $true }
           }
@@ -262,19 +262,19 @@ Describe 'Invoke-TraverseDirectory' {
               [System.Collections.Hashtable]$_passThru
             )
 
-            Write-Host "--> TEST-SUMMARY(block/break/single): Count: $_count, Skipped: $_skipped, Trigger: $_trigger";
+            Write-Debug "--> TEST-SUMMARY(block/break/single): Count: $_count, Skipped: $_skipped, Trigger: $_trigger";
             $container.count | Should -Be 2;
           }
 
           Invoke-TraverseDirectory -Path $sourcePath -Block $traverseBlock `
             -Summary $summary;
-        } # should: set break
+        } # should: stop iterating
       } # and: single iteration
 
       Context 'and: multiple iterations' {
-        It 'should: set break' {
+        It 'should: stop iterating' {
           [string]$sourcePath = (Convert-Path '.\Tests\Data\traverse\Audio\MINIMAL\Plastikman');
-          Write-Host "[+] === path: $sourcePath";
+          Write-Debug "[+] === path: $sourcePath";
 
           [scriptblock]$traverseBlock = {
             param(
@@ -283,7 +283,7 @@ Describe 'Invoke-TraverseDirectory' {
               [System.Collections.Hashtable]$_passThru,
               [boolean]$_trigger
             )
-            Write-Host "  [-] TEST-BLOCK(index: $_index): directory: $($_underscore.Name)";
+            Write-Debug "  [-] TEST-BLOCK(index: $_index): directory: $($_underscore.Name)";
 
             $break = $false;
             if ('EX' -eq $_underscore.Name) {
@@ -300,23 +300,40 @@ Describe 'Invoke-TraverseDirectory' {
               [System.Collections.Hashtable]$_passThru
             )
 
-            Write-Host "--> TEST-SUMMARY(block/break/multi): Count: $_count, Skipped: $_skipped, Trigger: $_trigger";
+            Write-Debug "--> TEST-SUMMARY(block/break/multi): Count: $_count, Skipped: $_skipped, Trigger: $_trigger";
             $_count | Should -Be 4;
           }
 
           Invoke-TraverseDirectory -Path $sourcePath -Block $traverseBlock `
             -Summary $summary;
-        } # should: set break
+        } # should: stop iterating
       } # and: multiple iterations
     } # and: break is fired
   } # given: block result
 
-  Context 'given: fn result' { #@@@@
+  Context 'given: fn result' {
     Context 'and: trigger is fired' {
       Context 'and: multiple iterations' {
-        It 'should: set break' -Tag 'Current' {
+        It 'should: stop iterating' {
+          Mock -ModuleName Elizium.Loopz Test-FireEXTrigger -Verifiable {
+            param(
+              [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', '')]
+              [System.IO.DirectoryInfo]$Underscore,
+              [int]$Index,
+              [System.Collections.Hashtable]$PassThru,
+              [boolean]$Trigger
+            )
+            $localTrigger = ('EX' -eq $Underscore.Name);
+            Write-Debug "  [-] MOCK Test-FireEXTrigger(index: $Index, local trigger: $localTrigger, Trigger: $Trigger): directory: $($Underscore.Name)";
+
+            if (@('Musik', 'Sheet One') -contains $Underscore.Name) {
+              $Trigger | Should -BeTrue;
+            }
+            @{ Product = $Underscore; Trigger = $localTrigger }
+          }
+
           [string]$sourcePath = (Convert-Path '.\Tests\Data\traverse\Audio\MINIMAL\Plastikman');
-          Write-Host "[+] === path: $sourcePath";
+          Write-Debug "[+] === path: $sourcePath";
 
           [scriptblock]$summary = {
             param(
@@ -326,53 +343,63 @@ Describe 'Invoke-TraverseDirectory' {
               [System.Collections.Hashtable]$_passThru
             )
 
-            Write-Host "--> TEST-SUMMARY(fn/break/multi): Count: $_count, Skipped: $_skipped, Trigger: $_trigger";
-            # $_count | Should -Be 4;
+            Write-Debug "--> TEST-SUMMARY(fn/break/multi): Count: $_count, Skipped: $_skipped, Trigger: $_trigger";
+            $_trigger | Should -BeTrue;
           }
 
           Invoke-TraverseDirectory -Path $sourcePath -Functee 'Test-FireEXTrigger' `
             -Summary $summary;
-        } # should: set break
-
-        Context 'and: Hoist' { #@@@@
-          It 'should: set trigger' {
-            [string]$sourcePath = (Convert-Path '.\Tests\Data\traverse\Audio\MINIMAL\Plastikman');
-            Write-Host "[+] === path: $sourcePath";
-
-            [scriptblock]$traverseBlock = {
-              param(
-                $_underscore,
-                [int]$_index,
-                [System.Collections.Hashtable]$_passThru,
-                [boolean]$_trigger
-              )
-
-              $trigger = $_trigger;
-              if ('EX' -eq $_underscore.Name) {
-                $trigger = $true;
-              }
-
-              Write-Host "  [-] TEST-FN(index: $_index, trigger: $_trigger): directory: $($_underscore.Name)";
-              @{ Product = $_underscore; Trigger = $trigger }
-            }
-
-            [scriptblock]$summary = {
-              param(
-                [int]$_count,
-                [int]$_skipped,
-                [boolean]$_trigger,
-                [System.Collections.Hashtable]$_passThru
-              )
-
-              Write-Host "--> TEST-SUMMARY(fn/trigger/multi/hoist): Count: $_count, Skipped: $_skipped, Trigger: $_trigger";
-              # $_trigger | Should -BeTrue;
-            }
-
-            Invoke-TraverseDirectory -Path $sourcePath -Block $traverseBlock `
-              -Summary $summary -Hoist;
-          } # should: set trigger
-        } # and: Hoist
+        } # should: stop iterating
       } # and: multiple iterations      
-    }
-  }
+    } # and: trigger is fired
+
+    Context 'and: break is fired' {
+      It 'should: stop iterating' {
+        Mock -ModuleName Elizium.Loopz Test-FireEXBreak -Verifiable {
+          param(
+            [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', '')]
+            [System.IO.DirectoryInfo]$Underscore,
+            [int]$Index,
+            [System.Collections.Hashtable]$PassThru,
+            [boolean]$Trigger
+          )
+          $break = ('EX' -eq $Underscore.Name);
+          Write-Debug "  [-] MOCK Test-FireEXBreak(index: $Index, directory: $($Underscore.Name)";
+
+          @{ Product = $Underscore; Break = $break }
+        } # Mock
+
+        [string]$sourcePath = (Convert-Path '.\Tests\Data\traverse\Audio\MINIMAL\Plastikman');
+        Write-Debug "[+] === path: $sourcePath";
+
+        Invoke-TraverseDirectory -Path $sourcePath -Functee 'Test-FireEXBreak';
+        Assert-MockCalled Test-FireEXBreak -ModuleName Elizium.Loopz -Times 4;
+      } # should: stop iterating
+
+      Context 'and: Hoist' {
+        It 'should: stop iterating' {
+          Mock -ModuleName Elizium.Loopz Test-FireEXBreak -Verifiable {
+            param(
+              [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', '')]
+              [System.IO.DirectoryInfo]$Underscore,
+              [int]$Index,
+              [System.Collections.Hashtable]$PassThru,
+              [boolean]$Trigger
+            )
+            $break = ('EX' -eq $Underscore.Name);
+            Write-Debug "  [-] MOCK Test-FireEXBreak(index: $Index, directory: $($Underscore.Name)";
+
+            @{ Product = $Underscore; Break = $break }
+          } # Mock
+
+          [string]$sourcePath = (Convert-Path '.\Tests\Data\traverse\Audio');
+          Write-Debug "[+] === path: $sourcePath";
+
+          Invoke-TraverseDirectory -Path $sourcePath -Functee 'Test-FireEXBreak' `
+            -Condition $filterDirectories -Hoist;
+          Assert-MockCalled Test-FireEXBreak -ModuleName Elizium.Loopz -Times 9;
+        } # should: stop iterating
+      } # and: Hoist
+    } # and: break is fired
+  } # given: fn result
 } # Invoke-TraverseDirectory

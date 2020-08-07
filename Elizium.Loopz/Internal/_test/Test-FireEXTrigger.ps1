@@ -13,7 +13,7 @@ function Test-FireEXTrigger {
     [Parameter(Mandatory)]
     [boolean]$Trigger
   )
-  $trigger = ('EX' -eq $Underscore.Name);
-  Write-Host "  [-] Test-FireEXTrigger(index: $Index, trigger: $trigger): directory: $($Underscore.Name)";
-  @{ Product = $Underscore; Trigger = $trigger }
+  $localTrigger = ('EX' -eq $Underscore.Name);
+  Write-Host "  [-] Test-FireEXTrigger(index: $Index, local trigger: $localTrigger, Trigger: $Trigger): directory: $($Underscore.Name)";
+  @{ Product = $Underscore; Trigger = $localTrigger }
 }

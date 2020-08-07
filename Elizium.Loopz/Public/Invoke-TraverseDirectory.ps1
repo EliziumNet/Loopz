@@ -268,9 +268,7 @@ function Invoke-TraverseDirectory {
     $index = $passThru['LOOPZ.FOREACH-INDEX'];
 
     try {
-      # This is the local invoke, for the current directory
-      #
-      # TODO: (issue #18) check the trigger on the invoke return result
+      # This is the invoke, for the current directory
       #
       if ($invokee -is [scriptblock]) {
         $positional = @($directoryInfo, $index, $passThru, $trigger);
@@ -299,8 +297,7 @@ function Invoke-TraverseDirectory {
       }
     }
     catch {
-      Write-Error "recurseTraverseDirectory Error: ($_), for item: '$($directoryInfo.Name)'"
-        -ErrorAction Continue;
+      Write-Error "recurseTraverseDirectory Error: ($_), for item: '$($directoryInfo.Name)'";
     }
     finally {
       $passThru['LOOPZ.FOREACH-INDEX']++;
@@ -363,7 +360,7 @@ function Invoke-TraverseDirectory {
     [System.IO.FileAttributes]::Directory) -eq [System.IO.FileAttributes]::Directory;
 
   if ($itemIsDirectory) {
-    [boolean]$trigger = $false;
+    [boolean]$trigger = $PassThru.ContainsKey('LOOPZ.FOREACH.TRIGGER');
     [boolean]$broken = $false;
 
     # The index of the top level directory is always 0
@@ -408,36 +405,39 @@ function Invoke-TraverseDirectory {
 
     # This is the top level invoke
     #
-    try {
-      # TODO: check the trigger on the invoke return result
-      #
-      if ('InvokeScriptBlock' -eq $PSCmdlet.ParameterSetName) {
-        $result = $Block.Invoke($positional);
+    if ($Condition.Invoke($directory)) {
+      try {
+        if ('InvokeScriptBlock' -eq $PSCmdlet.ParameterSetName) {
+          $result = $Block.Invoke($positional);
+        }
+        elseif ('InvokeFunction' -eq $PSCmdlet.ParameterSetName) {
+          $result = & $Functee @parameters;
+        }
       }
-      elseif ('InvokeFunction' -eq $PSCmdlet.ParameterSetName) {
-        $result = & $Functee @parameters;
+      catch {
+        Write-Error "Invoke-TraverseDirectory(top-level) Error: ($_), for item: '$($directory.Name)'";
       }
-    }
-    catch {
-      Write-Error "Invoke-TraverseDirectory(top-level) Error: ($_), for item: '$($directory.Name)'";
-    }
-    finally {
-      if ($Hoist.ToBool()) {
-        $index++;
+      finally {
+        if ($Hoist.ToBool()) {
+          $index++;
+        }
+        else {
+          $PassThru['LOOPZ.FOREACH-INDEX']++;
+          $index = $PassThru['LOOPZ.FOREACH-INDEX'];
+        }
       }
-      else {
-        $PassThru['LOOPZ.FOREACH-INDEX']++;
-        $index = $PassThru['LOOPZ.FOREACH-INDEX'];
+
+      if ($result.psobject.properties.match('Trigger') -and $result.Trigger) {
+        $PassThru['LOOPZ.FOREACH.TRIGGER'] = $true;
+        $trigger = $true;
+      }
+
+      if ($result.psobject.properties.match('Break') -and $result.Break) {
+        $broken = $true;
       }
     }
 
-    if ($result.psobject.properties.match('Trigger') -and $result.Trigger) {
-      $trigger = $true;
-    }
-
-    if ($result.psobject.properties.match('Break') -and $result.Break) {
-      $broken = $true;
-    }
+    # --- end of top level invoke ----------------------------------------------------------
 
     if ($Hoist.ToBool()) {
       # Perform non-recursive retrieval of descendant directories
