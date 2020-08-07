@@ -350,7 +350,7 @@
       $destinationInfo = New-Object -TypeName System.IO.DirectoryInfo ($destinationDirectory);
     }
 
-    if ($CopyFiles.ToBool() -and $CreateDirs.ToBool()) {
+    if ($CopyFiles.ToBool()) {
       Write-Debug "    [-] Creating files for branch directory: '$destinationBranch'";
 
       # To use the include/exclude parameters on Copy-Item, the Path specified
@@ -365,6 +365,17 @@
 
       [string[]]$adjustedFileExcludes = $FileExcludes | ForEach-Object {
         $_.Contains('*') ? $_ : "*.$_".Replace('..', '.');
+      }
+
+      # Ensure that the destination directory exists, but only if there are
+      # files to copy over which pass the include/exclude filters. This is
+      # required in the case where CreateDirs has not been specified.
+      #
+      if (Get-ChildItem $sourceDirectoryWithWildCard `
+          -Include $adjustedFileIncludes -Exclude $adjustedFileExcludes) {
+        if (-not(Test-Path -Path $destinationDirectory)) {
+          New-Item -ItemType 'Directory' -Path $destinationDirectory -WhatIf:$whatIf
+        }
       }
 
       Copy-Item -Path $sourceDirectoryWithWildCard `

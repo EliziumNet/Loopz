@@ -169,12 +169,22 @@ Describe 'Invoke-MirrorDirectoryTree' {
   } # given: Exclude file filters applied
 
   Context 'given: Include file filters applied' {
-    Context 'and: directory tree with Directory and File Creation options specified' {
+    Context 'and: directory tree with Directory Creation option specified' {
       It 'Should: traverse creating files and directories' {
         Invoke-MirrorDirectoryTree -Path $sourcePath `
           -DestinationPath $destinationPath -CreateDirs -DirectoryIncludes @('*o*') -WhatIf:$whatIf;
 
         Test-Path -Path (Join-Path -Path $destinationPath -ChildPath 'Audio') | Should -BeTrue;
+      }
+    }
+
+    Context 'and: File copy specified without directory creation' {
+      It 'should: still copy matching files' -Tag 'Current' {
+        Invoke-MirrorDirectoryTree -Path $sourcePath `
+          -DestinationPath $destinationPath -CopyFiles -FileIncludes @('cover.*')`
+            -DirectoryIncludes @('*o*') -WhatIf:$whatIf;
+
+          Test-Path -Path (Join-Path -Path $destinationPath -ChildPath 'Audio') | Should -BeTrue;
       }
     }
   } # given: Include file filters applied
