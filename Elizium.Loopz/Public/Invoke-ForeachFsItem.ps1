@@ -244,8 +244,8 @@ function Invoke-ForeachFsItem {
   ) # param
 
   begin {
-    [boolean]$manageIndex = -not($PassThru.ContainsKey('LOOPZ.FOREACH-INDEX'));
-    [int]$index = $manageIndex ? $StartIndex : $PassThru['LOOPZ.FOREACH-INDEX'];
+    [boolean]$manageIndex = -not($PassThru.ContainsKey('LOOPZ.FOREACH.INDEX'));
+    [int]$index = $manageIndex ? $StartIndex : $PassThru['LOOPZ.FOREACH.INDEX'];
     [int]$skipped = 0;
     [boolean]$broken = $false;
     [boolean]$trigger = $PassThru.ContainsKey('LOOPZ.FOREACH.TRIGGER');
@@ -292,7 +292,7 @@ function Invoke-ForeachFsItem {
               $index++;
             }
             else {
-              $index = $PassThru['LOOPZ.FOREACH-INDEX'];
+              $index = $PassThru['LOOPZ.FOREACH.INDEX'];
             }
 
             if ($result) {

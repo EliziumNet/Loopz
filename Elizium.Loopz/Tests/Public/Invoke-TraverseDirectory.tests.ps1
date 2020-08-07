@@ -49,7 +49,7 @@ Describe 'Invoke-TraverseDirectory' {
             [boolean]$_trigger,
             [System.Collections.Hashtable]$_passThru
           )
-          $index = $_passThru['LOOPZ.FOREACH-INDEX'];
+          $index = $_passThru['LOOPZ.FOREACH.INDEX'];
           $index | Should -Be 19;
         }
 

@@ -265,7 +265,7 @@ function Invoke-TraverseDirectory {
       [boolean]$trigger
     )
 
-    $index = $passThru['LOOPZ.FOREACH-INDEX'];
+    $index = $passThru['LOOPZ.FOREACH.INDEX'];
 
     try {
       # This is the invoke, for the current directory
@@ -300,7 +300,7 @@ function Invoke-TraverseDirectory {
       Write-Error "recurseTraverseDirectory Error: ($_), for item: '$($directoryInfo.Name)'";
     }
     finally {
-      $passThru['LOOPZ.FOREACH-INDEX']++;
+      $passThru['LOOPZ.FOREACH.INDEX']++;
     }
 
     [string]$fullName = $directoryInfo.FullName;
@@ -400,7 +400,7 @@ function Invoke-TraverseDirectory {
     if (-not($Hoist.ToBool())) {
       # We only want to manage the index via $PassThru when we are recursing
       #
-      $PassThru['LOOPZ.FOREACH-INDEX'] = $index;
+      $PassThru['LOOPZ.FOREACH.INDEX'] = $index;
     }
 
     # This is the top level invoke
@@ -422,8 +422,8 @@ function Invoke-TraverseDirectory {
           $index++;
         }
         else {
-          $PassThru['LOOPZ.FOREACH-INDEX']++;
-          $index = $PassThru['LOOPZ.FOREACH-INDEX'];
+          $PassThru['LOOPZ.FOREACH.INDEX']++;
+          $index = $PassThru['LOOPZ.FOREACH.INDEX'];
         }
       }
 
@@ -496,7 +496,7 @@ function Invoke-TraverseDirectory {
       }
 
       [int]$skipped = 0;
-      $index = $PassThru['LOOPZ.FOREACH-INDEX'];
+      $index = $PassThru['LOOPZ.FOREACH.INDEX'];
       $trigger = $PassThru['LOOPZ.FOREACH.TRIGGER'];
       $Summary.Invoke($index, $skipped, $trigger, $PassThru);
     }
