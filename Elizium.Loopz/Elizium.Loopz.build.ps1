@@ -89,7 +89,9 @@ task Compile @compileParams {
 }
 
 task CopyPSD {
-  New-Item -Path (Split-Path $script:PsdPath) -ItemType Directory -ErrorAction 0
+  if (-not(Test-Path (Split-Path $script:PsdPath))) {
+    New-Item -Path (Split-Path $script:PsdPath) -ItemType Directory -ErrorAction 0
+  }
   $copy = @{
     Path        = "$($script:ModuleName).psd1"
     Destination = $script:PsdPath
