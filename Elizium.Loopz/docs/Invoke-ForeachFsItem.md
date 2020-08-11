@@ -33,10 +33,15 @@ Invoke-ForeachFsItem -pipelineItem <FileSystemInfo> [-Condition <ScriptBlock>] -
 
 ## DESCRIPTION
 
-  2 parameters set are defined, one for invoking a named function (InvokeFunction) and
+  2 parameters sets are defined, one for invoking a named function (InvokeFunction) and
 the other (InvokeScriptBlock, the default) for invoking a script-block. An optional
 Summary script block can be specified which will be invoked at the end of the pipeline
-batch.
+batch. The user should assemble the candidate items from the file system, be they files or directories
+typically using Get-ChildItem, or can be any other function that delivers file systems
+items via the PowerShell pipeline. For each item in the pipeline, Invoke-ForeachFsItem will
+invoke the script-block/function specified. Invoke-ForeachFsItem will deliver what ever is
+returned from the script-block/function, so the result of Invoke-ForeachFsItem can be piped
+to another command.
 
 ## EXAMPLES
 

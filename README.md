@@ -20,6 +20,23 @@ The module can be installed using the standard **install-module** command:
 
 Requires [Elizium.Krayola](https://github.com/plastikfan/Krayola) which will be installed automatically if not already present.
 
+## The Main Commands
+
+The following table shows the list of public commands exported from the Loopz module:
+
+| COMMAND-NAME                                                                     | DESCRIPTION
+|----------------------------------------------------------------------------------|------------
+| [Invoke-ForeachFsItem](Elizium.Loopz/docs/Invoke-ForeachFsItem.md)               | Invoke a function foreach file system object
+| [Invoke-MirrorDirectoryTree](Elizium.Loopz/docs/Invoke-MirrorDirectoryTree.md)   | Copy a directory tree invoking a function
+| [Invoke-TraverseDirectory](Elizium.Loopz/docs/Invoke-TraverseDirectory.md)       | Navigate a directory tree invoking a function
+| [Write-HostFeItemDecorator](Elizium.Loopz/docs/Write-HostFeItemDecorator.md)     | Write output foreach file system object
+
+## Supporting Utilities
+
+| COMMAND-NAME                                                                     | DESCRIPTION
+|----------------------------------------------------------------------------------|------------
+| [Select-FsItem](Elizium.Loopz/docs/Select-FsItem.md)                             | A predicate function used for filtering
+
 ## General Concepts
 
 ### :o: PassThru hash-table object
@@ -32,7 +49,7 @@ The scenarios in which the PassThru are as follows:
 
 Let's elaborate the above points...
 
-:star: First point: Invoke-ForeachFsItem requires calling code to either specify a script-block or a function (collectively called the invokee). The invokee must have to conform to a signature accepting the following four common arguments:
+:star: First point: [Invoke-ForeachFsItem](Elizium.Loopz/docs/Invoke-ForeachFsItem.md) requires calling code to either specify a script-block or a function (collectively called the invokee). The invokee must have to conform to a signature accepting the following four common arguments:
 
 * Underscore: the current pipeline item
 * Index: an allocated numeric value indicating the sequence number in the pipeline
@@ -52,19 +69,20 @@ However, there is another commonly occurring pattern which would require the use
 
 The *Invoke-MirrorDirectoryTree* command illustrates this well. Invoke-MirrorDirectoryTree needs to be able to present the invokee with multiple (actually, just 2) DirectoryInfo objects for each source directory encountered, one for the source directory and another for the mirrored directory. Since *Invoke-ForeachFsItem* is the command that under-pins this functionality, Invoke-MirrorDirectoryTree needs to conform to it's requirements, one of which is that a single DirectoryInfo is presented to the invokee. To get around this, it populates a new entry inside the PassThru: 'LOOPZ.MIRROR.ROOT-DESTINATION', which the invokee can now access. This same technique can be used by calling code.
 
-## The Main Commands
+### :o: The Trigger
 
-The following table shows the list of public commands exported from the Loopz module:
+If the script-block/function (invokee) to be invoked by [Invoke-ForeachFsItem](Elizium.Loopz/docs/Invoke-ForeachFsItem.md), [Invoke-MirrorDirectoryTree](Elizium.Loopz/docs/Invoke-MirrorDirectoryTree.md) or [Invoke-TraverseDirectory](Elizium.Loopz/docs/Invoke-TraverseDirectory.md) (the compound function) is a state changing operation (such as renaming a file or a directory), it may be useful to know if the invokee actually performed the change or not, especially when a particular command is re-run. It may be that a rerun of a command results in no actual state change and it may be useful to know this after the batch has completed. In this scenario, the invokee must set the Trigger accordingly. If the write action was performed, then Trigger should be set (it's just a boolean value) on the PSCustomObject that it should return. The Trigger that the invokee receives as one of the fixed parameters passed to it by the compound function, reflects if any of the previous items in the pipeline set the Trigger.
 
-| COMMAND-NAME                                                                     | DESCRIPTION
-|----------------------------------------------------------------------------------|------------
-| [Invoke-ForeachFsItem](Elizium.Loopz/docs/Invoke-ForeachFsItem.md)               | Invoke a function foreach file system object
-| [Invoke-MirrorDirectoryTree](Elizium.Loopz/docs/Invoke-MirrorDirectoryTree.md)   | Copy a directory tree invoking a function
-| [Invoke-TraverseDirectory](Elizium.Loopz/docs/Invoke-TraverseDirectory.md)       | Navigate a directory tree invoking a function
-| [Write-HostFeItemDecorator](Elizium.Loopz/docs/Write-HostFeItemDecorator.md)     | Write output foreach file system object
+If the user needs to write functionality that needs to be able to support re-runs, where the re-run should not
+produce overly verbose output, because no real action was performed for some items in the pipeline, then use
+of the 'LOOPZ.WH-FOREACH-DECORATOR.IF-TRIGGERED' setting in the PassThru should be made. It should be set
+to true:
 
-## Supporting Utilities
+```powershell
+  $PassThru['LOOPZ.WH-FOREACH-DECORATOR.IF-TRIGGERED'] = $true
+```
 
-| COMMAND-NAME                                                                     | DESCRIPTION
-|----------------------------------------------------------------------------------|------------
-| [Select-FsItem](Elizium.Loopz/docs/Select-FsItem.md)                             | A predicate function used for filtering
+:exclamation: *This indicates that for a particular item in the pipeline, no output should be written
+for that item, if the invokee has not set the Trigger to true, to indicate that action has been performed*
+
+If a Summary script-block is supplied to the compound function, then it will see if any of the pipeline items set the Trigger.

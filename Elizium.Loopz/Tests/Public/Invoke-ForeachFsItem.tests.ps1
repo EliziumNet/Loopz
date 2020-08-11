@@ -164,7 +164,7 @@ Describe 'Invoke-ForeachFsItem' {
       } # and: Block with Break
 
       Context 'and: Triggered entry' {
-        It 'should: invoke all' {
+        It 'should: invoke all' -Tag 'Current' {
           [scriptblock]$block = {
             param(
               [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', '')]

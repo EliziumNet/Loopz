@@ -9,10 +9,15 @@ function Invoke-ForeachFsItem {
   objects delivered through the pipeline.
 
   .DESCRIPTION
-    2 parameters set are defined, one for invoking a named function (InvokeFunction) and
-  the other (InvokeScriptBlock, the default) for invoking a scriptblock. An optional
+    2 parameters sets are defined, one for invoking a named function (InvokeFunction) and
+  the other (InvokeScriptBlock, the default) for invoking a script-block. An optional
   Summary script block can be specified which will be invoked at the end of the pipeline
-  batch.
+  batch. The user should assemble the candidate items from the file system, be they files or
+  directories typically using Get-ChildItem, or can be any other function that delivers
+  file systems items via the PowerShell pipeline. For each item in the pipeline,
+  Invoke-ForeachFsItem will invoke the script-block/function specified. Invoke-ForeachFsItem
+  will deliver what ever is returned from the script-block/function, so the result of
+  Invoke-ForeachFsItem can be piped to another command.
 
   .PARAMETER pipelineItem
     This is the pipeline object, so should not be specified explicitly and can represent
@@ -37,7 +42,8 @@ function Invoke-ForeachFsItem {
   of the batch, the state of the trigger indicates whether any of the items were actioned.
   When the script block is invoked, the trigger should indicate if the trigger was pulled for
   any of the items so far processed in the pipeline. This is the responsibility of the
-  client's block implementation.
+  client's block implementation. The trigger is only of use for state changing operations
+  and can be ignored otherwise.
   
   In addition to these fixed positional parameters, if the invoked scriptblock is defined
   with additional parameters, then these will also be passed in. In order to achieve this,

@@ -21,16 +21,16 @@ Write-HostFeItemDecorator [-Underscore] <Object> [-Index] <Int32> [-PassThru] <H
 
 ## DESCRIPTION
 
-The function being decorated may or may not Support ShouldProcess. If it does, then the
-client should add 'LOOPZ.WH-FOREACH-DECORATOR.WHAT-IF' to the pass through, set to the current
+The script-block/function (invokee) being decorated may or may not Support ShouldProcess. If it does,
+then the client should add 'LOOPZ.WH-FOREACH-DECORATOR.WHAT-IF' to the pass through, set to the current
 value of WhatIf; or more accurately the existence of 'WhatIf' in PSBoundParameters. Or another
 way of putting it is, the presence of WHAT-IF indicates SupportsShouldProcess, and the value of
 'LOOPZ.WH-FOREACH-DECORATOR.WHAT-IF' dictates the value of WhatIf. This way, we only need a single
 value in the PassThru, rather than having to represent SupportShouldProcess explicitly with
 another value.
 
-  The PastThru must contain either a 'LOOPZ.WH-FOREACH-DECORATOR.FUNCTION-NAME' entry meaning a named function is
-being decorated or 'LOOPZ.WH-FOREACH-DECORATOR.BLOCK' meaning a script block is being
+  The PastThru must contain either a 'LOOPZ.WH-FOREACH-DECORATOR.FUNCTION-NAME' entry meaning a named
+function is being decorated or 'LOOPZ.WH-FOREACH-DECORATOR.BLOCK' meaning a script block is being
 decorated, but not both.
 
   PassThru must also contain either 'LOOPZ.WH-FOREACH-DECORATOR.ITEM-LABEL' or
@@ -39,7 +39,19 @@ then the user can specify a single value for 'LOOPZ.WH-FOREACH-DECORATOR.ITEM-LA
 'LOOPZ.WH-FOREACH-DECORATOR.ITEM-VALUE'. If there are multiple values, then 'LOOPZ.WH-FOREACH-DECORATOR.PROPERTIES' must be specified and set to an array of key/value string pairs (so its an array of 2
 item arrays).
 
-  By default, to render the value displayed, ToString() is called. However, the result item (value returned from custom function/script-block) may not have a ToString() method, in this case (you will see an error indicating ToString method not being available), the user should provide a custom script-block to determines how the value is constructed. This can be done by assigning a custom script-block to the 'LOOPZ.WH-FOREACH-DECORATOR.GET-RESULT' entry in PassThru.
+  By default, to render the value displayed (ie the 'Product' property item on the PSCustomObject returned by the invokee), ToString() is called. However, the 'Product' property may not have a ToString() method, in this case (you will see an error indicating ToString method not being available), the user should provide a custom script-block to determine how the value is constructed. This can be done by assigning a custom script-block to the 'LOOPZ.WH-FOREACH-DECORATOR.GET-RESULT' entry in PassThru. eg:
+
+```powershell
+  [scriptblock]$customGetResult = {
+    param($result)
+    $result.SomeCustomPropertyOfRelevanceThatIsAString;
+  }
+  $PassThru['LOOPZ.WH-FOREACH-DECORATOR.GET-RESULT'] = $customGetResult;
+  ...
+
+  Note also, the user can provide a custom 'GET-RESULT' in order control what is displayed
+  by Write-HostFeItemDecorator.
+```
 
   This function is designed to be used with Invoke-ForeachFsItem and as such, it's signature
 needs to match that required by Invoke-ForeachFsItem. Any additional parameters can be

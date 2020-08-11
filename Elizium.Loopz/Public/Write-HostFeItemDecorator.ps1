@@ -23,10 +23,23 @@
     and an accompanying 'LOOPZ.WH-FOREACH-DECORATOR.ITEM-VALUE'. If there are multiple values, then
     'LOOPZ.WH-FOREACH-DECORATOR.PROPERTIES' must be specified and set to an array of key/value
     string pairs (so its an array of 2 item arrays).
-      By default, to render the value displayed, ToString() is called. However, the result item
-    may not have a ToString() method, in this case, the user should provide a custom script-block
-    to determines how the value is constructed. This can be done by assigning a custom script-block
-    to the 'LOOPZ.WH-FOREACH-DECORATOR.GET-RESULT' entry in PassThru.
+      By default, to render the value displayed (ie the 'Product' property item on the PSCustomObject
+    returned by the invokee), ToString() is called. However, the 'Product' property may not have a
+    ToString() method, in this case (you will see an error indicating ToString method not being
+    available), the user should provide a custom script-block to determine how the value is
+    constructed. This can be done by assigning a custom script-block to the
+    'LOOPZ.WH-FOREACH-DECORATOR.GET-RESULT' entry in PassThru. eg:
+
+      [scriptblock]$customGetResult = {
+        param($result)
+        $result.SomeCustomPropertyOfRelevanceThatIsAString;
+      }
+      $PassThru['LOOPZ.WH-FOREACH-DECORATOR.GET-RESULT'] = $customGetResult;
+      ...
+
+      Note also, the user can provide a custom 'GET-RESULT' in order control what is displayed
+    by Write-HostFeItemDecorator.
+
       This function is designed to be used with Invoke-ForeachFsItem and as such, it's signature
     needs to match that required by Invoke-ForeachFsItem. Any additional parameters can be
     passed in via the PassThru.
@@ -166,67 +179,74 @@
   [string]$itemLabel = $PassThru['LOOPZ.WH-FOREACH-DECORATOR.ITEM-LABEL'];
   [string]$itemValue = $PassThru['LOOPZ.WH-FOREACH-DECORATOR.ITEM-VALUE'];
   [string]$productValue = [string]::Empty;
+  [boolean]$ifTriggered = $PassThru.ContainsKey('LOOPZ.WH-FOREACH-DECORATOR.IF-TRIGGERED');
+  [boolean]$resultIsTriggered = $invokeResult.psobject.properties.match('Trigger') -and $invokeResult.Trigger;
 
-  $getResult = $PassThru.Contains('LOOPZ.WH-FOREACH-DECORATOR.GET-RESULT') `
-    ? $PassThru['LOOPZ.WH-FOREACH-DECORATOR.GET-RESULT'] : $defaultGetResult;
-
-  [string[][]]$themedPairs = @(, @('No', $("{0,3}" -f ($Index + 1))));
-
-  # Get Product if it exists
+  # Suppress the write if client has set IF-TRIGGERED and the result is not triggered.
+  # This makes re-runs of a state changing operation less verbose if that's  required.
   #
-  [string]$productLabel = '';
-  if ($invokeResult -and $invokeResult.Product) {
-    $productValue = $getResult.Invoke($invokeResult.Product);
-    $productLabel = $PassThru.ContainsKey('LOOPZ.WH-FOREACH-DECORATOR.PRODUCT-LABEL') `
-      ? $PassThru['LOOPZ.WH-FOREACH-DECORATOR.PRODUCT-LABEL'] : 'Product';
+  if (-not($ifTriggered) -or ($resultIsTriggered)) {
+    $getResult = $PassThru.Contains('LOOPZ.WH-FOREACH-DECORATOR.GET-RESULT') `
+      ? $PassThru['LOOPZ.WH-FOREACH-DECORATOR.GET-RESULT'] : $defaultGetResult;
 
-    if (-not([string]::IsNullOrWhiteSpace($productLabel))) {
-      $themedPairs += , @($productLabel, $productValue);
+    [string[][]]$themedPairs = @(, @('No', $("{0,3}" -f ($Index + 1))));
+
+    # Get Product if it exists
+    #
+    [string]$productLabel = '';
+    if ($invokeResult -and $invokeResult.Product) {
+      $productValue = $getResult.Invoke($invokeResult.Product);
+      $productLabel = $PassThru.ContainsKey('LOOPZ.WH-FOREACH-DECORATOR.PRODUCT-LABEL') `
+        ? $PassThru['LOOPZ.WH-FOREACH-DECORATOR.PRODUCT-LABEL'] : 'Product';
+
+      if (-not([string]::IsNullOrWhiteSpace($productLabel))) {
+        $themedPairs += , @($productLabel, $productValue);
+      }
     }
-  }
 
-  # PROPERTIES or ITEM-LABEL/ITEM-VALUE
-  #
-  if ($PassThru.Contains('LOOPZ.WH-FOREACH-DECORATOR.PROPERTIES')) {
-    $properties = $PassThru['LOOPZ.WH-FOREACH-DECORATOR.PROPERTIES'];
+    # PROPERTIES or ITEM-LABEL/ITEM-VALUE
+    #
+    if ($PassThru.Contains('LOOPZ.WH-FOREACH-DECORATOR.PROPERTIES')) {
+      $properties = $PassThru['LOOPZ.WH-FOREACH-DECORATOR.PROPERTIES'];
 
-    if ($properties) {
-      if ($properties -is [Array]) {
-        Write-Debug "No of custom propeties in PassThru: $($properties.Length)"
-        $themedPairs += $properties;
+      if ($properties) {
+        if ($properties -is [Array]) {
+          Write-Debug "No of custom propeties in PassThru: $($properties.Length)"
+          $themedPairs += $properties;
+        }
+        else {
+          Write-Warning "Custom 'LOOPZ.WH-FOREACH-DECORATOR.PROPERTIES' in PassThru is not an array, skipping (type: $($properties.GetType()))"
+          $themedPairs += , @('LOOPZ.WH-FOREACH-DECORATOR.PROPERTIES', 'Malformed');
+        }
       }
       else {
-        Write-Warning "Custom 'LOOPZ.WH-FOREACH-DECORATOR.PROPERTIES' in PassThru is not an array, skipping (type: $($properties.GetType()))"
-        $themedPairs += , @('LOOPZ.WH-FOREACH-DECORATOR.PROPERTIES', 'Malformed');
+        Write-Warning "null custom properties defined in PassThru"
+        $themedPairs += , @('LOOPZ.WH-FOREACH-DECORATOR.PROPERTIES', 'Malformed (null)');
       }
+
     }
     else {
-      Write-Warning "null custom properties defined in PassThru"
-      $themedPairs += , @('LOOPZ.WH-FOREACH-DECORATOR.PROPERTIES', 'Malformed (null)');
+      $themedPairs += , @($itemLabel, $itemValue);
     }
 
-  }
-  else {
-    $themedPairs += , @($itemLabel, $itemValue);
-  }
+    # Write with a Krayola Theme
+    #
+    [System.Collections.Hashtable]$krayolaTheme = $PassThru.ContainsKey('LOOPZ.WH-FOREACH-DECORATOR.KRAYOLA-THEME') `
+      ? $PassThru['LOOPZ.WH-FOREACH-DECORATOR.KRAYOLA-THEME'] : (Get-KrayolaTheme);
 
-  # Write with a Krayola Theme
-  #
-  [System.Collections.Hashtable]$krayolaTheme = $PassThru.ContainsKey('LOOPZ.WH-FOREACH-DECORATOR.KRAYOLA-THEME') `
-    ? $PassThru['LOOPZ.WH-FOREACH-DECORATOR.KRAYOLA-THEME'] : (Get-KrayolaTheme);
+    [System.Collections.Hashtable]$parameters = @{}
+    $parameters['Pairs'] = $themedPairs;
+    $parameters['Theme'] = $krayolaTheme;
 
-  [System.Collections.Hashtable]$parameters = @{}
-  $parameters['Pairs'] = $themedPairs;
-  $parameters['Theme'] = $krayolaTheme;
+    [string]$writerFn = 'Write-ThemedPairsInColour';
 
-  [string]$writerFn = 'Write-ThemedPairsInColour';
+    if (-not([string]::IsNullOrWhiteSpace($message))) {
+      $parameters['Message'] = $message;
+    }
 
-  if (-not([string]::IsNullOrWhiteSpace($message))) {
-    $parameters['Message'] = $message;
-  }
-
-  if (-not([string]::IsNullOrWhiteSpace($writerFn))) {
-    & $writerFn @parameters;
+    if (-not([string]::IsNullOrWhiteSpace($writerFn))) {
+      & $writerFn @parameters;
+    }
   }
 
   return $invokeResult;

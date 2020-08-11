@@ -179,7 +179,7 @@ Describe 'Invoke-MirrorDirectoryTree' {
     }
 
     Context 'and: File copy specified without directory creation' {
-      It 'should: still copy matching files' -Tag 'Current' {
+      It 'should: still copy matching files' {
         Invoke-MirrorDirectoryTree -Path $sourcePath `
           -DestinationPath $destinationPath -CopyFiles -FileIncludes @('cover.*')`
             -DirectoryIncludes @('*o*') -WhatIf:$whatIf;

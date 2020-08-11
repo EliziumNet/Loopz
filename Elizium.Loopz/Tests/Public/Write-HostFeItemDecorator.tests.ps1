@@ -26,7 +26,7 @@ Describe 'Write-HostFeItemDecorator' {
           'LOOPZ.WH-FOREACH-DECORATOR.FUNCTION-NAME' = 'get-AnswerAdvancedFn';
           'ANSWER'                                   = 'Fourty Two';
           'LOOPZ.WH-FOREACH-DECORATOR.MESSAGE'       = 'Test Advanced Function';
-          'LOOPZ.WH-FOREACH-DECORATOR.KRAYOLA-THEME'                            = $(Get-KrayolaTheme);
+          'LOOPZ.WH-FOREACH-DECORATOR.KRAYOLA-THEME' = $(Get-KrayolaTheme);
           'LOOPZ.WH-FOREACH-DECORATOR.ITEM-LABEL'    = 'Question';
           'LOOPZ.WH-FOREACH-DECORATOR.ITEM-VALUE'    = 'The Wrong Answer';
           'LOOPZ.WH-FOREACH-DECORATOR.PRODUCT-LABEL' = 'Test product';
@@ -66,7 +66,7 @@ Describe 'Write-HostFeItemDecorator' {
           'LOOPZ.WH-FOREACH-DECORATOR.BLOCK'         = $block;
           'ANSWER'                                   = 'Fourty Two';
           'LOOPZ.WH-FOREACH-DECORATOR.MESSAGE'       = 'Test Advanced Function';
-          'LOOPZ.WH-FOREACH-DECORATOR.KRAYOLA-THEME'                            = $(Get-KrayolaTheme);
+          'LOOPZ.WH-FOREACH-DECORATOR.KRAYOLA-THEME' = $(Get-KrayolaTheme);
           'LOOPZ.WH-FOREACH-DECORATOR.ITEM-LABEL'    = 'Question';
           'LOOPZ.WH-FOREACH-DECORATOR.ITEM-VALUE'    = 'The Wrong Answer';
           'LOOPZ.WH-FOREACH-DECORATOR.PRODUCT-LABEL' = 'Test product';
@@ -103,7 +103,7 @@ Describe 'Write-HostFeItemDecorator' {
         'LOOPZ.WH-FOREACH-DECORATOR.FUNCTION-NAME' = 'get-AnswerAdvancedFn';
         'ANSWER'                                   = 'Fourty Two';
         'LOOPZ.WH-FOREACH-DECORATOR.MESSAGE'       = 'Test Advanced Function';
-        'LOOPZ.WH-FOREACH-DECORATOR.KRAYOLA-THEME'                            = $(Get-KrayolaTheme);
+        'LOOPZ.WH-FOREACH-DECORATOR.KRAYOLA-THEME' = $(Get-KrayolaTheme);
         'LOOPZ.WH-FOREACH-DECORATOR.PROPERTIES'    = $tests[$Description];
         'LOOPZ.WH-FOREACH-DECORATOR.PRODUCT-LABEL' = 'Test product';
         'LOOPZ.WH-FOREACH-DECORATOR.WHAT-IF'       = $false;
@@ -116,4 +116,52 @@ Describe 'Write-HostFeItemDecorator' {
 
     }
   } # given: PassThru contains PROPERTIES
+
+  Context 'given: IF-TRIGGERED is set' {
+    Context 'and: an item sets the Trigger' {
+      It 'should: invoke Write-ThemedPairsInColour' -Tag 'Current' {
+        Mock Write-ThemedPairsInColour -ModuleName Elizium.Loopz -Verifiable { }
+
+        [System.Collections.Hashtable]$passThru = @{
+          'LOOPZ.WH-FOREACH-DECORATOR.FUNCTION-NAME' = 'get-AnswerAdvancedFnWithTrigger';
+          'ANSWER'                                   = 'Fourty Two';
+          'LOOPZ.WH-FOREACH-DECORATOR.MESSAGE'       = 'Test Advanced Function';
+          'LOOPZ.WH-FOREACH-DECORATOR.KRAYOLA-THEME' = $(Get-KrayolaTheme);
+          'LOOPZ.WH-FOREACH-DECORATOR.ITEM-LABEL'    = 'Question';
+          'LOOPZ.WH-FOREACH-DECORATOR.ITEM-VALUE'    = 'The Wrong Answer';
+          'LOOPZ.WH-FOREACH-DECORATOR.PRODUCT-LABEL' = 'Test product';
+          'LOOPZ.WH-FOREACH-DECORATOR.WHAT-IF'       = $false;
+          'LOOPZ.WH-FOREACH-DECORATOR.IF-TRIGGERED'  = $true;
+        }
+
+        $underscore = 'What is the answer to the universe';
+        $decorator.Invoke($underscore, 0, $passThru, $false);
+
+        Assert-MockCalled Write-ThemedPairsInColour -ModuleName Elizium.Loopz -Times 1;
+      } # should: invoke Write-ThemedPairsInColour
+    } # and: IF-TRIGGERED is set
+
+    Context 'and: an item does not sets the Trigger' {
+      It 'should: NOT invoke Write-ThemedPairsInColour' -Tag 'Current' {
+        Mock Write-ThemedPairsInColour -ModuleName Elizium.Loopz -Verifiable { }
+
+        [System.Collections.Hashtable]$passThru = @{
+          'LOOPZ.WH-FOREACH-DECORATOR.FUNCTION-NAME' = 'get-AnswerAdvancedFn';
+          'ANSWER'                                   = 'Fourty Two';
+          'LOOPZ.WH-FOREACH-DECORATOR.MESSAGE'       = 'Test Advanced Function';
+          'LOOPZ.WH-FOREACH-DECORATOR.KRAYOLA-THEME' = $(Get-KrayolaTheme);
+          'LOOPZ.WH-FOREACH-DECORATOR.ITEM-LABEL'    = 'Question';
+          'LOOPZ.WH-FOREACH-DECORATOR.ITEM-VALUE'    = 'The Wrong Answer';
+          'LOOPZ.WH-FOREACH-DECORATOR.PRODUCT-LABEL' = 'Test product';
+          'LOOPZ.WH-FOREACH-DECORATOR.WHAT-IF'       = $false;
+          'LOOPZ.WH-FOREACH-DECORATOR.IF-TRIGGERED'  = $true;
+        }
+
+        $underscore = 'What is the answer to the universe';
+        $decorator.Invoke($underscore, 0, $passThru, $false);
+
+        Assert-MockCalled Write-ThemedPairsInColour -ModuleName Elizium.Loopz -Times 0;
+      } # should: NOT invoke Write-ThemedPairsInColour
+    } # and: IF-TRIGGERED is set
+  } # given: IF-TRIGGERED is set
 } # Write-HostFeItemDecorator
