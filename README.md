@@ -86,3 +86,8 @@ to true:
 for that item, if the invokee has not set the Trigger to true, to indicate that action has been performed*
 
 If a Summary script-block is supplied to the compound function, then it will see if any of the pipeline items set the Trigger.
+
+### And Finally
+
+If any points have not been explained properly or if there is any confusion then I am happy to update documentation accordingly and am more than happy to accept any constructive criticism, please raise issues
+as you see fit.
