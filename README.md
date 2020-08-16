@@ -71,12 +71,12 @@ The *Invoke-MirrorDirectoryTree* command illustrates this well. Invoke-MirrorDir
 
 ### :o: The Trigger
 
-If the script-block/function (invokee) to be invoked by [Invoke-ForeachFsItem](Elizium.Loopz/docs/Invoke-ForeachFsItem.md), [Invoke-MirrorDirectoryTree](Elizium.Loopz/docs/Invoke-MirrorDirectoryTree.md) or [Invoke-TraverseDirectory](Elizium.Loopz/docs/Invoke-TraverseDirectory.md) (the compound function) is a state changing operation (such as renaming a file or a directory), it may be useful to know if the invokee actually performed the change or not, especially when a particular command is re-run. It may be that a rerun of a command results in no actual state change and it may be useful to know this after the batch has completed. In this scenario, the invokee must set the Trigger accordingly. If the write action was performed, then Trigger should be set (it's just a boolean value) on the PSCustomObject that it should return. The Trigger that the invokee receives as one of the fixed parameters passed to it by the compound function, reflects if any of the previous items in the pipeline set the Trigger.
+If the script-block/function (invokee) to be invoked by [Invoke-ForeachFsItem](Elizium.Loopz/docs/Invoke-ForeachFsItem.md), [Invoke-MirrorDirectoryTree](Elizium.Loopz/docs/Invoke-MirrorDirectoryTree.md) or [Invoke-TraverseDirectory](Elizium.Loopz/docs/Invoke-TraverseDirectory.md) (the compound function) is a state changing operation (such as renaming a file or a directory), it may be useful to know if the invokee actually performed the change or not, especially when a particular command is re-run. It may be that a rerun of a command results in no actual state change and it may be useful to know this after the batch has completed. (*Please don't confuse this with WhatIf behaviour. An example of not performing an action being alluded to here, is an attempt to rename a file where the new name is the same as the existing one; this could happen in a re-run*) In this scenario, the invokee must set the Trigger accordingly. If the write action was performed, then Trigger should be set (it's just a boolean value) on the PSCustomObject that it should return. The Trigger that the invokee receives as one of the fixed parameters passed to it by the compound function, reflects if any of the previous items in the pipeline set the Trigger.
 
 If the user needs to write functionality that needs to be able to support re-runs, where the re-run should not
 produce overly verbose output, because no real action was performed for some items in the pipeline, then use
 of the 'LOOPZ.WH-FOREACH-DECORATOR.IF-TRIGGERED' setting in the PassThru should be made. It should be set
-to true:
+to true (although in reality, just the existence of the IF-TRIGGERED key, sets this option):
 
 ```powershell
   $PassThru['LOOPZ.WH-FOREACH-DECORATOR.IF-TRIGGERED'] = $true
