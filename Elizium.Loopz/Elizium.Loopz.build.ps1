@@ -58,6 +58,7 @@ task Compile @compileParams {
   }
   New-Item -Path $script:PsmPath -Force > $null
 
+  # "Set-StrictMode -Version Latest" >> $script:PsmPath
   # !!!BUG: This should be using whatever is yielded by @compileParams
   #
   foreach ($folder in $script:ImportFolders) {

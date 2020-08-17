@@ -1,5 +1,5 @@
 ﻿
-Describe 'Write-HostFeItemDecorator' {
+Describe 'Write-HostFeItemDecorator' -Tag 'Current' {
   BeforeAll {
     Get-Module Elizium.Loopz | Remove-Module
     Import-Module .\Output\Elizium.Loopz\Elizium.Loopz.psm1 `
@@ -17,7 +17,7 @@ Describe 'Write-HostFeItemDecorator' {
     }
   }
 
-  Context 'given: PassThru contains ITEM-LABEL/VALUE' -Tag 'DUFF' {
+  Context 'given: PassThru contains ITEM-LABEL/VALUE' -Tag 'DUFF' -Skip {
     Context 'given: a function' {
       It 'should: invoke the function' {
         Mock Write-ThemedPairsInColour -ModuleName Elizium.Loopz { }
@@ -81,7 +81,7 @@ Describe 'Write-HostFeItemDecorator' {
     } # given: a script block
   } # given: PassThru contains ITEM-LABEL/VALUE
 
-  Context 'given: Invoke Result contains Properties TRASH' -Tag 'RE-WRITE' {
+  Context 'given: Invoke Result contains Properties TRASH' -Tag 'RE-WRITE' -Skip {
     $script:tests = @{
       'PassThru with single item PROPERTIES defined'             = , @('Author', 'Douglas Adams');
       'PassThru with two item PROPERTIES defined'                = @(@('Author', 'Douglas Adams'), @('Genre', 'Sci-Fi'));
@@ -127,15 +127,12 @@ Describe 'Write-HostFeItemDecorator' {
     }
 
     Context 'and: contains single item' {
-      It 'should: invoke and write' {
+      It 'should: invoke and write' -Tag 'Current' {
         Mock get-AnswerAdvancedFn -ModuleName Elizium.Loopz {
-          # $p = , @('Author', 'Douglas Adams');
-          # Write-Host "MOCK: pair count: $($p.Count)"
-
-          # $obj = [PSCustomObject]@{ Pairs = $p }
-          # Write-Host "MOCK: OBJ pair count: $($obj.Pairs.Count)"
-          # return $obj;
-          ([PSCustomObject]@{ Pairs = @(@('Author', 'Douglas Adams'), @('beer', 'duff')) })
+          $pairs = @(, @('Author', 'Douglas Madcap Adams'));
+          $first = $pairs[0];
+          Write-Host "=== SINGLE-ITEM: pairs.count: $($pairs.Count), first.count: $($first.Count)"
+          ([PSCustomObject]@{ Pairs = , $pairs })
         }
 
         Mock Write-ThemedPairsInColour -ModuleName Elizium.Loopz {
@@ -146,7 +143,7 @@ Describe 'Write-HostFeItemDecorator' {
           )
           $first = $Pairs[1];
           $first[0] | Should -BeExactly 'Author';
-          $first[1] | Should -BeExactly 'Douglas Adams';
+          $first[1] | Should -BeExactly 'Douglas Madcap Adams';
         }
 
         $underscore = 'What is the answer to the universe';
@@ -177,7 +174,7 @@ Describe 'Write-HostFeItemDecorator' {
     } # and: contains 2 items
 
     Context 'and: contains many items' {
-      It 'should: invoke and write' -Tag 'Current' {
+      It 'should: invoke and write' {
         Mock get-AnswerAdvancedFn -ModuleName Elizium.Loopz {
           ([PSCustomObject]@{ Pairs = @(@('One', 'A'), @('Two', 'B'), @('Three', 'C'), @('Four', 'D')) })
         }
