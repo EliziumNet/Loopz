@@ -8,21 +8,21 @@
     info to the host for each entry in the pipeline.
 
   .DESCRIPTION
-    The function being decorated may or may not Support ShouldProcess. If it does, then the
-    client should add 'LOOPZ.WH-FOREACH-DECORATOR.WHAT-IF' to the pass through, set to the
-    current value of WhatIf; or more accurately the existence of 'WhatIf' in PSBoundParameters.
-    Or another way of putting it is, the presence of WHAT-IF indicates SupportsShouldProcess,
-    and the value of WHAT-IF dictates the value of WhatIf. This way, we only need a single value
-    in the PassThru, rather than having to represent SupportShouldProcess explicitly with another value.
+      The script-block/function (invokee) being decorated may or may not Support ShouldProcess. If it does,
+    then the client should add 'LOOPZ.WH-FOREACH-DECORATOR.WHAT-IF' to the pass through, set to the current
+    value of WhatIf; or more accurately the existence of 'WhatIf' in PSBoundParameters. Or another
+    way of putting it is, the presence of WHAT-IF indicates SupportsShouldProcess, and the value of
+    'LOOPZ.WH-FOREACH-DECORATOR.WHAT-IF' dictates the value of WhatIf. This way, we only need a single
+    value in the PassThru, rather than having to represent SupportShouldProcess explicitly with
+    another value.
       The PastThru must contain either a 'LOOPZ.WH-FOREACH-DECORATOR.FUNCTION-NAME' entry meaning
     a named function is being decorated or 'LOOPZ.WH-FOREACH-DECORATOR.BLOCK' meaning a script
     block is being decorated, but not both.
-      PassThru must also contain either 'LOOPZ.WH-FOREACH-DECORATOR.ITEM-LABEL' or
-    'LOOPZ.WH-FOREACH-DECORATOR.PROPERTIES'. If there is only a single item that must be written
-    out, then the user can specify a single value for 'LOOPZ.WH-FOREACH-DECORATOR.ITEM-LABEL'
-    and an accompanying 'LOOPZ.WH-FOREACH-DECORATOR.ITEM-VALUE'. If there are multiple values, then
-    'LOOPZ.WH-FOREACH-DECORATOR.PROPERTIES' must be specified and set to an array of key/value
-    string pairs (so its an array of 2 item arrays).
+      By default, Write-HostFeItemDecorator will display an item no for each object in the pipeline
+    and a property representing the Product. The Product is a property that the invokee can set on the
+    PSCustomObject it returns. However, additional properties can be displayed. This can be achieved by
+    the invokee populating another property Pairs, which is an array of string based key/value pairs. All
+    properties found in Pairs will be written out by Write-HostFeItemDecorator.
       By default, to render the value displayed (ie the 'Product' property item on the PSCustomObject
     returned by the invokee), ToString() is called. However, the 'Product' property may not have a
     ToString() method, in this case (you will see an error indicating ToString method not being
@@ -37,7 +37,7 @@
       $PassThru['LOOPZ.WH-FOREACH-DECORATOR.GET-RESULT'] = $customGetResult;
       ...
 
-      Note also, the user can provide a custom 'GET-RESULT' in order control what is displayed
+      Note also, the user can provide a custom 'GET-RESULT' in order to control what is displayed
     by Write-HostFeItemDecorator.
 
       This function is designed to be used with Invoke-ForeachFsItem and as such, it's signature
@@ -87,8 +87,6 @@
 
   [Systems.Collection.Hashtable]$passThru = @{
     'LOOPZ.WH-FOREACH-DECORATOR.FUNCTION-NAME' = 'Test-FN';
-    'LOOPZ.WH-FOREACH-DECORATOR.ITEM-LABEL' = 'Widget'
-    'LOOPZ.WH-FOREACH-DECORATOR.ITEM-VALUE' = $widget,
     'CLIENT.FORMAT' = '=== [{0}] -- [{1}] ==='
   }
 

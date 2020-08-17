@@ -120,8 +120,6 @@ Describe 'Write-HostFeItemDecorator' {
           'ANSWER'                                   = 'Fourty Two';
           'LOOPZ.WH-FOREACH-DECORATOR.MESSAGE'       = 'Test Advanced Function';
           'LOOPZ.WH-FOREACH-DECORATOR.KRAYOLA-THEME' = $(Get-KrayolaTheme);
-          'LOOPZ.WH-FOREACH-DECORATOR.ITEM-LABEL'    = 'Question';
-          'LOOPZ.WH-FOREACH-DECORATOR.ITEM-VALUE'    = 'The Wrong Answer';
           'LOOPZ.WH-FOREACH-DECORATOR.PRODUCT-LABEL' = 'Test product';
           'LOOPZ.WH-FOREACH-DECORATOR.WHAT-IF'       = $false;
           'LOOPZ.WH-FOREACH-DECORATOR.IF-TRIGGERED'  = $true;
@@ -143,8 +141,6 @@ Describe 'Write-HostFeItemDecorator' {
           'ANSWER'                                   = 'Fourty Two';
           'LOOPZ.WH-FOREACH-DECORATOR.MESSAGE'       = 'Test Advanced Function';
           'LOOPZ.WH-FOREACH-DECORATOR.KRAYOLA-THEME' = $(Get-KrayolaTheme);
-          'LOOPZ.WH-FOREACH-DECORATOR.ITEM-LABEL'    = 'Question';
-          'LOOPZ.WH-FOREACH-DECORATOR.ITEM-VALUE'    = 'The Wrong Answer';
           'LOOPZ.WH-FOREACH-DECORATOR.PRODUCT-LABEL' = 'Test product';
           'LOOPZ.WH-FOREACH-DECORATOR.WHAT-IF'       = $false;
           'LOOPZ.WH-FOREACH-DECORATOR.IF-TRIGGERED'  = $true;

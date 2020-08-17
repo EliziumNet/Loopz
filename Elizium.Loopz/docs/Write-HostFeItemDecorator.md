@@ -33,13 +33,12 @@ another value.
 function is being decorated or 'LOOPZ.WH-FOREACH-DECORATOR.BLOCK' meaning a script block is being
 decorated, but not both.
 
-  PassThru must also contain either 'LOOPZ.WH-FOREACH-DECORATOR.ITEM-LABEL' or
-'LOOPZ.WH-FOREACH-DECORATOR.PROPERTIES'. If there is only a single item that must be written out,
-then the user can specify a single value for 'LOOPZ.WH-FOREACH-DECORATOR.ITEM-LABEL' and an accompanying
-'LOOPZ.WH-FOREACH-DECORATOR.ITEM-VALUE'. If there are multiple values, then 'LOOPZ.WH-FOREACH-DECORATOR.PROPERTIES' must be specified and set to an array of key/value string pairs (so its an array of 2
-item arrays).
+  By default, Write-HostFeItemDecorator will display an item no for each object in the pipeline
+and a property representing the Product. The Product is a property that the invokee can set on the PSCustomObject it returns. However, additional properties can be displayed. This can be achieved by the invokee populating another
+property Pairs, which is an array of string based key/value pairs. All properties found in
+Pairs will be written out by Write-HostFeItemDecorator.
 
-  By default, to render the value displayed (ie the 'Product' property item on the PSCustomObject returned by the invokee), ToString() is called. However, the 'Product' property may not have a ToString() method, in this case (you will see an error indicating ToString method not being available), the user should provide a custom script-block to determine how the value is constructed. This can be done by assigning a custom script-block to the 'LOOPZ.WH-FOREACH-DECORATOR.GET-RESULT' entry in PassThru. eg:
+By default, to render the value displayed (ie the 'Product' property item on the PSCustomObject returned by the invokee), ToString() is called. However, the 'Product' property may not have a ToString() method, in this case (you will see an error indicating ToString method not being available), the user should provide a custom script-block to determine how the value is constructed. This can be done by assigning a custom script-block to the 'LOOPZ.WH-FOREACH-DECORATOR.GET-RESULT' entry in PassThru. eg:
 
 ```powershell
   [scriptblock]$customGetResult = {
@@ -49,7 +48,7 @@ item arrays).
   $PassThru['LOOPZ.WH-FOREACH-DECORATOR.GET-RESULT'] = $customGetResult;
   ...
 
-  Note also, the user can provide a custom 'GET-RESULT' in order control what is displayed
+  Note also, the user can provide a custom 'GET-RESULT' in order to control what is displayed
   by Write-HostFeItemDecorator.
 ```
 
@@ -82,8 +81,6 @@ commands that produce output to the terminal in a consistent manner.
 
   [Systems.Collection.Hashtable]$passThru = @{
     'LOOPZ.WH-FOREACH-DECORATOR.FUNCTION-NAME' = 'Test-FN';
-    'LOOPZ.WH-FOREACH-DECORATOR.ITEM-LABEL' = 'Widget'
-    'LOOPZ.WH-FOREACH-DECORATOR.ITEM-VALUE' = $widget,
     'CLIENT.FORMAT' = '=== [{0}] -- [{1}] ==='
   }
 
