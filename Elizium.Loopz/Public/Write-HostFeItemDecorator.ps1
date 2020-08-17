@@ -127,9 +127,7 @@
     )]
     [ValidateScript( {
         return ($_.ContainsKey('LOOPZ.WH-FOREACH-DECORATOR.FUNCTION-NAME') -xor
-          $_.ContainsKey('LOOPZ.WH-FOREACH-DECORATOR.BLOCK')) -and
-        ($_.ContainsKey('LOOPZ.WH-FOREACH-DECORATOR.ITEM-LABEL') -xor
-          $_.ContainsKey('LOOPZ.WH-FOREACH-DECORATOR.PROPERTIES'))
+          $_.ContainsKey('LOOPZ.WH-FOREACH-DECORATOR.BLOCK'))
       })]
     [System.Collections.Hashtable]
     $PassThru,
@@ -176,8 +174,6 @@
   $invokeResult = $decorator.Invoke($Underscore, $Index, $PassThru, $Trigger);
 
   [string]$message = $PassThru['LOOPZ.WH-FOREACH-DECORATOR.MESSAGE'];
-  [string]$itemLabel = $PassThru['LOOPZ.WH-FOREACH-DECORATOR.ITEM-LABEL'];
-  [string]$itemValue = $PassThru['LOOPZ.WH-FOREACH-DECORATOR.ITEM-VALUE'];
   [string]$productValue = [string]::Empty;
   [boolean]$ifTriggered = $PassThru.ContainsKey('LOOPZ.WH-FOREACH-DECORATOR.IF-TRIGGERED');
   [boolean]$resultIsTriggered = $invokeResult.psobject.properties.match('Trigger') -and $invokeResult.Trigger;
@@ -193,8 +189,8 @@
 
     # Get Product if it exists
     #
-    [string]$productLabel = '';
-    if ($invokeResult -and $invokeResult.Product) {
+    [string]$productLabel = [string]::Empty;
+    if ($invokeResult -and $invokeResult.psobject.properties.match('Product') -and $invokeResult.Product) {
       $productValue = $getResult.Invoke($invokeResult.Product);
       $productLabel = $PassThru.ContainsKey('LOOPZ.WH-FOREACH-DECORATOR.PRODUCT-LABEL') `
         ? $PassThru['LOOPZ.WH-FOREACH-DECORATOR.PRODUCT-LABEL'] : 'Product';
@@ -204,34 +200,36 @@
       }
     }
 
-    # PROPERTIES or ITEM-LABEL/ITEM-VALUE
+    # Get Key/Value Pairs
     #
-    if ($PassThru.Contains('LOOPZ.WH-FOREACH-DECORATOR.PROPERTIES')) {
-      $properties = $PassThru['LOOPZ.WH-FOREACH-DECORATOR.PROPERTIES'];
+    if ($invokeResult -and $invokeResult.psobject.properties.match('Pairs') -and
+      $invokeResult.Pairs -and ($invokeResult.Pairs -is [Array])) {
+      $themedPairs += $invokeResult.Pairs;
 
-      if ($properties) {
-        if ($properties -is [Array]) {
-          Write-Debug "No of custom propeties in PassThru: $($properties.Length)"
-          $themedPairs += $properties;
-        }
-        else {
-          Write-Warning "Custom 'LOOPZ.WH-FOREACH-DECORATOR.PROPERTIES' in PassThru is not an array, skipping (type: $($properties.GetType()))"
-          $themedPairs += , @('LOOPZ.WH-FOREACH-DECORATOR.PROPERTIES', 'Malformed');
-        }
-      }
-      else {
-        Write-Warning "null custom properties defined in PassThru"
-        $themedPairs += , @('LOOPZ.WH-FOREACH-DECORATOR.PROPERTIES', 'Malformed (null)');
+      [string[][]]$pa = $invokeResult.Pairs;
+      # Write-Host "WH-PAIRS: count: $($invokeResult.Pairs.Count)"
+      Write-Host "---> WH-PAIRS: pa-count: $($pa.Count), first: $($pa[0][0]), second: $($pa[0][1])"
+      $invokeResult.Pairs | ForEach-Object {
+        Write-Host "Piped Property: $_"
+        # Write-Host "Property KEY: '$($_[0])', VALUE: '$($_[1])'";
+        # $themedPairs += $_;
       }
 
-    }
-    else {
-      $themedPairs += , @($itemLabel, $itemValue);
+      foreach ($p in $invokeResult.Pairs) {
+        Write-Host "foreach Property: $p"
+      }
+
+      # $themedPairs = $themedPairs + $invokeResult.Pairs;
+
+      # if (1 -eq $invokeResult.Pairs.Count) {
+      #   $themedPairs += $invokeResult.Pairs;
+      # }
     }
 
     # Write with a Krayola Theme
     #
-    [System.Collections.Hashtable]$krayolaTheme = $PassThru.ContainsKey('LOOPZ.WH-FOREACH-DECORATOR.KRAYOLA-THEME') `
+    [System.Collections.Hashtable]$krayolaTheme = `
+      $PassThru.ContainsKey('LOOPZ.WH-FOREACH-DECORATOR.KRAYOLA-THEME') `
       ? $PassThru['LOOPZ.WH-FOREACH-DECORATOR.KRAYOLA-THEME'] : (Get-KrayolaTheme);
 
     [System.Collections.Hashtable]$parameters = @{}

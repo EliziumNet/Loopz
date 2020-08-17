@@ -17,7 +17,7 @@ Describe 'Write-HostFeItemDecorator' {
     }
   }
 
-  Context 'given: PassThru contains ITEM-LABEL/VALUE' {
+  Context 'given: PassThru contains ITEM-LABEL/VALUE' -Tag 'DUFF' {
     Context 'given: a function' {
       It 'should: invoke the function' {
         Mock Write-ThemedPairsInColour -ModuleName Elizium.Loopz { }
@@ -81,7 +81,7 @@ Describe 'Write-HostFeItemDecorator' {
     } # given: a script block
   } # given: PassThru contains ITEM-LABEL/VALUE
 
-  Context 'given: PassThru contains PROPERTIES' {
+  Context 'given: Invoke Result contains Properties TRASH' -Tag 'RE-WRITE' {
     $script:tests = @{
       'PassThru with single item PROPERTIES defined'             = , @('Author', 'Douglas Adams');
       'PassThru with two item PROPERTIES defined'                = @(@('Author', 'Douglas Adams'), @('Genre', 'Sci-Fi'));
@@ -117,9 +117,80 @@ Describe 'Write-HostFeItemDecorator' {
     }
   } # given: PassThru contains PROPERTIES
 
+  Context 'given: Invoke Result contains Properties' {
+    [System.Collections.Hashtable]$script:_passThru = @{
+      'LOOPZ.WH-FOREACH-DECORATOR.FUNCTION-NAME' = 'get-AnswerAdvancedFn';
+      'LOOPZ.WH-FOREACH-DECORATOR.MESSAGE'       = 'Test Advanced Function';
+      'LOOPZ.WH-FOREACH-DECORATOR.KRAYOLA-THEME' = $(Get-KrayolaTheme);
+      'LOOPZ.WH-FOREACH-DECORATOR.PRODUCT-LABEL' = 'Test product';
+      'LOOPZ.WH-FOREACH-DECORATOR.WHAT-IF'       = $false;
+    }
+
+    Context 'and: contains single item' {
+      It 'should: invoke and write' {
+        Mock get-AnswerAdvancedFn -ModuleName Elizium.Loopz {
+          # $p = , @('Author', 'Douglas Adams');
+          # Write-Host "MOCK: pair count: $($p.Count)"
+
+          # $obj = [PSCustomObject]@{ Pairs = $p }
+          # Write-Host "MOCK: OBJ pair count: $($obj.Pairs.Count)"
+          # return $obj;
+          ([PSCustomObject]@{ Pairs = @(@('Author', 'Douglas Adams'), @('beer', 'duff')) })
+        }
+
+        Mock Write-ThemedPairsInColour -ModuleName Elizium.Loopz {
+          param(
+            [string[][]]$Pairs,
+            [System.Collections.Hashtable]$Theme,
+            [string]$Message
+          )
+          $first = $Pairs[1];
+          $first[0] | Should -BeExactly 'Author';
+          $first[1] | Should -BeExactly 'Douglas Adams';
+        }
+
+        $underscore = 'What is the answer to the universe';
+        $decorator.Invoke($underscore, 0, $_passThru, $false);
+      }
+    } # and: contains single item
+
+    Context 'and: contains 2 items' {
+      It 'should: invoke and write' {
+        Mock get-AnswerAdvancedFn -ModuleName Elizium.Loopz {
+          ([PSCustomObject]@{ Pairs = @(@('Author', 'Douglas Adams'), @('Genre', 'Sci-Fi')) })
+        }
+
+        Mock Write-ThemedPairsInColour -ModuleName Elizium.Loopz {
+          param(
+            [string[][]]$Pairs,
+            [System.Collections.Hashtable]$Theme,
+            [string]$Message
+          )
+          $second = $Pairs[2];
+          $second[0] | Should -BeExactly 'Genre';
+          $second[1] | Should -BeExactly 'Sci-Fi';
+        }
+
+        $underscore = 'What is the answer to the universe';
+        $decorator.Invoke($underscore, 0, $_passThru, $false);
+      }
+    } # and: contains 2 items
+
+    Context 'and: contains many items' {
+      It 'should: invoke and write' -Tag 'Current' {
+        Mock get-AnswerAdvancedFn -ModuleName Elizium.Loopz {
+          ([PSCustomObject]@{ Pairs = @(@('One', 'A'), @('Two', 'B'), @('Three', 'C'), @('Four', 'D')) })
+        }
+
+        $underscore = 'What is the answer to the universe';
+        $decorator.Invoke($underscore, 0, $_passThru, $false);
+      }
+    } # and: contains many items
+  } # given: Invoke Result contains Properties
+
   Context 'given: IF-TRIGGERED is set' {
     Context 'and: an item sets the Trigger' {
-      It 'should: invoke Write-ThemedPairsInColour' -Tag 'Current' {
+      It 'should: invoke Write-ThemedPairsInColour' {
         Mock Write-ThemedPairsInColour -ModuleName Elizium.Loopz -Verifiable { }
 
         [System.Collections.Hashtable]$passThru = @{
@@ -142,7 +213,7 @@ Describe 'Write-HostFeItemDecorator' {
     } # and: IF-TRIGGERED is set
 
     Context 'and: an item does not sets the Trigger' {
-      It 'should: NOT invoke Write-ThemedPairsInColour' -Tag 'Current' {
+      It 'should: NOT invoke Write-ThemedPairsInColour' {
         Mock Write-ThemedPairsInColour -ModuleName Elizium.Loopz -Verifiable { }
 
         [System.Collections.Hashtable]$passThru = @{
