@@ -204,31 +204,7 @@
     #
     if ($invokeResult -and $invokeResult.psobject.properties.match('Pairs') -and
       $invokeResult.Pairs -and ($invokeResult.Pairs -is [Array]) -and ($invokeResult.Pairs.Count -gt 0)) {
-      
-      # THIS NOT WORKING FOR SINGLE ITEM ARRAYS
-      #
-      #$themedPairs += $invokeResult.Pairs;
-
-      # $pa = $invokeResult.Pairs.Count -eq 1 ? @($invokeResult.Pairs) : $invokeResult.Pairs;
-      $pa = @($invokeResult.Pairs);
-      # Write-Host "WH-PAIRS: count: $($invokeResult.Pairs.Count)"
-      Write-Host "---> WH-PAIRS: pa-count: $($pa.Count), Pairs.Count: $($invokeResult.Pairs.Count)"
-      $invokeResult.Pairs | ForEach-Object {
-        Write-Host "Piped Property pair: $_; $($_.Count)"
-        # Write-Host "Property KEY: '$($_[0])', VALUE: '$($_[1])'";
-        # $themedPairs += $_;
-      }
-
-      foreach ($p in $pa) { # $invokeResult.Pairs
-        Write-Host "foreach Property pair: $p; $($p.Count)"
-        $themedPairs += , $p;
-      }
-
-      # $themedPairs = $themedPairs + $invokeResult.Pairs;
-
-      # if (1 -eq $invokeResult.Pairs.Count) {
-      #   $themedPairs += $invokeResult.Pairs;
-      # }
+      $themedPairs += $invokeResult.Pairs;
     }
 
     # Write with a Krayola Theme
