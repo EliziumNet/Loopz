@@ -38,19 +38,7 @@ and a property representing the Product. The Product is a property that the invo
 property Pairs, which is an array of string based key/value pairs. All properties found in
 Pairs will be written out by Write-HostFeItemDecorator.
 
-By default, to render the value displayed (ie the 'Product' property item on the PSCustomObject returned by the invokee), ToString() is called. However, the 'Product' property may not have a ToString() method, in this case (you will see an error indicating ToString method not being available), the user should provide a custom script-block to determine how the value is constructed. This can be done by assigning a custom script-block to the 'LOOPZ.WH-FOREACH-DECORATOR.GET-RESULT' entry in PassThru. eg:
-
-```powershell
-  [scriptblock]$customGetResult = {
-    param($result)
-    $result.SomeCustomPropertyOfRelevanceThatIsAString;
-  }
-  $PassThru['LOOPZ.WH-FOREACH-DECORATOR.GET-RESULT'] = $customGetResult;
-  ...
-
-  Note also, the user can provide a custom 'GET-RESULT' in order to control what is displayed
-  by Write-HostFeItemDecorator.
-```
+By default, to render the value displayed (ie the 'Product' property item on the PSCustomObject returned by the invokee), ToString() is called. However, the 'Product' property may not have a ToString() method, in this case (you will see an error indicating ToString method not being available), the user should provide a custom script-block to determine how the value is constructed. This can be done by assigning a custom script-block to the 'LOOPZ.WH-FOREACH-DECORATOR.GET-RESULT' entry in PassThru.
 
   This function is designed to be used with Invoke-ForeachFsItem and as such, it's signature
 needs to match that required by Invoke-ForeachFsItem. Any additional parameters can be
