@@ -87,6 +87,61 @@ for that item, if the invokee has not set the Trigger to true, to indicate that 
 
 If a Summary script-block is supplied to the compound function, then it will see if any of the pipeline items set the Trigger.
 
+### :o: Write-HostFeItemDecorator
+
+When using a custom function/script-block (invokee) with one of the compound functions it is considered good form not to write to the host within the command being written (PSScriptAnalyzer warning *PSAvoidUsingWriteHost* comes to mind). This is so that the command can be composed into a pipeline without generating convoluted output (plus other reasons). However, it isn't against the law to write output and command line utilities are made much the richer and user friendly when they receive feedback for the operations being performed.
+
+This is where Write-HostFeItemDecorator comes in. It allows the development of commands that don't write to the host, leaving this to be taken over by Write-HostFeItemDecorator.
+
+The following shows an example of using a named function with [*Invoke-ForeachFsItem*](Elizium.Loopz/docs/Invoke-ForeachFsItem.md)
+
+```powershell
+  function Resize-Image {
+    param(
+      [System.IO.FileInfo]$Underscore,
+      [int]$Index,
+      [System.Collections.Hashtable]$PassThru,
+      [boolean]$Trigger
+    )
+
+    [PSCustomObject]@{ Product = $FileInfo; }
+  }
+
+  [string]$directoryPath = './Data/fefsi';
+  Get-ChildItem $directoryPath -Recurse -File -Filter "*.jpg" | Invoke-ForeachFsItem -Functee 'Resize-Image'
+
+```
+
+The function does not write any output to the host. However, it might be desirable to do so. Rather than include that logic into *Resize-Image*, it can be modified to populate the returned PSCustomObject that it already creates with additional properties (although this part is optional) and then making use of *Write-HostFeItemDecorator*.
+
+This can be achieved by defining our end function in the PassThru under key 'LOOPZ.WH-FOREACH-DECORATOR.FUNCTION-NAME' and selecting *Write-HostFeItemDecorator* to be the Functee on *Invoke-ForeachFsItem*.
+
+```powershell
+  function Resize-Image {
+    param(
+      [System.IO.DirectoryInfo]$Underscore,
+      [int]$Index,
+      [System.Collections.Hashtable]$PassThru,
+      [boolean]$Trigger,
+    )
+    ...
+    $pairs = @(
+      @('By', $percentage), @('Height', $height), @('Width', $width)
+    );
+    @{ Product = $Underscore; Pairs = $pairs; }
+  }
+
+  [Systems.Collection.Hashtable]$passThru = @{
+    'LOOPZ.WH-FOREACH-DECORATOR.FUNCTION-NAME' = 'Resize-Image';
+  }
+
+  [string]$directoryPath = './Data/fefsi';
+  Get-ChildItem $directoryPath -Recurse -File -Filter "*.jpg" | Invoke-ForeachFsItem -PassThru $passThru
+    -Functee 'Write-HostFeItemDecorator'
+```
+
+This sets up a new calling chain, where *Invoke-ForeachFsItem* invokes the *Write-HostFeItemDecorator* function and it in turn invokes the function defined in 'LOOPZ.WH-FOREACH-DECORATOR.FUNCTION-NAME' in this case being *Resize-Image*. This technique can also be used with [*Invoke-MirrorDirectoryTree*](Elizium.Loopz/docs/Invoke-MirrorDirectoryTree.md) and [*Invoke-TraverseDirectory*](Elizium.Loopz/docs/Invoke-TraverseDirectory.md).
+
 ### And Finally
 
 If any points have not been explained properly or if there is any confusion then I am happy to update documentation accordingly and am more than happy to accept any constructive criticism, please raise issues
