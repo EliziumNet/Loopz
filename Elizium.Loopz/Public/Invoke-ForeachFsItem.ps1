@@ -267,6 +267,8 @@ function Invoke-ForeachFsItem {
       if ( $acceptAll -or ($Directory.ToBool() -and $itemIsDirectory) -or
         ($File.ToBool() -and -not($itemIsDirectory)) ) {
         if ($Condition.Invoke($pipelineItem)) {
+          $result = $null;
+
           try {
             if ('InvokeScriptBlock' -eq $PSCmdlet.ParameterSetName) {
               $positional = @($pipelineItem, $index, $PassThru, $trigger);

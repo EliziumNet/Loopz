@@ -265,6 +265,7 @@ function Invoke-TraverseDirectory {
       [boolean]$trigger
     )
 
+    $result = $null;
     $index = $passThru['LOOPZ.FOREACH.INDEX'];
 
     try {
@@ -402,6 +403,7 @@ function Invoke-TraverseDirectory {
       #
       $PassThru['LOOPZ.FOREACH.INDEX'] = $index;
     }
+    $result = $null;
 
     # This is the top level invoke
     #
