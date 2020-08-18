@@ -196,6 +196,7 @@ function Invoke-ForeachFsItem {
   #>
   [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', '')]
   [CmdletBinding(DefaultParameterSetName = 'InvokeScriptBlock')]
+  [Alias('ife', 'Foreach-FsItem')]
   param(
     [Parameter(ParameterSetName = 'InvokeScriptBlock', Mandatory, ValueFromPipeline = $true)]
     [Parameter(ParameterSetName = 'InvokeFunction', Mandatory, ValueFromPipeline = $true)]

@@ -108,7 +108,11 @@ task UpdatePublicFunctionsToExport -if (Test-Path -Path $script:PublicFolder) {
 
   $publicFunctions = "FunctionsToExport = @('{0}')" -f $publicFunctions
 
-  (Get-Content -Path $script:PsdPath) -replace "FunctionsToExport = '/*'", $publicFunctions |
+  # Make sure in your source psd1 file, FunctionsToExport  is set to ''.
+  # PowerShell has a problem with trying to replace (), so @() does not
+  # work without jumping through hoops.
+  #
+  (Get-Content -Path $script:PsdPath) -replace "FunctionsToExport = ''", $publicFunctions |
   Set-Content -Path $script:PsdPath
 }
 
