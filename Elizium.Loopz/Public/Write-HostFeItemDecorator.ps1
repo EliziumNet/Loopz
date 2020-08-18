@@ -109,6 +109,7 @@
   [OutputType([PSCustomObject])]
   [CmdletBinding()]
   [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingWriteHost", "")]
+  [Alias('wife', 'Decorate-Foreach')]
   param (
     [Parameter(
       Mandatory = $true

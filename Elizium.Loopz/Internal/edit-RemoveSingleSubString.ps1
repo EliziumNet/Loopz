@@ -25,7 +25,6 @@ function edit-RemoveSingleSubString {
   Flag to indicate whether the last occurrence of a sub string is to be removed from the
   Target.
 #>
-  [Alias('Subtract-Single', 'rm-subs')]
   [CmdletBinding(DefaultParameterSetName = 'Single')]
   [OutputType([string])]
   param
