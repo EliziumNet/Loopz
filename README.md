@@ -142,6 +142,47 @@ This can be achieved by defining our end function in the PassThru under key 'LOO
 
 This sets up a new calling chain, where *Invoke-ForeachFsItem* invokes the *Write-HostFeItemDecorator* function and it in turn invokes the function defined in 'LOOPZ.WH-FOREACH-DECORATOR.FUNCTION-NAME' in this case being *Resize-Image*. This technique can also be used with [*Invoke-MirrorDirectoryTree*](Elizium.Loopz/docs/Invoke-MirrorDirectoryTree.md) and [*Invoke-TraverseDirectory*](Elizium.Loopz/docs/Invoke-TraverseDirectory.md).
 
+## Helpers
+
+Some global definitions have been exported as global variables as an aid to using the functions in this module.
+
+### :dart: Predefined summary script-block
+
+```powershell
+$LoopzHelpers.SimpleSummaryBlock
+```
+
+The *SimpleSummaryBlock* can be used on any compound function that that has a *Summary* parameter. Is can be customised by specifying a line string under key 'LOOPZ.SUMMARY-BLOCK.LINE'. Any string can be defined or one of the pre-defined lines (see below) can be specified.
+
+A custom summary message may also be defined under key 'LOOPZ.SUMMARY-BLOCK.MESSAGE'; this is optional and if not specified, the word 'Summary' will be used.
+
+A Krayola theme may be specified and as one may already have been defined for *Write-HostFeFsItem* under key 'LOOPZ.WH-FOREACH-DECORATOR.KRAYOLA-THEME', this will also be used by the Summary block.
+
+### :dart: Line definitions
+
+To be set under key 'LOOPZ.SUMMARY-BLOCK.LINE' of the PassThru as previously discussed.
+
+```powershell
+$LoopzUI.UnderscoreLine
+$LoopzUI.EqualsLine
+$LoopzUI.DotsLine
+$LoopzUI.LightDotsLine
+$LoopzUI.TildeLine
+$LoopzUI.SmallUnderscoreLine
+$LoopzUI.SmallEqualsLine
+$LoopzUI.SmallDotsLine
+$LoopzUI.SmallLightDotsLine
+$LoopzUI.SmallTildeLine
+```
+
+### :dart: Predefined Write-HostFeFsItem decorator script-block
+
+As the write host decorator is functionally the same used in different contents, it made sense not to force the user to keep re-defining this. Therefore, a predefined decorator is available for 3rd party use. Just pass this value as the *Block* parameter on the compound function being used.
+
+```powershell
+$LoopzHelpers.WhItemDecoratorBlock
+```
+
 ### And Finally
 
 If any points have not been explained properly or if there is any confusion then I am happy to update documentation accordingly and am more than happy to accept any constructive criticism, please raise issues

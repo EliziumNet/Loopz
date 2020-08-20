@@ -27,7 +27,7 @@ Describe 'Write-HostFeItemDecorator' {
     }
 
     Context 'and: contains single item' {
-      It 'should: invoke and write' -Tag 'Current' {
+      It 'should: invoke and write' {
         Mock get-AnswerAdvancedFn -ModuleName Elizium.Loopz {
           ([PSCustomObject]@{ Pairs = , @(, @('Author', 'Douglas Madcap Adams')) })
         }
@@ -45,6 +45,28 @@ Describe 'Write-HostFeItemDecorator' {
 
         $underscore = 'What is the answer to the universe';
         $decorator.Invoke($underscore, 0, $_passThru, $false);
+      }
+
+      Context 'and: using pre-defined WhItemDecoratorBlock' {
+        It 'should: invoke and write' {
+          Mock get-AnswerAdvancedFn -ModuleName Elizium.Loopz {
+            ([PSCustomObject]@{ Pairs = , @(, @('Author', 'Douglas Madcap Adams')) })
+          }
+
+          Mock Write-ThemedPairsInColour -ModuleName Elizium.Loopz {
+            param(
+              [string[][]]$Pairs,
+              [System.Collections.Hashtable]$Theme,
+              [string]$Message
+            )
+            $first = $Pairs[1];
+            $first[0] | Should -BeExactly 'Author';
+            $first[1] | Should -BeExactly 'Douglas Madcap Adams';
+          }
+
+          $underscore = 'What is the answer to the universe';
+          $LoopzHelpers.WhItemDecoratorBlock.Invoke($underscore, 0, $_passThru, $false);
+        }
       }
     } # and: contains single item
 

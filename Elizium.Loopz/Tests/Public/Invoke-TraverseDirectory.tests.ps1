@@ -56,6 +56,39 @@ Describe 'Invoke-TraverseDirectory' {
         Invoke-TraverseDirectory -Path $resolvedSourcePath `
           -Block $traverseBlock -Summary $summary;
       }
+
+      Context 'and: SimpleSummaryBlock provided' {
+        It 'should: write summary' {
+          Mock Write-InColour -ModuleName Elizium.Loopz { }
+          Mock Write-ThemedPairsInColour -ModuleName Elizium.Loopz { }
+
+          [scriptblock]$traverseBlock = {
+            param(
+              [Parameter(Mandatory)]
+              $_underscore,
+
+              [Parameter(Mandatory)]
+              [int]$_index,
+
+              [Parameter(Mandatory)]
+              [System.Collections.Hashtable]$_passThru,
+
+              [Parameter(Mandatory)]
+              [boolean]$_trigger
+            )
+
+            @{ Product = $_underscore }
+          }
+
+          [System.Collections.Hashtable]$passThru = @{
+            'LOOPZ.SUMMARY-BLOCK.LINE' = $LoopzUI.EqualsLine;
+            'LOOPZ.SUMMARY-BLOCK.MESSAGE' = 'Test Summary';
+          }
+
+          Invoke-TraverseDirectory -Path $resolvedSourcePath -PassThru $passThru `
+            -Block $traverseBlock -Summary $LoopzHelpers.SimpleSummaryBlock;
+        }
+      }
     } # and: directory tree
 
     Context 'and: directory tree and Hoist specified' {
