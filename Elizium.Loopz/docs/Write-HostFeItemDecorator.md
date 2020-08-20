@@ -22,10 +22,10 @@ Write-HostFeItemDecorator [-Underscore] <Object> [-Index] <Int32> [-PassThru] <H
 ## DESCRIPTION
 
 The script-block/function (invokee) being decorated may or may not Support ShouldProcess. If it does,
-then the client should add 'LOOPZ.WH-FOREACH-DECORATOR.WHAT-IF' to the pass through, set to the current
+then the client should add 'WHAT-IF' to the pass through, set to the current
 value of WhatIf; or more accurately the existence of 'WhatIf' in PSBoundParameters. Or another
 way of putting it is, the presence of WHAT-IF indicates SupportsShouldProcess, and the value of
-'LOOPZ.WH-FOREACH-DECORATOR.WHAT-IF' dictates the value of WhatIf. This way, we only need a single
+'WHAT-IF' dictates the value of WhatIf. This way, we only need a single
 value in the PassThru, rather than having to represent SupportShouldProcess explicitly with
 another value.
 

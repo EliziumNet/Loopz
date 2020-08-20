@@ -23,7 +23,7 @@ Describe 'Write-HostFeItemDecorator' {
       'LOOPZ.WH-FOREACH-DECORATOR.MESSAGE'       = 'Test Advanced Function';
       'LOOPZ.WH-FOREACH-DECORATOR.KRAYOLA-THEME' = $(Get-KrayolaTheme);
       'LOOPZ.WH-FOREACH-DECORATOR.PRODUCT-LABEL' = 'Test product';
-      'LOOPZ.WH-FOREACH-DECORATOR.WHAT-IF'       = $false;
+      'WHAT-IF'       = $false;
     }
 
     Context 'and: contains single item' {
@@ -121,7 +121,7 @@ Describe 'Write-HostFeItemDecorator' {
           'LOOPZ.WH-FOREACH-DECORATOR.MESSAGE'       = 'Test Advanced Function';
           'LOOPZ.WH-FOREACH-DECORATOR.KRAYOLA-THEME' = $(Get-KrayolaTheme);
           'LOOPZ.WH-FOREACH-DECORATOR.PRODUCT-LABEL' = 'Test product';
-          'LOOPZ.WH-FOREACH-DECORATOR.WHAT-IF'       = $false;
+          'WHAT-IF'       = $false;
           'LOOPZ.WH-FOREACH-DECORATOR.IF-TRIGGERED'  = $true;
         }
 
@@ -142,7 +142,7 @@ Describe 'Write-HostFeItemDecorator' {
           'LOOPZ.WH-FOREACH-DECORATOR.MESSAGE'       = 'Test Advanced Function';
           'LOOPZ.WH-FOREACH-DECORATOR.KRAYOLA-THEME' = $(Get-KrayolaTheme);
           'LOOPZ.WH-FOREACH-DECORATOR.PRODUCT-LABEL' = 'Test product';
-          'LOOPZ.WH-FOREACH-DECORATOR.WHAT-IF'       = $false;
+          'WHAT-IF'       = $false;
           'LOOPZ.WH-FOREACH-DECORATOR.IF-TRIGGERED'  = $true;
         }
 
