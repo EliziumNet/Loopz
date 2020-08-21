@@ -1,9 +1,14 @@
 
 Describe 'edit-RemoveSingleSubString' {
   BeforeAll {
-    Get-Module Elizium.Loopz | Remove-Module
-    Import-Module .\Output\Elizium.Loopz\Elizium.Loopz.psm1 `
-      -ErrorAction 'stop' -DisableNameChecking
+    # Get-Module Elizium.Loopz | Remove-Module
+    # Import-Module .\Output\Elizium.Loopz\Elizium.Loopz.psm1 `
+    #   -ErrorAction 'stop' -DisableNameChecking
+    #
+    # using InModuleScope doesn't fix not being able to test internal functions,
+    # therefore the only work-around is to directly source function script itself.
+    #
+    . .\Internal\edit-RemoveSingleSubString.ps1
   }
 
   Context 'given: First Only' {

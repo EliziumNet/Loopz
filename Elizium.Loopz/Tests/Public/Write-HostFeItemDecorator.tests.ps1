@@ -47,7 +47,7 @@ Describe 'Write-HostFeItemDecorator' {
         $decorator.Invoke($underscore, 0, $_passThru, $false);
       }
 
-      Context 'and: using pre-defined WhItemDecoratorBlock' {
+      Context 'and: using pre-defined WhItemDecoratorBlock' -Tag 'Current' {
         It 'should: invoke and write' {
           Mock get-AnswerAdvancedFn -ModuleName Elizium.Loopz {
             ([PSCustomObject]@{ Pairs = , @(, @('Author', 'Douglas Madcap Adams')) })
