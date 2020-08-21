@@ -72,10 +72,15 @@
   FunctionsToExport = ''
 
   # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.
-  CmdletsToExport   = @('LoopzHelpers', 'LoopzUI')
+  CmdletsToExport   = @()
 
-  # Variables to export from this module
-  # VariablesToExport = '*'
+  # Variables to export from this module; If you populate this entry, then all other functions
+  # are not exported, because the build script currently doesn't export functions in the sm file,
+  # even though FunctionsToExport above is populated. In order for those functions to be exported,
+  # there must either be no Export-ModuleMember in the psm or if there is, then the functions must
+  # also be exported in the psm
+  #
+  VariablesToExport = @('LoopzHelpers', 'LoopzUI')
 
   # Aliases to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no aliases to export.
   # AliasesToExport = '*'
