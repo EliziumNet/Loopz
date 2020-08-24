@@ -268,41 +268,35 @@ function Invoke-TraverseDirectory {
     $result = $null;
     $index = $passThru['LOOPZ.FOREACH.INDEX'];
 
-    try {
-      # This is the invoke, for the current directory
-      #
-      if ($invokee -is [scriptblock]) {
-        $positional = @($directoryInfo, $index, $passThru, $trigger);
+    # This is the invoke, for the current directory
+    #
+    if ($invokee -is [scriptblock]) {
+      $positional = @($directoryInfo, $index, $passThru, $trigger);
 
-        if ($passThru.ContainsKey('LOOPZ.TRAVERSE.INVOKEE.PARAMS') -and
-          ($passThru['LOOPZ.TRAVERSE.INVOKEE.PARAMS'] -gt 0)) {
-          $passThru['LOOPZ.TRAVERSE.INVOKEE.PARAMS'] | ForEach-Object {
-            $positional += $_;
-          }
+      if ($passThru.ContainsKey('LOOPZ.TRAVERSE.INVOKEE.PARAMS') -and
+        ($passThru['LOOPZ.TRAVERSE.INVOKEE.PARAMS'] -gt 0)) {
+        $passThru['LOOPZ.TRAVERSE.INVOKEE.PARAMS'] | ForEach-Object {
+          $positional += $_;
         }
-        $result = $invokee.Invoke($positional);
       }
-      else {
-        [System.Collections.Hashtable]$parameters = $passThru.ContainsKey('LOOPZ.TRAVERSE.INVOKEE.PARAMS') `
-          ? $passThru['LOOPZ.TRAVERSE.INVOKEE.PARAMS'] : @{};
+      $result = $invokee.Invoke($positional);
+    }
+    else {
+      [System.Collections.Hashtable]$parameters = $passThru.ContainsKey('LOOPZ.TRAVERSE.INVOKEE.PARAMS') `
+        ? $passThru['LOOPZ.TRAVERSE.INVOKEE.PARAMS'] : @{};
 
-        # These are directory specific overwrites. The custom parameters
-        # will still be present
-        #
-        $parameters['Underscore'] = $directoryInfo;
-        $parameters['Index'] = $index;
-        $parameters['PassThru'] = $passThru;
-        $parameters['Trigger'] = $trigger;
+      # These are directory specific overwrites. The custom parameters
+      # will still be present
+      #
+      $parameters['Underscore'] = $directoryInfo;
+      $parameters['Index'] = $index;
+      $parameters['PassThru'] = $passThru;
+      $parameters['Trigger'] = $trigger;
 
-        $result = & $invokee @parameters;
-      }
+      $result = & $invokee @parameters;
     }
-    catch {
-      Write-Error "recurseTraverseDirectory Error: ($_), for item: '$($directoryInfo.Name)'";
-    }
-    finally {
-      $passThru['LOOPZ.FOREACH.INDEX']++;
-    }
+
+    $passThru['LOOPZ.FOREACH.INDEX']++;
 
     [string]$fullName = $directoryInfo.FullName;
     [System.IO.DirectoryInfo[]]$directoryInfos = Get-ChildItem -Path $fullName `
@@ -408,25 +402,19 @@ function Invoke-TraverseDirectory {
     # This is the top level invoke
     #
     if ($Condition.Invoke($directory)) {
-      try {
-        if ('InvokeScriptBlock' -eq $PSCmdlet.ParameterSetName) {
-          $result = $Block.Invoke($positional);
-        }
-        elseif ('InvokeFunction' -eq $PSCmdlet.ParameterSetName) {
-          $result = & $Functee @parameters;
-        }
+      if ('InvokeScriptBlock' -eq $PSCmdlet.ParameterSetName) {
+        $result = $Block.Invoke($positional);
       }
-      catch {
-        Write-Error "Invoke-TraverseDirectory(top-level) Error: ($_), for item: '$($directory.Name)'";
+      elseif ('InvokeFunction' -eq $PSCmdlet.ParameterSetName) {
+        $result = & $Functee @parameters;
       }
-      finally {
-        if ($Hoist.ToBool()) {
-          $index++;
-        }
-        else {
-          $PassThru['LOOPZ.FOREACH.INDEX']++;
-          $index = $PassThru['LOOPZ.FOREACH.INDEX'];
-        }
+
+      if ($Hoist.ToBool()) {
+        $index++;
+      }
+      else {
+        $PassThru['LOOPZ.FOREACH.INDEX']++;
+        $index = $PassThru['LOOPZ.FOREACH.INDEX'];
       }
 
       if ($result.psobject.properties.match('Trigger') -and $result.Trigger) {

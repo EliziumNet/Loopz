@@ -391,35 +391,31 @@
 
     $invokee = $_passThru['LOOPZ.MIRROR.INVOKEE'];
 
-    try {
-      if ($invokee -is [scriptblock]) {
-        $positional = @($_underscore, $_index, $_passThru, $_trigger);
+    if ($invokee -is [scriptblock]) {
+      $positional = @($_underscore, $_index, $_passThru, $_trigger);
 
-        if ($_passThru.ContainsKey('LOOPZ.MIRROR.INVOKEE.PARAMS')) {
-          $_passThru['LOOPZ.MIRROR.INVOKEE.PARAMS'] | ForEach-Object {
-            $positional += $_;
-          }
+      if ($_passThru.ContainsKey('LOOPZ.MIRROR.INVOKEE.PARAMS')) {
+        $_passThru['LOOPZ.MIRROR.INVOKEE.PARAMS'] | ForEach-Object {
+          $positional += $_;
         }
+      }
 
-        $invokee.Invoke($positional);
-      }
-      elseif ($invokee -is [string]) {
-        [System.Collections.Hashtable]$parameters = $_passThru.ContainsKey('LOOPZ.MIRROR.INVOKEE.PARAMS') `
-          ? $_passThru['LOOPZ.MIRROR.INVOKEE.PARAMS'] : @{};
-        $parameters['Underscore'] = $_underscore;
-        $parameters['Index'] = $_index;
-        $parameters['PassThru'] = $_passThru;
-        $parameters['Trigger'] = $_trigger;
+      $invokee.Invoke($positional);
+    }
+    elseif ($invokee -is [string]) {
+      [System.Collections.Hashtable]$parameters = $_passThru.ContainsKey('LOOPZ.MIRROR.INVOKEE.PARAMS') `
+        ? $_passThru['LOOPZ.MIRROR.INVOKEE.PARAMS'] : @{};
+      $parameters['Underscore'] = $_underscore;
+      $parameters['Index'] = $_index;
+      $parameters['PassThru'] = $_passThru;
+      $parameters['Trigger'] = $_trigger;
 
-        & $invokee @parameters;
-      }
-      else {
-        Write-Warning "User defined function/block not valid, not invoking.";
-      }
+      & $invokee @parameters;
     }
-    catch {
-      Write-Error "function invoke error doMirrorBlock: error ($_) occurred for '$destinationBranch'";
+    else {
+      Write-Warning "User defined function/block not valid, not invoking.";
     }
+
 
     @{ Product = $destinationInfo }
   } #doMirrorBlock

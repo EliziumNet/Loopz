@@ -270,53 +270,47 @@ function Invoke-ForeachFsItem {
         if ($Condition.Invoke($pipelineItem)) {
           $result = $null;
 
-          try {
-            if ('InvokeScriptBlock' -eq $PSCmdlet.ParameterSetName) {
-              $positional = @($pipelineItem, $index, $PassThru, $trigger);
+          if ('InvokeScriptBlock' -eq $PSCmdlet.ParameterSetName) {
+            $positional = @($pipelineItem, $index, $PassThru, $trigger);
 
-              if ($BlockParams.Length -gt 0) {
-                $BlockParams | ForEach-Object {
-                  $positional += $_;
-                }
+            if ($BlockParams.Length -gt 0) {
+              $BlockParams | ForEach-Object {
+                $positional += $_;
               }
-
-              $result = Invoke-Command -ScriptBlock $Block -ArgumentList $positional;
             }
-            elseif ('InvokeFunction' -eq $PSCmdlet.ParameterSetName) {
-              [System.Collections.Hashtable]$parameters = $FuncteeParams.Clone();
 
-              $parameters['Underscore'] = $pipelineItem;
-              $parameters['Index'] = $index;
-              $parameters['PassThru'] = $PassThru;
-              $parameters['Trigger'] = $trigger;
-
-              $result = & $Functee @parameters;
-            }
+            $result = Invoke-Command -ScriptBlock $Block -ArgumentList $positional;
           }
-          catch {
-            Write-Error "Foreach Error: ($_), for item: '$($pipelineItem.Name)'";
+          elseif ('InvokeFunction' -eq $PSCmdlet.ParameterSetName) {
+            [System.Collections.Hashtable]$parameters = $FuncteeParams.Clone();
+
+            $parameters['Underscore'] = $pipelineItem;
+            $parameters['Index'] = $index;
+            $parameters['PassThru'] = $PassThru;
+            $parameters['Trigger'] = $trigger;
+
+            $result = & $Functee @parameters;
           }
-          finally {
-            if ($manageIndex) {
-              $index++;
+
+          if ($manageIndex) {
+            $index++;
+          }
+          else {
+            $index = $PassThru['LOOPZ.FOREACH.INDEX'];
+          }
+
+          if ($result) {
+            if ($result.psobject.properties.match('Trigger') -and $result.Trigger) {
+              $PassThru['LOOPZ.FOREACH.TRIGGER'] = $true;
+              $trigger = $true;
             }
-            else {
-              $index = $PassThru['LOOPZ.FOREACH.INDEX'];
+
+            if ($result.psobject.properties.match('Break') -and $result.Break) {
+              $broken = $true;
             }
 
-            if ($result) {
-              if ($result.psobject.properties.match('Trigger') -and $result.Trigger) {
-                $PassThru['LOOPZ.FOREACH.TRIGGER'] = $true;
-                $trigger = $true;
-              }
-
-              if ($result.psobject.properties.match('Break') -and $result.Break) {
-                $broken = $true;
-              }
-
-              if ($result.psobject.properties.match('Product') -and $result.Product) {
-                $result.Product;
-              }
+            if ($result.psobject.properties.match('Product') -and $result.Product) {
+              $result.Product;
             }
           }
         }
