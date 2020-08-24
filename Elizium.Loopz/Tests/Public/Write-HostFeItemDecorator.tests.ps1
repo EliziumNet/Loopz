@@ -132,6 +132,27 @@ Describe 'Write-HostFeItemDecorator' {
     } # and: contains many items
   } # given: Invoke Result contains Pairs
 
+  Context 'given: Product is Affirmed' {
+    It 'should: write affirmed Product' -Tag 'Current' {
+      Mock Write-ThemedPairsInColour -ModuleName Elizium.Loopz {
+        param(
+          [string[][]]$Pairs,
+          [System.Collections.Hashtable]$Theme,
+          [string]$Message
+        )
+        $productValue = $Pairs[1];
+        $productValue[1] | Should -BeExactly 'The owls are not what they seem';
+        $productValue[2] | Should -BeTrue; # affirm value
+      }
+
+      $myPassThru = $_passThru.Clone();
+      $myPassThru['LOOPZ.WH-FOREACH-DECORATOR.FUNCTION-NAME'] = 'get-AffirmedProduct';
+
+      $underscore = 'The owls are not what they seem';
+      $decorator.Invoke($underscore, 0, $myPassThru, $false);
+    } # should: write affirmed Product
+  } # given: Product is Affirmed
+
   Context 'given: IF-TRIGGERED is set' {
     Context 'and: an item sets the Trigger' {
       It 'should: invoke Write-ThemedPairsInColour' {

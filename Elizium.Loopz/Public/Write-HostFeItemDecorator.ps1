@@ -185,12 +185,13 @@
     #
     [string]$productLabel = [string]::Empty;
     if ($invokeResult -and $invokeResult.psobject.properties.match('Product') -and $invokeResult.Product) {
+      [boolean]$affirm = $invokeResult.psobject.properties.match('Affirm') -and $invokeResult.Affirm;
       $productValue = $getResult.Invoke($invokeResult.Product);
       $productLabel = $PassThru.ContainsKey('LOOPZ.WH-FOREACH-DECORATOR.PRODUCT-LABEL') `
         ? $PassThru['LOOPZ.WH-FOREACH-DECORATOR.PRODUCT-LABEL'] : 'Product';
 
       if (-not([string]::IsNullOrWhiteSpace($productLabel))) {
-        $themedPairs += , @($productLabel, $productValue);
+        $themedPairs += , @($productLabel, $productValue, $affirm);
       }
     }
 
