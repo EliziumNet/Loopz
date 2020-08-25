@@ -191,7 +191,7 @@ Describe 'Invoke-MirrorDirectoryTree' {
 
   Context 'given: HoistDescendent specified' {
     Context 'and: Include directory filters applied' {
-      It 'Should: traverse creating files and hoisted descendant directories' {
+      It 'Should: traverse creating files and hoisted descendant directories' -Tag 'Current' {
         [scriptblock]$summary = {
           param(
             [int]$_count,
@@ -203,9 +203,13 @@ Describe 'Invoke-MirrorDirectoryTree' {
           $_count | Should -Be 11;
         }
 
+        [System.Collections.Hashtable]$verifiedCountPassThru = @{}
+
         Invoke-MirrorDirectoryTree -Path $sourcePath `
           -DestinationPath $destinationPath -CreateDirs -DirectoryIncludes @('*e*') `
-          -Hoist -Summary $summary -WhatIf:$whatIf;
+          -Hoist -Summary $summary -PassThru $verifiedCountPassThru -WhatIf:$whatIf;
+
+        $verifiedCountPassThru['LOOPZ.MIRROR.COUNT'] | Should -Be 11;
       }
     }
   } # given: HoistDescendent specified

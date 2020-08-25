@@ -42,6 +42,56 @@ Describe 'Invoke-ForeachFsItem' {
       }
     }
 
+    Context 'and: files piped from same directory' {
+      It 'should: contain correct count value in PassThru' {
+        $container = @{
+          count = 0
+        }
+
+        [scriptblock]$block = {
+          param(
+            [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', '')]
+            [System.IO.FileInfo]$FileInfo,
+            [int]$Index,
+            [System.Collections.Hashtable]$PassThru,
+            [boolean]$Trigger
+          )
+          $container.count++;
+        }
+
+        [string]$directoryPath = './Tests/Data/fefsi/csv';
+        [System.Collections.Hashtable]$verifiedCountPassThru = @{}
+        Get-ChildItem $directoryPath -File | Invoke-ForeachFsItem -Block $block -PassThru $verifiedCountPassThru;
+        $container.count | Should -Be 3;
+        $verifiedCountPassThru['LOOPZ.FOREACH.COUNT'] | Should -Be 3;
+      }
+    }
+
+    Context 'and: no files found' {
+      It 'should: contain 0 count value in PassThru' {
+        $container = @{
+          count = 0
+        }
+
+        [scriptblock]$block = {
+          param(
+            [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', '')]
+            [System.IO.FileInfo]$FileInfo,
+            [int]$Index,
+            [System.Collections.Hashtable]$PassThru,
+            [boolean]$Trigger
+          )
+          $container.count++;
+        }
+
+        [string]$directoryPath = './Tests/Data/fefsi/csv';
+        [System.Collections.Hashtable]$verifiedCountPassThru = @{}
+        Get-ChildItem $directoryPath -File -Filter '*.blob' | Invoke-ForeachFsItem -Block $block -PassThru $verifiedCountPassThru;
+        $container.count | Should -Be 0;
+        $verifiedCountPassThru['LOOPZ.FOREACH.COUNT'] | Should -Be 0;
+      }
+    }
+
     Context 'and: files piped from different directories' {
       It 'should: invoke all' {
         $container = @{
