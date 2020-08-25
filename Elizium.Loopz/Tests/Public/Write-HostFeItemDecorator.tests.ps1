@@ -47,7 +47,7 @@ Describe 'Write-HostFeItemDecorator' {
         $decorator.Invoke($underscore, 0, $_passThru, $false);
       }
 
-      Context 'and: using pre-defined WhItemDecoratorBlock' -Tag 'Current' {
+      Context 'and: using pre-defined WhItemDecoratorBlock' {
         It 'should: invoke and write' {
           Mock get-AnswerAdvancedFn -ModuleName Elizium.Loopz {
             ([PSCustomObject]@{ Pairs = , @(, @('Author', 'Douglas Madcap Adams')) })
@@ -133,7 +133,7 @@ Describe 'Write-HostFeItemDecorator' {
   } # given: Invoke Result contains Pairs
 
   Context 'given: Product is Affirmed' {
-    It 'should: write affirmed Product' -Tag 'Current' {
+    It 'should: write affirmed Product' {
       Mock Write-ThemedPairsInColour -ModuleName Elizium.Loopz {
         param(
           [string[][]]$Pairs,

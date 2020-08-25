@@ -459,4 +459,6 @@
   Invoke-TraverseDirectory -Path $resolvedSourcePath `
     -Block $doMirrorBlock -PassThru $PassThru -Summary $Summary `
     -Condition $filterDirectories -Hoist:$Hoist;
+
+  $PassThru['LOOPZ.MIRROR.COUNT'] = $PassThru['LOOPZ.TRAVERSE.COUNT'];
 } # Invoke-MirrorDirectoryTree

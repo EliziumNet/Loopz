@@ -432,6 +432,32 @@ Describe 'Invoke-TraverseDirectory' {
             -Condition $filterDirectories -Hoist;
           Assert-MockCalled Test-FireEXBreak -ModuleName Elizium.Loopz -Times 9;
         } # should: stop iterating
+
+        It 'should: contain correct count value in PassThru' {
+          Mock -ModuleName Elizium.Loopz Test-FireEXBreak -Verifiable {
+            param(
+              [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', '')]
+              [System.IO.DirectoryInfo]$Underscore,
+              [int]$Index,
+              [System.Collections.Hashtable]$PassThru,
+              [boolean]$Trigger
+            )
+            $break = ('EX' -eq $Underscore.Name);
+            Write-Debug "  [-] MOCK Test-FireEXBreak(index: $Index, directory: $($Underscore.Name)";
+
+            @{ Product = $Underscore; Break = $break }
+          } # Mock
+
+          [string]$sourcePath = (Convert-Path '.\Tests\Data\traverse\Audio');
+          Write-Debug "[+] === path: $sourcePath";
+
+          [System.Collections.Hashtable]$verifiedCountPassThru = @{}
+          Invoke-TraverseDirectory -Path $sourcePath -Functee 'Test-FireEXBreak' `
+            -Condition $filterDirectories -Hoist -PassThru $verifiedCountPassThru;
+
+          Assert-MockCalled Test-FireEXBreak -ModuleName Elizium.Loopz -Times 9;
+          $verifiedCountPassThru['LOOPZ.TRAVERSE.COUNT'] | Should -Be 9;
+        }
       } # and: Hoist
     } # and: break is fired
   } # given: fn result

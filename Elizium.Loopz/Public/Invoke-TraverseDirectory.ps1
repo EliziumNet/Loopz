@@ -490,6 +490,8 @@ function Invoke-TraverseDirectory {
       $trigger = $PassThru['LOOPZ.FOREACH.TRIGGER'];
       $Summary.Invoke($index, $skipped, $trigger, $PassThru);
     }
+
+    $PassThru['LOOPZ.TRAVERSE.COUNT'] = $PassThru['LOOPZ.FOREACH.COUNT'];
   }
   else {
     Write-Error "Path specified '$($Path)' is not a directory";
