@@ -113,6 +113,19 @@
   then a descendant directory that does match the filters will be mirrored even though any of
   its ancestors may not match the filters.
 
+  .PARAMETER Header
+    A script-block that is invoked at the start of the mirroring batch. The script-block is
+  invoked with the following positional parameters:
+    * PassThru: (see PassThru previously described)
+
+    The Header can be customised with the following PassThru entries:
+    - 'LOOPZ.KRAYOLA-THEME': Krayola Theme generally in use
+    - 'LOOPZ.HEADER-BLOCK.MESSAGE': message displayed as part of the header
+    - 'LOOPZ.HEADER-BLOCK.CRUMB': Lead text displayed in header, default: '[+] '
+    - 'LOOPZ.HEADER.PROPERTIES': An array of Key/Value pairs of items to be displayed
+    - 'LOOPZ.HEADER-BLOCK.LINE': A string denoting the line to be displayed. (There are
+    predefined lines available to use in $LoopzUI, or a custom one can be used instead)
+
   .PARAMETER Summary
     A script-block that is invoked at the end of the mirroring batch. The script-block is
   invoked with the following positional parameters:
@@ -291,12 +304,20 @@
 
     [Parameter(ParameterSetName = 'InvokeScriptBlock')]
     [Parameter(ParameterSetName = 'InvokeFunction')]
+    [scriptblock]$Header = ( {
+        param(
+          [System.Collections.Hashtable]$_passThru
+        )
+      }),
+
+    [Parameter(ParameterSetName = 'InvokeScriptBlock')]
+    [Parameter(ParameterSetName = 'InvokeFunction')]
     [scriptblock]$Summary = ( {
         [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', '')]
         param(
-          [int]$index,
-          [int]$skipped,
-          [boolean]$trigger,
+          [int]$_index,
+          [int]$_skipped,
+          [boolean]$_trigger,
           [System.Collections.Hashtable]$_passThru
         )
       })
@@ -457,7 +478,7 @@
   }
 
   Invoke-TraverseDirectory -Path $resolvedSourcePath `
-    -Block $doMirrorBlock -PassThru $PassThru -Summary $Summary `
+    -Block $doMirrorBlock -PassThru $PassThru -Header $Header -Summary $Summary `
     -Condition $filterDirectories -Hoist:$Hoist;
 
   $PassThru['LOOPZ.MIRROR.COUNT'] = $PassThru['LOOPZ.TRAVERSE.COUNT'];

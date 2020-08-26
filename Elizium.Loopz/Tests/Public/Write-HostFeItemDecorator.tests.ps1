@@ -21,9 +21,9 @@ Describe 'Write-HostFeItemDecorator' {
     [System.Collections.Hashtable]$script:_passThru = @{
       'LOOPZ.WH-FOREACH-DECORATOR.FUNCTION-NAME' = 'get-AnswerAdvancedFn';
       'LOOPZ.WH-FOREACH-DECORATOR.MESSAGE'       = 'Test Advanced Function';
-      'LOOPZ.WH-FOREACH-DECORATOR.KRAYOLA-THEME' = $(Get-KrayolaTheme);
+      'LOOPZ.KRAYOLA-THEME'                      = $(Get-KrayolaTheme);
       'LOOPZ.WH-FOREACH-DECORATOR.PRODUCT-LABEL' = 'Test product';
-      'WHAT-IF'       = $false;
+      'WHAT-IF'                                  = $false;
     }
 
     Context 'and: contains single item' {
@@ -162,9 +162,9 @@ Describe 'Write-HostFeItemDecorator' {
           'LOOPZ.WH-FOREACH-DECORATOR.FUNCTION-NAME' = 'get-AnswerAdvancedFnWithTrigger';
           'ANSWER'                                   = 'Fourty Two';
           'LOOPZ.WH-FOREACH-DECORATOR.MESSAGE'       = 'Test Advanced Function';
-          'LOOPZ.WH-FOREACH-DECORATOR.KRAYOLA-THEME' = $(Get-KrayolaTheme);
+          'LOOPZ.KRAYOLA-THEME'                      = $(Get-KrayolaTheme);
           'LOOPZ.WH-FOREACH-DECORATOR.PRODUCT-LABEL' = 'Test product';
-          'WHAT-IF'       = $false;
+          'WHAT-IF'                                  = $false;
           'LOOPZ.WH-FOREACH-DECORATOR.IF-TRIGGERED'  = $true;
         }
 
@@ -183,9 +183,9 @@ Describe 'Write-HostFeItemDecorator' {
           'LOOPZ.WH-FOREACH-DECORATOR.FUNCTION-NAME' = 'get-AnswerAdvancedFn';
           'ANSWER'                                   = 'Fourty Two';
           'LOOPZ.WH-FOREACH-DECORATOR.MESSAGE'       = 'Test Advanced Function';
-          'LOOPZ.WH-FOREACH-DECORATOR.KRAYOLA-THEME' = $(Get-KrayolaTheme);
+          'LOOPZ.KRAYOLA-THEME'                      = $(Get-KrayolaTheme);
           'LOOPZ.WH-FOREACH-DECORATOR.PRODUCT-LABEL' = 'Test product';
-          'WHAT-IF'       = $false;
+          'WHAT-IF'                                  = $false;
           'LOOPZ.WH-FOREACH-DECORATOR.IF-TRIGGERED'  = $true;
         }
 

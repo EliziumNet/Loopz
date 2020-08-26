@@ -68,6 +68,19 @@ function Invoke-TraverseDirectory {
     Optional hash-table containing the named parameters which are splatted into the Functee
   function invoke. As it's a hash table, order is not significant.
 
+  .PARAMETER Header
+    A script-block that is invoked at the start of the mirroring batch. The script-block is
+  invoked with the following positional parameters:
+    * PassThru: (see PassThru previously described)
+
+    The Header can be customised with the following PassThru entries:
+    - 'LOOPZ.KRAYOLA-THEME': Krayola Theme generally in use
+    - 'LOOPZ.HEADER-BLOCK.MESSAGE': message displayed as part of the header
+    - 'LOOPZ.HEADER-BLOCK.CRUMB': Lead text displayed in header, default: '[+] '
+    - 'LOOPZ.HEADER.PROPERTIES': An array of Key/Value pairs of items to be displayed
+    - 'LOOPZ.HEADER-BLOCK.LINE': A string denoting the line to be displayed. (There are
+    predefined lines available to use in $LoopzUI, or a custom one can be used instead)
+
   .PARAMETER Summary
     A script-block that is invoked at the end of the traversal batch. The script-block is
   invoked with the following positional parameters:
@@ -226,13 +239,21 @@ function Invoke-TraverseDirectory {
 
     [Parameter(ParameterSetName = 'InvokeScriptBlock')]
     [Parameter(ParameterSetName = 'InvokeFunction')]
+    [scriptblock]$Header = ( {
+        param(
+          [System.Collections.Hashtable]$_passThru
+        )
+      }),
+
+    [Parameter(ParameterSetName = 'InvokeScriptBlock')]
+    [Parameter(ParameterSetName = 'InvokeFunction')]
     [scriptblock]$Summary = ( {
         [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', '')]
         param(
-          [int]$Count,
-          [int]$Skipped,
-          [boolean]$Triggered,
-          [System.Collections.Hashtable]$PassThru
+          [int]$_count,
+          [int]$_skipped,
+          [boolean]$_triggered,
+          [System.Collections.Hashtable]$_passThru
         )
       }),
 
@@ -394,8 +415,11 @@ function Invoke-TraverseDirectory {
 
     if (-not($Hoist.ToBool())) {
       # We only want to manage the index via $PassThru when we are recursing
+      # and tells invoke-ForeachFsItem further down the line not to manage the
+      # index and not to invoke the Header and Summary.
       #
       $PassThru['LOOPZ.FOREACH.INDEX'] = $index;
+      $Header.Invoke($PassThru);
     }
     $result = $null;
 

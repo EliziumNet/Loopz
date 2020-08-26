@@ -18,14 +18,14 @@ as it goes.
 
 ```powershell
 Invoke-TraverseDirectory -Path <String> [-Condition <ScriptBlock>] [-PassThru <Hashtable>]
- [-Block <ScriptBlock>] [-BlockParams <Object>] [-Summary <ScriptBlock>] [-Hoist] [<CommonParameters>]
+ [-Block <ScriptBlock>] [-BlockParams <Object>] [-Header <ScriptBlock>] [-Summary <ScriptBlock>] [-Hoist] [<CommonParameters>]
 ```
 
 ### InvokeFunction
 
 ```powershell
 Invoke-TraverseDirectory -Path <String> [-Condition <ScriptBlock>] [-PassThru <Hashtable>] -Functee <String>
- [-FuncteeParams <Hashtable>] [-Summary <ScriptBlock>] [-Hoist] [<CommonParameters>]
+ [-FuncteeParams <Hashtable>] [-Header <ScriptBlock>] [-Summary <ScriptBlock>] [-Hoist] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -250,6 +250,34 @@ function invoke. As it's a hash table, order is not significant.
 ```yaml
 Type: Hashtable
 Parameter Sets: InvokeFunction
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Header
+
+  A script-block that is invoked at the start of the traverse batch. The script-block is
+invoked with the following positional parameters:
+
+* PassThru: (see PassThru previously described)
+
+  The Header can be customised with the following PassThru entries:
+
+* 'LOOPZ.KRAYOLA-THEME': Krayola Theme generally in use
+* 'LOOPZ.HEADER-BLOCK.MESSAGE': message displayed as part of the header
+* 'LOOPZ.HEADER-BLOCK.CRUMB': Lead text displayed in header, default: '[+] '
+* 'LOOPZ.HEADER.PROPERTIES': An array of Key/Value pairs of items to be displayed
+* 'LOOPZ.HEADER-BLOCK.LINE': A string denoting the line to be displayed. (There are
+predefined lines available to use in $LoopzUI, or a custom one can be used instead)
+
+```yaml
+Type: ScriptBlock
+Parameter Sets: (All)
 Aliases:
 
 Required: False

@@ -21,46 +21,26 @@ $global:LoopzHelpers = @{
       -Index $_index `
       -PassThru $_passThru `
       -Trigger $_trigger
-  }
+  } # WhItemDecoratorBlock
+
+  DefaultHeaderBlock    = [scriptblock] {
+    param(
+      [System.Collections.Hashtable]$PassThru = @{}
+    )
+
+    show-DefaultHeaderBlock -PassThru $PassThru;
+  } # SimpleHeaderBlock
 
   SimpleSummaryBlock   = [scriptblock] {
     param(
-      [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', '')]
       [int]$Count,
       [int]$Skipped,
       [boolean]$Triggered,
       [System.Collections.Hashtable]$PassThru = @{}
     )
   
-    [System.Collections.Hashtable]$krayolaTheme = $PassThru.ContainsKey(
-      'LOOPZ.WH-FOREACH-DECORATOR.KRAYOLA-THEME') `
-      ? $PassThru['LOOPZ.WH-FOREACH-DECORATOR.KRAYOLA-THEME'] : $(Get-KrayolaTheme);
-
-    $metaColours = $krayolaTheme['META-COLOURS'];
-
-    $line = $colouredLine = $null;
-    if ($PassThru.ContainsKey('LOOPZ.SUMMARY-BLOCK.LINE')) {
-      $line = $PassThru['LOOPZ.SUMMARY-BLOCK.LINE'];
-      $colouredLine = @($line) + $metaColours;
-
-      Write-InColour -TextSnippets @(, $colouredLine);
-    }
-
-    [string[][]]$properties = @(
-      @('Count', $Count),
-      @('Skipped', $Skipped),
-      @('Triggered', $Triggered)
-    )
-
-    [string]$message = $PassThru.ContainsKey('LOOPZ.SUMMARY-BLOCK.MESSAGE') `
-      ? $PassThru['LOOPZ.SUMMARY-BLOCK.MESSAGE'] : 'Summary';
-
-    Write-ThemedPairsInColour -Pairs $properties -Theme $krayolaTheme -Message $message;
-
-    if ($colouredLine) {
-      Write-InColour -TextSnippets @(, $colouredLine);
-    }
-  }
+    show-SimpleSummaryBlock -Count $Count -Skipped $Skipped -Triggered $Triggered -PassThru $PassThru;
+  } # SimpleSummaryBlock
 }
 
 # Session UI state
@@ -74,12 +54,16 @@ $global:LoopzUI = [ordered]@{
   UnderscoreLine      = (New-Object String("_", $_LineLength));
   EqualsLine          = (New-Object String("=", $_LineLength));
   DotsLine            = (New-Object String(".", $_LineLength));
+  DashLine            = (New-Object String("-", $_LineLength));
   LightDotsLine       = ((New-Object String(".", (($_LineLength - 1) / 2))).Replace(".", ". ") + ".");
+  LightDashLine       = ((New-Object String("-", (($_LineLength - 1) / 2))).Replace("-", "- ") + "-");
   TildeLine           = (New-Object String("~", $_LineLength));
 
   SmallUnderscoreLine = (New-Object String("_", $_SmallLineLength));
   SmallEqualsLine     = (New-Object String("=", $_SmallLineLength));
   SmallDotsLine       = (New-Object String(".", $_SmallLineLength));
+  SmallDashLine       = (New-Object String("-", $_SmallLineLength));
   SmallLightDotsLine  = ((New-Object String(".", (($_SmallLineLength - 1) / 2))).Replace(".", ". ") + ".");
+  SmallLightDashLine  = ((New-Object String("-", (($_SmallLineLength - 1) / 2))).Replace("-", "- ") + "-");
   SmallTildeLine      = (New-Object String("~", $_SmallLineLength));
 }

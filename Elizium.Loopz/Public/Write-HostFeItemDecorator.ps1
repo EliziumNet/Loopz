@@ -205,8 +205,8 @@
     # Write with a Krayola Theme
     #
     [System.Collections.Hashtable]$krayolaTheme = `
-      $PassThru.ContainsKey('LOOPZ.WH-FOREACH-DECORATOR.KRAYOLA-THEME') `
-      ? $PassThru['LOOPZ.WH-FOREACH-DECORATOR.KRAYOLA-THEME'] : (Get-KrayolaTheme);
+      $PassThru.ContainsKey('LOOPZ.KRAYOLA-THEME') `
+      ? $PassThru['LOOPZ.KRAYOLA-THEME'] : (Get-KrayolaTheme);
 
     [System.Collections.Hashtable]$parameters = @{}
     $parameters['Pairs'] = $themedPairs;

@@ -191,7 +191,7 @@ Describe 'Invoke-MirrorDirectoryTree' {
 
   Context 'given: HoistDescendent specified' {
     Context 'and: Include directory filters applied' {
-      It 'Should: traverse creating files and hoisted descendant directories' -Tag 'Current' {
+      It 'Should: traverse creating files and hoisted descendant directories' {
         [scriptblock]$summary = {
           param(
             [int]$_count,
