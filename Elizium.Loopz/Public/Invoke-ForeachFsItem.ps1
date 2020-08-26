@@ -57,10 +57,10 @@ function Invoke-ForeachFsItem {
   .PARAMETER Functee
     String defining the function to be invoked. Works in a similar way to the Block parameter
   for script-blocks. The Function's base signature is as follows:
-    "Underscore": (See pipelineItem described above)
-    "Index": (See index described above)
-    "PassThru": (See PathThru described above)
-    "Trigger": (See trigger described above)
+    * Underscore: (See pipelineItem described above)
+    * Index: (See index described above)
+    * PassThru: (See PathThru described above)
+    *Trigger: (See trigger described above)
 
   .PARAMETER FuncteeParams
     Optional hash-table containing the named parameters which are splatted into the Functee
@@ -70,6 +70,19 @@ function Invoke-ForeachFsItem {
     A hash table containing miscellaneous information gathered internally throughout the
   pipeline batch. This can be of use to the user, because it is the way the user can perform
   bi-directional communication between the invoked custom script block and client side logic.
+
+  .PARAMETER Header
+    A script-block that is invoked at the start of the pipeline batch. The script-block is
+  invoked with the following positional parameters:
+    * PassThru: (see PassThru previously described)
+
+    The Header can be customised with the following PassThru entries:
+    - 'LOOPZ.KRAYOLA-THEME': Krayola Theme generally in use
+    - 'LOOPZ.HEADER-BLOCK.MESSAGE': message displayed as part of the header
+    - 'LOOPZ.HEADER-BLOCK.CRUMB': Lead text displayed in header, default: '[+] '
+    - 'LOOPZ.HEADER.PROPERTIES': An array of Key/Value pairs of items to be displayed
+    - 'LOOPZ.HEADER-BLOCK.LINE': A string denoting the line to be displayed. (There are
+    predefined lines available to use in $LoopzUI, or a custom one can be used instead)
 
   .PARAMETER Summary
     A script-block that is invoked at the end of the pipeline batch. The script-block is
@@ -193,6 +206,33 @@ function Invoke-ForeachFsItem {
 
     Get-ChildItem './Tests/Data/fefsi' -Directory | Invoke-ForeachFsItem `
       -Block $block -Directory -DirectoryIncludes $filterDirectories;
+
+  .EXAMPLE 5
+  Invoke a script-block to handle .txt file objects from the same directory. This
+  example illustrates the use of the Header and Summary blocks. Blocks predefined
+  in LoopzHelpers are illustrated but the user can defined their own.
+
+    [scriptblock]$block = {
+      param(
+        [System.IO.FileInfo]$FileInfo,
+        [int]$Index,
+        [System.Collections.Hashtable]$PassThru,
+        [boolean]$Trigger
+      )
+      ...
+    }
+
+    $passThru = @{
+      'LOOPZ.KRAYOLA-THEME' = $(Get-KrayolaTheme);
+      'LOOPZ.HEADER-BLOCK.MESSAGE' = 'The owls are not what they seem';
+      'LOOPZ.HEADER-BLOCK.PROPERTIES' = @(@('A', 'One'), @('B', 'Two'), @('C', 'Three'));
+      'LOOPZ.HEADER-BLOCK.LINE' = $LoopzUI.TildeLine;
+      'LOOPZ.SUMMARY-BLOCK.LINE' = $LoopzUI.DashLine;
+    }
+
+    Get-ChildItem './Tests/Data/fefsi' -Recurse -Filter '*.txt' -File | `
+      Invoke-ForeachFsItem -File -Block $block -PassThru $passThru `
+        -Header $LoopzHelpers.DefaultHeaderBlock -Summary $LoopzHelpers.SimpleSummaryBlock;
   #>
   [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', '')]
   [CmdletBinding(DefaultParameterSetName = 'InvokeScriptBlock')]
@@ -226,12 +266,20 @@ function Invoke-ForeachFsItem {
 
     [Parameter(ParameterSetName = 'InvokeScriptBlock')]
     [Parameter(ParameterSetName = 'InvokeFunction')]
+    [scriptblock]$Header = ( {
+        param(
+          [System.Collections.Hashtable]$_passThru
+        )
+      }),
+
+    [Parameter(ParameterSetName = 'InvokeScriptBlock')]
+    [Parameter(ParameterSetName = 'InvokeFunction')]
     [scriptblock]$Summary = ( {
         param(
-          [int]$count,
-          [int]$skipped,
-          [boolean]$trigger,
-          [System.Collections.Hashtable]$passThru
+          [int]$_count,
+          [int]$_skipped,
+          [boolean]$_trigger,
+          [System.Collections.Hashtable]$_passThru
         )
       }),
 
@@ -256,6 +304,10 @@ function Invoke-ForeachFsItem {
     [int]$skipped = 0;
     [boolean]$broken = $false;
     [boolean]$trigger = $PassThru.ContainsKey('LOOPZ.FOREACH.TRIGGER');
+
+    if ($manageIndex) {
+      $Header.Invoke($PassThru);
+    }
   }
 
   process {

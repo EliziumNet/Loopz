@@ -156,7 +156,7 @@ The *SimpleSummaryBlock* can be used on any compound function that that has a *S
 
 A custom summary message may also be defined under key 'LOOPZ.SUMMARY-BLOCK.MESSAGE'; this is optional and if not specified, the word 'Summary' will be used.
 
-A Krayola theme may be specified and as one may already have been defined for *Write-HostFeFsItem* under key 'LOOPZ.WH-FOREACH-DECORATOR.KRAYOLA-THEME', this will also be used by the Summary block.
+A Krayola theme may be specified and as one may already have been defined for *Write-HostFeFsItem* under key 'LOOPZ.KRAYOLA-THEME', this will also be used by the Summary block.
 
 ### :dart: Line definitions
 
