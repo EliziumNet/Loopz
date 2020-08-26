@@ -19,7 +19,7 @@ or function as it goes.
 ```powershell
 Invoke-MirrorDirectoryTree -Path <String> -DestinationPath <String> [-DirectoryIncludes <String[]>]
  [-DirectoryExcludes <String[]>] [-FileIncludes <String[]>] [-FileExcludes <String[]>] [-PassThru <Hashtable>]
- [-Block <ScriptBlock>] [-BlockParams <Object>] [-CreateDirs] [-CopyFiles] [-Hoist] [-Summary <ScriptBlock>]
+ [-Block <ScriptBlock>] [-BlockParams <Object>] [-CreateDirs] [-CopyFiles] [-Hoist] [-Header <ScriptBlock>] [-Summary <ScriptBlock>]
  [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 
@@ -28,7 +28,7 @@ Invoke-MirrorDirectoryTree -Path <String> -DestinationPath <String> [-DirectoryI
 ```powershell
 Invoke-MirrorDirectoryTree -Path <String> -DestinationPath <String> [-DirectoryIncludes <String[]>]
  [-DirectoryExcludes <String[]>] [-FileIncludes <String[]>] [-FileExcludes <String[]>] [-PassThru <Hashtable>]
- -Functee <String> [-FuncteeParams <Hashtable>] [-CreateDirs] [-CopyFiles] [-Hoist] [-Summary <ScriptBlock>]
+ -Functee <String> [-FuncteeParams <Hashtable>] [-CreateDirs] [-CopyFiles] [-Hoist] [-Header <ScriptBlock>] [-Summary <ScriptBlock>]
  [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 
@@ -389,6 +389,34 @@ function invoke. As it's a hash table, order is not significant.
 ```yaml
 Type: Hashtable
 Parameter Sets: InvokeFunction
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Header
+
+  A script-block that is invoked at the start of the mirror batch. The script-block is
+invoked with the following positional parameters:
+
+* PassThru: (see PassThru previously described)
+
+  The Header can be customised with the following PassThru entries:
+
+* 'LOOPZ.KRAYOLA-THEME': Krayola Theme generally in use
+* 'LOOPZ.HEADER-BLOCK.MESSAGE': message displayed as part of the header
+* 'LOOPZ.HEADER-BLOCK.CRUMB': Lead text displayed in header, default: '[+] '
+* 'LOOPZ.HEADER.PROPERTIES': An array of Key/Value pairs of items to be displayed
+* 'LOOPZ.HEADER-BLOCK.LINE': A string denoting the line to be displayed. (There are
+predefined lines available to use in $LoopzUI, or a custom one can be used instead)
+
+```yaml
+Type: ScriptBlock
+Parameter Sets: (All)
 Aliases:
 
 Required: False

@@ -146,30 +146,89 @@ This sets up a new calling chain, where *Invoke-ForeachFsItem* invokes the *Writ
 
 Some global definitions have been exported as global variables as an aid to using the functions in this module.
 
-### :dart: Predefined summary script-block
+### :dart: Predefined Header script-block
+
+```powershell
+$LoopzHelpers.DefaultHeaderBlock
+```
+
+The *DefaultHeaderBlock* can be used on any compound function that that has a *Header* parameter. The Header can be customised with the following PassThru entries:
+
+* 'LOOPZ.KRAYOLA-THEME': Krayola Theme generally in use
+* 'LOOPZ.HEADER-BLOCK.MESSAGE': message displayed as part of the header
+* 'LOOPZ.HEADER-BLOCK.CRUMB': Lead text displayed in header, default: '[+] '
+* 'LOOPZ.HEADER.PROPERTIES': An array of Key/Value pairs of items to be displayed
+* 'LOOPZ.HEADER-BLOCK.LINE': A string denoting the line to be displayed. (There are
+predefined lines available to use in $LoopzUI, or a custom one can be used instead)
+
+The *DefaultHeaderBlock* will generated either a single line or multi-line Header depending on whether custom properties have been defined. When properties have been defined under key *LOOPZ.HEADER.PROPERTIES* then a multi-line Header is generated, eg:
+
+```powershell
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+The sound the wind makes in the pines // ["A" => "One", "B" => "Two", "C" => "Three"]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
+
+If no properties have been defined then a single line Header will be generated, eg:
+
+```powershell
+[+] ============================================================= [ What lies in the darkness ] ===
+```
+
+What is displayed in the Header is driven by what is defined in the Krayola theme or items in the PassThru, so in this example
+
+* '[+] ' (*PassThru*): 'LOOPZ.HEADER-BLOCK.CRUMB'
+* 'What lies in the darkness' (*PassThru*): 'LOOPZ.HEADER-BLOCK.MESSAGE'
+* '[': (*Theme*): 'OPEN'
+* ']': (*Theme*): 'CLOSE'
+
+The user can specify the pre-defined Header script block or can defined their own. The signature of the Header script-block is as follows:
+
+```powershell
+  param(
+    [System.Collections.Hashtable]$PassThru
+  )
+```
+
+### :dart: Predefined Summary script-block
 
 ```powershell
 $LoopzHelpers.SimpleSummaryBlock
 ```
 
-The *SimpleSummaryBlock* can be used on any compound function that that has a *Summary* parameter. Is can be customised by specifying a line string under key 'LOOPZ.SUMMARY-BLOCK.LINE'. Any string can be defined or one of the pre-defined lines (see below) can be specified.
+The *SimpleSummaryBlock* can be used on any compound function that that has a *Summary* parameter. It can be customised by specifying a line string under key 'LOOPZ.SUMMARY-BLOCK.LINE'. Any string can be defined or one of the pre-defined lines (see below) can be specified.
 
 A custom summary message may also be defined under key 'LOOPZ.SUMMARY-BLOCK.MESSAGE'; this is optional and if not specified, the word 'Summary' will be used.
 
 A Krayola theme may be specified and as one may already have been defined for *Write-HostFeFsItem* under key 'LOOPZ.KRAYOLA-THEME', this will also be used by the Summary block.
 
+The user can specify the pre-defined Summary script block or can defined their own. The signature of the Summary script-block is as follows:
+
+```powershell
+  param(
+    [int]$Count,
+    [int]$Skipped,
+    [boolean]$Triggered,
+    [System.Collections.Hashtable]$PassThru
+  )
+```
+
 ### :dart: Line definitions
 
-To be set under key 'LOOPZ.SUMMARY-BLOCK.LINE' of the PassThru as previously discussed.
+To be set under key 'LOOPZ.HEADER-BLOCK.LINE' and/or 'LOOPZ.SUMMARY-BLOCK.LINE' of the PassThru as previously discussed.
 
 ```powershell
 $LoopzUI.UnderscoreLine
 $LoopzUI.EqualsLine
+$LoopzUI.DashLine
 $LoopzUI.DotsLine
+$LoopzUI.LightDashLine
 $LoopzUI.LightDotsLine
 $LoopzUI.TildeLine
 $LoopzUI.SmallUnderscoreLine
 $LoopzUI.SmallEqualsLine
+$LoopzUI.SmallLightDashLine
+$LoopzUI.SmallDashLine
 $LoopzUI.SmallDotsLine
 $LoopzUI.SmallLightDotsLine
 $LoopzUI.SmallTildeLine
