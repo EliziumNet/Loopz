@@ -24,4 +24,24 @@ Describe 'show-SimpleSummaryBlock' {
       show-SimpleSummaryBlock -Count 101 -Skipped 0 -Triggered $true -PassThru $passThru;
     }
   }
+
+  Context 'given: wide items specified' {
+    It 'should: display summary with wide items' -Tag 'Current' {
+      [System.Collections.Hashtable]$passThru = @{
+        'LOOPZ.SUMMARY-BLOCK.LINE' = $LoopzUI.DashLine;
+        'LOOPZ.SUMMARY-BLOCK.WIDE-ITEMS' = @(@('From', '/source/'), @('To', '/destination/'));
+      }
+      show-SimpleSummaryBlock -Count 999 -Skipped 0 -Triggered $false -PassThru $passThru;
+    }
+  }
+
+  Context 'given: summary properties specified' {
+    It 'should: display summary with summary properties' -Tag 'Current' {
+      [System.Collections.Hashtable]$passThru = @{
+        'LOOPZ.SUMMARY-BLOCK.LINE'       = $LoopzUI.DashLine;
+        'LOOPZ.SUMMARY-BLOCK.PROPERTIES' = @(@('A', 'One'), @('B', 'Two'));
+      }
+      show-SimpleSummaryBlock -Count 999 -Skipped 0 -Triggered $false -PassThru $passThru;
+    }
+  }
 }
