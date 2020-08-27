@@ -31,10 +31,33 @@ function show-SimpleSummaryBlock {
     @('Triggered', $Triggered)
   )
 
+  [string[][]]$summaryProperties = $PassThru.ContainsKey(
+    'LOOPZ.SUMMARY-BLOCK.PROPERTIES') ? $PassThru['LOOPZ.SUMMARY-BLOCK.PROPERTIES'] : @();
+
+  if ($summaryProperties.Length -gt 0) {
+    $properties += $summaryProperties;
+  }
+
   [string]$message = $PassThru.ContainsKey('LOOPZ.SUMMARY-BLOCK.MESSAGE') `
     ? $PassThru['LOOPZ.SUMMARY-BLOCK.MESSAGE'] : 'Summary';
 
   Write-ThemedPairsInColour -Pairs $properties -Theme $krayolaTheme -Message $message;
+
+  # Wide items
+  #
+  if ($PassThru.ContainsKey('LOOPZ.SUMMARY-BLOCK.WIDE-ITEMS')) {
+    [string[][]]$wideItems = $PassThru['LOOPZ.SUMMARY-BLOCK.WIDE-ITEMS'];
+    $keyColours = $krayolaTheme['KEY-COLOURS'];
+    $valueColours = $krayolaTheme['VALUE-COLOURS'];
+
+    foreach ($item in $wideItems) {
+      Write-InColour -TextSnippets @(
+        @(@(, $item[0]) + $keyColours),
+        @(@(, ': ') + $metaColours),
+        @(@(, $item[1]) + $valueColours)
+      )
+    }
+  }
 
   # Second line
   #

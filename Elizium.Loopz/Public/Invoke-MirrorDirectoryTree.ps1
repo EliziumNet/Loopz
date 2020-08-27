@@ -354,7 +354,9 @@
     }
 
     $destinationBranch = edit-RemoveSingleSubString -Target $sourceDirectoryFullName -Subtract $rootSource;
+
     $destinationDirectory = Join-Path -Path $rootDestination -ChildPath $destinationBranch;
+    $_passThru['LOOPZ.MIRROR.BRANCH-DESTINATION'] = $destinationBranch;
 
     [boolean]$whatIf = $_passThru.ContainsKey('LOOPZ.MIRROR.WHAT-IF') -and ($_passThru['LOOPZ.MIRROR.WHAT-IF']);
     Write-Debug "[+] >>> doMirrorBlock: destinationDirectory: '$destinationDirectory'";
@@ -477,7 +479,7 @@
       -Includes $DirectoryIncludes -Excludes $DirectoryExcludes;
   }
 
-  Invoke-TraverseDirectory -Path $resolvedSourcePath `
+  $null = Invoke-TraverseDirectory -Path $resolvedSourcePath `
     -Block $doMirrorBlock -PassThru $PassThru -Header $Header -Summary $Summary `
     -Condition $filterDirectories -Hoist:$Hoist;
 
