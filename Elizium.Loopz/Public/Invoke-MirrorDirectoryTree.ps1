@@ -365,7 +365,7 @@
 
       $destinationInfo = (Test-Path -Path $destinationDirectory) `
         ? (Get-Item -Path $destinationDirectory) `
-        : (New-Item -ItemType 'Directory' -Path $destinationDirectory -WhatIf:$whatIf);
+        : (New-Item -ItemType 'Directory' -Path $destinationDirectory);
     }
     else {
       Write-Debug "    [-] Creating destination branch directory INFO obj: '$destinationBranch'";
@@ -396,7 +396,7 @@
       if (Get-ChildItem $sourceDirectoryWithWildCard `
           -Include $adjustedFileIncludes -Exclude $adjustedFileExcludes) {
         if (-not(Test-Path -Path $destinationDirectory)) {
-          New-Item -ItemType 'Directory' -Path $destinationDirectory -WhatIf:$whatIf
+          New-Item -ItemType 'Directory' -Path $destinationDirectory;
         }
       }
 
