@@ -234,7 +234,6 @@ function Invoke-TraverseDirectory {
     [string]$Functee,
 
     [Parameter(ParameterSetName = 'InvokeFunction')]
-    [ValidateScript( { $_.Length -gt 0; })]
     [System.Collections.Hashtable]$FuncteeParams = @{},
 
     [Parameter(ParameterSetName = 'InvokeScriptBlock')]

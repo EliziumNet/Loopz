@@ -287,7 +287,6 @@
     [string]$Functee,
 
     [Parameter(ParameterSetName = 'InvokeFunction')]
-    [ValidateScript( { $_.Count -gt 0; })]
     [System.Collections.Hashtable]$FuncteeParams = @{},
 
     [Parameter(ParameterSetName = 'InvokeScriptBlock')]
@@ -358,7 +357,7 @@
     $destinationDirectory = Join-Path -Path $rootDestination -ChildPath $destinationBranch;
     $_passThru['LOOPZ.MIRROR.BRANCH-DESTINATION'] = $destinationBranch;
 
-    [boolean]$whatIf = $_passThru.ContainsKey('LOOPZ.MIRROR.WHAT-IF') -and ($_passThru['LOOPZ.MIRROR.WHAT-IF']);
+    [boolean]$whatIf = $_passThru.ContainsKey('WHAT-IF') -and ($_passThru['WHAT-IF']);
     Write-Debug "[+] >>> doMirrorBlock: destinationDirectory: '$destinationDirectory'";
 
     if ($CreateDirs.ToBool()) {
@@ -467,7 +466,7 @@
   }
 
   if ($PSBoundParameters.ContainsKey('WhatIf') -and ($true -eq $PSBoundParameters['WhatIf'])) {
-    $PassThru['LOOPZ.MIRROR.WHAT-IF'] = $true;
+    $PassThru['WHAT-IF'] = $true;
   }
 
   [scriptblock]$filterDirectories = {
