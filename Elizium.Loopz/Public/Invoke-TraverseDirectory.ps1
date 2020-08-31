@@ -294,7 +294,7 @@ function Invoke-TraverseDirectory {
       $positional = @($directoryInfo, $index, $passThru, $trigger);
 
       if ($passThru.ContainsKey('LOOPZ.TRAVERSE.INVOKEE.PARAMS') -and
-        ($passThru['LOOPZ.TRAVERSE.INVOKEE.PARAMS'] -gt 0)) {
+        ($passThru['LOOPZ.TRAVERSE.INVOKEE.PARAMS'].Count -gt 0)) {
         $passThru['LOOPZ.TRAVERSE.INVOKEE.PARAMS'] | ForEach-Object {
           $positional += $_;
         }
@@ -355,13 +355,24 @@ function Invoke-TraverseDirectory {
 
     [scriptblock]$adapted = $_passThru['LOOPZ.TRAVERSE.ADAPTED'];
 
-    $adapted.Invoke(
-      $_underscore,
-      $_passThru['LOOPZ.TRAVERSE.CONDITION'],
-      $_passThru,
-      $PassThru['LOOPZ.TRAVERSE.INVOKEE'],
-      $_trigger
-    );
+    try {
+      $adapted.Invoke(
+        $_underscore,
+        $_passThru['LOOPZ.TRAVERSE.CONDITION'],
+        $_passThru,
+        $PassThru['LOOPZ.TRAVERSE.INVOKEE'],
+        $_trigger
+      );
+    } catch [System.Management.Automation.MethodInvocationException] {
+      # This is a mystery exception, that has no effect on processing the batch:
+      #
+      # Exception calling ".ctor" with "2" argument(s): "Count cannot be less than zero.
+      #
+      # Resolve-Error
+      # Write-Error "Problem with: '$_underscore'" -ErrorAction Stop;
+    } catch {
+      Write-Error "[!] Error: $($_.Exception.Message)" -ErrorAction Continue;
+    }
   } # adapter
 
   # ======================================================= [Invoke-TraverseDirectory] ===
@@ -440,13 +451,17 @@ function Invoke-TraverseDirectory {
         $index = $PassThru['LOOPZ.FOREACH.INDEX'];
       }
 
-      if ($result.psobject.properties.match('Trigger') -and $result.Trigger) {
-        $PassThru['LOOPZ.FOREACH.TRIGGER'] = $true;
-        $trigger = $true;
-      }
+      if ($result) {
+        if ($result.psobject.properties.match('Trigger') -and $result.Trigger) {
+          $PassThru['LOOPZ.FOREACH.TRIGGER'] = $true;
+          $trigger = $true;
+        }
 
-      if ($result.psobject.properties.match('Break') -and $result.Break) {
-        $broken = $true;
+        if ($result.psobject.properties.match('Break') -and $result.Break) {
+          $broken = $true;
+        }
+      } else {
+        Write-Debug "Received null invoke result for directory: '$($directory.FullName)'";
       }
     }
 
