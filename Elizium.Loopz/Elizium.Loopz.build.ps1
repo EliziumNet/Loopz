@@ -172,7 +172,9 @@ task WriteStats {
 }
 
 task Analyse {
-  Invoke-ScriptAnalyzer -Path .\Output\ -Recurse
+  if (Test-Path -Path .\Output\) {
+    Invoke-ScriptAnalyzer -Path .\Output\ -Recurse
+  }
 }
 
 task ApplyFix {
