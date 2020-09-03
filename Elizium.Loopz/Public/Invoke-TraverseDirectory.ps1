@@ -473,6 +473,8 @@ function Invoke-TraverseDirectory {
       [System.IO.DirectoryInfo[]]$directoryInfos = Get-ChildItem -Path $Path `
         -Directory -Recurse | Where-Object { $Condition.Invoke($_) }
 
+      Write-Debug "  [o] Invoke-TraverseDirectory (Hoist); Count: $($directoryInfos.Count)";
+
       if ($directoryInfos) {
         # No need to manage the index, let Invoke-ForeachFsItem do this for us,
         # except we do need to inform Invoke-ForeachFsItem to start the index at

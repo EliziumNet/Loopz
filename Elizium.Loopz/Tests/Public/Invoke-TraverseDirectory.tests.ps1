@@ -410,30 +410,7 @@ Describe 'Invoke-TraverseDirectory' {
       } # should: stop iterating
 
       Context 'and: Hoist' {
-        It 'should: stop iterating' {
-          Mock -ModuleName Elizium.Loopz Test-FireEXBreak -Verifiable {
-            param(
-              [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', '')]
-              [System.IO.DirectoryInfo]$Underscore,
-              [int]$Index,
-              [System.Collections.Hashtable]$PassThru,
-              [boolean]$Trigger
-            )
-            $break = ('EX' -eq $Underscore.Name);
-            Write-Debug "  [-] MOCK Test-FireEXBreak(index: $Index, directory: $($Underscore.Name)";
-
-            @{ Product = $Underscore; Break = $break }
-          } # Mock
-
-          [string]$sourcePath = (Convert-Path '.\Tests\Data\traverse\Audio');
-          Write-Debug "[+] === path: $sourcePath";
-
-          Invoke-TraverseDirectory -Path $sourcePath -Functee 'Test-FireEXBreak' `
-            -Condition $filterDirectories -Hoist;
-          Assert-MockCalled Test-FireEXBreak -ModuleName Elizium.Loopz -Times 9;
-        } # should: stop iterating
-
-        It 'should: contain correct count value in PassThru' {
+        It 'should: stop iterating and contain correct count in PassThru' -Tag 'Current' {
           Mock -ModuleName Elizium.Loopz Test-FireEXBreak -Verifiable {
             param(
               [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', '')]
@@ -454,10 +431,9 @@ Describe 'Invoke-TraverseDirectory' {
           [System.Collections.Hashtable]$verifiedCountPassThru = @{}
           Invoke-TraverseDirectory -Path $sourcePath -Functee 'Test-FireEXBreak' `
             -Condition $filterDirectories -Hoist -PassThru $verifiedCountPassThru;
-
-          Assert-MockCalled Test-FireEXBreak -ModuleName Elizium.Loopz -Times 9;
-          $verifiedCountPassThru['LOOPZ.TRAVERSE.COUNT'] | Should -Be 9;
-        }
+          Assert-MockCalled Test-FireEXBreak -ModuleName Elizium.Loopz -Times 6;
+          $verifiedCountPassThru['LOOPZ.TRAVERSE.COUNT'] | Should -Be 6;
+        } # should: stop iterating
       } # and: Hoist
     } # and: break is fired
   } # given: fn result
