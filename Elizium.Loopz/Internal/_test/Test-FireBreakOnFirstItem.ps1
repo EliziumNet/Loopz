@@ -1,5 +1,5 @@
 
-function Test-FireEXBreak {
+function Test-FireBreakOnFirstItem {
   [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', '')]
   param(
     [Parameter(Mandatory)]
@@ -14,8 +14,7 @@ function Test-FireEXBreak {
     [Parameter(Mandatory)]
     [boolean]$Trigger
   )
-  $break = ('EX' -eq $Underscore.Name);
-  Write-Host "  [-] Test-FireEXBreak(index: $Index): directory: $($Underscore.Name)";
-  @{ Product = $Underscore; Break = $break }
+  Write-Host "  [-] Test-FireBreakOnFirstItem(index: $Index): directory: $($Underscore.Name)";
+  @{ Product = $Underscore; Break = $true }
 }
 
