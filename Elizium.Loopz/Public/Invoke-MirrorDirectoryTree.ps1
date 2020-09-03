@@ -360,16 +360,27 @@
     [boolean]$whatIf = $_passThru.ContainsKey('WHAT-IF') -and ($_passThru['WHAT-IF']);
     Write-Debug "[+] >>> doMirrorBlock: destinationDirectory: '$destinationDirectory'";
 
-    if ($CreateDirs.ToBool()) {
-      Write-Debug "    [-] Creating destination branch directory: '$destinationBranch'";
-
-      $destinationInfo = (Test-Path -Path $destinationDirectory) `
-        ? (Get-Item -Path $destinationDirectory) `
-        : (New-Item -ItemType 'Directory' -Path $destinationDirectory);
+    if ($whatIf) {
+      if (Test-Path -Path $destinationDirectory) {
+        Write-Debug "    [-] (WhatIf) Get existing destination branch directory: '$destinationBranch'";
+        $destinationInfo = (Get-Item -Path $destinationDirectory);
+      } else {
+        Write-Debug "    [-] (WhatIf) Creating synthetic destination branch directory: '$destinationBranch'";
+        $destinationInfo = ([System.IO.DirectoryInfo]::new($destinationDirectory));
+      }
     }
     else {
-      Write-Debug "    [-] Creating destination branch directory INFO obj: '$destinationBranch'";
-      $destinationInfo = New-Object -TypeName System.IO.DirectoryInfo ($destinationDirectory);
+      if ($CreateDirs.ToBool()) {
+        Write-Debug "    [-] Creating destination branch directory: '$destinationBranch'";
+
+        $destinationInfo = (Test-Path -Path $destinationDirectory) `
+          ? (Get-Item -Path $destinationDirectory) `
+          : (New-Item -ItemType 'Directory' -Path $destinationDirectory);
+      }
+      else {
+        Write-Debug "    [-] Creating destination branch directory INFO obj: '$destinationBranch'";
+        $destinationInfo = New-Object -TypeName System.IO.DirectoryInfo ($destinationDirectory);
+      }
     }
 
     if ($CopyFiles.ToBool()) {
