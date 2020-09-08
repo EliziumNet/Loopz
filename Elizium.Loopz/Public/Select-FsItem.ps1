@@ -1,4 +1,4 @@
-
+﻿
 function Select-FsItem {
   <#
   .NAME
@@ -11,7 +11,7 @@ function Select-FsItem {
   .DESCRIPTION
     Use this utility function to help specify a Condition for Invoke-TraverseDirectory.
   This function is partly required because the Include/Exclude parameters on functions
-  such as Get-ChildItems/Copy-Item/Get-Item etc only work on files not directories. 
+  such as Get-ChildItems/Copy-Item/Get-Item etc only work on files not directories.
 
   .PARAMETER Name
     A string to be matched against the filters.

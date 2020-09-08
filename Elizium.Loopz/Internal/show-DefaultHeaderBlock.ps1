@@ -1,4 +1,4 @@
-
+﻿
 function show-DefaultHeaderBlock {
   param(
     [System.Collections.Hashtable]$PassThru
@@ -70,7 +70,7 @@ function show-DefaultHeaderBlock {
       $messageColours = $krayolaTheme['MESSAGE-COLOURS'];
       $leadFormat = "{0}{1} {2} ";
       $tailFormat = " {0} {1}";
- 
+
       if ($message.Length -gt ($line.Length - $open.Length - $close.Length - $extra)) {
         $lead = (New-Object String($char, $tailLength))
         $tail = (New-Object String($char, $tailLength));

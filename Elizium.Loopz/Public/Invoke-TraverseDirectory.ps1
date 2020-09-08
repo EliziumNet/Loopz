@@ -43,7 +43,7 @@ function Invoke-TraverseDirectory {
     When the script block is invoked, the trigger should indicate if the trigger was pulled for
     any of the items so far processed in the batch. This is the responsibility of the
     client's script-block/function implementation.
-  
+
   In addition to these fixed positional parameters, if the invoked scriptblock is defined
   with additional parameters, then these will also be passed in. In order to achieve this,
   the client has to provide excess parameters in BlockParams and these parameters must be

@@ -1,4 +1,4 @@
-
+﻿
 $global:LoopzHelpers = @{
   # Helper Script Blocks
   #
@@ -38,7 +38,7 @@ $global:LoopzHelpers = @{
       [boolean]$Triggered,
       [System.Collections.Hashtable]$PassThru = @{}
     )
-  
+
     show-SimpleSummaryBlock -Count $Count -Skipped $Skipped -Triggered $Triggered -PassThru $PassThru;
   } # SimpleSummaryBlock
 }
