@@ -26,7 +26,7 @@ Describe 'show-SimpleSummaryBlock' {
   }
 
   Context 'given: wide items specified' {
-    It 'should: display summary with wide items' -Tag 'Current' {
+    It 'should: display summary with wide items' {
       [System.Collections.Hashtable]$passThru = @{
         'LOOPZ.SUMMARY-BLOCK.LINE' = $LoopzUI.DashLine;
         'LOOPZ.SUMMARY-BLOCK.WIDE-ITEMS' = @(@('From', '/source/'), @('To', '/destination/'));
@@ -36,7 +36,7 @@ Describe 'show-SimpleSummaryBlock' {
   }
 
   Context 'given: summary properties specified' {
-    It 'should: display summary with summary properties' -Tag 'Current' {
+    It 'should: display summary with summary properties' {
       [System.Collections.Hashtable]$passThru = @{
         'LOOPZ.SUMMARY-BLOCK.LINE'       = $LoopzUI.DashLine;
         'LOOPZ.SUMMARY-BLOCK.PROPERTIES' = @(@('A', 'One'), @('B', 'Two'));

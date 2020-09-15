@@ -258,6 +258,25 @@ function Invoke-TraverseDirectory {
 
     [Parameter(ParameterSetName = 'InvokeScriptBlock')]
     [Parameter(ParameterSetName = 'InvokeFunction')]
+    [scriptblock]$SessionHeader = ( {
+        param(
+          [System.Collections.Hashtable]$_passThru
+        )
+      }),
+
+    [Parameter(ParameterSetName = 'InvokeScriptBlock')]
+    [Parameter(ParameterSetName = 'InvokeFunction')]
+    [scriptblock]$SessionSummary = ( {
+        param(
+          [int]$_count,
+          [int]$_skipped,
+          [boolean]$_trigger,
+          [System.Collections.Hashtable]$_passThru
+        )
+      }),
+
+    [Parameter(ParameterSetName = 'InvokeScriptBlock')]
+    [Parameter(ParameterSetName = 'InvokeFunction')]
     [switch]$Hoist
   ) # param
 
@@ -316,8 +335,6 @@ function Invoke-TraverseDirectory {
       $result = & $invokee @parameters;
     }
 
-    $passThru['LOOPZ.FOREACH.INDEX']++;
-
     [string]$fullName = $directoryInfo.FullName;
     [System.IO.DirectoryInfo[]]$directoryInfos = Get-ChildItem -Path $fullName `
       -Directory | Where-Object { $condition.Invoke($_) };
@@ -354,6 +371,7 @@ function Invoke-TraverseDirectory {
     )
 
     [scriptblock]$adapted = $_passThru['LOOPZ.TRAVERSE.ADAPTED'];
+    $controller = $_passThru['LOOPZ.CONTROLLER'];
 
     try {
       $adapted.Invoke(
@@ -363,105 +381,92 @@ function Invoke-TraverseDirectory {
         $PassThru['LOOPZ.TRAVERSE.INVOKEE'],
         $_trigger
       );
-    } catch [System.Management.Automation.MethodInvocationException] {
+    }
+    catch [System.Management.Automation.MethodInvocationException] {
+      $controller.ErrorItem();
       # This is a mystery exception, that has no effect on processing the batch:
       #
       # Exception calling ".ctor" with "2" argument(s): "Count cannot be less than zero.
       #
       # Resolve-Error
       # Write-Error "Problem with: '$_underscore'" -ErrorAction Stop;
-    } catch {
+    }
+    catch {
+      $controller.ErrorItem();
       Write-Error "[!] Error: $($_.Exception.Message)" -ErrorAction Continue;
+
+      throw;
     }
   } # adapter
 
   # ======================================================= [Invoke-TraverseDirectory] ===
 
+  $controller = New-Controller -Type TraverseCtrl -PassThru $PassThru `
+    -Header $Header -Summary $Summary -SessionHeader $SessionHeader -SessionSummary $SessionSummary;
+  $PassThru['LOOPZ.CONTROLLER'] = $controller;
+
+  $controller.StartSession();
+
   # Handle top level directory, before recursing through child directories
   #
-
   [System.IO.DirectoryInfo]$directory = Get-Item -Path $Path;
 
   [boolean]$itemIsDirectory = ($directory.Attributes -band
     [System.IO.FileAttributes]::Directory) -eq [System.IO.FileAttributes]::Directory;
 
   if ($itemIsDirectory) {
-    [boolean]$trigger = $PassThru.ContainsKey('LOOPZ.FOREACH.TRIGGER');
-    [boolean]$broken = $false;
-
-    # The index of the top level directory is always 0
-    #
-    [int]$index = 0;
-
-    if ('InvokeFunction' -eq $PSCmdlet.ParameterSetName) {
-      # set-up custom parameters
-      #
-      [System.Collections.Hashtable]$parameters = $FuncteeParams.Clone();
-      $parameters['Underscore'] = $directory;
-      $parameters['Index'] = $index;
-      $parameters['PassThru'] = $PassThru;
-      $parameters['Trigger'] = $trigger;
-      $PassThru['LOOPZ.TRAVERSE.INVOKEE.PARAMS'] = $parameters;
-    }
-    elseif ('InvokeScriptBlock' -eq $PSCmdlet.ParameterSetName) {
-      $positional = @($directory, $index, $PassThru, $trigger);
-
-      if ($BlockParams.Count -gt 0) {
-        $BlockParams | Foreach-Object {
-          $positional += $_;
-        }
-      }
-
-      # Note, for the positional parameters, we can only pass in the additional
-      # custom parameters provided by the client here via the PassThru otherwise
-      # we could accidentally build up the array of positional parameters with
-      # duplicated entries. This is in contrast to splatted arguments for function
-      # invokes where parameter names are paired with parameter values in a
-      # hashtable and naturally prevent duplicated entries. This is why we set
-      # 'LOOPZ.TRAVERSE.INVOKEE.PARAMS' to $BlockParams and not $positional.
-      #
-      $PassThru['LOOPZ.TRAVERSE.INVOKEE.PARAMS'] = $BlockParams;
-    }
-
-    if (-not($Hoist.ToBool())) {
-      # We only want to manage the index via $PassThru when we are recursing
-      # and tells invoke-ForeachFsItem further down the line not to manage the
-      # index and not to invoke the Header and Summary.
-      #
-      $PassThru['LOOPZ.FOREACH.INDEX'] = $index;
-      $Header.Invoke($PassThru);
-    }
-    $result = $null;
-
-    # This is the top level invoke
-    #
     if ($Condition.Invoke($directory)) {
-      if ('InvokeScriptBlock' -eq $PSCmdlet.ParameterSetName) {
-        $result = $Block.Invoke($positional);
-      }
-      elseif ('InvokeFunction' -eq $PSCmdlet.ParameterSetName) {
-        $result = & $Functee @parameters;
-      }
+      [boolean]$trigger = $controller.GetTrigger();
 
-      if ($Hoist.ToBool()) {
-        $index++;
-      }
-      else {
-        $PassThru['LOOPZ.FOREACH.INDEX']++;
-        $index = $PassThru['LOOPZ.FOREACH.INDEX'];
-      }
+      # The index of the top level directory is always 0
+      #
+      [int]$index = $controller.RequestIndex();
 
-      if ($result) {
-        if ($result.psobject.properties.match('Trigger') -and $result.Trigger) {
-          $PassThru['LOOPZ.FOREACH.TRIGGER'] = $true;
-          $trigger = $true;
+      if ('InvokeFunction' -eq $PSCmdlet.ParameterSetName) {
+        # set-up custom parameters
+        #
+        [System.Collections.Hashtable]$parameters = $FuncteeParams.Clone();
+        $parameters['Underscore'] = $directory;
+        $parameters['Index'] = $index;
+        $parameters['PassThru'] = $PassThru;
+        $parameters['Trigger'] = $trigger;
+        $PassThru['LOOPZ.TRAVERSE.INVOKEE.PARAMS'] = $parameters;
+      }
+      elseif ('InvokeScriptBlock' -eq $PSCmdlet.ParameterSetName) {
+        $positional = @($directory, $index, $PassThru, $trigger);
+
+        if ($BlockParams.Count -gt 0) {
+          $BlockParams | Foreach-Object {
+            $positional += $_;
+          }
         }
 
-        if ($result.psobject.properties.match('Break') -and $result.Break) {
-          $broken = $true;
+        # Note, for the positional parameters, we can only pass in the additional
+        # custom parameters provided by the client here via the PassThru otherwise
+        # we could accidentally build up the array of positional parameters with
+        # duplicated entries. This is in contrast to splatted arguments for function
+        # invokes where parameter names are paired with parameter values in a
+        # hashtable and naturally prevent duplicated entries. This is why we set
+        # 'LOOPZ.TRAVERSE.INVOKEE.PARAMS' to $BlockParams and not $positional.
+        #
+        $PassThru['LOOPZ.TRAVERSE.INVOKEE.PARAMS'] = $BlockParams;
+      }
+
+      $result = $null;
+
+      # This is the top level invoke (TODO: try / catch this invoke)
+      #
+      try {
+        if ('InvokeScriptBlock' -eq $PSCmdlet.ParameterSetName) {
+          $result = $Block.Invoke($positional);
         }
-      } else {
-        Write-Debug "Received null invoke result for directory: '$($directory.FullName)'";
+        elseif ('InvokeFunction' -eq $PSCmdlet.ParameterSetName) {
+          $result = & $Functee @parameters;
+        }
+      } catch {
+        $controller.IncrementError();
+      } finally {
+        $controller.HandleResult($result);
       }
     }
 
@@ -484,7 +489,6 @@ function Invoke-TraverseDirectory {
         [System.Collections.Hashtable]$parametersFeFsItem = @{
           'Directory'  = $true;
           'PassThru'   = $PassThru;
-          'StartIndex' = $index;
           'Summary'    = $Summary;
         }
 
@@ -501,6 +505,8 @@ function Invoke-TraverseDirectory {
       }
     }
     else {
+      # Top level descendants
+      #
       # Set up the adapter. (NB, can't use splatting because we're invoking a script block
       # as opposed to a named function.)
       #
@@ -522,18 +528,14 @@ function Invoke-TraverseDirectory {
 
       if ($directoryInfos) {
         $directoryInfos | Invoke-ForeachFsItem -Directory -Block $adapter `
-          -StartIndex $index -PassThru $PassThru -Condition $Condition -Summary $Summary;
+          -PassThru $PassThru -Condition $Condition -Summary $Summary;
       }
-
-      [int]$skipped = 0;
-      $index = $PassThru['LOOPZ.FOREACH.INDEX'];
-      $trigger = $PassThru['LOOPZ.FOREACH.TRIGGER'];
-      $Summary.Invoke($index, $skipped, $trigger, $PassThru);
     }
-
-    $PassThru['LOOPZ.TRAVERSE.COUNT'] = $PassThru['LOOPZ.FOREACH.COUNT'];
   }
   else {
+    $controller.SkipItem();
     Write-Error "Path specified '$($Path)' is not a directory";
   }
+
+  $controller.EndSession();
 } # Invoke-TraverseDirectory

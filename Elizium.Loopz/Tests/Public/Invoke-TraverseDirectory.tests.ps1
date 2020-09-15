@@ -38,23 +38,23 @@ Describe 'Invoke-TraverseDirectory' {
             [Parameter(Mandatory)]
             [boolean]$_trigger
           )
+          Write-Debug "+++ DIRECTORY (Index: $_index): $_underscore"
 
           @{ Product = $_underscore }
         }
 
-        [scriptblock]$summary = {
+        [scriptblock]$sessionSummary = {
           param(
             [int]$_count,
             [int]$_skipped,
             [boolean]$_trigger,
             [System.Collections.Hashtable]$_passThru
           )
-          $index = $_passThru['LOOPZ.FOREACH.INDEX'];
-          $index | Should -Be 19;
+          $_count | Should -Be 19;
         }
 
         Invoke-TraverseDirectory -Path $resolvedSourcePath `
-          -Block $traverseBlock -Summary $summary;
+          -Block $traverseBlock -SessionSummary $sessionSummary;
       }
 
       Context 'and: SimpleSummaryBlock provided' {
@@ -112,7 +112,7 @@ Describe 'Invoke-TraverseDirectory' {
           @{ Product = $_underscore }
         }
 
-        [scriptblock]$summary = {
+        [scriptblock]$sessionSummary = {
           param(
             [int]$_count,
             [int]$_skipped,
@@ -124,15 +124,59 @@ Describe 'Invoke-TraverseDirectory' {
         }
 
         Invoke-TraverseDirectory -Path $resolvedSourcePath -Block $traverseBlock `
-          -Summary $summary -Condition $filterDirectories -Hoist;
+          -SessionSummary $sessionSummary -Condition $filterDirectories -Hoist;
       } # should: traverse child directories whose ancestors don\`t match filter
+
+      Context 'and: Skipped' {
+        It 'should: increment skip' {
+          $container = @{
+            count = 0;
+          }
+          [scriptblock]$skipBlock = {
+            param(
+              [Parameter(Mandatory)]
+              [System.IO.DirectoryInfo]$_underscore,
+
+              [Parameter(Mandatory)]
+              [int]$_index,
+
+              [Parameter(Mandatory)]
+              [System.Collections.Hashtable]$_passThru,
+
+              [Parameter(Mandatory)]
+              [boolean]$_trigger
+              )
+              $skipped = $($container.count -le 4);
+              Write-Debug "[+] Traverse with Hoist (Skipped); directory ($filter): '$($_underscore.Name)', index: $_index, Skipped: $skipped";
+              @{ Product = $_underscore; Skipped = $skipped; }
+              $container.count++;
+          }
+
+          [scriptblock]$summaryWithSkip = {
+            param(
+              [int]$_count,
+              [int]$_skipped,
+              [boolean]$_trigger,
+              [System.Collections.Hashtable]$_passThru
+            )
+
+            Write-Debug "  [Summary] Count: $_count, skipped: $_skipped, trigger: $_trigger";
+            # $_count | Should -Be 5;
+          }
+
+          [System.Collections.Hashtable]$passThruWithSkip = @{}
+          Invoke-TraverseDirectory -Path $resolvedSourcePath -Block $skipBlock `
+            -Summary $summaryWithSkip -Condition $filterDirectories -Hoist -PassThru $passThruWithSkip;
+          # $passThruWithSkip['LOOPZ.TRAVERSE.SKIPPED'] | Should -Be 5; # this is just the top level invoke
+        }
+      }
     } # and: directory tree and Hoist specified
   } # given: custom scriptblock specified
 
   Context 'given: custom function specified' {
     Context 'and: directory tree and Hoist specified' {
       It 'should: traverse child directories whose ancestors don\`t match filter' {
-        [scriptblock]$summary = {
+        [scriptblock]$sessionSummary = {
           param(
             [int]$_count,
             [int]$_skipped,
@@ -147,7 +191,7 @@ Describe 'Invoke-TraverseDirectory' {
         }
 
         Invoke-TraverseDirectory -Path $resolvedSourcePath -Functee 'Test-HoistResult' `
-          -FuncteeParams $parameters -Summary $summary -Condition $filterDirectories -Hoist;
+          -FuncteeParams $parameters -SessionSummary $sessionSummary -Condition $filterDirectories -Hoist;
       }
     }
   } # given: custom function specified
@@ -296,7 +340,7 @@ Describe 'Invoke-TraverseDirectory' {
             )
 
             Write-Debug "--> TEST-SUMMARY(block/break/single): Count: $_count, Skipped: $_skipped, Trigger: $_trigger";
-            $container.count | Should -Be 2;
+            $container.count | Should -Be 1;
           }
 
           Invoke-TraverseDirectory -Path $sourcePath -Block $traverseBlock `
@@ -325,7 +369,7 @@ Describe 'Invoke-TraverseDirectory' {
             @{ Product = $_underscore; Break = $break }
           }
 
-          [scriptblock]$summary = {
+          [scriptblock]$sessionSummary = {
             param(
               [int]$_count,
               [int]$_skipped,
@@ -338,7 +382,7 @@ Describe 'Invoke-TraverseDirectory' {
           }
 
           Invoke-TraverseDirectory -Path $sourcePath -Block $traverseBlock `
-            -Summary $summary;
+            -SessionSummary $sessionSummary;
         } # should: stop iterating
       } # and: multiple iterations
     } # and: break is fired

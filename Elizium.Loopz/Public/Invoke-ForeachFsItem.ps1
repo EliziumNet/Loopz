@@ -44,7 +44,7 @@ function Invoke-ForeachFsItem {
   any of the items so far processed in the pipeline. This is the responsibility of the
   client's block implementation. The trigger is only of use for state changing operations
   and can be ignored otherwise.
-
+                              
   In addition to these fixed positional parameters, if the invoked scriptblock is defined
   with additional parameters, then these will also be passed in. In order to achieve this,
   the client has to provide excess parameters in BlockParam and these parameters must be
@@ -108,15 +108,6 @@ function Invoke-ForeachFsItem {
   .PARAMETER Directory
     Switch to indicate that the invoked function/script-block (invokee) is to handle Directory
   objects.
-
-  .PARAMETER StartIndex
-    Some calling functions interact with Invoke-ForeachFsItem in a way that may require that
-  there is external control of the starting index. For example, Invoke-TraverseDirectory
-  (which invokes Invoke-ForeachFsItem) handles the root Directory separately from its descendants
-  and to ensure that the allocated indices are correct, the starting index should be set to 1,
-  because the root Directory has already been allocated index 0, outside of the ForeachFsItem
-  batch.
-    Normal use of ForeachFsItem does not require StartIndex to be specified.
 
   .EXAMPLE 1
   Invoke a script-block to handle .txt file objects from the same directory (without -Recurse):
@@ -291,23 +282,15 @@ function Invoke-ForeachFsItem {
     [Parameter(ParameterSetName = 'InvokeScriptBlock')]
     [Parameter(ParameterSetName = 'InvokeFunction')]
     [ValidateScript( { -not($PSBoundParameters.ContainsKey('File')) })]
-    [switch]$Directory,
-
-    [Parameter(ParameterSetName = 'InvokeScriptBlock')]
-    [Parameter(ParameterSetName = 'InvokeFunction')]
-    [int]$StartIndex = 0
+    [switch]$Directory
   ) # param
 
   begin {
-    [boolean]$manageIndex = -not($PassThru.ContainsKey('LOOPZ.FOREACH.INDEX'));
-    [int]$index = $manageIndex ? $StartIndex : $PassThru['LOOPZ.FOREACH.INDEX'];
-    [int]$skipped = 0;
-    [boolean]$broken = $false;
-    [boolean]$trigger = $PassThru.ContainsKey('LOOPZ.FOREACH.TRIGGER');
-
-    if ($manageIndex) {
-      $Header.Invoke($PassThru);
+    if (-not($PassThru.ContainsKey('LOOPZ.CONTROLLER'))) {
+      $PassThru['LOOPZ.CONTROLLER'] = New-Controller -Type ForeachCtrl -PassThru $PassThru -Header $Header -Summary $Summary;
     }
+    $controller = $PassThru['LOOPZ.CONTROLLER'];
+    $controller.ForeachBegin();
   }
 
   process {
@@ -316,11 +299,13 @@ function Invoke-ForeachFsItem {
 
     [boolean]$acceptAll = -not($File.ToBool()) -and -not($Directory.ToBool());
 
-    if (-not($broken)) {
+    if (-not($controller.IsBroken())) {
       if ( $acceptAll -or ($Directory.ToBool() -and $itemIsDirectory) -or
         ($File.ToBool() -and -not($itemIsDirectory)) ) {
         if ($Condition.Invoke($pipelineItem)) {
-          $result = $null;
+          [PSCustomObject]$result = $null;
+          [int]$index = $controller.RequestIndex();
+          [boolean]$trigger = $controller.GetTrigger();
 
           if ('InvokeScriptBlock' -eq $PSCmdlet.ParameterSetName) {
             $positional = @($pipelineItem, $index, $PassThru, $trigger);
@@ -344,49 +329,28 @@ function Invoke-ForeachFsItem {
             $result = & $Functee @parameters;
           }
 
-          if ($manageIndex) {
-            $index++;
-          }
-          else {
-            $index = $PassThru['LOOPZ.FOREACH.INDEX'];
-          }
-
-          if ($result) {
-            if ($result.psobject.properties.match('Trigger') -and $result.Trigger) {
-              $PassThru['LOOPZ.FOREACH.TRIGGER'] = $true;
-              $trigger = $true;
-            }
-
-            if ($result.psobject.properties.match('Break') -and $result.Break) {
-              $broken = $true;
-            }
-
-            if ($result.psobject.properties.match('Product') -and $result.Product) {
-              $result.Product;
-            }
+          $controller.HandleResult($result);
+          if ($result -and $result.psobject.properties.match('Product') -and $result.Product) {
+            $result.Product;
           }
         }
         else {
           # IDEA! We could allow the user to provide an extra script block which we
           # invoke for skipped items and set a string containing the reason why it was
           # skipped.
-          $null = $skipped++;
+          $controller.SkipItem();
         }
       }
       else {
-        $null = $skipped++;
+        $controller.SkipItem();
       }
     }
     else {
-      $null = $skipped++;
+      $controller.SkipItem();
     }
   }
 
   end {
-    $PassThru['LOOPZ.FOREACH.TRIGGER'] = $trigger;
-    $PassThru['LOOPZ.FOREACH.COUNT'] = $manageIndex ? $index : $PassThru['LOOPZ.FOREACH.INDEX'];
-    if ($manageIndex) {
-      $Summary.Invoke($index, $skipped, $trigger, $PassThru);
-    }
+    $controller.ForeachEnd();
   }
 } # Invoke-ForeachFsItem
