@@ -405,7 +405,7 @@ function Invoke-TraverseDirectory {
     -Header $Header -Summary $Summary -SessionHeader $SessionHeader -SessionSummary $SessionSummary;
   $PassThru['LOOPZ.CONTROLLER'] = $controller;
 
-  $controller.StartSession();
+  $controller.BeginSession();
 
   # Handle top level directory, before recursing through child directories
   #

@@ -44,8 +44,6 @@ class BaseController {
   [scriptblock]$_summary;
   [System.Collections.Hashtable]hidden $_passThru;
   [int]hidden $_index = 0;
-  [int]hidden $_skipped = 0;
-  [int]hidden $_errors = 0;
   [boolean]$_trigger = $false;
   [boolean]hidden $_broken = $false;
 
@@ -72,33 +70,43 @@ class BaseController {
     return $this._trigger;
   }
 
+  # I don't know how to define abstract methods in PowerShell classes, so
+  # throwing an exception is the best thing we can do for now.
+  #
   [void] SkipItem() {
-    $this._skipped++;
+    throw [System.Management.Automation.MethodInvocationException]::new(
+      'Abstract method not implemented (BaseController.SkipItem)');
+  }
+
+  [int] Skipped() {
+    throw [System.Management.Automation.MethodInvocationException]::new(
+      'Abstract method not implemented (BaseController.Skipped)');
   }
 
   [void] ErrorItem() {
-    if ($this._passThru.ContainsKey('LOOPZ.CONTROLLER.STACK')) {
-      $this._passThru['LOOPZ.CONTROLLER.STACK'].Peek().Increment();
-    }
-    $this._errors++;
+    throw [System.Management.Automation.MethodInvocationException]::new(
+      'Abstract method not implemented (BaseController.ErrorItem)');
   }
 
-  [void]ForeachBegin () {
+  [int] Errors() {
+    throw [System.Management.Automation.MethodInvocationException]::new(
+      'Abstract method not implemented (BaseController.Errors)');
+  }
+
+  [void] ForeachBegin () {
     [System.Collections.Stack]$stack = $this._passThru.ContainsKey('LOOPZ.CONTROLLER.STACK') `
       ? ($this._passThru['LOOPZ.CONTROLLER.STACK']) : ([System.Collections.Stack]::new());
 
     $stack.Push([Counter]::new());
-    $this._skipped = 0;
-    $this._errors = 0;
     $this._header.Invoke($this._passThru);
   }
 
-  [void]ForeachEnd () {
+  [void] ForeachEnd () {
     $this._passThru['LOOPZ.FOREACH.TRIGGER'] = $this._trigger;
     $this._passThru['LOOPZ.FOREACH.COUNT'] = $this._index;
 
     [int]$count = 0;
-    [int]$skipped = 0;
+    [int]$skipped = $this._skipped;
     if ($this._passThru.ContainsKey('LOOPZ.CONTROLLER.STACK')) {
       [Counter]$counter = $this._passThru['LOOPZ.CONTROLLER.STACK'].Pop();
       $count = $counter.Value();
@@ -110,8 +118,8 @@ class BaseController {
     $this._summary.Invoke($count, $skipped, $this._trigger, $this._passThru);
   }
 
-  [void]StartSession () {}
-  [void]EndSession () {}
+  [void] BeginSession () {}
+  [void] EndSession () {}
 
   [void] HandleResult([PSCustomObject]$invokeResult) {
     # Note, the _index at this point has already been incremented and refers to the
@@ -128,18 +136,44 @@ class BaseController {
       }
 
       if ($invokeResult.psobject.properties.match('Skipped') -and $invokeResult.Skipped) {
-        $this._skipped++;
+        $this.SkipItem();
       }
     }
   }
 }
 
 class ForeachController : BaseController {
+  [int]hidden $_skipped = 0;
+  [int]hidden $_errors = 0;
+
   ForeachController([System.Collections.Hashtable]$passThru,
     [scriptblock]$header,
     [scriptblock]$summary
   ): base($passThru, $header, $summary) {
 
+  }
+
+  [void] SkipItem() {
+    $this._skipped++;
+  }
+
+  [int] Skipped() {
+    return $this._skipped;
+  }
+
+  [void] ErrorItem() {
+    $this._errors++;
+  }
+
+  [int] Errors() {
+    return $this._errors;
+  }
+
+  [void] ForeachEnd () {
+    $this._passThru['LOOPZ.FOREACH.TRIGGER'] = $this._trigger;
+    $this._passThru['LOOPZ.FOREACH.COUNT'] = $this._index;
+
+    $this._summary.Invoke($this._index, $this._skipped, $this._trigger, $this._passThru);
   }
 }
 
@@ -164,8 +198,27 @@ class TraverseController : BaseController {
     $this._session.Summary = $sessionSummary;
   }
 
-  [void]ForeachEnd () {
-    [Counter]$counter = $this._passThru['LOOPZ.CONTROLLER.STACK'].Peek();
+  [void] SkipItem() {
+    $this._passThru['LOOPZ.CONTROLLER.STACK'].Peek().IncrementSkipped();
+  }
+
+  [int] Skipped() {
+    return $this._session.Skipped;
+  }
+
+  [void] ErrorItem() {
+    $this._passThru['LOOPZ.CONTROLLER.STACK'].Peek().IncrementError();
+  }
+
+  [int] Errors() {
+    return $this._session.Errors;
+  }
+
+  [void] ForeachEnd () {
+    $this._passThru['LOOPZ.FOREACH.TRIGGER'] = $this._trigger;
+    $this._passThru['LOOPZ.FOREACH.COUNT'] = $this._index;
+
+    [Counter]$counter = $this._passThru['LOOPZ.CONTROLLER.STACK'].Pop();
     $this._session.Count += $counter.Value();
     $this._session.Errors += $counter.Errors();
     $this._session.Skipped += $counter.Skipped();
@@ -173,17 +226,17 @@ class TraverseController : BaseController {
       $this._session.Trigger = $true;
     }
 
-    ([BaseController]$this).ForeachEnd();
+    $this._summary.Invoke($counter.Value(), $counter.Skipped(), $this._trigger, $this._passThru);
   }
 
-  [void]StartSession () {
+  [void] BeginSession () {
     [System.Collections.Stack]$stack = [System.Collections.Stack]::new();
     $stack.Push([Counter]::new());
     $this._passThru['LOOPZ.CONTROLLER.STACK'] = $stack;
     $this._session.Header.Invoke($this._passThru);
   }
 
-  [void]EndSession () {
+  [void] EndSession () {
     [System.Collections.Stack]$stack = $this._passThru['LOOPZ.CONTROLLER.STACK'];
 
     # This counter value represents the top-level invoke which is not included in
