@@ -207,29 +207,29 @@ class TraverseController : BaseController {
 }
 
 function New-Controller {
-  [CmdletBinding()]
+  [CmdletBinding(DefaultParameterSetName = 'Iterating')]
   [OutputType([BaseController])]
   param (
-    # [Parameter(ParameterSetName = 'ForeachSet')]
-    # [Parameter(ParameterSetName = 'TraverseSet')]
+    [Parameter(ParameterSetName = 'Iterating')]
+    [Parameter(ParameterSetName = 'Traversing')]
     [ControllerType]$Type,
 
-    # [Parameter(ParameterSetName = 'ForeachSet')]
-    # [Parameter(ParameterSetName = 'TraverseSet')]
+    [Parameter(ParameterSetName = 'Iterating')]
+    [Parameter(ParameterSetName = 'Traversing')]
     [System.Collections.Hashtable]$PassThru,
 
-    # [Parameter(ParameterSetName = 'ForeachSet')]
-    # [Parameter(ParameterSetName = 'TraverseSet')]
+    [Parameter(ParameterSetName = 'Iterating')]
+    [Parameter(ParameterSetName = 'Traversing')]
     [scriptblock]$Header,
 
-    # [Parameter(ParameterSetName = 'ForeachSet')]
-    # [Parameter(ParameterSetName = 'TraverseSet')]
+    [Parameter(ParameterSetName = 'Iterating')]
+    [Parameter(ParameterSetName = 'Traversing')]
     [scriptblock]$Summary,
 
-    # [Parameter(ParameterSetName = 'TraverseSet')]
+    [Parameter(ParameterSetName = 'Traversing')]
     [scriptblock]$SessionHeader,
 
-    # [Parameter(ParameterSetName = 'TraverseSet')]
+    [Parameter(ParameterSetName = 'Traversing')]
     [scriptblock]$SessionSummary
   )
 
