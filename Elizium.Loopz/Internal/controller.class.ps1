@@ -1,7 +1,7 @@
 
 # The only reason why all the controller classes are implemented in the same file is because
 # there is a deficiency in PSScriptAnalyzer (in VSCode) which reports class references as errors
-# if they are defined in the same file from where they are referenced. The only way to circumvent
+# if they are not defined in the same file from where they are referenced. The only way to circumvent
 # this problem is to place all class related code into the same file.
 #
 enum ControllerType {
@@ -194,7 +194,7 @@ class TraverseController : BaseController {
     if ($stack.Count -eq 0) {
       $this._passThru.Remove('LOOPZ.CONTROLLER.STACK');
     } else {
-      Write-Warning "!!!!!! END-SESSION; stack contains excess items [$($stack.Count)]"
+      Write-Warning "!!!!!! END-SESSION; stack contains $($stack.Count) excess items";
     }
 
     $this._session.Count += $counter.Value();

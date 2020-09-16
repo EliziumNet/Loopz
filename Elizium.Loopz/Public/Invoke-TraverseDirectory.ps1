@@ -454,7 +454,7 @@ function Invoke-TraverseDirectory {
 
       $result = $null;
 
-      # This is the top level invoke (TODO: try / catch this invoke)
+      # This is the top level invoke
       #
       try {
         if ('InvokeScriptBlock' -eq $PSCmdlet.ParameterSetName) {
@@ -463,11 +463,16 @@ function Invoke-TraverseDirectory {
         elseif ('InvokeFunction' -eq $PSCmdlet.ParameterSetName) {
           $result = & $Functee @parameters;
         }
-      } catch {
+      }
+      catch {
         $controller.IncrementError();
-      } finally {
+      }
+      finally {
         $controller.HandleResult($result);
       }
+    }
+    else {
+      $controller.SkipItem();
     }
 
     # --- end of top level invoke ----------------------------------------------------------
@@ -487,9 +492,9 @@ function Invoke-TraverseDirectory {
         # handled.
         #
         [System.Collections.Hashtable]$parametersFeFsItem = @{
-          'Directory'  = $true;
-          'PassThru'   = $PassThru;
-          'Summary'    = $Summary;
+          'Directory' = $true;
+          'PassThru'  = $PassThru;
+          'Summary'   = $Summary;
         }
 
         if ('InvokeScriptBlock' -eq $PSCmdlet.ParameterSetName) {

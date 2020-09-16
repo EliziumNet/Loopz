@@ -2,7 +2,7 @@
 task . Clean, Build, Tests, Stats
 task Tests ImportCompiledModule, Pester
 task CreateManifest CopyPSD, UpdatePublicFunctionsToExport
-task Build Compile, CreateManifest, Ana
+task Build Compile, CreateManifest
 task Stats RemoveStats, WriteStats
 task Ana Analyse
 task Fix ApplyFix
@@ -24,8 +24,6 @@ $script:TestHelpers = "$PSScriptRoot/Tests/Helpers"
 if (Test-Path -Path $script:TestHelpers) {
   $helpers = Get-ChildItem -Path $script:TestHelpers -Recurse -File -Filter '*.ps1';
   $helpers | ForEach-Object { Write-Verbose "sourcing helper $_"; . $_; }
-} else {
-  Write-Warning "Could not find helpers: $script:TestHelpers"
 }
 
 function Get-FunctionExportList {

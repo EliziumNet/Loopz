@@ -319,6 +319,25 @@
           [boolean]$_trigger,
           [System.Collections.Hashtable]$_passThru
         )
+      }),
+
+    [Parameter(ParameterSetName = 'InvokeScriptBlock')]
+    [Parameter(ParameterSetName = 'InvokeFunction')]
+    [scriptblock]$SessionHeader = ( {
+        param(
+          [System.Collections.Hashtable]$_passThru
+        )
+      }),
+
+    [Parameter(ParameterSetName = 'InvokeScriptBlock')]
+    [Parameter(ParameterSetName = 'InvokeFunction')]
+    [scriptblock]$SessionSummary = ( {
+        param(
+          [int]$_count,
+          [int]$_skipped,
+          [boolean]$_trigger,
+          [System.Collections.Hashtable]$_passThru
+        )
       })
   ) # param
 
@@ -491,7 +510,7 @@
 
   $null = Invoke-TraverseDirectory -Path $resolvedSourcePath `
     -Block $doMirrorBlock -PassThru $PassThru -Header $Header -Summary $Summary `
-    -Condition $filterDirectories -Hoist:$Hoist;
+    -SessionHeader $SessionHeader -SessionSummary $SessionSummary -Condition $filterDirectories -Hoist:$Hoist;
 
   # $PassThru['LOOPZ.MIRROR.COUNT'] = $PassThru['LOOPZ.TRAVERSE.COUNT'];
 } # Invoke-MirrorDirectoryTree
