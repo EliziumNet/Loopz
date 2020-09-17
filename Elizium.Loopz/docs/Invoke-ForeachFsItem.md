@@ -18,8 +18,7 @@ Allows a custom defined script-block or function to be invoked for all file syst
 ```powershell
 
 Invoke-ForeachFsItem -pipelineItem <FileSystemInfo> [-Condition <ScriptBlock>] -Block <ScriptBlock>
-[-BlockParams <Object>] [-PassThru <Hashtable>] [-Header <ScriptBlock>] [-Summary <ScriptBlock>] [-File] [-Directory]
-[-StartIndex <Int32>] [<CommonParameters>]
+[-BlockParams <Object>] [-PassThru <Hashtable>] [-Header <ScriptBlock>] [-Summary <ScriptBlock>] [-File] [-Directory] [<CommonParameters>]
 ```
 
 ### InvokeFunction
@@ -27,8 +26,7 @@ Invoke-ForeachFsItem -pipelineItem <FileSystemInfo> [-Condition <ScriptBlock>] -
 ```powershell
 
 Invoke-ForeachFsItem -pipelineItem <FileSystemInfo> [-Condition <ScriptBlock>] -Functee <String>
-[-FuncteeParams <Hashtable>] [-PassThru <Hashtable>] [-Header <ScriptBlock>] [-Summary <ScriptBlock>] [-File] [-Directory]
-[-StartIndex <Int32>] [<CommonParameters>]
+[-FuncteeParams <Hashtable>] [-PassThru <Hashtable>] [-Header <ScriptBlock>] [-Summary <ScriptBlock>] [-File] [-Directory] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -337,29 +335,6 @@ bi-directional communication between the invoked custom script block and client 
 
 ```yaml
 Type: Hashtable
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -StartIndex
-
-Some calling functions interact with Invoke-ForeachFsItem in a way that may require that
-there is external control of the starting index. For example, Invoke-TraverseDirectory
-(which invokes Invoke-ForeachFsItem) handles the root Directory separately from its descendants
-and to ensure that the allocated indices are correct, the starting index should be set to 1,
-because the root Directory has already been allocated index 0, outside of the ForeachFsItem
-batch.
-
-Normal use of ForeachFsItem does not require StartIndex to be specified.
-
-```yaml
-Type: Int32
 Parameter Sets: (All)
 Aliases:
 

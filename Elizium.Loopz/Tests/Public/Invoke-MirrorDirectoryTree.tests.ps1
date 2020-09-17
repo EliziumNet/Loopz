@@ -98,7 +98,8 @@ Describe 'Invoke-MirrorDirectoryTree' {
         Invoke-MirrorDirectoryTree -Path $sourcePath `
           -DestinationPath $destinationPath -CreateDirs -WhatIf:$whatIf;
 
-        Test-Path -Path (Join-Path -Path $destinationPath -ChildPath 'Audio') | Should -BeTrue;
+        $testPath = Join-Path -Path $destinationPath -ChildPath 'Audio';
+        Test-Path -Path $testPath | Should -BeTrue;
       }
     }
 
@@ -107,8 +108,11 @@ Describe 'Invoke-MirrorDirectoryTree' {
         Invoke-MirrorDirectoryTree -Path $sourcePath `
           -DestinationPath $destinationPath -CreateDirs -CopyFiles -WhatIf:$whatIf;
 
-        Test-Path -Path (Join-Path -Path $destinationPath -ChildPath 'Audio') | Should -BeTrue;
-        Test-Path -Path (Join-Path -Path $destinationPath -ChildPath 'Audio\audio-catalogue.txt') | Should -BeTrue;
+        $testPath = Join-Path -Path $destinationPath -ChildPath 'Audio';
+        Test-Path -Path $testPath | Should -BeTrue;
+
+        $testFile = Join-Path -Path $destinationPath -ChildPath 'Audio\audio-catalogue.txt';
+        Test-Path -Path $testFile | Should -BeTrue;
       }
     }
   } # given: no filters applied
@@ -119,10 +123,15 @@ Describe 'Invoke-MirrorDirectoryTree' {
         Invoke-MirrorDirectoryTree -Path $sourcePath `
           -DestinationPath $destinationPath -CreateDirs -CopyFiles -FileIncludes @('cover.*') -WhatIf:$whatIf;
 
-        Test-Path -Path (Join-Path -Path $destinationPath -ChildPath 'Audio') | Should -BeTrue;
-        Test-Path -Path (Join-Path -Path $destinationPath `
-            -ChildPath 'Audio\GOTHIC\Fields Of The Nephilim\Earth Inferno\cover.fotn.earth-inferno.jpg.txt') | Should -BeTrue;
-        Test-Path -Path (Join-Path -Path $destinationPath -ChildPath 'Audio\audio-catalogue.txt') | Should -BeFalse;
+        $testPath = Join-Path -Path $destinationPath -ChildPath 'Audio';
+        Test-Path -Path $testPath | Should -BeTrue;
+
+        $coverFile = Join-Path -Path $destinationPath `
+          -ChildPath 'Audio\GOTHIC\Fields Of The Nephilim\Earth Inferno\cover.fotn.earth-inferno.jpg.txt';
+        Test-Path -Path $coverFile | Should -BeTrue -Because "'cover.fotn.earth-inferno.jpg.txt' matches include";
+
+        $excludedFile = Join-Path -Path $destinationPath -ChildPath 'Audio\audio-catalogue.txt';
+        Test-Path -Path $excludedFile | Should -BeFalse;
       }
     }
 
@@ -132,10 +141,15 @@ Describe 'Invoke-MirrorDirectoryTree' {
           Invoke-MirrorDirectoryTree -Path $sourcePath `
             -DestinationPath $destinationPath -CreateDirs -CopyFiles -FileIncludes @('jpg.txt') -WhatIf:$whatIf;
 
-          Test-Path -Path (Join-Path -Path $destinationPath -ChildPath 'Audio') | Should -BeTrue;
-          Test-Path -Path (Join-Path -Path $destinationPath `
-              -ChildPath 'Audio\GOTHIC\Fields Of The Nephilim\Earth Inferno\cover.fotn.earth-inferno.jpg.txt') | Should -BeTrue;
-          Test-Path -Path (Join-Path -Path $destinationPath -ChildPath 'Audio\audio-catalogue.txt') | Should -BeFalse;
+          $testPath = Join-Path -Path $destinationPath -ChildPath 'Audio';
+          Test-Path -Path $testPath | Should -BeTrue;
+
+          $coverFile = Join-Path -Path $destinationPath `
+            -ChildPath 'Audio\GOTHIC\Fields Of The Nephilim\Earth Inferno\cover.fotn.earth-inferno.jpg.txt';
+          Test-Path -Path $coverFile | Should -BeTrue -Because "Path $coverFile does not exist";
+
+          $excludedFile = Join-Path -Path $destinationPath -ChildPath 'Audio\audio-catalogue.txt';
+          Test-Path -Path $excludedFile | Should -BeFalse;
         }
       }
 
@@ -144,10 +158,15 @@ Describe 'Invoke-MirrorDirectoryTree' {
           Invoke-MirrorDirectoryTree -Path $sourcePath `
             -DestinationPath $destinationPath -CreateDirs -CopyFiles -FileIncludes @('.jpg.txt') -WhatIf:$whatIf;
 
-          Test-Path -Path (Join-Path -Path $destinationPath -ChildPath 'Audio') | Should -BeTrue;
-          Test-Path -Path (Join-Path -Path $destinationPath `
-              -ChildPath 'Audio\GOTHIC\Fields Of The Nephilim\Earth Inferno\cover.fotn.earth-inferno.jpg.txt') | Should -BeTrue;
-          Test-Path -Path (Join-Path -Path $destinationPath -ChildPath 'Audio\audio-catalogue.txt') | Should -BeFalse;
+          $testPath = Join-Path -Path $destinationPath -ChildPath 'Audio';
+          Test-Path -Path $testPath | Should -BeTrue -Because "Path $testPath does not exist";
+
+          $coverFile = Join-Path -Path $destinationPath `
+            -ChildPath 'Audio\GOTHIC\Fields Of The Nephilim\Earth Inferno\cover.fotn.earth-inferno.jpg.txt';
+          Test-Path -Path $coverFile | Should -BeTrue -Because "Path $coverFile does not exist";
+
+          $excludedFile = Join-Path -Path $destinationPath -ChildPath 'Audio\audio-catalogue.txt';
+          Test-Path -Path $excludedFile | Should -BeFalse;
         }
       }
     } # and: filter without wild-card
@@ -159,11 +178,15 @@ Describe 'Invoke-MirrorDirectoryTree' {
         Invoke-MirrorDirectoryTree -Path $sourcePath `
           -DestinationPath $destinationPath -CreateDirs -CopyFiles -FileExcludes @('*mp3*') -WhatIf:$whatIf;
 
-        Test-Path -Path (Join-Path -Path $destinationPath -ChildPath 'Audio') | Should -BeTrue;
-        Test-Path -Path (Join-Path -Path $destinationPath `
-            -ChildPath 'Audio\GOTHIC\Fields Of The Nephilim\Earth Inferno\cover.fotn.earth-inferno.jpg.txt') | Should -BeTrue;
-        Test-Path -Path (Join-Path -Path $destinationPath `
-            -ChildPath 'Audio\MINIMAL\Plastikman\Consumed\A1 - Contain.mp3.txt') | Should -BeFalse;
+        $testPath = Join-Path -Path $destinationPath -ChildPath 'Audio';
+        Test-Path -Path $testPath | Should -BeTrue -Because "Path $testPath does not exist";
+
+        $coverFile = Join-Path -Path $destinationPath `
+          -ChildPath 'Audio\GOTHIC\Fields Of The Nephilim\Earth Inferno\cover.fotn.earth-inferno.jpg.txt';
+        Test-Path -Path $coverFile | Should -BeTrue -Because "Path $coverFile does not exist";
+
+        $testFile = Join-Path -Path $destinationPath -ChildPath 'Audio\MINIMAL\Plastikman\Consumed\A1 - Contain.mp3.txt';
+        Test-Path -Path $testFile | Should -BeFalse -Because "Path $testFile has been excluded";
       }
     }
   } # given: Exclude file filters applied
@@ -174,17 +197,27 @@ Describe 'Invoke-MirrorDirectoryTree' {
         Invoke-MirrorDirectoryTree -Path $sourcePath `
           -DestinationPath $destinationPath -CreateDirs -DirectoryIncludes @('*o*') -WhatIf:$whatIf;
 
-        Test-Path -Path (Join-Path -Path $destinationPath -ChildPath 'Audio') | Should -BeTrue;
+        $testPath = Join-Path -Path $destinationPath -ChildPath 'Audio';
+        Test-Path -Path $testPath | Should -BeTrue -Because "Path: $testPath does not exist";
       }
     }
 
     Context 'and: File copy specified without directory creation' {
       It 'should: still copy matching files' {
         Invoke-MirrorDirectoryTree -Path $sourcePath `
-          -DestinationPath $destinationPath -CopyFiles -FileIncludes @('cover.*')`
-            -DirectoryIncludes @('*o*') -WhatIf:$whatIf;
+          -DestinationPath $destinationPath -CopyFiles -FileIncludes @('cover.*') `
+          -DirectoryIncludes @('*o*') -WhatIf:$whatIf;
 
-          Test-Path -Path (Join-Path -Path $destinationPath -ChildPath 'Audio') | Should -BeTrue;
+        $testPath = Join-Path -Path $destinationPath -ChildPath 'Audio';
+        Test-Path -Path $testPath | Should -BeTrue -Because "Path $testPath does not exist";
+
+        $coverFile = Join-Path -Path $destinationPath `
+          -ChildPath 'Audio\GOTHIC\Fields Of The Nephilim\Earth Inferno\cover.fotn.earth-inferno.jpg.txt';
+        Test-Path -Path $coverFile | Should -BeTrue -Because "Path $coverFile does not exist";
+
+        $excludedPath = Join-Path -Path $destinationPath `
+          -ChildPath 'Audio\MINIMAL\FUSE\Dimension Intrusion\cover.fuse.dimension-instrusion.jpg.txt';
+        Test-Path -Path $excludedPath | Should -BeFalse -Because "'MINIMAL' has not been included";
       }
     }
   } # given: Include file filters applied
@@ -192,7 +225,7 @@ Describe 'Invoke-MirrorDirectoryTree' {
   Context 'given: HoistDescendent specified' {
     Context 'and: Include directory filters applied' {
       It 'Should: traverse creating files and hoisted descendant directories' {
-        [scriptblock]$summary = {
+        [scriptblock]$sessionSummary = {
           param(
             [int]$_count,
             [int]$_skipped, 
@@ -207,9 +240,7 @@ Describe 'Invoke-MirrorDirectoryTree' {
 
         Invoke-MirrorDirectoryTree -Path $sourcePath `
           -DestinationPath $destinationPath -CreateDirs -DirectoryIncludes @('*e*') `
-          -Hoist -Summary $summary -PassThru $verifiedCountPassThru -WhatIf:$whatIf;
-
-        $verifiedCountPassThru['LOOPZ.MIRROR.COUNT'] | Should -Be 11;
+          -Hoist -SessionSummary $sessionSummary -PassThru $verifiedCountPassThru -WhatIf:$whatIf;
       }
     }
   } # given: HoistDescendent specified

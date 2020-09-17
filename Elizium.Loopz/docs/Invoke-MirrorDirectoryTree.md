@@ -19,8 +19,9 @@ or function as it goes.
 ```powershell
 Invoke-MirrorDirectoryTree -Path <String> -DestinationPath <String> [-DirectoryIncludes <String[]>]
  [-DirectoryExcludes <String[]>] [-FileIncludes <String[]>] [-FileExcludes <String[]>] [-PassThru <Hashtable>]
- [-Block <ScriptBlock>] [-BlockParams <Object>] [-CreateDirs] [-CopyFiles] [-Hoist] [-Header <ScriptBlock>] [-Summary <ScriptBlock>]
- [-WhatIf] [-Confirm] [<CommonParameters>]
+ [-Block <ScriptBlock>] [-BlockParams <Object>] [-CreateDirs] [-CopyFiles] [-Hoist] [-Header <ScriptBlock>]
+ [-Summary <ScriptBlock>] [-SessionHeader <ScriptBlock>] [-SessionSummary <ScriptBlock>] [-WhatIf] [-Confirm]
+ [<CommonParameters>]
 ```
 
 ### InvokeFunction
@@ -28,8 +29,9 @@ Invoke-MirrorDirectoryTree -Path <String> -DestinationPath <String> [-DirectoryI
 ```powershell
 Invoke-MirrorDirectoryTree -Path <String> -DestinationPath <String> [-DirectoryIncludes <String[]>]
  [-DirectoryExcludes <String[]>] [-FileIncludes <String[]>] [-FileExcludes <String[]>] [-PassThru <Hashtable>]
- -Functee <String> [-FuncteeParams <Hashtable>] [-CreateDirs] [-CopyFiles] [-Hoist] [-Header <ScriptBlock>] [-Summary <ScriptBlock>]
- [-WhatIf] [-Confirm] [<CommonParameters>]
+ -Functee <String> [-FuncteeParams <Hashtable>] [-CreateDirs] [-CopyFiles] [-Hoist] [-Header <ScriptBlock>]
+ [-Summary <ScriptBlock>] [-SessionHeader <ScriptBlock>] [-SessionSummary <ScriptBlock>] [-WhatIf] [-Confirm]
+ [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -151,6 +153,16 @@ Mirror a directory tree copying over just flac files
 Note that -CreateDirs is missing which means directories will not be mirrored by default. They
 are only mirrored as part of the process of copying over flac files, so in the end the
 resultant mirror directory tree will contain directories that include flac files.
+
+### Example 7
+
+Same as EXAMPLE 6, but using predefined Header and Summary script-blocks for Session header/summary
+and per directory header/summary.
+
+Invoke-MirrorDirectoryTree -Path './Tests/Data/fefsi' -DestinationPath './Tests/Data/mirror' `
+-FileIncludes @('flac') -CopyFiles -Hoist `
+-Header $LoopzHelpers.DefaultHeaderBlock -Summary $DefaultHeaderBlock.SimpleSummaryBlock `
+-SessionHeader $LoopzHelpers.DefaultHeaderBlock -SessionSummary $DefaultHeaderBlock.SimpleSummaryBlock;
 
 ## PARAMETERS
 
@@ -400,8 +412,8 @@ Accept wildcard characters: False
 
 ### -Header
 
-  A script-block that is invoked at the start of the mirror batch. The script-block is
-invoked with the following positional parameters:
+  A script-block that is invoked for each directory that also contains child directories.
+The script-block is invoked with the following positional parameters:
 
 * PassThru: (see PassThru previously described)
 
@@ -483,8 +495,9 @@ Accept wildcard characters: False
 
 ### -Summary
 
-A script-block that is invoked at the end of the mirroring batch. The script-block is
-invoked with the following positional parameters:
+A script-block that is invoked foreach directory that also contains child directories,
+after all its descendants have been processed and serves as a sub-total for the current
+directory. The script-block is invoked with the following positional parameters:
 
 * count: the number of items processed in the mirroring batch.
 * skipped: the number of items skipped in the mirroring batch. An item is skipped if
@@ -517,6 +530,40 @@ The cmdlet is not run.
 Type: SwitchParameter
 Parameter Sets: (All)
 Aliases: wi
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -SessionHeader
+
+A script-block that is invoked at the start of the mirroring batch. The script-block has
+the same signature as the Header script block.
+
+```yaml
+Type: ScriptBlock
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -SessionSummary
+
+A script-block that is invoked at the end of the mirroring batch. The script-block has
+the same signature as the Summary script block.
+
+```yaml
+Type: ScriptBlock
+Parameter Sets: (All)
+Aliases:
 
 Required: False
 Position: Named
