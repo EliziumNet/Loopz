@@ -26,8 +26,12 @@ Describe 'controller' -Tag 'Current' {
     };
   }
 
+  # NB, it would be useful to be able to test Header/Summary with Mocks. However, Pester
+  # Mocks can't work with class methods; they only work with named functions, so this
+  # aspect of the controller, unfortunately can't be tested.
+  #
   Context 'given: ForeachController' {
-    Context 'and: Single index requested' {
+    Context 'and: single index requested' {
       It 'should: iterate once' {
         [scriptblock]$summary = {
           param(
@@ -51,9 +55,14 @@ Describe 'controller' -Tag 'Current' {
         $controller.ForeachEnd();
         $controller.Skipped() | Should -Be 0;
       } # should: iterate once
-    } # and: Single index requested
+    } # and:single index requested
 
-    Context 'and: Single index requested' {
+    Context 'and: multiple indices requested without break' {
+      # NB: testing the Break/Skip functionality of the controller doesn't really make sense
+      # because we'd have to replicate the break/skip iteration logic that resides in the
+      # client function(s) (eg Invoke-ForeachFsItem) in the test which would be totally pointless.
+      # Instead, this break/skip logic is tested in the tests for Invoke-ForeachFsItem.
+      # 
       It 'should: iterate multiple times' {
         [scriptblock]$summary = {
           param(
@@ -83,8 +92,8 @@ Describe 'controller' -Tag 'Current' {
         $controller.Skipped() | Should -Be 3;
         $controller.ForeachEnd();
       } # should: iterate multiple times
-    } # and: Single index requested
-  }
+    } # and: multiple indices requested without break
+  } # given: ForeachController
 
   Context 'given: TraverseController' {
     Context 'and: single depth iteration' {
@@ -123,7 +132,7 @@ Describe 'controller' -Tag 'Current' {
     } # and: single depth iteration
 
     Context 'and: multiple depth iteration' {
-      It 'should: iterate single level multiple times' {
+      It 'should: traverse multiple depths' {
         [scriptblock]$sessionSummary = {
           param(
             [int]$_count,
@@ -131,7 +140,7 @@ Describe 'controller' -Tag 'Current' {
             [boolean]$_trigger,
             [System.Collections.Hashtable]$_passThru
           )
-          $_count | Should -Be 10;
+          $_count | Should -Be 12;
           $_skipped | Should -Be 0;
         };
         [System.Collections.Hashtable]$passThru = @{}
@@ -157,31 +166,37 @@ Describe 'controller' -Tag 'Current' {
                       Product = "$_ Deeper Widget(s)"
                     });
                 }
-                $passThru['LOOPZ.CONTROLLER.STACK'].Peek().Value() | Should -Be 3; # (0..2)
+                $passThru['LOOPZ.CONTROLLER.STACK'].Peek().Value() | Should -Be 3;
+                $passThru['LOOPZ.CONTROLLER.DEPTH'] | Should -Be 4;
 
                 $controller.ForeachEnd();
-              } else {
-                $controller.RequestIndex();
-                $controller.HandleResult(@{
-                    Product = "$_ Inner Widget(s)"
-                  });
               }
+              $controller.RequestIndex();
+              $controller.HandleResult(@{
+                  Product = "$_ Inner Widget(s)"
+                });
             }
-            $passThru['LOOPZ.CONTROLLER.STACK'].Peek().Value() | should -Be 3; # (1..3)
+            $passThru['LOOPZ.CONTROLLER.STACK'].Peek().Value() | should -Be 4;
+            $passThru['LOOPZ.CONTROLLER.DEPTH'] | Should -Be 3;
 
             $controller.ForeachEnd();
-          } else {
-            $controller.RequestIndex();
-            $controller.HandleResult(@{
-                Product = "$_ Widget(s)"
-              });
           }
+          $controller.RequestIndex();
+          $controller.HandleResult(@{
+              Product = "$_ Widget(s)"
+            });
         }
-        $passThru['LOOPZ.CONTROLLER.STACK'].Peek().Value() | Should -Be 4; # (1..4)
+        $passThru['LOOPZ.CONTROLLER.STACK'].Peek().Value() | Should -Be 5;
+        $passThru['LOOPZ.CONTROLLER.DEPTH'] | Should -Be 2;
 
         $controller.ForeachEnd();
+
+        $passThru['LOOPZ.CONTROLLER.DEPTH'] | Should -Be 1;
         $controller.EndSession();
-      }
+
+        $passThru['LOOPZ.CONTROLLER.DEPTH'] | Should -Be 0;
+        $passThru['LOOPZ.CONTROLLER.STACK'] | Should -BeNullOrEmpty;
+      } # should: traverse multiple depths
     } # and: multiple depth iteration
   } # given: TraverseController
 } # controller

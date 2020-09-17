@@ -98,6 +98,7 @@ class BaseController {
       ? ($this._passThru['LOOPZ.CONTROLLER.STACK']) : ([System.Collections.Stack]::new());
 
     $stack.Push([Counter]::new());
+    $this._passThru['LOOPZ.CONTROLLER.DEPTH'] = $stack.Count;
     $this._header.Invoke($this._passThru);
   }
 
@@ -108,7 +109,9 @@ class BaseController {
     [int]$count = 0;
     [int]$skipped = $this._skipped;
     if ($this._passThru.ContainsKey('LOOPZ.CONTROLLER.STACK')) {
-      [Counter]$counter = $this._passThru['LOOPZ.CONTROLLER.STACK'].Pop();
+      [System.Collections.Stack]$stack = $this._passThru['LOOPZ.CONTROLLER.STACK'];
+      [Counter]$counter = $stack.Pop();
+      $this._passThru['LOOPZ.CONTROLLER.DEPTH'] = $stack.Count;
       $count = $counter.Value();
       $skipped = $counter.Skipped();
     } else {
@@ -218,7 +221,9 @@ class TraverseController : BaseController {
     $this._passThru['LOOPZ.FOREACH.TRIGGER'] = $this._trigger;
     $this._passThru['LOOPZ.FOREACH.COUNT'] = $this._index;
 
-    [Counter]$counter = $this._passThru['LOOPZ.CONTROLLER.STACK'].Pop();
+    [System.Collections.Stack]$stack = $this._passThru['LOOPZ.CONTROLLER.STACK'];
+    [Counter]$counter = $stack.Pop();
+    $this._passThru['LOOPZ.CONTROLLER.DEPTH'] = $stack.Count;
     $this._session.Count += $counter.Value();
     $this._session.Errors += $counter.Errors();
     $this._session.Skipped += $counter.Skipped();
@@ -231,8 +236,12 @@ class TraverseController : BaseController {
 
   [void] BeginSession () {
     [System.Collections.Stack]$stack = [System.Collections.Stack]::new();
+
+    # The Counter for the session represents the top-level invoke
+    #
     $stack.Push([Counter]::new());
     $this._passThru['LOOPZ.CONTROLLER.STACK'] = $stack;
+    $this._passThru['LOOPZ.CONTROLLER.DEPTH'] = $stack.Count;
     $this._session.Header.Invoke($this._passThru);
   }
 
@@ -243,6 +252,7 @@ class TraverseController : BaseController {
     # a foreach sequence.
     #
     [Counter]$counter = $stack.Pop();
+    $this._passThru['LOOPZ.CONTROLLER.DEPTH'] = $stack.Count;
 
     if ($stack.Count -eq 0) {
       $this._passThru.Remove('LOOPZ.CONTROLLER.STACK');
