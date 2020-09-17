@@ -103,22 +103,8 @@ class BaseController {
   }
 
   [void] ForeachEnd () {
-    $this._passThru['LOOPZ.FOREACH.TRIGGER'] = $this._trigger;
-    $this._passThru['LOOPZ.FOREACH.COUNT'] = $this._index;
-
-    [int]$count = 0;
-    [int]$skipped = $this._skipped;
-    if ($this._passThru.ContainsKey('LOOPZ.CONTROLLER.STACK')) {
-      [System.Collections.Stack]$stack = $this._passThru['LOOPZ.CONTROLLER.STACK'];
-      [Counter]$counter = $stack.Pop();
-      $this._passThru['LOOPZ.CONTROLLER.DEPTH'] = $stack.Count;
-      $count = $counter.Value();
-      $skipped = $counter.Skipped();
-    } else {
-      $count = $this._index;
-      $skipped = $this._skipped;
-    }
-    $this._summary.Invoke($count, $skipped, $this._trigger, $this._passThru);
+    throw [System.Management.Automation.MethodInvocationException]::new(
+      'Abstract method not implemented (BaseController.ForeachEnd)');
   }
 
   [void] BeginSession () {}
