@@ -69,8 +69,8 @@ function Invoke-TraverseDirectory {
   function invoke. As it's a hash table, order is not significant.
 
   .PARAMETER Header
-    A script-block that is invoked at the start of the mirroring batch. The script-block is
-  invoked with the following positional parameters:
+    A script-block that is invoked for each directory that also contains child directories.
+  The script-block is invoked with the following positional parameters:
     * PassThru: (see PassThru previously described)
 
     The Header can be customised with the following PassThru entries:
@@ -82,8 +82,9 @@ function Invoke-TraverseDirectory {
     predefined lines available to use in $LoopzUI, or a custom one can be used instead)
 
   .PARAMETER Summary
-    A script-block that is invoked at the end of the traversal batch. The script-block is
-  invoked with the following positional parameters:
+    A script-block that is invoked foreach directory that also contains child directories,
+  after all its descendants have been processed and serves as a sub-total for the current
+  directory. The script-block is invoked with the following positional parameters:
     * count: the number of items processed in the mirroring batch.
     * skipped: the number of items skipped in the mirroring batch. An item is skipped if
     it fails the defined condition or is not of the correct type (eg if its a directory
@@ -93,6 +94,14 @@ function Invoke-TraverseDirectory {
     This helps in written idempotent operations that can be re-run without adverse
     consequences.
     * PassThru: (see PassThru previously described)
+
+  .PARAMETER SessionHeader
+    A script-block that is invoked at the start of the traversal batch. The script-block has
+  the same signature as the Header script block.
+
+  .PARAMETER SessionSummary
+    A script-block that is invoked at the end of the traversal batch. The script-block has
+  the same signature as the Summary script block.
 
   .PARAMETER Hoist
     Switch parameter. Without Hoist being specified, the Condition can prove to be too restrictive
@@ -195,6 +204,15 @@ function Invoke-TraverseDirectory {
   directory include of @('A'), is problematic, because A is not a valid directory filter so its
   ignored and there are no remaining filters that are able to include any directory, so no
   directory passes the filter.
+
+  .EXAMPLE 5
+  Same as EXAMPLE 4, but using predefined Header and Summary script-blocks for Session header/summary
+  and per directory header/summary. (Test-Traverse and filterDirectories as per EXAMPLE 4)
+
+  Invoke-TraverseDirectory -Path './Tests/Data/fefsi' -Functee 'Test-Traverse' `
+    -Condition $filterDirectories -Hoist `
+    -Header $LoopzHelpers.DefaultHeaderBlock -Summary $DefaultHeaderBlock.SimpleSummaryBlock `
+    -SessionHeader $LoopzHelpers.DefaultHeaderBlock -SessionSummary $DefaultHeaderBlock.SimpleSummaryBlock;
 
   #>
   [CmdletBinding(DefaultParameterSetName = 'InvokeScriptBlock')]

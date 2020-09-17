@@ -114,8 +114,8 @@
   its ancestors may not match the filters.
 
   .PARAMETER Header
-    A script-block that is invoked at the start of the mirroring batch. The script-block is
-  invoked with the following positional parameters:
+    A script-block that is invoked for each directory that also contains child directories.
+  The script-block is invoked with the following positional parameters:
     * PassThru: (see PassThru previously described)
 
     The Header can be customised with the following PassThru entries:
@@ -127,8 +127,9 @@
     predefined lines available to use in $LoopzUI, or a custom one can be used instead)
 
   .PARAMETER Summary
-    A script-block that is invoked at the end of the mirroring batch. The script-block is
-  invoked with the following positional parameters:
+    A script-block that is invoked foreach directory that also contains child directories,
+  after all its descendants have been processed and serves as a sub-total for the current
+  directory. The script-block is invoked with the following positional parameters:
     * count: the number of items processed in the mirroring batch.
     * skipped: the number of items skipped in the mirroring batch. An item is skipped if
     it fails the defined condition or is not of the correct type (eg if its a directory
@@ -138,6 +139,14 @@
     This helps in written idempotent operations that can be re-run without adverse
     consequences.
     * PassThru: (see PassThru previously described)
+
+  .PARAMETER SessionHeader
+    A script-block that is invoked at the start of the mirroring batch. The script-block has
+  the same signature as the Header script block.
+
+  .PARAMETER SessionSummary
+    A script-block that is invoked at the end of the mirroring batch. The script-block has
+  the same signature as the Summary script block.
 
   .EXAMPLE 1
     Invoke a named function for every directory in the source tree and mirror every
@@ -232,6 +241,15 @@
   Note that -CreateDirs is missing which means directories will not be mirrored by default. They
   are only mirrored as part of the process of copying over flac files, so in the end the
   resultant mirror directory tree will contain directories that include flac files.
+
+  .EXAMPLE 7
+  Same as EXAMPLE 6, but using predefined Header and Summary script-blocks for Session header/summary
+  and per directory header/summary.
+
+  Invoke-MirrorDirectoryTree -Path './Tests/Data/fefsi' -DestinationPath './Tests/Data/mirror' `
+  -FileIncludes @('flac') -CopyFiles -Hoist `
+  -Header $LoopzHelpers.DefaultHeaderBlock -Summary $DefaultHeaderBlock.SimpleSummaryBlock `
+  -SessionHeader $LoopzHelpers.DefaultHeaderBlock -SessionSummary $DefaultHeaderBlock.SimpleSummaryBlock;
   #>
 
   [CmdletBinding(SupportsShouldProcess, DefaultParameterSetName = 'InvokeScriptBlock')]

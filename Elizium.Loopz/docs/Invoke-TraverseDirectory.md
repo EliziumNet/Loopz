@@ -145,6 +145,16 @@ directory include of @('A'), is problematic, because A is not a valid directory 
 ignored and there are no remaining filters that are able to include any directory, so no
 directory passes the filter.
 
+### Example 5
+
+Same as EXAMPLE 4, but using predefined Header and Summary script-blocks for Session header/summary
+and per directory header/summary. (Test-Traverse and filterDirectories as per EXAMPLE 4)
+
+Invoke-TraverseDirectory -Path './Tests/Data/fefsi' -Functee 'Test-Traverse' `
+  -Condition $filterDirectories -Hoist `
+  -Header $LoopzHelpers.DefaultHeaderBlock -Summary $DefaultHeaderBlock.SimpleSummaryBlock `
+  -SessionHeader $LoopzHelpers.DefaultHeaderBlock -SessionSummary $DefaultHeaderBlock.SimpleSummaryBlock;
+
 ## PARAMETERS
 
 ### -Block
@@ -261,8 +271,8 @@ Accept wildcard characters: False
 
 ### -Header
 
-  A script-block that is invoked at the start of the traverse batch. The script-block is
-invoked with the following positional parameters:
+A script-block that is invoked for each directory that also contains child directories.
+The script-block is invoked with the following positional parameters:
 
 * PassThru: (see PassThru previously described)
 
@@ -343,8 +353,9 @@ Accept wildcard characters: False
 
 ### -Summary
 
-A script-block that is invoked at the end of the traversal batch. The script-block is
-invoked with the following positional parameters:
+  A script-block that is invoked foreach directory that also contains child directories,
+after all its descendants have been processed and serves as a sub-total for the current
+directory. The script-block is invoked with the following positional parameters:
 
 * count: the number of items processed in the mirroring batch.
 * skipped: the number of items skipped in the mirroring batch. An item is skipped if
@@ -355,6 +366,40 @@ indicate whether any of the items processed were actively updated/written in thi
 This helps in written idempotent operations that can be re-run without adverse
 consequences.
 * PassThru: (see PassThru previously described)
+
+```yaml
+Type: ScriptBlock
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -SessionHeader
+
+A script-block that is invoked at the start of the traversal batch. The script-block has
+the same signature as the Header script block.
+
+```yaml
+Type: ScriptBlock
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -SessionSummary
+
+A script-block that is invoked at the start of the traversal batch. The script-block has
+the same signature as the Header script block.
 
 ```yaml
 Type: ScriptBlock
