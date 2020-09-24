@@ -1,4 +1,4 @@
-Describe 'Rename-ForeachFsItem' -Tag 'Current' {
+Describe 'Rename-ForeachFsItem' {
   BeforeAll {
     Get-Module Elizium.Loopz | Remove-Module
     Import-Module .\Output\Elizium.Loopz\Elizium.Loopz.psm1 `

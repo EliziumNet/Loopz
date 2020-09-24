@@ -82,36 +82,17 @@ function Rename-ForeachFsItem {
 
         switch ($occurrence) {
           'FIRST' {
-            # https://stackoverflow.com/questions/40089631/replacing-only-the-first-occurrence-of-a-word-in-a-string
-            # "caat" -replace '(.*?)a(.*)', '$1@$2'
-            # replace the first a with @
-
-            # Another solution:
-            # $test = "My name is Bob, her name is Sara."
-            # [regex]$pattern = "name"
-            # $pattern.replace($test, "baby", 1) 
-            #
-
-            [regex]$patternRegEx = New-Object -TypeName [regex] -ArgumentList $replacePattern;
-            $newItemName = ($patternRegEx.Replace($_underscore.Name, $replaceWith, $quantityFirst)).Trim();
+            $newItemName = (edit-ReplaceFirstMatch -Source $_underscore.Name `
+                -Pattern $replacePattern -With $replaceWith -Quantity $quantityFirst).Trim();
             break;
           }
 
           'LAST' {
-            # https://stackoverflow.com/questions/46124821/find-last-match-of-a-string-only-using-powershell
-
-            # ANother:
-
-            # $text = "This is the dawning of the age of Aquarius. The age of Aquarius, Aquarius, Aquarius, Aquarius, Aquarius"
-            # $text -replace "(.*)Aquarius(.*)", '$1Bumblebee Joe$2'
-            # This is the dawning of the age of Aquarius. The age of Aquarius, Aquarius, Aquarius, Aquarius, Bumblebee Joe
-
             if ($literalPattern) {
               # The user says the pattern ($replacePattern) is not a regular expression, so take it as it is
               #
-              [string]$expression = "(.*){0}(.*)" -f $replacePattern;
-              [string]$replacement = '$1{0}$2' -f $replaceWith;
-              $newItemName = ($_underscore.Name -replace $expression, $replacement).Trim();
+              $newItemName = (edit-ReplaceLastMatch -Source $_underscore.Name `
+                  -Pattern $replacePattern -With $replaceWith).Trim();
             }
             else {
               # The pattern is a regular expression. However, it is quite dangerous to use Last in
@@ -192,7 +173,7 @@ function Rename-ForeachFsItem {
     } # doRenameFsItems
 
     [System.IO.FileSystemInfo[]]$collection = @();
-  }
+  } # begin
 
   process {
     Write-Debug "=== Rename-ForeachFsItem [$($underscore.Name)] ===";
