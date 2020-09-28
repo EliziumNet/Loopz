@@ -1,55 +1,64 @@
 
 function Rename-ForeachFsItem {
-  [CmdletBinding(SupportsShouldProcess, DefaultParameterSetName = 'RenameFiles')]
+  [CmdletBinding(SupportsShouldProcess, DefaultParameterSetName = 'ReplaceWith')]
   [Alias('rnfsi', 'rnall')]
   param
   (
-    [Parameter(ParameterSetName = 'RenameFiles', Mandatory, ValueFromPipeline = $true)]
-    [Parameter(ParameterSetName = 'RenameDirectories', Mandatory, ValueFromPipeline = $true)]
-    [System.IO.FileSystemInfo]$underscore,
-
-    [Parameter(ParameterSetName = 'RenameFiles')]
-    [Parameter(ParameterSetName = 'RenameDirectories')]
-    [scriptblock]$Condition = ( { return $true; }),
-
-    [Parameter(ParameterSetName = 'RenameFiles', Mandatory)]
+    # Defining parameter sets for File and Directory, just to ensure both of these switches
+    # are mutually exclusive makes the whole parameter set definition exponentially more
+    # complex. It's easier just to enforce this with a ValidateScript.
+    #
+    [Parameter()]
+    [ValidateScript({ -not($PSBoundParameters.ContainsKey('Directory')); })]
     [switch]$File,
 
-    [Parameter(ParameterSetName = 'RenameDirectories', Mandatory)]
+    [Parameter()]
+    [ValidateScript( { -not($PSBoundParameters.ContainsKey('File')); })]
     [switch]$Directory,
 
-    [Parameter(ParameterSetName = 'RenameFiles', Mandatory)]
-    [Parameter(ParameterSetName = 'RenameDirectories', Mandatory)]
-    [string]$Pattern,
+    [Parameter(Mandatory, ValueFromPipeline = $true)]
+    [System.IO.FileSystemInfo]$underscore,
 
-    [Parameter(ParameterSetName = 'RenameFiles', Mandatory)]
-    [Parameter(ParameterSetName = 'RenameDirectories', Mandatory)]
-    [string]$With,
-
-    [Parameter(ParameterSetName = 'RenameFiles')]
-    [Parameter(ParameterSetName = 'RenameDirectories')]
-    [ValidateScript( { -not($PSBoundParameters.ContainsKey('Last')) -and
-        -not($PSBoundParameters.ContainsKey('Literal')) })]
+    [Parameter(ParameterSetName = 'ReplaceFirst', Mandatory)]
     [switch]$First,
 
-    [Parameter(ParameterSetName = 'RenameFiles')]
-    [Parameter(ParameterSetName = 'RenameDirectories')]
-    [ValidateScript( { -not($PSBoundParameters.ContainsKey('Last')) -and
-        ($PSBoundParameters.ContainsKey('First')) })]
+    [Parameter(ParameterSetName = 'ReplaceFirst')]
     [int]$Quantity = 1,
 
-    [Parameter(ParameterSetName = 'RenameFiles')]
-    [Parameter(ParameterSetName = 'RenameDirectories')]
-    [ValidateScript( { -not($PSBoundParameters.ContainsKey('First')) })]
+    [Parameter(ParameterSetName = 'ReplaceWith')]
+    [Parameter(ParameterSetName = 'MoveToEnd', Mandatory)]
+    [Parameter(ParameterSetName = 'MoveToStart')]
+    [Parameter(ParameterSetName = 'MoveRelative')]
     [switch]$Last,
 
-    [Parameter(ParameterSetName = 'RenameFiles')]
-    [Parameter(ParameterSetName = 'RenameDirectories')]
-    [switch]$Literal
+    [Parameter()]
+    [switch]$Whole,
+
+    [Parameter(Mandatory, Position = 0)]
+    [string]$Pattern,
+
+    [Parameter(ParameterSetName = 'ReplaceFirst')]
+    [Parameter(ParameterSetName = 'ReplaceWith')]
+    [string]$With,
+
+    [Parameter()]
+    [scriptblock]$Condition = ( { return $true; }),
+
+    [Parameter(ParameterSetName = 'MoveRelative')]
+    [string]$Target,
+
+    [Parameter(ParameterSetName = 'MoveRelative')]
+    [string]$Relation = 'after',
+
+    [Parameter(ParameterSetName = 'MoveToStart', Mandatory)]
+    [switch]$Start,
+
+    [Parameter(ParameterSetName = 'MoveToEnd', Mandatory)]
+    [switch]$End
   )
 
   begin {
-    Write-Debug '>>> Rename-ForeachFsItem >>>';
+    Write-Debug ">>> Rename-ForeachFsItem [ParamaterSet: '$($PSCmdlet.ParameterSetName)]' >>>";
 
     [scriptblock]$doRenameFsItems = {
       param(
@@ -67,14 +76,12 @@ function Rename-ForeachFsItem {
       )
 
       [string]$replacePattern = $_passThru['LOOPZ.RN-FOREACH.PATTERN'];
-      [boolean]$literalPattern = $_passThru.ContainsKey('LOOPZ.RN-FOREACH.LITERAL') -and `
-        $_passThru['LOOPZ.RN-FOREACH.LITERAL'];
       [string]$replaceWith = $_passThru['LOOPZ.RN-FOREACH.WITH'];
       [boolean]$processingFiles = $_passThru['LOOPZ.RN-FOREACH.FS-ITEM-TYPE'] -eq 'FILE';
+      [boolean]$wholeWord = $_passThru.ContainsKey('LOOPZ.RN-FOREACH.WHOLE-WORD') `
+        ? $_passThru['LOOPZ.RN-FOREACH.WHOLE-WORD'] : $false;
       [string]$newItemName = [string]::Empty;
       [boolean]$errorOccurred = $false;
-      [int]$quantityFirst = $_passThru.ContainsKey('LOOPZ.RN-FOREACH.QUANTITY-FIRST') `
-        ? $_passThru['LOOPZ.RN-FOREACH.QUANTITY-FIRST'] : 0;
       [string[][]]$properties = @();
 
       if ($_passThru.ContainsKey('LOOPZ.RN-FOREACH.OCCURRENCE')) {
@@ -82,24 +89,18 @@ function Rename-ForeachFsItem {
 
         switch ($occurrence) {
           'FIRST' {
+            [int]$quantityFirst = $_passThru.ContainsKey('LOOPZ.RN-FOREACH.QUANTITY-FIRST') `
+              ? $_passThru['LOOPZ.RN-FOREACH.QUANTITY-FIRST'] : 1;
+
             $newItemName = (edit-ReplaceFirstMatch -Source $_underscore.Name `
-                -Pattern $replacePattern -With $replaceWith -Quantity $quantityFirst).Trim();
+                -Pattern $replacePattern -With $replaceWith -Quantity $quantityFirst `
+                -Whole:$wholeWord).Trim();
             break;
           }
 
           'LAST' {
-            if ($literalPattern) {
-              # The user says the pattern ($replacePattern) is not a regular expression, so take it as it is
-              #
-              $newItemName = (edit-ReplaceLastMatch -Source $_underscore.Name `
-                  -Pattern $replacePattern -With $replaceWith).Trim();
-            }
-            else {
-              # The pattern is a regular expression. However, it is quite dangerous to use Last in
-              # this scenario, so to be on the safe side, we'll ignore and register an error.
-              #
-              $errorOccurred = $true;
-            }
+            $newItemName = (edit-ReplaceLastMatch -Source $_underscore.Name `
+                -Pattern $replacePattern -With $replaceWith -Whole:$wholeWord).Trim();
             break;
           }
           default {
@@ -125,9 +126,14 @@ function Rename-ForeachFsItem {
             ? (Join-Path $_underscore.Directory.FullName $newItemName) `
             : (Join-Path $_underscore.Parent.FullName $newItemName);
 
-          # First check if we only differ by case
+          # TODO: do not do the rename directly here. Abstract this out into another command.
+          # This will enable us to generate an undo-script, in case the user made a mistake
+          # Display the location of the undo script in the summary.
           #
-          if ($newItemName.ToLower() -eq $_.Name.ToLower()) {
+
+          # First check if we only differ by case (TODO: check if this also applies to unix)
+          #
+          if ($newItemName.ToLower() -eq $_underscore.Name.ToLower()) {
             if ($PSCmdlet.ShouldProcess($_underscore.Name, 'Rename Item')) {
               # Just doing a double move to get around the problem of not being able to rename
               # an item unless the case is different
@@ -197,17 +203,26 @@ function Rename-ForeachFsItem {
       $properties += , @('[*] Pattern', $Pattern);
     }
 
-    if ($With.Length -gt $WIDE_THRESHOLD) {
-      $wideItems += , @('[-] With', $With);
+    if ($With -and $With.Length -gt 0) {
+      if ($With.Length -gt $WIDE_THRESHOLD) {
+        $wideItems += , @('[-] With', $With);
+      }
+      else {
+        $properties += , @('[-] With', $With);
+      }
     }
-    else {
-      $properties += , @('[-] With', $With);
+
+    [scriptblock]$getResult = {
+      param($result)
+
+      $result.GetType() -in @([System.IO.FileInfo], [System.IO.DirectoryInfo]) ? $result.Name : $result;
     }
 
     [System.Collections.Hashtable]$passThru = @{
       'LOOPZ.WH-FOREACH-DECORATOR.BLOCK'         = $doRenameFsItems;
       'LOOPZ.WH-FOREACH-DECORATOR.MESSAGE'       = $message;
       'LOOPZ.WH-FOREACH-DECORATOR.PRODUCT-LABEL' = $File.ToBool() ? 'File' : 'Directory';
+      'LOOPZ.WH-FOREACH-DECORATOR.GET-RESULT'    = $getResult;
 
       'LOOPZ.HEADER-BLOCK.CRUMB'                 = '[🛡️] '
       'LOOPZ.HEADER-BLOCK.LINE'                  = $LoopzUI.DashLine;
@@ -217,18 +232,20 @@ function Rename-ForeachFsItem {
       'LOOPZ.SUMMARY-BLOCK.MESSAGE'              = '[💫] Rename Summary';
 
       'LOOPZ.RN-FOREACH.PATTERN'                 = $Pattern;
-      'LOOPZ.RN-FOREACH.WITH'                    = $With;
       'LOOPZ.RN-FOREACH.FS-ITEM-TYPE'            = $File.ToBool() ? 'FILE' : 'DIRECTORY';
+      'LOOPZ.RN-FOREACH.WITH'                    = ($PSBoundParameters.ContainsKey('Target') -or
+        $PSBoundParameters.ContainsKey('Start') -or $PSBoundParameters.ContainsKey('End')) `
+        ? $Pattern : $With;
     }
 
     if ($First.ToBool()) {
-      $properties += @('[+] First', '[/]');
+      $properties += , @('[+] First', '[=]');
       $passThru['LOOPZ.RN-FOREACH.OCCURRENCE'] = 'FIRST';
       $passThru['LOOPZ.RN-FOREACH.QUANTITY-FIRST'] = $Quantity;
     }
 
     if ($Last.ToBool()) {
-      $properties += @('[+] Last', '[/]');
+      $properties += , @('[+] Last', '[=]');
       $passThru['LOOPZ.RN-FOREACH.OCCURRENCE'] = 'LAST';
     }
 
@@ -240,19 +257,33 @@ function Rename-ForeachFsItem {
       $passThru['LOOPZ.SUMMARY-BLOCK.PROPERTIES'] = $properties;
     }
 
-    if ($Literal.ToBool()) {
-      $passThru['LOOPZ.RN-FOREACH.LITERAL'] = $true;
+    if ($Whole.ToBool()) {
+      $passThru['LOOPZ.RN-FOREACH.WHOLE-WORD'] = $true;
+    }
+
+    [scriptblock]$clientCondition = $Condition;
+
+    [scriptblock]$matchesPattern = {
+      param(
+        [System.IO.FileSystemInfo]$pipelineItem
+      )
+      # Inside the scope of this script block, $Condition is assigned to Invoke-ForeachFsItem's
+      # version of the Condition parameter which is this scriptblock and thus results in a stack
+      # overflow due to infinite recursion. We need to use a temporary variable so that
+      # the client's Condition (Rename-ForeachFsItem) is not accidentally hidden.
+      #
+      return ($pipelineItem.Name -match $Pattern) -and $clientCondition.Invoke($pipelineItem);
     }
 
     [System.Collections.Hashtable]$parameters = @{
-      'Condition' = $Condition;
+      'Condition' = $matchesPattern;
       'PassThru'  = $passThru;
       'Header'    = $LoopzHelpers.DefaultHeaderBlock;
       'Summary'   = $LoopzHelpers.SimpleSummaryBlock;
       'Block'     = $LoopzHelpers.WhItemDecoratorBlock;
     }
 
-    if ($PSCmdlet.ParameterSetName -eq 'RenameFiles') {
+    if ($PSBoundParameters.ContainsKey('File')) {
       $parameters['File'] = $true;
     }
     else {

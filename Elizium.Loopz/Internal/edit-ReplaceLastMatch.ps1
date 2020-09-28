@@ -10,24 +10,16 @@ function edit-ReplaceLastMatch {
     [string]$Pattern,
 
     [Parameter(Mandatory)]
-    [string]$With
+    [AllowEmptyString()]
+    [string]$With,
+
+    [Parameter()]
+    [switch]$Whole
   )
+  [string]$adjustedPattern = $Whole `
+    ? ($adjustedPattern = '\b{0}\b' -f $Pattern.Replace('\b', '')) : $Pattern;
 
-    [string]$expression = "(.*){0}(.*)" -f $Pattern;
-    [string]$replacement = '$1{0}$2' -f $With;
-    return $Source -replace $expression, $replacement;
-
-  # if ($literalPattern) {
-  #   # The user says the pattern ($replacePattern) is not a regular expression, so take it as it is
-  #   #
-  #   [string]$expression = "(.*){0}(.*)" -f $replacePattern;
-  #   [string]$replacement = '$1{0}$2' -f $replaceWith;
-  #   $newItemName = ($_underscore.Name -replace $expression, $replacement).Trim();
-  # }
-  # else {
-  #   # The pattern is a regular expression. However, it is quite dangerous to use Last in
-  #   # this scenario, so to be on the safe side, we'll ignore and register an error.
-  #   #
-  #   $errorOccurred = $true;
-  # }
+  [string]$expression = "(?<_f1>.*){0}(?<_f2>.*)" -f $adjustedPattern;
+  [string]$replacement = '${_f1}' + $With + '${_f2}';
+  return $Source -replace $expression, $replacement;
 }

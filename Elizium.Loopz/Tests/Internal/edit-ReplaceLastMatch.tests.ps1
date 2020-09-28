@@ -75,6 +75,36 @@ Describe 'edit-ReplaceLastMatch' {
       }
     } # and: word boundary
 
+    Context 'and: Whole' {
+      Context 'and: \b omitted' {
+        Context 'and: single match' {
+          It 'should: replace the single match' {
+            [string]$source = 'We are like the dreamer who dreams and then lives inside the dream';
+            [string]$pattern = 'dream';
+            [string]$with = 'healer';
+
+            edit-ReplaceLastMatch -Source $source -Pattern $pattern -With $with -Whole | `
+              Should -BeExactly 'We are like the dreamer who dreams and then lives inside the healer';
+          }
+        }
+      }
+
+      Context 'and: Pattern already includes \b' {
+        It 'should: replace the single match' {
+          # This scenario tests a case where the user has accidentally specified \b in
+          # the pattern which is not required if -Whole switch is set; this test
+          # checks that edit-ReplaceFirstMatch does not double apply \b
+          #
+          [string]$source = 'We are like the dreamer who dreams and then lives inside the dream';
+          [string]$pattern = '\bdream\b';
+          [string]$with = 'healer';
+
+          edit-ReplaceLastMatch -Source $source -Pattern $pattern -With $with -Whole | `
+            Should -BeExactly 'We are like the dreamer who dreams and then lives inside the healer';
+        }
+      }
+    } # and: Whole
+
     Context 'and: date' {
       Context 'and: single match' {
         It 'should: replace the single match' {
