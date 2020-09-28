@@ -9,7 +9,7 @@ function Rename-ForeachFsItem {
     # complex. It's easier just to enforce this with a ValidateScript.
     #
     [Parameter()]
-    [ValidateScript({ -not($PSBoundParameters.ContainsKey('Directory')); })]
+    [ValidateScript( { -not($PSBoundParameters.ContainsKey('Directory')); })]
     [switch]$File,
 
     [Parameter()]
@@ -40,6 +40,9 @@ function Rename-ForeachFsItem {
     [Parameter(ParameterSetName = 'ReplaceFirst')]
     [Parameter(ParameterSetName = 'ReplaceWith')]
     [string]$With,
+
+    [Parameter()]
+    [string]$Except = [string]::Empty,
 
     [Parameter()]
     [scriptblock]$Condition = ( { return $true; }),
@@ -272,7 +275,9 @@ function Rename-ForeachFsItem {
       # overflow due to infinite recursion. We need to use a temporary variable so that
       # the client's Condition (Rename-ForeachFsItem) is not accidentally hidden.
       #
-      return ($pipelineItem.Name -match $Pattern) -and $clientCondition.Invoke($pipelineItem);
+      return ($pipelineItem.Name -match $Pattern) -and `
+        (($Except -eq [string]::Empty) -or -not($pipelineItem.Name -match $Except)) -and
+        $clientCondition.Invoke($pipelineItem);
     }
 
     [System.Collections.Hashtable]$parameters = @{

@@ -45,7 +45,8 @@ Describe 'Rename-ForeachFsItem' {
         It 'should: not throw ParameterBindingException' {
           {
             Get-ChildItem -File -Path $sourcePath -Filter $filter | Rename-ForeachFsItem -File `
-              -Pattern 'data.' -Target 't\d{1}\.' -Last -Whole -Condition $successCondition -Relation 'before' -WhatIf:$whatIf; } `
+              -Last -Whole -Pattern 'data.' -Target 't\d{1}\.' -Except 'fake' `
+              -Condition $successCondition -Relation 'before' -WhatIf:$whatIf; } `
           | Should -Not -Throw;
         }
       } # MoveRelative
@@ -54,7 +55,8 @@ Describe 'Rename-ForeachFsItem' {
         It 'should: not throw ParameterBindingException' {
           {
             Get-ChildItem -File -Path $sourcePath -Filter $filter | Rename-ForeachFsItem -File `
-              -Last -Whole -Pattern 'data.' -Start -Condition $successCondition -WhatIf:$whatIf; } `
+              -Last -Whole -Pattern 'data.' -Start -Except 'fake' -Condition $successCondition `
+              -WhatIf:$whatIf; } `
           | Should -Not -Throw;
         }
       } # MoveToStart
@@ -63,7 +65,8 @@ Describe 'Rename-ForeachFsItem' {
         It 'should: not throw ParameterBindingException' {
           {
             Get-ChildItem -File -Path $sourcePath -Filter $filter | Rename-ForeachFsItem -File `
-              -Last -Whole -Pattern 'data.' -End -Condition $successCondition -WhatIf:$whatIf; } `
+              -Last -Whole -Pattern 'data.' -End -Except 'fake' -Condition $successCondition `
+              -WhatIf:$whatIf; } `
           | Should -Not -Throw;
         }
       } # MoveToEnd
@@ -72,7 +75,8 @@ Describe 'Rename-ForeachFsItem' {
         It 'should: not throw ParameterBindingException' {
           {
             Get-ChildItem -File -Path $sourcePath -Filter $filter | Rename-ForeachFsItem -File `
-              -Last -Whole -Pattern 'data.' -With 'info.' -Condition $successCondition -WhatIf:$whatIf; } `
+              -Last -Whole -Pattern 'data.' -With 'info.' -Except 'fake' `
+              -Condition $successCondition -WhatIf:$whatIf; } `
           | Should -Not -Throw;
         }
       } # ReplaceWith
@@ -81,7 +85,8 @@ Describe 'Rename-ForeachFsItem' {
         It 'should: not throw ParameterBindingException' {
           {
             Get-ChildItem -File -Path $sourcePath -Filter $filter | Rename-ForeachFsItem -File `
-              -First -Quantity 2 -Whole -Pattern 'data.' -With 'info.' -Condition $successCondition -WhatIf:$whatIf; } `
+              -First -Quantity 2 -Whole -Pattern 'data.' -With 'info.' -Except 'fake' `
+              -Condition $successCondition -WhatIf:$whatIf; } `
           | Should -Not -Throw;
         }
       } # ReplaceFirst
