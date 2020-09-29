@@ -24,7 +24,10 @@ function edit-MoveToken {
     [switch]$Start,
 
     [Parameter(ParameterSetName = 'MoveToEnd')]
-    [switch]$End
+    [switch]$End,
+
+    [Parameter()]
+    [string]$With = [string]::Empty
   )
 
   [string]$result = $Source;
@@ -41,6 +44,7 @@ function edit-MoveToken {
     [System.Text.RegularExpressions.RegEx]$patternMatchedRegEx = `
       New-Object -TypeName System.Text.RegularExpressions.RegEx -ArgumentList ($Whole ? $wholePatternMatched : $patternMatched);
     [string]$patternRemoved = $patternMatchedRegEx.Replace($Source, '', 1);
+    [string]$replaceWith = [string]::IsNullOrEmpty($With) ? $patternMatched : $With;
 
     if ($PSBoundParameters.ContainsKey('Target')) {
       if ($patternRemoved -match $Target) {
@@ -56,8 +60,8 @@ function edit-MoveToken {
         # stage process.
         #
         [string]$withPattern = ($Relation -eq 'after') `
-          ? $targetMatched + $patternMatched `
-          : $patternMatched + $targetMatched;
+          ? $targetMatched + $replaceWith `
+          : $replaceWith + $targetMatched;
 
         [System.Text.RegularExpressions.RegEx]$captureRegEx = `
           New-Object -TypeName System.Text.RegularExpressions.RegEx -ArgumentList $captureExpression;
@@ -69,10 +73,10 @@ function edit-MoveToken {
     }
     else {
       if ($Start.ToBool()) {
-        $result = $patternMatched + $patternRemoved;
+        $result = $replaceWith + $patternRemoved;
       }
       elseif ($end.ToBool()) {
-        $result = $patternRemoved + $patternMatched;
+        $result = $patternRemoved + $replaceWith;
       }
       else {
         throw 'edit-MoveToken invoked with invalid parameters'

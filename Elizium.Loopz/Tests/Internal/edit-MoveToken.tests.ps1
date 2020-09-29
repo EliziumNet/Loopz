@@ -27,6 +27,18 @@ Describe 'edit-MoveToken' {
               Should -BeExactly 'There is where you are fire going';
           }
         } # and: move after
+
+        Context 'and: replace With after' {
+          It 'should: move the match after the target' -Tag 'Current' {
+            [string]$source = 'There is fire where you are going';
+            [string]$pattern = 'fire ';
+            [string]$target = 'are ';
+            [string]$with = 'ice ';
+
+            edit-MoveToken -Source $source -Pattern $pattern -Target $target -With $with -Relation 'after' | `
+              Should -BeExactly 'There is where you are ice going';
+          }
+        }
       } # and: Target match
 
       Context 'and: multiple Target matches' {

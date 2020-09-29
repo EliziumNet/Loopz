@@ -35,7 +35,7 @@ function Rename-ForeachFsItem {
     [int]$Quantity = 1,
 
     [Parameter(ParameterSetName = 'ReplaceWith')]
-    [Parameter(ParameterSetName = 'MoveToEnd', Mandatory)]
+    [Parameter(ParameterSetName = 'MoveToEnd')]
     [Parameter(ParameterSetName = 'MoveToStart')]
     [Parameter(ParameterSetName = 'MoveRelative')]
     [switch]$Last,
@@ -46,8 +46,11 @@ function Rename-ForeachFsItem {
     [Parameter(Mandatory, Position = 0)]
     [string]$Pattern,
 
+    [Parameter(ParameterSetName = 'MoveToStart')]
+    [Parameter(ParameterSetName = 'MoveToEnd')]
+    [Parameter(ParameterSetName = 'MoveRelative')]
     [Parameter(ParameterSetName = 'ReplaceFirst')]
-    [Parameter(ParameterSetName = 'ReplaceWith')]
+    [Parameter(ParameterSetName = 'ReplaceWith', Mandatory)]
     [string]$With,
 
     [Parameter()]
@@ -293,7 +296,12 @@ function Rename-ForeachFsItem {
 
       'LOOPZ.RN-FOREACH.PATTERN'                 = $Pattern;
       'LOOPZ.RN-FOREACH.FS-ITEM-TYPE'            = $File.ToBool() ? 'FILE' : 'DIRECTORY';
-      'LOOPZ.RN-FOREACH.WITH'                    = $doMoveToken ? $Pattern : $With;
+    }
+
+    $passThru['LOOPZ.RN-FOREACH.WITH'] = if ($doMoveToken) {
+      [string]::IsNullOrEmpty($With) ? $With : $Pattern;
+    } else {
+      $With;
     }
 
     if ($First.ToBool()) {

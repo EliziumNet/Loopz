@@ -1,6 +1,6 @@
 using namespace System.Management.Automation;
 
-Describe 'Rename-ForeachFsItem' {
+Describe 'Rename-ForeachFsItem' -Tag 'Current' {
   BeforeAll {
     Get-Module Elizium.Loopz | Remove-Module
     Import-Module .\Output\Elizium.Loopz\Elizium.Loopz.psm1 `
@@ -45,7 +45,7 @@ Describe 'Rename-ForeachFsItem' {
         It 'should: not throw ParameterBindingException' {
           {
             Get-ChildItem -File -Path $sourcePath -Filter $filter | Rename-ForeachFsItem -File `
-              -Last -Whole -Pattern 'data.' -Target 't\d{1}\.' -Except 'fake' `
+              -Last -Whole -Pattern 'data.' -Target 't\d{1}\.' -With 'repl' -Except 'fake' `
               -Condition $successCondition -Relation 'before' -WhatIf:$whatIf; } `
           | Should -Not -Throw;
         }
@@ -55,7 +55,7 @@ Describe 'Rename-ForeachFsItem' {
         It 'should: not throw ParameterBindingException' {
           {
             Get-ChildItem -File -Path $sourcePath -Filter $filter | Rename-ForeachFsItem -File `
-              -Last -Whole -Pattern 'data.' -Start -Except 'fake' -Condition $successCondition `
+              -Last -Whole -Pattern 'data.' -Start -With 'repl' -Except 'fake' -Condition $successCondition `
               -WhatIf:$whatIf; } `
           | Should -Not -Throw;
         }
@@ -65,7 +65,7 @@ Describe 'Rename-ForeachFsItem' {
         It 'should: not throw ParameterBindingException' {
           {
             Get-ChildItem -File -Path $sourcePath -Filter $filter | Rename-ForeachFsItem -File `
-              -Last -Whole -Pattern 'data.' -End -Except 'fake' -Condition $successCondition `
+              -Last -Whole -Pattern 'data.' -End -With 'repl' -Except 'fake' -Condition $successCondition `
               -WhatIf:$whatIf; } `
           | Should -Not -Throw;
         }
@@ -93,15 +93,6 @@ Describe 'Rename-ForeachFsItem' {
     } # is: valid
 
     Context 'is not: valid (MoveRelative)' {
-      Context 'and: "With" specified' {
-        It 'should: throw ParameterBindingException' {
-          {
-            Get-ChildItem -File -Path $sourcePath -Filter $filter | Rename-ForeachFsItem -File `
-              -Pattern 'data.' -Target 't\d{1}\.' -With 'blah' -WhatIf:$whatIf;
-          } | Assert-Throw -ExceptionType ([ParameterBindingException]);
-        }
-      } # MoveToken(MoveRelative)
-
       Context 'and: "Quantity" specified' {
         It 'should: throw ParameterBindingException' {
           {
@@ -135,20 +126,11 @@ Describe 'Rename-ForeachFsItem' {
         }
       } # and: "Relation" specified
 
-      Context 'and: "With" specified' {
-        It 'should: throw ParameterBindingException' {
-          {
-            Get-ChildItem -File -Path $sourcePath -Filter $filter | Rename-ForeachFsItem -File `
-              -Pattern 'data.' -Start -Target 't\d{1}\.' -With 'blah' -WhatIf:$whatIf;
-          } | Assert-Throw -ExceptionType ([ParameterBindingException]);
-        }
-      } # and: "With" specified
-
       Context 'and: "Quantity" specified' {
         It 'should: throw ParameterBindingException' {
           {
             Get-ChildItem -File -Path $sourcePath -Filter $filter | Rename-ForeachFsItem -File `
-              -Pattern 'data.' -Start -Target 't\d{1}\.' -Quantity 101 -WhatIf:$whatIf;
+              -Pattern 'data.' -Start -Quantity 101 -WhatIf:$whatIf;
           } | Assert-Throw -ExceptionType ([ParameterBindingException]);
         }
       } # and: "Quantity" specified
@@ -157,7 +139,7 @@ Describe 'Rename-ForeachFsItem' {
         It 'should: throw ParameterBindingException' {
           {
             Get-ChildItem -File -Path $sourcePath -Filter $filter | Rename-ForeachFsItem -File `
-              -Pattern 'data.' -Start -End -Target 't\d{1}\.' -WhatIf:$whatIf;
+              -Pattern 'data.' -Start -End -WhatIf:$whatIf;
           } | Assert-Throw -ExceptionType ([ParameterBindingException]);
         }
       } # and: "End" specified
@@ -182,20 +164,11 @@ Describe 'Rename-ForeachFsItem' {
         }
       } # and: "Relation" specified
 
-      Context 'and: "With" specified' {
-        It 'should: throw ParameterBindingException' {
-          {
-            Get-ChildItem -File -Path $sourcePath -Filter $filter | Rename-ForeachFsItem -File `
-              -Pattern 'data.' -End -Target 't\d{1}\.' -With 'blah' -WhatIf:$whatIf;
-          } | Assert-Throw -ExceptionType ([ParameterBindingException]);
-        }
-      } # and: "With" specified
-
       Context 'and: "Quantity" specified' {
         It 'should: throw ParameterBindingException' {
           {
             Get-ChildItem -File -Path $sourcePath -Filter $filter | Rename-ForeachFsItem -File `
-              -Pattern 'data.' -End -Target 't\d{1}\.' -Quantity 101 -WhatIf:$whatIf;
+              -Pattern 'data.' -End -Quantity 101 -WhatIf:$whatIf;
           } | Assert-Throw -ExceptionType ([ParameterBindingException]);
         }
       } # and: "Quantity" specified
@@ -204,7 +177,7 @@ Describe 'Rename-ForeachFsItem' {
         It 'should: throw ParameterBindingException' {
           {
             Get-ChildItem -File -Path $sourcePath -Filter $filter | Rename-ForeachFsItem -File `
-              -Pattern 'data.' -Start -End -Target 't\d{1}\.' -WhatIf:$whatIf;
+              -Pattern 'data.' -Start -End -WhatIf:$whatIf;
           } | Assert-Throw -ExceptionType ([ParameterBindingException]);
         }
       } # and: "Start" specified
@@ -218,44 +191,6 @@ Describe 'Rename-ForeachFsItem' {
         }
       } # and: "Target" specified
     } # is not: valid (MoveToEnd)
-
-    Context 'is not: valid (ReplaceWith)' {
-      Context 'and: "Target" specified' {
-        It 'should: ParameterBindingException' {
-          {
-            Get-ChildItem -File -Path $sourcePath -Filter $filter | Rename-ForeachFsItem -File `
-              -Last -Whole -Pattern 'data.' -With 'info.' -Target 'blah' -WhatIf:$whatIf;
-          } | Assert-Throw -ExceptionType ([ParameterBindingException]);
-        }
-      } # and: "Target" specified
-
-      Context 'and: "Relation" specified' {
-        It 'should: ParameterBindingException' {
-          {
-            Get-ChildItem -File -Path $sourcePath -Filter $filter | Rename-ForeachFsItem -File `
-              -Last -Whole -Pattern 'data.' -With 'info.' -Relation 'after' -WhatIf:$whatIf;
-          } | Assert-Throw -ExceptionType ([ParameterBindingException]);
-        }
-      } # and: "Relation" specified
-
-      Context 'and: "Start" specified' {
-        It 'should: ParameterBindingException' {
-          {
-            Get-ChildItem -File -Path $sourcePath -Filter $filter | Rename-ForeachFsItem -File `
-              -Last -Whole -Pattern 'data.' -With 'info.' -Start -WhatIf:$whatIf;
-          } | Assert-Throw -ExceptionType ([ParameterBindingException]);
-        }
-      } # and: "Start" specified
-
-      Context 'and: "End" specified' {
-        It 'should: ParameterBindingException' {
-          {
-            Get-ChildItem -File -Path $sourcePath -Filter $filter | Rename-ForeachFsItem -File `
-              -Last -Whole -Pattern 'data.' -With 'info.' -End -WhatIf:$whatIf;
-          } | Assert-Throw -ExceptionType ([ParameterBindingException]);
-        }
-      } # and: "End" specified
-    } # is not: valid (ReplaceWith)
 
     Context 'is not: valid (ReplaceFirst)' {
       Context 'and: "Target" specified' {
