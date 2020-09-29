@@ -1,5 +1,14 @@
 
 function Rename-ForeachFsItem {
+  # - ReplaceFirst; action: 'REPLACE-WITH'
+  # - ReplaceWith; action: 'REPLACE-WITH'
+  # - MoveToEnd; action: 'MOVE-TOKEN'
+  # - MoveToStart; action:'MOVE-TOKEN'
+  # - MoveRelative; action: 'MOVE-TOKEN'
+  #
+  # Can re-introduce the Literal parameter and use this with [regex]::Escape("pattern")
+  # but check it first!!
+  #
   [CmdletBinding(SupportsShouldProcess, DefaultParameterSetName = 'ReplaceWith')]
   [Alias('rnfsi', 'rnall')]
   param
@@ -86,36 +95,81 @@ function Rename-ForeachFsItem {
       [string]$newItemName = [string]::Empty;
       [boolean]$errorOccurred = $false;
       [string[][]]$properties = @();
+      [string]$action = $_passThru['LOOPZ.RN-FOREACH.ACTION'];
 
-      if ($_passThru.ContainsKey('LOOPZ.RN-FOREACH.OCCURRENCE')) {
-        [string]$occurrence = $_passThru['LOOPZ.RN-FOREACH.OCCURRENCE'];
+      switch ($action) {
+        'REPLACE-WITH' {
+          if ($_passThru.ContainsKey('LOOPZ.RN-FOREACH.OCCURRENCE')) {
+            [string]$occurrence = $_passThru['LOOPZ.RN-FOREACH.OCCURRENCE'];
 
-        switch ($occurrence) {
-          'FIRST' {
-            [int]$quantityFirst = $_passThru.ContainsKey('LOOPZ.RN-FOREACH.QUANTITY-FIRST') `
-              ? $_passThru['LOOPZ.RN-FOREACH.QUANTITY-FIRST'] : 1;
+            switch ($occurrence) {
+              'FIRST' {
+                [int]$quantityFirst = $_passThru.ContainsKey('LOOPZ.RN-FOREACH.QUANTITY-FIRST') `
+                  ? $_passThru['LOOPZ.RN-FOREACH.QUANTITY-FIRST'] : 1;
 
-            $newItemName = (edit-ReplaceFirstMatch -Source $_underscore.Name `
-                -Pattern $replacePattern -With $replaceWith -Quantity $quantityFirst `
-                -Whole:$wholeWord).Trim();
-            break;
+                $newItemName = (edit-ReplaceFirstMatch -Source $_underscore.Name `
+                    -Pattern $replacePattern -With $replaceWith -Quantity $quantityFirst `
+                    -Whole:$wholeWord).Trim();
+                break;
+              }
+
+              'LAST' {
+                $newItemName = (edit-ReplaceLastMatch -Source $_underscore.Name `
+                    -Pattern $replacePattern -With $replaceWith -Whole:$wholeWord).Trim();
+                break;
+              }
+              default {
+                $errorOccurred = $true;
+                break;
+              }
+            }
+          }
+          else {
+            # Just replace all occurrences
+            #
+            $newItemName = ($_underscore.Name -replace $replacePattern, $replaceWith).Trim();
           }
 
-          'LAST' {
-            $newItemName = (edit-ReplaceLastMatch -Source $_underscore.Name `
-                -Pattern $replacePattern -With $replaceWith -Whole:$wholeWord).Trim();
-            break;
+          break;
+        } # action: REPLACE-WITH
+
+        'MOVE-TOKEN' {
+          [System.Collections.Hashtable]$moveTokenParameters = @{
+            'Source'  = $_underscore.Name;
+            'Pattern' = $replacePattern;
           }
-          default {
-            $errorOccurred = $true;
-            break;
+
+          [string]$targetType = $_passThru['LOOPZ.RN-FOREACH.TARGET-TYPE'];
+          switch ($targetType) {
+            'MATCHED-ITEM' {
+              $moveTokenParameters['Target'] = $_passThru['LOOPZ.RN-FOREACH.TARGET'];
+              $moveTokenParameters['Relation'] = $_passThru['LOOPZ.RN-FOREACH.RELATION'];
+              break;
+            }
+            'START' {
+              $moveTokenParameters['Start'] = $true;
+              break;
+            }
+            'END' {
+              $moveTokenParameters['End'] = $true;
+              break;
+            }
+            default {
+              throw "doRenameFsItems: encountered Invalid 'LOOPZ.RN-FOREACH.TARGET-TYPE': '$targetType'";
+            }
           }
+
+          if ($_passThru.ContainsKey('LOOPZ.RN-FOREACH.WHOLE-WORD')) {
+            $moveTokenParameters['Whole'] = $true;
+          }
+
+          $newItemName = (edit-MoveToken @moveTokenParameters).Trim();
+          break;
+        } # action: MOVE-TOKEN
+
+        default {
+          throw "doRenameFsItems: encountered Invalid 'LOOPZ.RN-FOREACH.ACTION': '$action'";
         }
-      }
-      else {
-        # Just replace all occurrences
-        #
-        $newItemName = ($_underscore.Name -replace $replacePattern, $replaceWith).Trim();
       }
 
       [boolean]$trigger = $false;
@@ -221,6 +275,9 @@ function Rename-ForeachFsItem {
       $result.GetType() -in @([System.IO.FileInfo], [System.IO.DirectoryInfo]) ? $result.Name : $result;
     }
 
+    [boolean]$doMoveToken = ($PSBoundParameters.ContainsKey('Target') -or
+      $PSBoundParameters.ContainsKey('Start') -or $PSBoundParameters.ContainsKey('End'));
+
     [System.Collections.Hashtable]$passThru = @{
       'LOOPZ.WH-FOREACH-DECORATOR.BLOCK'         = $doRenameFsItems;
       'LOOPZ.WH-FOREACH-DECORATOR.MESSAGE'       = $message;
@@ -236,9 +293,7 @@ function Rename-ForeachFsItem {
 
       'LOOPZ.RN-FOREACH.PATTERN'                 = $Pattern;
       'LOOPZ.RN-FOREACH.FS-ITEM-TYPE'            = $File.ToBool() ? 'FILE' : 'DIRECTORY';
-      'LOOPZ.RN-FOREACH.WITH'                    = ($PSBoundParameters.ContainsKey('Target') -or
-        $PSBoundParameters.ContainsKey('Start') -or $PSBoundParameters.ContainsKey('End')) `
-        ? $Pattern : $With;
+      'LOOPZ.RN-FOREACH.WITH'                    = $doMoveToken ? $Pattern : $With;
     }
 
     if ($First.ToBool()) {
@@ -264,6 +319,20 @@ function Rename-ForeachFsItem {
       $passThru['LOOPZ.RN-FOREACH.WHOLE-WORD'] = $true;
     }
 
+    $passThru['LOOPZ.RN-FOREACH.ACTION'] = $doMoveToken ? 'MOVE-TOKEN' : 'REPLACE-WITH';
+    $passThru['LOOPZ.RN-FOREACH.RELATION'] = $Relation;
+
+    if ([string]::IsNullOrEmpty($Target)) {
+      $passThru['LOOPZ.RN-FOREACH.TARGET-TYPE'] = 'MATCHED-ITEM';
+      $passThru['LOOPZ.RN-FOREACH.TARGET'] = $Target;
+    }
+    elseif ($PSBoundParameters.ContainsKey('Start')) {
+      $passThru['LOOPZ.RN-FOREACH.TARGET-TYPE'] = 'START';
+    }
+    elseif ($PSBoundParameters.ContainsKey('End')) {
+      $passThru['LOOPZ.RN-FOREACH.TARGET-TYPE'] = 'END';
+    }
+
     [scriptblock]$clientCondition = $Condition;
 
     [scriptblock]$matchesPattern = {
@@ -276,8 +345,8 @@ function Rename-ForeachFsItem {
       # the client's Condition (Rename-ForeachFsItem) is not accidentally hidden.
       #
       return ($pipelineItem.Name -match $Pattern) -and `
-        (($Except -eq [string]::Empty) -or -not($pipelineItem.Name -match $Except)) -and
-        $clientCondition.Invoke($pipelineItem);
+      (($Except -eq [string]::Empty) -or -not($pipelineItem.Name -match $Except)) -and
+      $clientCondition.Invoke($pipelineItem);
     }
 
     [System.Collections.Hashtable]$parameters = @{
