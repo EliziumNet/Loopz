@@ -40,7 +40,7 @@ function edit-MoveToken {
 
   if ($Source -match $adjustedPattern) {
     [string]$wholePatternMatched = ('\b{0}\b' -f $matches[0]);
-    [string]$patternMatched = $matches[0]; # => 31-12-1999
+    [string]$patternMatched = $matches[0];
     [System.Text.RegularExpressions.RegEx]$patternMatchedRegEx = `
       New-Object -TypeName System.Text.RegularExpressions.RegEx -ArgumentList ($Whole ? $wholePatternMatched : $patternMatched);
     [string]$patternRemoved = $patternMatchedRegEx.Replace($Source, '', 1);
@@ -49,15 +49,15 @@ function edit-MoveToken {
     if ($PSBoundParameters.ContainsKey('Target')) {
       if ($patternRemoved -match $Target) {
         [string]$targetMatched = $matches[0]; # 'is: '
-        [string]$captureExpression = ('(?<target>{0})' -f $targetMatched).Replace(' ', '\s'); # => '(?<target>is:\s)'
+        [string]$captureExpression = ('(?<target>{0})' -f $targetMatched).Replace(' ', '\s');
 
         # The natural way to perform the regex replacement, would be to use something like:
         # $patternRemoved -replace $captureExpression, '${target} ...' or
-        # $patternRemoved -replace $captureExpression, '... ${target}' depending on the Relation. However, the
-        # second parameter of the replace operator has to be a literal string (') not template string ("),
-        # because group reference ${target} would be incorrectly interpreted by the template string instead of
-        # leaving it to be used by the regex string replacement. This is why we have to do this in a clunky 2
-        # stage process.
+        # $patternRemoved -replace $captureExpression, '... ${target}' depending on the Relation.
+        # However, the second parameter of the replace operator has to be a literal string (')
+        # not template string ("), because group reference ${target} would be incorrectly
+        # interpreted by the template string instead of leaving it to be used by the regex string
+        # replacement. This is why we have to do this in a clunky 2 stage process.
         #
         [string]$withPattern = ($Relation -eq 'after') `
           ? $targetMatched + $replaceWith `

@@ -287,7 +287,8 @@ function Invoke-ForeachFsItem {
 
   begin {
     if (-not($PassThru.ContainsKey('LOOPZ.CONTROLLER'))) {
-      $PassThru['LOOPZ.CONTROLLER'] = New-Controller -Type ForeachCtrl -PassThru $PassThru -Header $Header -Summary $Summary;
+      $PassThru['LOOPZ.CONTROLLER'] = New-Controller -Type ForeachCtrl -PassThru $PassThru `
+        -Header $Header -Summary $Summary;
     }
     $controller = $PassThru['LOOPZ.CONTROLLER'];
     $controller.ForeachBegin();

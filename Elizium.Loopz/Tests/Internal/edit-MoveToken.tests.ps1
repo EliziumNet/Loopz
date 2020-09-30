@@ -29,7 +29,7 @@ Describe 'edit-MoveToken' {
         } # and: move after
 
         Context 'and: replace With after' {
-          It 'should: move the match after the target' -Tag 'Current' {
+          It 'should: move the match after the target' {
             [string]$source = 'There is fire where you are going';
             [string]$pattern = 'fire ';
             [string]$target = 'are ';
