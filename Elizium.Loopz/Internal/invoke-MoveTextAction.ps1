@@ -3,7 +3,7 @@ function invoke-MoveTextAction {
   [OutputType([string])]
   param(
     [Parameter()]
-    $Value,
+    [string]$Value,
 
     [Parameter()]
     [string]$Pattern,

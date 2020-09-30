@@ -1,11 +1,5 @@
 
 function Rename-ForeachFsItem {
-  # - ReplaceFirst; action: 'REPLACE-WITH'
-  # - ReplaceWith; action: 'REPLACE-WITH'
-  # - MoveToEnd; action: 'MOVE-TOKEN'
-  # - MoveToStart; action:'MOVE-TOKEN'
-  # - MoveRelative; action: 'MOVE-TOKEN'
-  #
   # Can re-introduce the Literal parameter and use this with [regex]::Escape("pattern")
   # but check it first!!
   #
@@ -92,133 +86,93 @@ function Rename-ForeachFsItem {
 
       [string]$replacePattern = $_passThru['LOOPZ.RN-FOREACH.PATTERN'];
       [string]$replaceWith = $_passThru['LOOPZ.RN-FOREACH.WITH'];
-      [boolean]$processingFiles = $_passThru['LOOPZ.RN-FOREACH.FS-ITEM-TYPE'] -eq 'FILE';
+      
       [boolean]$wholeWord = $_passThru.ContainsKey('LOOPZ.RN-FOREACH.WHOLE-WORD') `
         ? $_passThru['LOOPZ.RN-FOREACH.WHOLE-WORD'] : $false;
-      [string]$newItemName = [string]::Empty;
-      [boolean]$errorOccurred = $false;
-      [string[][]]$properties = @();
+      
       [string]$action = $_passThru['LOOPZ.RN-FOREACH.ACTION'];
+
+      [System.Collections.Hashtable]$actionParameters = @{
+        'Value'   = $_underscore.Name;
+        'Pattern' = $replacePattern;
+        'With'    = $replaceWith;
+      }
+
+      if ($wholeWord) {
+        $actionParameters['Whole'] = $true;
+      }
 
       switch ($action) {
         'REPLACE-WITH' {
+          [string]$actionFn = 'invoke-ReplaceTextAction';
+          $actionParameters['Quantity'] = $_passThru.ContainsKey('LOOPZ.RN-FOREACH.QUANTITY-FIRST') `
+            ? $_passThru['LOOPZ.RN-FOREACH.QUANTITY-FIRST'] : 1;
+
           if ($_passThru.ContainsKey('LOOPZ.RN-FOREACH.OCCURRENCE')) {
-            [string]$occurrence = $_passThru['LOOPZ.RN-FOREACH.OCCURRENCE'];
-
-            switch ($occurrence) {
-              'FIRST' {
-                [int]$quantityFirst = $_passThru.ContainsKey('LOOPZ.RN-FOREACH.QUANTITY-FIRST') `
-                  ? $_passThru['LOOPZ.RN-FOREACH.QUANTITY-FIRST'] : 1;
-
-                $newItemName = (edit-ReplaceFirstMatch -Source $_underscore.Name `
-                    -Pattern $replacePattern -With $replaceWith -Quantity $quantityFirst `
-                    -Whole:$wholeWord).Trim();
-                break;
-              }
-
-              'LAST' {
-                $newItemName = (edit-ReplaceLastMatch -Source $_underscore.Name `
-                    -Pattern $replacePattern -With $replaceWith -Whole:$wholeWord).Trim();
-                break;
-              }
-              default {
-                $errorOccurred = $true;
-                break;
-              }
-            }
+            $actionParameters['Occurrence'] = $_passThru['LOOPZ.RN-FOREACH.OCCURRENCE'];
           }
-          else {
-            # Just replace all occurrences
-            #
-            $newItemName = ($_underscore.Name -replace $replacePattern, $replaceWith).Trim();
-          }
-
           break;
-        } # action: REPLACE-WITH
+        }
 
         'MOVE-TOKEN' {
-          [System.Collections.Hashtable]$moveTokenParameters = @{
-            'Source'  = $_underscore.Name;
-            'Pattern' = $replacePattern;
-          }
-
-          [string]$targetType = $_passThru['LOOPZ.RN-FOREACH.TARGET-TYPE'];
-          switch ($targetType) {
-            'MATCHED-ITEM' {
-              $moveTokenParameters['Target'] = $_passThru['LOOPZ.RN-FOREACH.TARGET'];
-              $moveTokenParameters['Relation'] = $_passThru['LOOPZ.RN-FOREACH.RELATION'];
-              break;
-            }
-            'START' {
-              $moveTokenParameters['Start'] = $true;
-              break;
-            }
-            'END' {
-              $moveTokenParameters['End'] = $true;
-              break;
-            }
-            default {
-              throw "doRenameFsItems: encountered Invalid 'LOOPZ.RN-FOREACH.TARGET-TYPE': '$targetType'";
-            }
-          }
-
-          if ($_passThru.ContainsKey('LOOPZ.RN-FOREACH.WHOLE-WORD')) {
-            $moveTokenParameters['Whole'] = $true;
-          }
-
-          $newItemName = (edit-MoveToken @moveTokenParameters).Trim();
+          [string]$actionFn = 'invoke-MoveTextAction';
+          $actionParameters['Target'] = $_passThru['LOOPZ.RN-FOREACH.TARGET'];
+          $actionParameters['TargetType'] = $_passThru['LOOPZ.RN-FOREACH.TARGET-TYPE'];
+          $actionParameters['Relation'] = $Relation;
           break;
-        } # action: MOVE-TOKEN
+        }
 
         default {
           throw "doRenameFsItems: encountered Invalid 'LOOPZ.RN-FOREACH.ACTION': '$action'";
         }
       }
 
+      [string]$newItemName = & $actionFn @actionParameters;
+
       [boolean]$trigger = $false;
       [boolean]$affirm = $false;
+      [boolean]$processingFiles = $_passThru['LOOPZ.RN-FOREACH.FS-ITEM-TYPE'] -eq 'FILE';
+      [string[][]]$properties = @();
 
-      if (-not($errorOccurred)) {
-        if (-not($_underscore.Name -ceq $newItemName)) {
-          $trigger = $true;
+      if (-not($_underscore.Name -ceq $newItemName)) {
+        $trigger = $true;
 
-          $destinationPath = ($processingFiles) `
-            ? (Join-Path $_underscore.Directory.FullName $newItemName) `
-            : (Join-Path $_underscore.Parent.FullName $newItemName);
+        $destinationPath = ($processingFiles) `
+          ? (Join-Path $_underscore.Directory.FullName $newItemName) `
+          : (Join-Path $_underscore.Parent.FullName $newItemName);
 
-          # TODO: do not do the rename directly here. Abstract this out into another command.
-          # This will enable us to generate an undo-script, in case the user made a mistake
-          # Display the location of the undo script in the summary.
-          #
+        # TODO: do not do the rename directly here. Abstract this out into another command.
+        # This will enable us to generate an undo-script, in case the user made a mistake
+        # Display the location of the undo script in the summary.
+        #
 
-          # First check if we only differ by case (TODO: check if this also applies to unix)
-          #
-          if ($newItemName.ToLower() -eq $_underscore.Name.ToLower()) {
-            if ($PSCmdlet.ShouldProcess($_underscore.Name, 'Rename Item')) {
-              # Just doing a double move to get around the problem of not being able to rename
-              # an item unless the case is different
-              #
-              $tempName = $newItemName + "_";
+        # First check if we only differ by case (TODO: check if this also applies to unix)
+        #
+        if ($newItemName.ToLower() -eq $_underscore.Name.ToLower()) {
+          if ($PSCmdlet.ShouldProcess($_underscore.Name, 'Rename Item')) {
+            # Just doing a double move to get around the problem of not being able to rename
+            # an item unless the case is different
+            #
+            $tempName = $newItemName + "_";
 
-              $tempDestinationPath = ($processingFiles) `
-                ? (Join-Path $_underscore.Directory.FullName $tempName) `
-                : (Join-Path $_underscore.Parent.FullName $tempName);
+            $tempDestinationPath = ($processingFiles) `
+              ? (Join-Path $_underscore.Directory.FullName $tempName) `
+              : (Join-Path $_underscore.Parent.FullName $tempName);
   
-              Move-Item -LiteralPath $_underscore.FullName -Destination $tempDestinationPath -PassThru | `
-                Move-Item -Destination $destinationPath;
-            }
-          }
-          else {
-            $affirm = $true;
-            if ($PSCmdlet.ShouldProcess($_underscore.Name, 'Rename Item')) {
-              Move-Item -LiteralPath $_underscore.FullName -Destination $destinationPath;
-            }
+            Move-Item -LiteralPath $_underscore.FullName -Destination $tempDestinationPath -PassThru | `
+              Move-Item -Destination $destinationPath;
           }
         }
+        else {
+          $affirm = $true;
+          if ($PSCmdlet.ShouldProcess($_underscore.Name, 'Rename Item')) {
+            Move-Item -LiteralPath $_underscore.FullName -Destination $destinationPath;
+          }
+        }
+      }
 
-        if ($trigger) {
-          $properties += , @('Original', $_underscore.Name);
-        }
+      if ($trigger) {
+        $properties += , @('Original', $_underscore.Name);
       }
 
       [PSCustomObject]$result = [PSCustomObject]@{
@@ -300,7 +254,8 @@ function Rename-ForeachFsItem {
 
     $passThru['LOOPZ.RN-FOREACH.WITH'] = if ($doMoveToken) {
       [string]::IsNullOrEmpty($With) ? $With : $Pattern;
-    } else {
+    }
+    else {
       $With;
     }
 
