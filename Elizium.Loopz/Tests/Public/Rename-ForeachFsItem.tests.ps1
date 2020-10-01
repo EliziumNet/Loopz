@@ -241,7 +241,7 @@ Describe 'Rename-ForeachFsItem' {
   } # given: Parameter Set
 } # Rename-ForeachFsItem
 
-Describe 'RegEx comprehension' {
+Describe 'RegEx comprehension' -Skip {
   Context 'Literal ([regex]::Escape("pattern"))' {
     It 'Literal' {
       [string]$source = 'hello=-=world';
@@ -275,6 +275,43 @@ Describe 'RegEx comprehension' {
           Write-Host ">>> Capture Group: $groupName";
         }
       }      
+    }
+
+    It 'Reinsert Capture groups' {
+      # How do we move 'Zorg' to moniker: -->
+      # [moniker:"Zorg"]Greeting earthlings, my name is Zorg and I eat humans
+      [string]$source = '[moniker:"Zorg"]Greeting earthlings, my name is  and I eat humans, code:1234';
+      [string]$pattern = 'Zorg';
+      [string]$capturedPattern = '(?<name>{0})' -f $pattern;
+
+      [string]$captureGroupPattern = '\(\?\<(?<groupName>\w+)\>'
+
+      if ($capturedPattern -match $captureGroupPattern) {
+        [string]$groupName = $matches['groupName'];
+
+        if ($source -match $capturedPattern) {
+          # Let's not cheat and find out dynamically what the capture group name is:
+          #
+          $capturedZorg = $matches[$groupName]
+
+          Write-Host "@@@ Captured name: '$capturedZorg'"
+
+          [string]$patternRemovedFromSource = $source -replace $capturedPattern, '';
+          [string]$target = ':"'
+
+          Write-Host "Pattern removed from source: '$patternRemovedFromSource'";
+
+          [string]$with = $target + $capturedZorg;
+          $inserted = $patternRemovedFromSource -replace "$target", $with
+ 
+          Write-Host ">>> INSERTED: '$inserted'";
+        }
+        else {
+          Write-Host "!!! FAILED to capture Zorg";
+        }
+      } else {
+        Write-Host "!!! FAILED to find the group name"
+      }
     }
   }
 }

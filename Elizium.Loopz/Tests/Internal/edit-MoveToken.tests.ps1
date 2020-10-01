@@ -138,12 +138,30 @@ Describe 'edit-MoveToken' {
             [string]$pattern = '\d{2}-\d{2}-\d{4}\s';
             [string]$target = 'on ';
 
-            $result = edit-MoveToken -Source $source -Pattern $pattern -Target $target -Relation 'after';
-            Write-Host ">>> RESULT: '$result'";
+            edit-MoveToken -Source $source -Pattern $pattern -Target $target -Relation 'after' | `
+              Should -BeExactly 'There will be fire on \d{2}-\d{2}-\d{4}\swhere you are going';
+
+            # ----------------------
+            # Ideally, we would like the result of this test to be:
+            # 'There will be fire on 23-03-1984 where you are going'
+            # but for now it is:
             # 'There will be fire on \d{2}-\d{2}-\d{4}\swhere you are going'
+            #                   --->|===================|<---
             #
-            # edit-MoveToken -Source $source -Pattern $pattern -Target $target -Relation 'after' | `
-            #   Should -BeExactly 'There will be fire on 23-03-1984 where you are going';
+            # This is because, the pattern is literally inserted as the text replacement as opposed
+            # to it being re-parsed from the source. This is an additional feature. So this is a
+            # stop-gap test until this functionality has been implemented; probably as an extra
+            # parameters such as "Capture" and "Format", where the user defines:
+            #
+            # Capture = '(?<date>\d{2}-\d{2}-\d{4}\s)'
+            # Format = 'date:${date}'
+            #
+            # where the capture groups specified in Capture, must be in sync with the Format
+            # string; ie, the fields referenced in the Format, must be defined in the Capture
+            # pattern. [Let's call this the 'Capture' parameter set]
+            #
+            # which actually would should result in 
+            # 'There will be fire on date:23-03-1984 where you are going'
           }
         } # and: move after
       } # and: Target match
