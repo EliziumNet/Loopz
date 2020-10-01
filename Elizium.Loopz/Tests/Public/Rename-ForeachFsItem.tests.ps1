@@ -241,6 +241,44 @@ Describe 'Rename-ForeachFsItem' {
   } # given: Parameter Set
 } # Rename-ForeachFsItem
 
+Describe 'RegEx comprehension' {
+  Context 'Literal ([regex]::Escape("pattern"))' {
+    It 'Literal' {
+      [string]$source = 'hello=-=world';
+      [string]$pattern = [regex]::Escape('=*=');
+
+      [boolean]$result = $source -match $pattern;
+      Write-Host ">>> Literal match result: $result";
+    }
+
+    It 'Capture' {
+      [string]$source = 'date:29-jul-2008';
+      [string]$pattern = '(\-)(?<cap>\w{3})(\-)';
+
+      [boolean]$result = $source -match $pattern;
+      Write-Host ">>> Literal match result: $result";
+
+      if ($result) {
+        $captured = $matches[0];
+        Write-Host ">>> Captured: $captured";
+        $cap = $matches['cap'];
+        Write-Host ">>> <cap>: $cap";
+
+        # How do we get the capture group name?
+        # We need the following expression:
+        # just look for (?<group>
+        #
+        $captureGroupPattern = '\(\?\<(?<groupName>\w+)\>'
+
+        if ($pattern -match $captureGroupPattern) {
+          $groupName = $matches['groupName'];
+          Write-Host ">>> Capture Group: $groupName";
+        }
+      }      
+    }
+  }
+}
+
 Describe 'Fails to handle pipeline in a single pass' -Skip {
   Context 'given: pipeline variable defined as a scalar value' {
     It 'should: invoke pipeline in a single pass' {

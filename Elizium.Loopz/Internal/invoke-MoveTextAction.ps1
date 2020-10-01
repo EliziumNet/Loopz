@@ -9,6 +9,9 @@ function invoke-MoveTextAction {
     [string]$Pattern,
 
     [Parameter()]
+    [string[]]$Literal,
+
+    [Parameter()]
     [string]$Target,
 
     [Parameter()]
@@ -25,6 +28,10 @@ function invoke-MoveTextAction {
   [System.Collections.Hashtable]$moveTokenParameters = @{
     'Source'  = $Value;
     'Pattern' = $Pattern;
+  }
+
+  if ($PSBoundParameters.ContainsKey('Literal')) {
+    $moveTokenParameters['Literal'] = $Literal;
   }
 
   switch ($TargetType) {

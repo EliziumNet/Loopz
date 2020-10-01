@@ -57,6 +57,19 @@ Describe 'invoke-MoveTextAction' -Tag 'Current' {
       } # and: Relation=after
     } # and: single Pattern match
 
+    Context 'and: single Pattern Literal match' {
+      Context 'and: single Target match' {
+        It 'should: move Pattern after target' -Tag 'BROKEN?' -Skip {
+          [string]$source = '[] date is [???]';
+          [string]$pattern = '???';
+          [string]$target = '[';
+
+          invoke-MoveTextAction -Value $source -Pattern $pattern -Target $target `
+            -TargetType 'MATCHED-ITEM' -Relation 'after' -Literal p, t | Should -BeExactly '[???] date is []';
+        }
+      } # and: single Target match
+    }
+
     Context 'and: multiple Pattern matches' {
       Context 'and: Relation=after' {
         Context 'and: single Target match' {

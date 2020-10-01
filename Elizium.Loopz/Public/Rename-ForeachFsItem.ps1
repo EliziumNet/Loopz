@@ -40,6 +40,9 @@ function Rename-ForeachFsItem {
     [Parameter(Mandatory, Position = 0)]
     [string]$Pattern,
 
+    [Parameter()]
+    [string[]]$Literal,
+
     [Parameter(ParameterSetName = 'MoveToStart')]
     [Parameter(ParameterSetName = 'MoveToEnd')]
     [Parameter(ParameterSetName = 'MoveRelative')]
@@ -86,7 +89,7 @@ function Rename-ForeachFsItem {
 
       [string]$replacePattern = $_passThru['LOOPZ.RN-FOREACH.PATTERN'];
       [string]$replaceWith = $_passThru['LOOPZ.RN-FOREACH.WITH'];
-      
+
       [boolean]$wholeWord = $_passThru.ContainsKey('LOOPZ.RN-FOREACH.WHOLE-WORD') `
         ? $_passThru['LOOPZ.RN-FOREACH.WHOLE-WORD'] : $false;
       
@@ -96,6 +99,11 @@ function Rename-ForeachFsItem {
         'Value'   = $_underscore.Name;
         'Pattern' = $replacePattern;
         'With'    = $replaceWith;
+      }
+
+      if ($_passThru.ContainsKey('LOOPZ.RN-FOREACH.LITERAL')) {
+        [string[]]$literals = $_passThru['LOOPZ.RN-FOREACH.LITERAL'];
+        $actionParameters['LOOPZ.RN-FOREACH.LITERAL'] = $literals;
       }
 
       if ($wholeWord) {
@@ -325,6 +333,10 @@ function Rename-ForeachFsItem {
     }
     else {
       $parameters['Directory'] = $true;
+    }
+
+    if ($PSBoundParameters.ContainsKey('Literal')) {
+      $passThru['LOOPZ.RN-FOREACH.LITERAL'] = $Literal | ForEach-Object { $_.ToLower() };
     }
 
     $collection | Invoke-ForeachFsItem @parameters;

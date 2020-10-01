@@ -10,6 +10,9 @@ function edit-MoveToken {
     [Parameter(Mandatory)]
     [string]$Pattern,
 
+    [Parameter()]
+    [string[]]$Literal,
+
     [Parameter(ParameterSetName = 'MoveRelative')]
     [string]$Target,
 
@@ -32,23 +35,39 @@ function edit-MoveToken {
 
   [string]$result = $Source;
   [string]$adjustedPattern = $Whole ? ('\b{0}\b' -f $Pattern.Replace('\b', '')) : $Pattern;
+  [boolean]$isLiteral = $PSBoundParameters.ContainsKey('Literal');
+  if ($isLiteral) {
+    if ('*' -in $Literal) {
+      [boolean]$literalPattern = [boolean]$literalWith = [boolean]$literalTarget = $true;
+    }
+    else {
+      [boolean]$literalPattern = $isLiteral -and ('p' -in $Literal);
+      [boolean]$literalWith = $isLiteral -and ('w' -in $Literal);
+      [boolean]$literalTarget = $isLiteral -and ('t' -in $Literal);
+    }
+  }
 
-  # Source = '31-12-1999 new years eve is: ';
-  # Pattern = '\d{2}-\d{2}-\d{4}'
-  # Target = 'is: '
-  # Relation = 'after'
+  if ($literalPattern) {
+    $adjustedPattern = [regex]::Escape($adjustedPattern);
+  }
 
   if ($Source -match $adjustedPattern) {
-    [string]$wholePatternMatched = ('\b{0}\b' -f $matches[0]);
-    [string]$patternMatched = $matches[0];
+    [string]$patternMatched = $Whole ? ('\b{0}\b' -f $matches[0]) : $matches[0];
+
+    if ($literalPattern) {
+      $patternMatched = [regex]::Escape($patternMatched);
+    }
+
     [System.Text.RegularExpressions.RegEx]$patternMatchedRegEx = `
-      New-Object -TypeName System.Text.RegularExpressions.RegEx -ArgumentList ($Whole ? $wholePatternMatched : $patternMatched);
+      New-Object -TypeName System.Text.RegularExpressions.RegEx -ArgumentList ($patternMatched);
     [string]$patternRemoved = $patternMatchedRegEx.Replace($Source, '', 1);
     [string]$replaceWith = [string]::IsNullOrEmpty($With) ? $patternMatched : $With;
 
     if ($PSBoundParameters.ContainsKey('Target')) {
-      if ($patternRemoved -match $Target) {
-        [string]$targetMatched = $matches[0]; # 'is: '
+      [string]$normalisedTarget = $literalTarget ? [regex]::Escape($Target) : $Target;
+
+      if ($patternRemoved -match $normalisedTarget) {
+        [string]$targetMatched = $literalTarget ? [regex]::Escape($matches[0]) : $matches[0]; ;
         [string]$captureExpression = ('(?<target>{0})' -f $targetMatched).Replace(' ', '\s');
 
         # The natural way to perform the regex replacement, would be to use something like:
@@ -59,9 +78,17 @@ function edit-MoveToken {
         # interpreted by the template string instead of leaving it to be used by the regex string
         # replacement. This is why we have to do this in a clunky 2 stage process.
         #
-        [string]$withPattern = ($Relation -eq 'after') `
-          ? $targetMatched + $replaceWith `
-          : $replaceWith + $targetMatched;
+        if ($PSBoundParameters.ContainsKey('With')) {
+          [string]$withPattern = ($Relation -eq 'after') `
+            ? ($Target + $With) : ($With + $Target);
+        } else {
+          [string]$withPattern = ($Relation -eq 'after') `
+            ? ($Target + $Pattern) : ($Pattern + $Target);
+        }
+
+        if ($literalWith) {
+          $withPattern = [regex]::Escape($withPattern);
+        }
 
         [System.Text.RegularExpressions.RegEx]$captureRegEx = `
           New-Object -TypeName System.Text.RegularExpressions.RegEx -ArgumentList $captureExpression;
@@ -75,7 +102,7 @@ function edit-MoveToken {
       if ($Start.ToBool()) {
         $result = $replaceWith + $patternRemoved;
       }
-      elseif ($end.ToBool()) {
+      elseif ($End.ToBool()) {
         $result = $patternRemoved + $replaceWith;
       }
       else {

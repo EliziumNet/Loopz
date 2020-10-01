@@ -9,6 +9,9 @@ function invoke-ReplaceTextAction {
     [string]$Pattern,
 
     [Parameter()]
+    [string[]]$Literal,
+
+    [Parameter()]
     [string]$With,
 
     [Parameter()]
