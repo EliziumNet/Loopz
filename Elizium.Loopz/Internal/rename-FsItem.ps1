@@ -18,15 +18,15 @@ function rename-FsItem {
     [System.IO.FileAttributes]::Directory) -eq [System.IO.FileAttributes]::Directory;
 
   [string]$destinationPath = $itemIsDirectory `
-    ? (Join-Path -Path $From.Parent.FullName -ChildPath $To)
-  : (Join-Path -Path $From.Directory.FullName -ChildPath $To);
+    ? (Join-Path -Path $From.Parent.FullName -ChildPath $To) `
+    : (Join-Path -Path $From.Directory.FullName -ChildPath $To);
 
-  if ($PSCmdlet.ShouldProcess($From.FullName, 'Rename Item')) {
+  if (-not($PSBoundParameters.ContainsKey('WhatIf') -and $PSBoundParameters['WhatIf'])) {
     try {
       [boolean]$createUndoEntry = $false;
       [boolean]$differByCaseOnly = $From.Name.ToLower() -eq $To.ToLower();
 
-      if ($DifferByCaseOnly.ToBool()) {
+      if ($differByCaseOnly) {
         # Just doing a double move to get around the problem of not being able to rename
         # an item unless the case is different
         #

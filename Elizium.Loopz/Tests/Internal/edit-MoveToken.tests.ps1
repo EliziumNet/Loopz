@@ -34,9 +34,7 @@ Describe 'edit-MoveToken' {
             [string]$pattern = 'fire ';
             [string]$target = 'are ';
             [string]$with = 'ice ';
-            # EXPECT: 'There is where you are ice going'
-            # ACTUAL: 'There is where you are fire going'
-            # ==> so we have ignored the with parameter and inserted pattern
+
             edit-MoveToken -Source $source -Pattern $pattern -Target $target -With $with -Relation 'after' | `
               Should -BeExactly 'There is where you are ice going';
           }

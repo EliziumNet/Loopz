@@ -136,18 +136,20 @@ function Rename-ForeachFsItem {
 
       [boolean]$trigger = $false;
       [boolean]$affirm = $false;
+      [boolean]$whatIf = $_passThru.ContainsKey('WHAT-IF') -and `
+      ($_passThru['WHAT-IF']);
       [string[][]]$properties = @();
 
       if (-not($_underscore.Name -ceq $newItemName)) {
         $trigger = $true;
-        $product = rename-FsItem -From $_underscore -To $newItemName;
+        $product = rename-FsItem -From $_underscore -To $newItemName -WhatIf:$whatIf;
       }
 
       [boolean]$differsByCaseOnly = $newItemName.ToLower() -eq $_underscore.Name.ToLower();
       [boolean]$affirm = $trigger -and ($product) -and -not($differsByCaseOnly);
 
       if ($trigger) {
-        $properties += , @('Original', $_underscore.Name);
+        $properties += , @('To', $newItemName, $affirm);
       }
 
       [PSCustomObject]$result = [PSCustomObject]@{
@@ -155,10 +157,6 @@ function Rename-ForeachFsItem {
       }
 
       $result | Add-Member -MemberType NoteProperty -Name 'Pairs' -Value (, $properties);
-
-      if ($affirm) {
-        $result | Add-Member -MemberType NoteProperty -Name 'Affirm' -Value $true;
-      }
 
       if ($trigger) {
         $result | Add-Member -MemberType NoteProperty -Name 'Trigger' -Value $true;
@@ -180,24 +178,26 @@ function Rename-ForeachFsItem {
     Write-Debug '<<< Rename-ForeachFsItem <<<';
     [int]$WIDE_THRESHOLD = 6;
 
+    [boolean]$whatIf = $PSBoundParameters.ContainsKey('WhatIf');
+
     [string]$itemEmoji = $File.ToBool() ? '🏷️' : '📁';
-    [string]$message = '   [{0}] Rename Item' -f $itemEmoji;
+    [string]$message = '   [{0}] Rename Item{1}' -f $itemEmoji, ($whatIf ? ' (WhatIf)' : '');
     [string[][]]$wideItems = @();
     [string[][]]$properties = @();
 
     if ($Pattern.Length -gt $WIDE_THRESHOLD) {
-      $wideItems += , @('[*] Pattern', $Pattern);
+      $wideItems += , @('[📌] Pattern', $Pattern);
     }
     else {
-      $properties += , @('[*] Pattern', $Pattern);
+      $properties += , @('[📌] Pattern', $Pattern);
     }
 
     if ($With -and $With.Length -gt 0) {
       if ($With.Length -gt $WIDE_THRESHOLD) {
-        $wideItems += , @('[-] With', $With);
+        $wideItems += , @('[💠] With', $With);
       }
       else {
-        $properties += , @('[-] With', $With);
+        $properties += , @('[💠] With', $With);
       }
     }
 
@@ -218,10 +218,10 @@ function Rename-ForeachFsItem {
 
       'LOOPZ.HEADER-BLOCK.CRUMB'                 = '[🛡️] '
       'LOOPZ.HEADER-BLOCK.LINE'                  = $LoopzUI.DashLine;
-      'LOOPZ.HEADER-BLOCK.MESSAGE'               = 'Rename';
+      'LOOPZ.HEADER-BLOCK.MESSAGE'               = $whatIf ? 'Rename (WhatIf)' : 'Rename';
 
       'LOOPZ.SUMMARY-BLOCK.LINE'                 = $LoopzUI.EqualsLine;
-      'LOOPZ.SUMMARY-BLOCK.MESSAGE'              = '[💫] Rename Summary';
+      'LOOPZ.SUMMARY-BLOCK.MESSAGE'              = '[💎] Rename Summary';
 
       'LOOPZ.RN-FOREACH.PATTERN'                 = $Pattern;
       'LOOPZ.RN-FOREACH.FS-ITEM-TYPE'            = $File.ToBool() ? 'FILE' : 'DIRECTORY';
@@ -235,13 +235,13 @@ function Rename-ForeachFsItem {
     }
 
     if ($First.ToBool()) {
-      $properties += , @('[+] First', '[=]');
+      $properties += , @('[✨] First', '[✔️]');
       $passThru['LOOPZ.RN-FOREACH.OCCURRENCE'] = 'FIRST';
       $passThru['LOOPZ.RN-FOREACH.QUANTITY-FIRST'] = $Quantity;
     }
 
     if ($Last.ToBool()) {
-      $properties += , @('[+] Last', '[=]');
+      $properties += , @('[❄️] Last', '[✔️]');
       $passThru['LOOPZ.RN-FOREACH.OCCURRENCE'] = 'LAST';
     }
 
@@ -283,8 +283,8 @@ function Rename-ForeachFsItem {
       # the client's Condition (Rename-ForeachFsItem) is not accidentally hidden.
       #
       return ($pipelineItem.Name -match $Pattern) -and `
-      (($Except -eq [string]::Empty) -or -not($pipelineItem.Name -match $Except)) -and
-      $clientCondition.Invoke($pipelineItem);
+      (($Except -eq [string]::Empty) -or -not($pipelineItem.Name -match $Except)) -and `
+        $clientCondition.Invoke($pipelineItem);
     }
 
     [System.Collections.Hashtable]$parameters = @{
@@ -306,6 +306,10 @@ function Rename-ForeachFsItem {
       $passThru['LOOPZ.RN-FOREACH.LITERAL'] = $Literal | ForEach-Object { $_.ToLower() };
     }
 
-    $collection | Invoke-ForeachFsItem @parameters;
-  }
+    if ($whatIf) {
+      $passThru['WHAT-IF'] = $true;
+    }
+
+    $null = $collection | Invoke-ForeachFsItem @parameters;
+  } # end
 } # Rename-ForeachFsItem
