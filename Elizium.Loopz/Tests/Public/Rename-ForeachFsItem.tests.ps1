@@ -10,10 +10,9 @@ Describe 'Rename-ForeachFsItem' {
     [boolean]$script:whatIf = $false;
   }
 
-  Context 'TBD' {
+  Context 'TBD' -Tag 'Current' {
     Context 'given: some files' {
       It 'should: rename all' {
-        Mock Move-Item {}
         [string]$sourcePath = './Tests/Data/fefsi';
         Get-ChildItem -File -Path $sourcePath -Filter  '*.txt' | `
           Rename-ForeachFsItem -File -Pattern 'data' -With 'info' -WhatIf;
@@ -22,7 +21,6 @@ Describe 'Rename-ForeachFsItem' {
 
     Context 'given: some directories' {
       It 'should: rename all' {
-        Mock Move-Item {}
         [string]$sourcePath = './Tests/Data/traverse/Audio/MINIMAL/Plastikman';
         Get-ChildItem -Directory -Path $sourcePath -Filter '*e*' | `
           Rename-ForeachFsItem -Directory -Pattern 'a' -With '@' -WhatIf;

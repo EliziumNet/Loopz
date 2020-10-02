@@ -1,8 +1,5 @@
 
 function Rename-ForeachFsItem {
-  # Can re-introduce the Literal parameter and use this with [regex]::Escape("pattern")
-  # but check it first!!
-  #
   [CmdletBinding(SupportsShouldProcess, DefaultParameterSetName = 'ReplaceWith')]
   [Alias('rnfsi', 'rnall')]
   param
@@ -139,52 +136,22 @@ function Rename-ForeachFsItem {
 
       [boolean]$trigger = $false;
       [boolean]$affirm = $false;
-      [boolean]$processingFiles = $_passThru['LOOPZ.RN-FOREACH.FS-ITEM-TYPE'] -eq 'FILE';
       [string[][]]$properties = @();
 
       if (-not($_underscore.Name -ceq $newItemName)) {
         $trigger = $true;
-
-        $destinationPath = ($processingFiles) `
-          ? (Join-Path $_underscore.Directory.FullName $newItemName) `
-          : (Join-Path $_underscore.Parent.FullName $newItemName);
-
-        # TODO: do not do the rename directly here. Abstract this out into another command.
-        # This will enable us to generate an undo-script, in case the user made a mistake
-        # Display the location of the undo script in the summary.
-        #
-
-        # First check if we only differ by case (TODO: check if this also applies to unix)
-        #
-        if ($newItemName.ToLower() -eq $_underscore.Name.ToLower()) {
-          if ($PSCmdlet.ShouldProcess($_underscore.Name, 'Rename Item')) {
-            # Just doing a double move to get around the problem of not being able to rename
-            # an item unless the case is different
-            #
-            $tempName = $newItemName + "_";
-
-            $tempDestinationPath = ($processingFiles) `
-              ? (Join-Path $_underscore.Directory.FullName $tempName) `
-              : (Join-Path $_underscore.Parent.FullName $tempName);
-  
-            Move-Item -LiteralPath $_underscore.FullName -Destination $tempDestinationPath -PassThru | `
-              Move-Item -Destination $destinationPath;
-          }
-        }
-        else {
-          $affirm = $true;
-          if ($PSCmdlet.ShouldProcess($_underscore.Name, 'Rename Item')) {
-            Move-Item -LiteralPath $_underscore.FullName -Destination $destinationPath;
-          }
-        }
+        $product = rename-FsItem -From $_underscore -To $newItemName;
       }
+
+      [boolean]$differsByCaseOnly = $newItemName.ToLower() -eq $_underscore.Name.ToLower();
+      [boolean]$affirm = $trigger -and ($product) -and -not($differsByCaseOnly);
 
       if ($trigger) {
         $properties += , @('Original', $_underscore.Name);
       }
 
       [PSCustomObject]$result = [PSCustomObject]@{
-        Product = $newItemName;
+        Product = $product;
       }
 
       $result | Add-Member -MemberType NoteProperty -Name 'Pairs' -Value (, $properties);
@@ -341,4 +308,4 @@ function Rename-ForeachFsItem {
 
     $collection | Invoke-ForeachFsItem @parameters;
   }
-}
+} # Rename-ForeachFsItem

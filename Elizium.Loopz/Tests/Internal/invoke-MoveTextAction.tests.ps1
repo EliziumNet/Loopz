@@ -1,4 +1,4 @@
-Describe 'invoke-MoveTextAction' -Tag 'Current' {
+Describe 'invoke-MoveTextAction' {
   BeforeAll {
     . .\Internal\edit-MoveToken.ps1;
     . .\Internal\invoke-MoveTextAction.ps1;
