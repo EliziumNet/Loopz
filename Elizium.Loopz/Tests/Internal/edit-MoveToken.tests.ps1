@@ -131,7 +131,7 @@ Describe 'edit-MoveToken' {
     Context 'and: Pattern match' {
       Context 'and: Target match' {
         Context 'and: move after' {
-          It 'should: move the match after the target' -Tag 'Focus' {
+          It 'should: move the match after the target' {
             [string]$source = 'There 23-03-1984 will be fire on where you are going';
             [string]$pattern = '\d{2}-\d{2}-\d{4}\s';
             [string]$target = 'on ';

@@ -9,7 +9,7 @@ function rename-FsItem {
     [string]$To,
 
     [Parameter()]
-    [System.Collections.Hashtable]$CreateUndo,
+    [System.Collections.Hashtable]$Undo,
 
     [Parameter()]
     $Shell
@@ -39,7 +39,7 @@ function rename-FsItem {
         Move-Item -LiteralPath $From.FullName -Destination $tempDestinationPath -PassThru | `
           Move-Item -Destination $destinationPath;
 
-        if ($PSBoundParameters.ContainsKey('CreateUndo')) {
+        if ($PSBoundParameters.ContainsKey('Undo')) {
           $createUndoEntry = $true;
         }
       }

@@ -45,6 +45,8 @@ function edit-MoveToken {
       [boolean]$literalWith = $isLiteral -and ('w' -in $Literal);
       [boolean]$literalTarget = $isLiteral -and ('t' -in $Literal);
     }
+  } else {
+    [boolean]$literalPattern = [boolean]$literalWith = [boolean]$literalTarget = $false;
   }
 
   if ($literalPattern) {

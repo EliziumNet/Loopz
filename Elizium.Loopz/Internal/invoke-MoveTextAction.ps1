@@ -12,6 +12,9 @@ function invoke-MoveTextAction {
     [string[]]$Literal,
 
     [Parameter()]
+    [string]$With,
+
+    [Parameter()]
     [string]$Target,
 
     [Parameter()]

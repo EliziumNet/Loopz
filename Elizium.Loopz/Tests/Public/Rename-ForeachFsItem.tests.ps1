@@ -1,6 +1,6 @@
 using namespace System.Management.Automation;
 
-Describe 'Rename-ForeachFsItem' {
+Describe 'Rename-ForeachFsItem' -Tag 'Current' {
   BeforeAll {
     Get-Module Elizium.Loopz | Remove-Module
     Import-Module .\Output\Elizium.Loopz\Elizium.Loopz.psm1 `
@@ -8,25 +8,161 @@ Describe 'Rename-ForeachFsItem' {
 
     Import-Module Assert;
     [boolean]$script:whatIf = $false;
+    [string]$script:directoryPath = './Tests/Data/fefsi/';
+
+    Mock -ModuleName Elizium.Loopz rename-FsItem {
+      param(
+        [System.IO.FileSystemInfo]$From,
+        [string]$To,
+        [System.Collections.Hashtable]$Undo,
+        $Shell,
+        [switch]$WhatIf
+      )
+      # This mock result works only because the actual returned FileSystemInfo returned
+      # does not drive any control logic.
+      #
+      return $From;
+    }
   }
 
-  Context 'TBD' -Tag 'Current' {
-    Context 'given: some files' {
-      It 'should: rename all' {
-        [string]$sourcePath = './Tests/Data/fefsi';
-        Get-ChildItem -File -Path $sourcePath -Filter  '*.txt' | `
-          Rename-ForeachFsItem -File -Pattern 'data' -With 'info' -WhatIf;
+  Context 'given: MoveRelative' {
+    Context 'and: TargetType is Target' {
+      Context 'and Relation is Before' {
+        Context 'and: Source matches Pattern' {
+          Context 'and: Source matches Target' {
+            It 'should: do rename; move Pattern match before target' {
+              Get-ChildItem -File -Path $directoryPath | Rename-ForeachFsItem -File `
+                -Pattern 'data.' -Target 'loopz' -Relation 'before' -WhatIf;
+            }
+          } # and: Source matches Target
+
+          Context 'and: Source does not match Target' {
+            It 'should: NOT do rename' {
+              Get-ChildItem -File -Path $directoryPath | Rename-ForeachFsItem -File `
+                -Pattern 'data.' -Target 'blooper' -Relation 'before' -WhatIf;
+            }
+          }
+        } # and: Source matches Pattern
+      } # and Relation is Before
+
+      Context 'and Relation is After' {
+        Context 'and: Source matches Pattern' {
+          Context 'and: Source matches Target' {
+            It 'should: do rename; move Pattern match after target' {
+              Get-ChildItem -File -Path $directoryPath | Rename-ForeachFsItem -File `
+                -Pattern 'loopz.' -Target 'data.' -Relation 'after' -WhatIf;
+            }
+          } # and: Source matches Target
+
+          # Context 'and: Source matches Target which needs escape' {
+          #   # use Literal t (eg, `+^$.,-?()[]{}` are all allowed in win-fs, but are regex characters that needs escape)
+          #   It 'should: ' {
+          #     Write-Host "NOT-IMPLEMENTED YET"
+          #   }
+          # }
+
+          Context 'and: Source does not match Target' {
+            It 'should: NOT do rename' {
+              Get-ChildItem -File -Path $directoryPath | Rename-ForeachFsItem -File `
+                -Pattern 'loopz.' -Target 'blooper' -Relation 'after' -WhatIf;
+            }
+          }
+        } # and: Source matches Pattern
+      } # and Relation is After
+    } # and: TargetType is Target
+  } # given: MoveRelative
+
+  Context 'given: MoveToStart' {
+    Context 'and: Source matches Pattern in middle' {
+      It 'should: do rename; move Pattern match to start' {
+        Get-ChildItem -Path $directoryPath -Filter '*.txt' | Rename-ForeachFsItem -File `
+          -Pattern 'data.' -Start -WhatIf;
+      }
+    } # and: Source matches Pattern in middle
+
+    Context 'and: Source matches Pattern already at start' {
+      It 'should: NOT do rename' {
+        Get-ChildItem -Path $directoryPath -Filter '*.txt' | Rename-ForeachFsItem -File `
+          -Pattern 'loopz.' -Start -WhatIf;
+      }
+    } # and: Source matches Pattern in middle
+  } # given: MoveToStart
+
+  Context 'given: MoveToEnd' {
+    Context 'and: Source matches Pattern in middle' {
+      It 'should: do rename; move Pattern match to end' {
+        Get-ChildItem -Path $directoryPath -File | Rename-ForeachFsItem -File `
+          -Pattern '.data' -End -WhatIf;
       }
     }
 
-    Context 'given: some directories' {
-      It 'should: rename all' {
-        [string]$sourcePath = './Tests/Data/traverse/Audio/MINIMAL/Plastikman';
-        Get-ChildItem -Directory -Path $sourcePath -Filter '*e*' | `
-          Rename-ForeachFsItem -Directory -Pattern 'a' -With '@' -WhatIf;
+    Context 'and: Source matches Pattern already at end' {
+      It 'should: NOT do rename' {
+        Get-ChildItem -Path $directoryPath | Rename-ForeachFsItem -File `
+          -Pattern 't1' -End -WhatIf;
       }
-    }
-  }
+    } # and: Source matches Pattern in middle
+  } # given: MoveToEnd
+
+  Context 'given: ReplaceWith' {
+    Context 'and: Source matches Pattern' {
+      Context 'and: With is non-regex static text' {
+        Context 'and: First Only' {
+          It 'should: do rename; replace First Pattern for With text' {
+            Get-ChildItem -Path $directoryPath | Rename-ForeachFsItem -File `
+              -First -Pattern 'a' -With '@' -WhatIf;
+          }
+        } # and: First Only
+
+        Context 'and: First Only, with is empty string' {
+          It 'should: do rename; Cut First Pattern' {
+            Get-ChildItem -Path $directoryPath | Rename-ForeachFsItem -File `
+              -First -Pattern 'a' -With '' -WhatIf;
+          }
+        } # and: First Only
+
+        Context 'and: First 2' {
+          It 'should: do rename; replace First 2 Occurrence for With text' {
+            Get-ChildItem -Path $directoryPath | Rename-ForeachFsItem -File `
+              -First -Quantity 2 -Pattern 'o' -With '0' -WhatIf;
+          }
+        } # and: First 2 Only
+
+        Context 'and: Last Only' {
+          It 'should: do rename; replace Last Pattern for With text' {
+            Get-ChildItem -Path $directoryPath | Rename-ForeachFsItem -File `
+              -Last -Pattern 'a' -With '@' -WhatIf;
+          }
+        } # and: Last Only
+      }
+
+      Context 'and: With contains static text that needs escape' {
+        Context 'and: First Only' {
+          It 'should: do rename; replace First Pattern for With text' {
+            Write-Host "should: do rename; replace First Pattern for With text: NOT-IMPLEMENTED YET"
+          }
+        }
+      }
+
+      Context 'and: Except' {
+        Context 'and: Source matches Pattern' {
+          It 'should: do rename; replace Last Pattern for With text' {
+            Get-ChildItem -Path $directoryPath | Rename-ForeachFsItem -File `
+              -Pattern 'loopz' -Except 'data' -With 'h00pz' -WhatIf;
+          }
+        }
+      } # and: Except
+
+      Context 'and: Source are Directories' {
+        It 'should: do rename; replace First Pattern for With text' {
+          [string]$plastikmanPath = './Tests/Data/traverse/Audio/MINIMAL/Plastikman';
+
+          Get-ChildItem -Path $plastikmanPath | Rename-ForeachFsItem -Directory `
+            -Pattern 'e' -With '3' -WhatIf;
+        }
+      }
+    } # and: Source matches Pattern
+  } # given: ReplaceWith
 
   Context 'given: Parameter Set' {
     [string]$script:sourcePath = './Tests/Data/fefsi';
@@ -307,7 +443,8 @@ Describe 'RegEx comprehension' -Skip {
         else {
           Write-Host "!!! FAILED to capture Zorg";
         }
-      } else {
+      }
+      else {
         Write-Host "!!! FAILED to find the group name"
       }
     }

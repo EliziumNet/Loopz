@@ -45,6 +45,7 @@ function Rename-ForeachFsItem {
     [Parameter(ParameterSetName = 'MoveRelative')]
     [Parameter(ParameterSetName = 'ReplaceFirst')]
     [Parameter(ParameterSetName = 'ReplaceWith', Mandatory)]
+    [AllowEmptyString()]
     [string]$With,
 
     [Parameter()]
@@ -86,6 +87,11 @@ function Rename-ForeachFsItem {
 
       [string]$replacePattern = $_passThru['LOOPZ.RN-FOREACH.PATTERN'];
       [string]$replaceWith = $_passThru['LOOPZ.RN-FOREACH.WITH'];
+      [boolean]$itemIsDirectory = ($_underscore.Attributes -band
+        [System.IO.FileAttributes]::Directory) -eq [System.IO.FileAttributes]::Directory;
+
+      $endAdapter = New-EndAdapter($_underscore);
+      [string]$adjustedName = $endAdapter.GetAdjustedName();
 
       [boolean]$wholeWord = $_passThru.ContainsKey('LOOPZ.RN-FOREACH.WHOLE-WORD') `
         ? $_passThru['LOOPZ.RN-FOREACH.WHOLE-WORD'] : $false;
@@ -93,7 +99,7 @@ function Rename-ForeachFsItem {
       [string]$action = $_passThru['LOOPZ.RN-FOREACH.ACTION'];
 
       [System.Collections.Hashtable]$actionParameters = @{
-        'Value'   = $_underscore.Name;
+        'Value'   = $adjustedName;
         'Pattern' = $replacePattern;
         'With'    = $replaceWith;
       }
@@ -121,7 +127,9 @@ function Rename-ForeachFsItem {
 
         'MOVE-TOKEN' {
           [string]$actionFn = 'invoke-MoveTextAction';
-          $actionParameters['Target'] = $_passThru['LOOPZ.RN-FOREACH.TARGET'];
+          if ($_passThru.ContainsKey('LOOPZ.RN-FOREACH.TARGET')) {
+            $actionParameters['Target'] = $_passThru['LOOPZ.RN-FOREACH.TARGET'];
+          }
           $actionParameters['TargetType'] = $_passThru['LOOPZ.RN-FOREACH.TARGET-TYPE'];
           $actionParameters['Relation'] = $Relation;
           break;
@@ -130,19 +138,31 @@ function Rename-ForeachFsItem {
         default {
           throw "doRenameFsItems: encountered Invalid 'LOOPZ.RN-FOREACH.ACTION': '$action'";
         }
-      }
+      } # $action
 
       [string]$newItemName = & $actionFn @actionParameters;
+      $newItemName = $endAdapter.GetNameWithExtension($newItemName);
 
       [boolean]$trigger = $false;
       [boolean]$affirm = $false;
-      [boolean]$whatIf = $_passThru.ContainsKey('WHAT-IF') -and `
-      ($_passThru['WHAT-IF']);
+      [boolean]$whatIf = $_passThru.ContainsKey('WHAT-IF') -and ($_passThru['WHAT-IF']);
       [string[][]]$properties = @();
 
-      if (-not($_underscore.Name -ceq $newItemName)) {
+      [string]$parent = $itemIsDirectory ? $_underscore.Parent.FullName : $_underscore.Directory.FullName;
+      [boolean]$nameHasChanged = -not($_underscore.Name -ceq $newItemName);
+      [string]$newItemFullPath = Join-Path -Path $parent -ChildPath $newItemName;
+      [boolean]$clash = (Test-Path -Path $newItemFullPath) -and $nameHasChanged;
+
+      [string]$itemEmoji = $itemIsDirectory ? '📁' : '🏷️';
+      [string]$message = '   [{0}] Rename Item{1}' -f $itemEmoji, ($whatIf ? ' (WhatIf)' : '');
+      $_passThru['LOOPZ.WH-FOREACH-DECORATOR.MESSAGE'] = $message;
+
+      if ($nameHasChanged -and -not($clash)) {
         $trigger = $true;
         $product = rename-FsItem -From $_underscore -To $newItemName -WhatIf:$whatIf;
+      }
+      else {
+        $product = $_underscore;
       }
 
       [boolean]$differsByCaseOnly = $newItemName.ToLower() -eq $_underscore.Name.ToLower();
@@ -150,6 +170,15 @@ function Rename-ForeachFsItem {
 
       if ($trigger) {
         $properties += , @('To', $newItemName, $affirm);
+      }
+      else {
+        if ($clash) {
+          Write-Debug "!!! doRenameFsItems; path: '$newItemFullPath' already exists, rename skipped"
+          $properties += , @('Clash', '⛔');
+        }
+        else {
+          $properties += , @('Not renamed', '⛔');
+        }
       }
 
       [PSCustomObject]$result = [PSCustomObject]@{
@@ -179,25 +208,37 @@ function Rename-ForeachFsItem {
     [int]$WIDE_THRESHOLD = 6;
 
     [boolean]$whatIf = $PSBoundParameters.ContainsKey('WhatIf');
-
-    [string]$itemEmoji = $File.ToBool() ? '🏷️' : '📁';
-    [string]$message = '   [{0}] Rename Item{1}' -f $itemEmoji, ($whatIf ? ' (WhatIf)' : '');
     [string[][]]$wideItems = @();
     [string[][]]$properties = @();
 
     if ($Pattern.Length -gt $WIDE_THRESHOLD) {
-      $wideItems += , @('[📌] Pattern', $Pattern);
+      $wideItems += , @('[🔍] Pattern', $Pattern);
     }
     else {
-      $properties += , @('[📌] Pattern', $Pattern);
+      $properties += , @('[🔍] Pattern', $Pattern);
     }
 
-    if ($With -and $With.Length -gt 0) {
-      if ($With.Length -gt $WIDE_THRESHOLD) {
-        $wideItems += , @('[💠] With', $With);
+    if ($PSBoundParameters.ContainsKey('With')) {
+      if (-not([string]::IsNullOrEmpty($With))) {
+        if ($Pattern.Length -gt $WIDE_THRESHOLD) {
+          $wideItems += , @('[📌] With', $With);
+        }
+        else {
+          $properties += , @('[📌] With', $With);
+        }
       }
       else {
-        $properties += , @('[💠] With', $With);
+        $properties += , @('[✂️] Cut', $Pattern);
+      }
+    }
+
+    if ($PSBoundParameters.ContainsKey('Target')) {
+      [string]$targetLabel = '[🎯] Target ({0})' -f $Relation;
+      if ($Target.Length -gt $WIDE_THRESHOLD) {
+        $wideItems += , @($targetLabel, $Target);
+      }
+      else {
+        $properties += , @($targetLabel, $Target);
       }
     }
 
@@ -212,7 +253,6 @@ function Rename-ForeachFsItem {
 
     [System.Collections.Hashtable]$passThru = @{
       'LOOPZ.WH-FOREACH-DECORATOR.BLOCK'         = $doRenameFsItems;
-      'LOOPZ.WH-FOREACH-DECORATOR.MESSAGE'       = $message;
       'LOOPZ.WH-FOREACH-DECORATOR.PRODUCT-LABEL' = $File.ToBool() ? 'File' : 'Directory';
       'LOOPZ.WH-FOREACH-DECORATOR.GET-RESULT'    = $getResult;
 
@@ -228,29 +268,21 @@ function Rename-ForeachFsItem {
     }
 
     $passThru['LOOPZ.RN-FOREACH.WITH'] = if ($doMoveToken) {
-      [string]::IsNullOrEmpty($With) ? $With : $Pattern;
+      -not([string]::IsNullOrEmpty($With)) ? $With : $Pattern;
     }
     else {
       $With;
     }
 
     if ($First.ToBool()) {
-      $properties += , @('[✨] First', '[✔️]');
+      $properties += , @('First', '[✔️]');
       $passThru['LOOPZ.RN-FOREACH.OCCURRENCE'] = 'FIRST';
       $passThru['LOOPZ.RN-FOREACH.QUANTITY-FIRST'] = $Quantity;
     }
 
     if ($Last.ToBool()) {
-      $properties += , @('[❄️] Last', '[✔️]');
+      $properties += , @('Last', '[✔️]');
       $passThru['LOOPZ.RN-FOREACH.OCCURRENCE'] = 'LAST';
-    }
-
-    if ($wideItems.Length -gt 0) {
-      $passThru['LOOPZ.SUMMARY-BLOCK.WIDE-ITEMS'] = $wideItems;
-    }
-
-    if ($properties.Length -gt 0) {
-      $passThru['LOOPZ.SUMMARY-BLOCK.PROPERTIES'] = $properties;
     }
 
     if ($Whole.ToBool()) {
@@ -260,15 +292,25 @@ function Rename-ForeachFsItem {
     $passThru['LOOPZ.RN-FOREACH.ACTION'] = $doMoveToken ? 'MOVE-TOKEN' : 'REPLACE-WITH';
     $passThru['LOOPZ.RN-FOREACH.RELATION'] = $Relation;
 
-    if ([string]::IsNullOrEmpty($Target)) {
+    if (-not([string]::IsNullOrEmpty($Target))) {
       $passThru['LOOPZ.RN-FOREACH.TARGET-TYPE'] = 'MATCHED-ITEM';
       $passThru['LOOPZ.RN-FOREACH.TARGET'] = $Target;
     }
     elseif ($PSBoundParameters.ContainsKey('Start')) {
+      $properties += , @('Start', '[✔️]');
       $passThru['LOOPZ.RN-FOREACH.TARGET-TYPE'] = 'START';
     }
     elseif ($PSBoundParameters.ContainsKey('End')) {
+      $properties += , @('End', '[✔️]');
       $passThru['LOOPZ.RN-FOREACH.TARGET-TYPE'] = 'END';
+    }
+
+    if ($wideItems.Length -gt 0) {
+      $passThru['LOOPZ.SUMMARY-BLOCK.WIDE-ITEMS'] = $wideItems;
+    }
+
+    if ($properties.Length -gt 0) {
+      $passThru['LOOPZ.SUMMARY-BLOCK.PROPERTIES'] = $properties;
     }
 
     [scriptblock]$clientCondition = $Condition;
