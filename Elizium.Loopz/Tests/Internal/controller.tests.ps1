@@ -1,5 +1,5 @@
 
-Describe 'controller' -Tag 'Current' {
+Describe 'controller' {
 
   BeforeAll {
     . .\Internal\controller.class.ps1
