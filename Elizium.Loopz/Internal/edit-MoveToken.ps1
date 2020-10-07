@@ -10,9 +10,6 @@ function edit-MoveToken {
     [Parameter(Mandatory)]
     [string]$Pattern,
 
-    [Parameter()]
-    [string[]]$Literal,
-
     [Parameter(ParameterSetName = 'MoveRelative')]
     [string]$Target,
 
@@ -35,30 +32,9 @@ function edit-MoveToken {
 
   [string]$result = $Source;
   [string]$adjustedPattern = $Whole ? ('\b{0}\b' -f $Pattern.Replace('\b', '')) : $Pattern;
-  [boolean]$isLiteral = $PSBoundParameters.ContainsKey('Literal');
-  if ($isLiteral) {
-    if ('*' -in $Literal) {
-      [boolean]$literalPattern = [boolean]$literalWith = [boolean]$literalTarget = $true;
-    }
-    else {
-      [boolean]$literalPattern = $isLiteral -and ('p' -in $Literal);
-      [boolean]$literalWith = $isLiteral -and ('w' -in $Literal);
-      [boolean]$literalTarget = $isLiteral -and ('t' -in $Literal);
-    }
-  } else {
-    [boolean]$literalPattern = [boolean]$literalWith = [boolean]$literalTarget = $false;
-  }
-
-  if ($literalPattern) {
-    $adjustedPattern = [regex]::Escape($adjustedPattern);
-  }
 
   if ($Source -match $adjustedPattern) {
     [string]$patternMatched = $Whole ? ('\b{0}\b' -f $matches[0]) : $matches[0];
-
-    if ($literalPattern) {
-      $patternMatched = [regex]::Escape($patternMatched);
-    }
 
     [System.Text.RegularExpressions.RegEx]$patternMatchedRegEx = `
       New-Object -TypeName System.Text.RegularExpressions.RegEx -ArgumentList ($patternMatched);
@@ -66,10 +42,9 @@ function edit-MoveToken {
     [string]$replaceWith = [string]::IsNullOrEmpty($With) ? $patternMatched : $With;
 
     if ($PSBoundParameters.ContainsKey('Target')) {
-      [string]$normalisedTarget = $literalTarget ? [regex]::Escape($Target) : $Target;
 
-      if ($patternRemoved -match $normalisedTarget) {
-        [string]$targetMatched = $literalTarget ? [regex]::Escape($matches[0]) : $matches[0]; ;
+      if ($patternRemoved -match $Target) {
+        [string]$targetMatched = $matches[0]; ;
         [string]$captureExpression = ('(?<target>{0})' -f $targetMatched).Replace(' ', '\s');
 
         # The natural way to perform the regex replacement, would be to use something like:
@@ -86,10 +61,6 @@ function edit-MoveToken {
         } else {
           [string]$withPattern = ($Relation -eq 'after') `
             ? ($Target + $Pattern) : ($Pattern + $Target);
-        }
-
-        if ($literalWith) {
-          $withPattern = [regex]::Escape($withPattern);
         }
 
         [System.Text.RegularExpressions.RegEx]$captureRegEx = `
