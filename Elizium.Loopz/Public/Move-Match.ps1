@@ -1,45 +1,53 @@
 
-function edit-ShiftToken {
+function Move-Match {
+
+  # Parameter sets to indicate:
+  # vanilla move (Pattern)
+  # vanilla move formatted (Pattern, Paste)
+  # exotic move (Pattern, With)
+  # exotic move formatted (Pattern, With, Paste)
+  # (Move, Cut, CutAndPaste)
   # Since this is an internal function, we can have separate parameters
   # for quantities instead of shoe-horning into With/Pattern parameters
   # as excess array elements for brevity and end user convenience.
   #
-  [CmdletBinding(DefaultParameterSetName = 'MoveRelative')]
+  [Alias('Move-Match', 'moma')]
   [OutputType([string])]
   param (
     [Parameter(Mandatory)]
     [string]$Source,
 
-    [Parameter(Mandatory)]
+    [Parameter()]
     [string]$Pattern,
 
-    [Parameter(Mandatory)]
+    [Parameter()]
     [string]$LiteralPattern,
 
     [Parameter()]
     [ValidateSet('F', 'L', '*')]
     [string]$PatternOccurrence = 'F',
 
-    [Parameter(ParameterSetName = 'MoveRelative')]
+    [Parameter()]
     [string]$Anchor,
 
+    [Parameter()]
     [string]$LiteralAnchor,
 
     [Parameter()]
     [ValidateSet('F', 'L')]
     [string]$AnchorOccurrence = 'F',
 
-    [Parameter(ParameterSetName = 'MoveRelative')]
+    [Parameter()]
     [ValidateSet('before', 'after')]
     [string]$Relation = 'after',
 
     [Parameter()]
     [switch]$Whole,
 
-    [Parameter(ParameterSetName = 'MoveToStart')]
+    [Parameter()]
     [switch]$Start,
 
-    [Parameter(ParameterSetName = 'MoveToEnd')]
+    [Parameter()]
     [switch]$End,
 
     [Parameter()]
