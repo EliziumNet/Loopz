@@ -1,5 +1,7 @@
 
 function Rename-ForeachFsItem {
+  [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSShouldProcess', '',
+    Justification = 'WhatIf is accessed and passed into PassThru')]
   [CmdletBinding(SupportsShouldProcess, DefaultParameterSetName = 'ReplaceWith')]
   [Alias('rnfsi', 'rnall')]
   param
