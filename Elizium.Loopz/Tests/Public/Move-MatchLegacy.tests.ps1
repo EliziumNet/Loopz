@@ -1,4 +1,4 @@
-Describe 'Move-Match' {
+Describe 'Move-MatchLegacy' {
   BeforeAll {
     Get-Module Elizium.Loopz | Remove-Module
     Import-Module .\Output\Elizium.Loopz\Elizium.Loopz.psm1 `
@@ -16,7 +16,7 @@ Describe 'Move-Match' {
               [string]$anchor = 'Judgement';
               [string]$relation = 'before'
 
-              Move-Match -Source $source -Pattern $pattern -Relation $relation -Anchor $anchor | `
+              Move-MatchLegacy -Source $source -Pattern $pattern -Relation $relation -Anchor $anchor | `
                 Should -BeExactly '06-06-2626Judgement Day: [], Judgement Day: [28-02-2727], take your pick!';
             }
 
@@ -26,7 +26,7 @@ Describe 'Move-Match' {
               [string]$anchor = 'Judgement';
               [string]$relation = 'before'
 
-              Move-Match -Source $source -Pattern $pattern -PatternOccurrence 'L' `
+              Move-MatchLegacy -Source $source -Pattern $pattern -PatternOccurrence 'L' `
                 -Relation $relation -Anchor $anchor | `
                 Should -BeExactly '28-02-2727Judgement Day: [06-06-2626], Judgement Day: [], take your pick!';
             }
@@ -37,7 +37,7 @@ Describe 'Move-Match' {
               [string]$anchor = 'Judgement';
               [string]$relation = 'before'
 
-              Move-Match -Source $source -Pattern $pattern -PatternOccurrence '2' `
+              Move-MatchLegacy -Source $source -Pattern $pattern -PatternOccurrence '2' `
                 -Relation $relation -Anchor $anchor | `
                 Should -BeExactly '28-02-2727Judgement Day: [06-06-2626], Judgement Day: [], take your pick!';
             }
@@ -48,11 +48,11 @@ Describe 'Move-Match' {
               [string]$escapedAnchor = 'Judgement+';
               [string]$relation = 'before'
 
-              Move-Match -Source $source -Pattern $pattern -Relation $relation -EscapedAnchor $escapedAnchor `
+              Move-MatchLegacy -Source $source -Pattern $pattern -Relation $relation -EscapedAnchor $escapedAnchor `
                 -AnchorOccurrence 'L' | `
                 Should -BeExactly 'Judgement+ Day: [], 06-06-2626Judgement+ Day: [28-02-2727], take your pick!';
 
-              Move-Match -Source $source -Pattern $pattern -Relation $relation -Anchor $(esc($escapedAnchor)) `
+              Move-MatchLegacy -Source $source -Pattern $pattern -Relation $relation -Anchor $(esc($escapedAnchor)) `
                 -AnchorOccurrence 'L' | `
                 Should -BeExactly 'Judgement+ Day: [], 06-06-2626Judgement+ Day: [28-02-2727], take your pick!';
             }
@@ -63,11 +63,11 @@ Describe 'Move-Match' {
               [string]$escapedAnchor = 'Judgement+';
               [string]$relation = 'before'
 
-              Move-Match -Source $source -Pattern $pattern -PatternOccurrence 'L' `
+              Move-MatchLegacy -Source $source -Pattern $pattern -PatternOccurrence 'L' `
                 -Relation $relation -EscapedAnchor $escapedAnchor  -AnchorOccurrence 'L' | `
                 Should -BeExactly 'Judgement+ Day: [06-06-2626], 28-02-2727Judgement+ Day: [], take your pick!';
 
-              Move-Match -Source $source -Pattern $pattern -PatternOccurrence 'L' `
+              Move-MatchLegacy -Source $source -Pattern $pattern -PatternOccurrence 'L' `
                 -Relation $relation -Anchor $(esc($escapedAnchor))  -AnchorOccurrence 'L' | `
                 Should -BeExactly 'Judgement+ Day: [06-06-2626], 28-02-2727Judgement+ Day: [], take your pick!';
             }
@@ -78,7 +78,7 @@ Describe 'Move-Match' {
               [string]$anchor = 'fight';
               [string]$relation = 'before'
 
-              Move-Match -Source $source -EscapedPattern $escapedPattern -Relation $relation -Anchor $anchor | `
+              Move-MatchLegacy -Source $source -EscapedPattern $escapedPattern -Relation $relation -Anchor $anchor | `
                 Should -BeExactly '+firefight  with +fire';
             }
 
@@ -88,7 +88,7 @@ Describe 'Move-Match' {
               [string]$anchor = 'fight';
               [string]$relation = 'before'
 
-              Move-Match -Source $source -EscapedPattern $escapedPattern -PatternOccurrence 'L' `
+              Move-MatchLegacy -Source $source -EscapedPattern $escapedPattern -PatternOccurrence 'L' `
                 -Relation $relation -Anchor $anchor | `
                 Should -BeExactly '+firefight +fire with ';
             }
@@ -99,11 +99,11 @@ Describe 'Move-Match' {
               [string]$escapedAnchor = '*fight';
               [string]$relation = 'before'
 
-              Move-Match -Source $source -EscapedPattern $escapedPattern `
+              Move-MatchLegacy -Source $source -EscapedPattern $escapedPattern `
                 -Relation $relation -EscapedAnchor $escapedAnchor -AnchorOccurrence 'L' | `
                 Should -BeExactly '*fight  with +fire*fight +fire';
 
-              Move-Match -Source $source -EscapedPattern $escapedPattern `
+              Move-MatchLegacy -Source $source -EscapedPattern $escapedPattern `
                 -Relation $relation -Anchor $(esc($escapedAnchor)) -AnchorOccurrence 'L' | `
                 Should -BeExactly '*fight  with +fire*fight +fire';
             }
@@ -114,11 +114,11 @@ Describe 'Move-Match' {
               [string]$escapedAnchor = '*fight';
               [string]$relation = 'before'
 
-              Move-Match -Source $source -EscapedPattern $escapedPattern -PatternOccurrence 'L' `
+              Move-MatchLegacy -Source $source -EscapedPattern $escapedPattern -PatternOccurrence 'L' `
                 -Relation $relation -EscapedAnchor $escapedAnchor -AnchorOccurrence 'L' | `
                 Should -BeExactly '*fight +fire with +fire*fight ';
 
-              Move-Match -Source $source -EscapedPattern $escapedPattern -PatternOccurrence 'L' `
+              Move-MatchLegacy -Source $source -EscapedPattern $escapedPattern -PatternOccurrence 'L' `
                 -Relation $relation -Anchor $(esc($escapedAnchor)) -AnchorOccurrence 'L' | `
                 Should -BeExactly '*fight +fire with +fire*fight ';
             }
@@ -133,7 +133,7 @@ Describe 'Move-Match' {
                     [string]$pattern = 'fox';
                     [string]$anchor = ' quick';
 
-                    Move-Match -WholePattern -Source $source -Pattern $pattern `
+                    Move-MatchLegacy -WholePattern -Source $source -Pattern $pattern `
                       -Anchor $anchor -Relation 'before' | Should -BeExactly 'Thefox quick brown firefox  fox';
                   }
 
@@ -152,7 +152,7 @@ Describe 'Move-Match' {
                     [string]$pattern = 'fire ';
                     [string]$anchor = 'are ';
 
-                    Move-Match -WholePattern -Source $source -Pattern $pattern -Anchor $anchor -Relation 'after' | `
+                    Move-MatchLegacy -WholePattern -Source $source -Pattern $pattern -Anchor $anchor -Relation 'after' | `
                       Should -BeExactly 'There is where you are fire going';
                   }
 
@@ -171,10 +171,10 @@ Describe 'Move-Match' {
               [string]$anchor = 'fight ';
               [string]$relation = 'after'
 
-              Move-Match -Source $source -EscapedPattern $escapedPattern -Relation $relation -Anchor $anchor | `
+              Move-MatchLegacy -Source $source -EscapedPattern $escapedPattern -Relation $relation -Anchor $anchor | `
                 Should -BeExactly 'so fight +firethe  with +fire';
 
-              Move-Match -Source $source -Pattern $(esc($escapedPattern)) -Relation $relation -Anchor $anchor | `
+              Move-MatchLegacy -Source $source -Pattern $(esc($escapedPattern)) -Relation $relation -Anchor $anchor | `
                 Should -BeExactly 'so fight +firethe  with +fire';
             }
 
@@ -184,11 +184,11 @@ Describe 'Move-Match' {
               [string]$anchor = 'fight ';
               [string]$relation = 'after'
 
-              Move-Match -Source $source -EscapedPattern $escapedPattern -PatternOccurrence 'L' `
+              Move-MatchLegacy -Source $source -EscapedPattern $escapedPattern -PatternOccurrence 'L' `
                 -Relation $relation -Anchor $anchor | `
                 Should -BeExactly 'so fight +firethe +fire with ';
 
-              Move-Match -Source $source -Pattern $(esc($escapedPattern)) -PatternOccurrence 'L' `
+              Move-MatchLegacy -Source $source -Pattern $(esc($escapedPattern)) -PatternOccurrence 'L' `
                 -Relation $relation -Anchor $anchor | `
                 Should -BeExactly 'so fight +firethe +fire with ';
             }
@@ -199,11 +199,11 @@ Describe 'Move-Match' {
               [string]$escapedAnchor = '*fight';
               [string]$relation = 'after'
 
-              Move-Match -Source $source -EscapedPattern $escapedPattern `
+              Move-MatchLegacy -Source $source -EscapedPattern $escapedPattern `
                 -Relation $relation -EscapedAnchor $escapedAnchor -AnchorOccurrence 'L' | `
                 Should -BeExactly 'so *fight the  with +fire *fight+fire';
 
-              Move-Match -Source $source -EscapedPattern $escapedPattern `
+              Move-MatchLegacy -Source $source -EscapedPattern $escapedPattern `
                 -Relation $relation -Anchor $(esc($escapedAnchor)) -AnchorOccurrence 'L' | `
                 Should -BeExactly 'so *fight the  with +fire *fight+fire';
             }
@@ -214,11 +214,11 @@ Describe 'Move-Match' {
               [string]$escapedAnchor = '*fight';
               [string]$relation = 'after'
 
-              Move-Match -Source $source -EscapedPattern $escapedPattern -PatternOccurrence 'L' `
+              Move-MatchLegacy -Source $source -EscapedPattern $escapedPattern -PatternOccurrence 'L' `
                 -Relation $relation -EscapedAnchor $escapedAnchor -AnchorOccurrence 'L' | `
                 Should -BeExactly '*fight +fire with *fight+fire bump ';
 
-              Move-Match -Source $source -EscapedPattern $escapedPattern -PatternOccurrence 'L' `
+              Move-MatchLegacy -Source $source -EscapedPattern $escapedPattern -PatternOccurrence 'L' `
                 -Relation $relation -Anchor $(esc($escapedAnchor)) -AnchorOccurrence 'L' | `
                 Should -BeExactly '*fight +fire with *fight+fire bump ';
             }
@@ -233,7 +233,7 @@ Describe 'Move-Match' {
               [string]$anchor = 'blooper';
               [string]$relation = 'before'
 
-              Move-Match -Source $source -EscapedPattern $escapedPattern -Relation $relation -Anchor $anchor | `
+              Move-MatchLegacy -Source $source -EscapedPattern $escapedPattern -Relation $relation -Anchor $anchor | `
                 Should -BeExactly 'fight +fire with +fire';
             }
           }
@@ -245,7 +245,7 @@ Describe 'Move-Match' {
               [string]$source = 'There is fire where you are going';
               [string]$escapedPattern = 'fire ';
 
-              Move-Match -Source $source -EscapedPattern $escapedPattern -Start | `
+              Move-MatchLegacy -Source $source -EscapedPattern $escapedPattern -Start | `
                 Should -BeExactly 'fire There is where you are going';
             }
           } # and Pattern is midway in source
@@ -255,7 +255,7 @@ Describe 'Move-Match' {
               [string]$source = 'There is fire where you are going';
               [string]$escapedPattern = 'There';
 
-              Move-Match -Source $source -EscapedPattern $escapedPattern -Start | `
+              Move-MatchLegacy -Source $source -EscapedPattern $escapedPattern -Start | `
                 Should -BeExactly 'There is fire where you are going';
             }
           } # and Pattern is already at Start in source
@@ -267,7 +267,7 @@ Describe 'Move-Match' {
               [string]$source = 'There is fire where you are going';
               [string]$escapedPattern = ' fire';
 
-              Move-Match -Source $source -EscapedPattern $escapedPattern -End | `
+              Move-MatchLegacy -Source $source -EscapedPattern $escapedPattern -End | `
                 Should -BeExactly 'There is where you are going fire';
             }
           } # and Pattern is midway in source
@@ -277,7 +277,7 @@ Describe 'Move-Match' {
               [string]$source = 'There is fire where you are going';
               [string]$escapedPattern = ' fire';
 
-              Move-Match -Source $source -EscapedPattern $escapedPattern -End | `
+              Move-MatchLegacy -Source $source -EscapedPattern $escapedPattern -End | `
                 Should -BeExactly 'There is where you are going fire';
             }
           } # and Pattern is midway in source
@@ -305,7 +305,7 @@ Describe 'Move-Match' {
         [string]$pattern = 'bomb!';
         [string]$anchor = '\d{2}-\d{2}-\d{4}\s';
 
-        Move-Match -Source $source -Pattern $pattern -Relation 'before' -Anchor $anchor | `
+        Move-MatchLegacy -Source $source -Pattern $pattern -Relation 'before' -Anchor $anchor | `
           Should -BeExactly 'There 23-03-1984 will be fire on where you are going' -Because "No ('$pattern') match found";
       }
     } # and: No Pattern match
@@ -322,10 +322,10 @@ Describe 'Move-Match' {
               [string]$anchor = 'fight';
               [string]$relation = 'before'
 
-              Move-Match -Source $source -EscapedPattern $escapedPattern -Relation $relation -Anchor $anchor | `
+              Move-MatchLegacy -Source $source -EscapedPattern $escapedPattern -Relation $relation -Anchor $anchor | `
                 Should -BeExactly '+firefight  with +fire';
 
-              Move-Match -Source $source -Pattern $(esc($escapedPattern)) -Relation $relation -Anchor $anchor | `
+              Move-MatchLegacy -Source $source -Pattern $(esc($escapedPattern)) -Relation $relation -Anchor $anchor | `
                 Should -BeExactly '+firefight  with +fire';
             }
 
@@ -335,11 +335,11 @@ Describe 'Move-Match' {
               [string]$anchor = 'fight';
               [string]$relation = 'before'
 
-              Move-Match -Source $source -EscapedPattern $escapedPattern -PatternOccurrence 'L' `
+              Move-MatchLegacy -Source $source -EscapedPattern $escapedPattern -PatternOccurrence 'L' `
                 -Relation $relation -Anchor $anchor | `
                 Should -BeExactly '+firefight +fire with ';
 
-              Move-Match -Source $source -Pattern $(esc($escapedPattern)) -PatternOccurrence 'L' `
+              Move-MatchLegacy -Source $source -Pattern $(esc($escapedPattern)) -PatternOccurrence 'L' `
                 -Relation $relation -Anchor $anchor | `
                 Should -BeExactly '+firefight +fire with ';
             }
@@ -350,15 +350,15 @@ Describe 'Move-Match' {
               [string]$escapedAnchor = '*fight';
               [string]$relation = 'before'
 
-              Move-Match -Source $source -EscapedPattern $escapedPattern `
+              Move-MatchLegacy -Source $source -EscapedPattern $escapedPattern `
                 -Relation $relation -EscapedAnchor $escapedAnchor -AnchorOccurrence 'L' | `
                 Should -BeExactly '*fight  with +fire*fight +fire';
 
-              Move-Match -Source $source -Pattern $(esc($escapedPattern)) `
+              Move-MatchLegacy -Source $source -Pattern $(esc($escapedPattern)) `
                 -Relation $relation -EscapedAnchor $escapedAnchor -AnchorOccurrence 'L' | `
                 Should -BeExactly '*fight  with +fire*fight +fire';
 
-              Move-Match -Source $source -Pattern $(esc($escapedPattern)) `
+              Move-MatchLegacy -Source $source -Pattern $(esc($escapedPattern)) `
                 -Relation $relation -EscapedAnchor $escapedAnchor -AnchorOccurrence '2' | `
                 Should -BeExactly '*fight  with +fire*fight +fire';
             }
@@ -369,11 +369,11 @@ Describe 'Move-Match' {
               [string]$escapedAnchor = '*fight';
               [string]$relation = 'before';
 
-              Move-Match -Source $source -EscapedPattern $escapedPattern -PatternOccurrence 'L' `
+              Move-MatchLegacy -Source $source -EscapedPattern $escapedPattern -PatternOccurrence 'L' `
                 -Relation $relation -EscapedAnchor $escapedAnchor -AnchorOccurrence 'L' | `
                 Should -BeExactly '*fight +fire with +fire*fight ';
 
-              Move-Match -Source $source -Pattern $(esc($escapedPattern)) -PatternOccurrence 'L' `
+              Move-MatchLegacy -Source $source -Pattern $(esc($escapedPattern)) -PatternOccurrence 'L' `
                 -Relation $relation -EscapedAnchor $escapedAnchor -AnchorOccurrence 'L' | `
                 Should -BeExactly '*fight +fire with +fire*fight ';
             }
@@ -386,10 +386,10 @@ Describe 'Move-Match' {
               [string]$anchor = 'fight ';
               [string]$relation = 'after';
 
-              Move-Match -Source $source -EscapedPattern $escapedPattern -Relation $relation -Anchor $anchor | `
+              Move-MatchLegacy -Source $source -EscapedPattern $escapedPattern -Relation $relation -Anchor $anchor | `
                 Should -BeExactly 'so fight +firethe  with +fire';
 
-              Move-Match -Source $source -Pattern $(esc($escapedPattern)) -Relation $relation -Anchor $anchor | `
+              Move-MatchLegacy -Source $source -Pattern $(esc($escapedPattern)) -Relation $relation -Anchor $anchor | `
                 Should -BeExactly 'so fight +firethe  with +fire';
             }
 
@@ -399,11 +399,11 @@ Describe 'Move-Match' {
               [string]$anchor = 'fight ';
               [string]$relation = 'after';
 
-              Move-Match -Source $source -EscapedPattern $escapedPattern -PatternOccurrence 'L' `
+              Move-MatchLegacy -Source $source -EscapedPattern $escapedPattern -PatternOccurrence 'L' `
                 -Relation $relation -Anchor $anchor | `
                 Should -BeExactly 'so fight +firethe +fire with ';
 
-              Move-Match -Source $source -Pattern $(esc($escapedPattern)) -PatternOccurrence 'L' `
+              Move-MatchLegacy -Source $source -Pattern $(esc($escapedPattern)) -PatternOccurrence 'L' `
                 -Relation $relation -Anchor $anchor | `
                 Should -BeExactly 'so fight +firethe +fire with ';
             }
@@ -414,11 +414,11 @@ Describe 'Move-Match' {
               [string]$escapedAnchor = '*fight';
               [string]$relation = 'after';
 
-              Move-Match -Source $source -EscapedPattern $escapedPattern `
+              Move-MatchLegacy -Source $source -EscapedPattern $escapedPattern `
                 -Relation $relation -EscapedAnchor $escapedAnchor -AnchorOccurrence 'L' | `
                 Should -BeExactly 'so *fight the  with +fire *fight+fire';
 
-              Move-Match -Source $source -Pattern $(esc($escapedPattern)) `
+              Move-MatchLegacy -Source $source -Pattern $(esc($escapedPattern)) `
                 -Relation $relation -EscapedAnchor $escapedAnchor -AnchorOccurrence 'L' | `
                 Should -BeExactly 'so *fight the  with +fire *fight+fire';
             }
@@ -429,11 +429,11 @@ Describe 'Move-Match' {
               [string]$escapedAnchor = '*fight';
               [string]$relation = 'after';
 
-              Move-Match -Source $source -EscapedPattern $escapedPattern -PatternOccurrence 'L' `
+              Move-MatchLegacy -Source $source -EscapedPattern $escapedPattern -PatternOccurrence 'L' `
                 -Relation $relation -EscapedAnchor $escapedAnchor -AnchorOccurrence 'L' | `
                 Should -BeExactly '*fight +fire with *fight+fire bump ';
 
-              Move-Match -Source $source -Pattern $(esc($escapedPattern)) -PatternOccurrence 'L' `
+              Move-MatchLegacy -Source $source -Pattern $(esc($escapedPattern)) -PatternOccurrence 'L' `
                 -Relation $relation -EscapedAnchor $escapedAnchor -AnchorOccurrence 'L' | `
                 Should -BeExactly '*fight +fire with *fight+fire bump ';
             }
@@ -448,7 +448,7 @@ Describe 'Move-Match' {
             [string]$pattern = '\d{2}-\d{2}-\d{4}';
             [string]$anchor = 'Judgement';
 
-            Move-Match -Source $source -Pattern $pattern -Anchor $anchor `
+            Move-MatchLegacy -Source $source -Pattern $pattern -Anchor $anchor `
               -Paste '==[$0]== ${_a}' | `
               Should -BeExactly '==[06-06-2626]== Judgement Day: [], Judgement Day: [28-02-2727], take your pick!';
           }
@@ -458,7 +458,7 @@ Describe 'Move-Match' {
             [string]$pattern = '\d{2}-\d{2}-\d{4}';
             [string]$anchor = 'Judgement';
 
-            Move-Match -Source $source -Pattern $pattern -PatternOccurrence 'L' `
+            Move-MatchLegacy -Source $source -Pattern $pattern -PatternOccurrence 'L' `
               -Anchor $anchor `
               -Paste '==[$0]== ${_a}' | `
               Should -BeExactly '==[28-02-2727]== Judgement Day: [06-06-2626], Judgement Day: [], take your pick!';
@@ -485,7 +485,7 @@ Describe 'Move-Match' {
                 [string]$relation = 'after'
                 [string]$With = '\d{2}-\d{2}-\d{4}';
 
-                Move-Match -Source $source -Pattern $pattern -Relation $relation -Anchor $anchor `
+                Move-MatchLegacy -Source $source -Pattern $pattern -Relation $relation -Anchor $anchor `
                   -With $With -WithOccurrence 'L' -Paste $paste | `
                   Should -BeExactly 'Judgement 28-02-2727Day [], Judgement Day [28-02-2727], Day: <Friday>';
               }
@@ -500,7 +500,7 @@ Describe 'Move-Match' {
                   [string]$relation = 'after'
                   [string]$literalWith = '**-**-**** ';
 
-                  Move-Match -Source $source -Pattern $pattern -Relation $relation -Anchor $anchor `
+                  Move-MatchLegacy -Source $source -Pattern $pattern -Relation $relation -Anchor $anchor `
                     -LiteralWith $literalWith -Paste $paste | `
                     Should -BeExactly 'Judgement **-**-**** Day [], Judgement Day [28-02-2727], Day: <Friday>';
                 }
@@ -514,7 +514,7 @@ Describe 'Move-Match' {
                   [string]$relation = 'after'
                   [string]$with = '\<' + '\w+' + '\>'
 
-                  Move-Match -Source $source -Pattern $pattern -PatternOccurrence 'L' `
+                  Move-MatchLegacy -Source $source -Pattern $pattern -PatternOccurrence 'L' `
                     -Relation $relation -Anchor $anchor -With $with | `
                     Should -BeExactly 'Judgement Day <Friday>[06-06-2626], Judgement Day [], Day: <Friday>';
                 }
@@ -529,7 +529,7 @@ Describe 'Move-Match' {
                   [string]$literalWith = 'Day: <(?<day>\w+)>';
                   [string]$paste = '==(${day})==';
 
-                  Move-Match -Source $source -Pattern $pattern -Relation $relation -Anchor $literalAnchor `
+                  Move-MatchLegacy -Source $source -Pattern $pattern -Relation $relation -Anchor $literalAnchor `
                     -AnchorOccurrence 'L' -LiteralWith $literalWith -Paste $paste | `
                     Should -BeExactly 'Judgement^ Day [], Judgement^==(Friday)== Day [28-02-2727], Day: <Friday>';
                 }
@@ -542,7 +542,7 @@ Describe 'Move-Match' {
                   [string]$literalWith = 'Day: <(?<day>\w+)>';
                   [string]$paste = '==(${day})==';
 
-                  Move-Match -Source $source -Pattern $pattern -Relation $relation -Anchor $literalAnchor `
+                  Move-MatchLegacy -Source $source -Pattern $pattern -Relation $relation -Anchor $literalAnchor `
                     -AnchorOccurrence 'L' -LiteralWith $literalWith -Paste $paste | `
                     Should -BeExactly 'Judgement^ Day [06-06-2626], Judgement^==(Friday)== Day [], Day: <Friday>';
                 }
@@ -557,7 +557,7 @@ Describe 'Move-Match' {
                     [string]$literalWith = 'ice^';
                     [string]$paste = '($0) ';
 
-                    Move-Match -Source $source -EscapedPattern $escapedPattern -Relation $relation -Anchor $anchor `
+                    Move-MatchLegacy -Source $source -EscapedPattern $escapedPattern -Relation $relation -Anchor $anchor `
                       -LiteralWith $literalWith -Paste $paste | `
                       Should -BeExactly 'There is (ice^) where your +fire is going';
                   }
@@ -570,7 +570,7 @@ Describe 'Move-Match' {
                     [string]$literalWith = 'ice^';
                     [string]$paste = '($0) ';
 
-                    Move-Match -Source $source -EscapedPattern $escapedPattern -Relation $relation -Anchor $anchor `
+                    Move-MatchLegacy -Source $source -EscapedPattern $escapedPattern -Relation $relation -Anchor $anchor `
                       -LiteralWith $literalWith -Paste $paste | `
                       Should -BeExactly 'There is (ice^) where +fire your is going';
                   }
@@ -583,7 +583,7 @@ Describe 'Move-Match' {
                     [string]$literalWith = 'ice^';
                     [string]$paste = '($0)';
 
-                    Move-Match -Source $source -EscapedPattern $escapedPattern -Relation $relation -LiteralAnchor $literalAnchor `
+                    Move-MatchLegacy -Source $source -EscapedPattern $escapedPattern -Relation $relation -LiteralAnchor $literalAnchor `
                       -AnchorOccurrence 'L' -LiteralWith $literalWith -Paste $paste | `
                       Should -BeExactly 'There is$ where  your +fire is$(ice^) going';
                   }
@@ -596,7 +596,7 @@ Describe 'Move-Match' {
                     [string]$literalWith = 'ice^';
                     [string]$paste = '';
 
-                    Move-Match -Source $source -EscapedPattern $escapedPattern -Relation $relation -LiteralAnchor $literalAnchor `
+                    Move-MatchLegacy -Source $source -EscapedPattern $escapedPattern -Relation $relation -LiteralAnchor $literalAnchor `
                       -AnchorOccurrence 'L' -LiteralWith $literalWith -WithOccurrence 'L' -Paste $paste | `
                       Should -BeExactly 'There is where you are ice going';
                   }
@@ -620,7 +620,7 @@ Describe 'Move-Match' {
             [string]$with = '\d{5}';
             [string]$paste = '${_a}==($0)== ';
 
-            Move-Match -Source $source -EscapedPattern $escapedPattern -Anchor $anchor `
+            Move-MatchLegacy -Source $source -EscapedPattern $escapedPattern -Anchor $anchor `
               -With $with -Paste $paste | `
               Should -BeExactly 'In the ZZZ ==(+2525)== year: , Mourning +2525 ZZZ 12345 Sun';
           }
@@ -632,7 +632,7 @@ Describe 'Move-Match' {
             [string]$with = '\d{5}';
             [string]$paste = '${_a}==($0)== ';
 
-            Move-Match -Source $source -EscapedPattern $escapedPattern -PatternOccurrence 'L' `
+            Move-MatchLegacy -Source $source -EscapedPattern $escapedPattern -PatternOccurrence 'L' `
               -Anchor $anchor -With $with -Paste $paste | `
               Should -BeExactly 'In the ZZZ ==(+2525)== year: +2525, Mourning  ZZZ 12345 Sun';
           }
@@ -644,7 +644,7 @@ Describe 'Move-Match' {
             [string]$with = '\d{5}';
             [string]$paste = '${_a}==(${_w})== ';
 
-            Move-Match -Source $source -EscapedPattern $escapedPattern -EscapedAnchor $escapedAnchor `
+            Move-MatchLegacy -Source $source -EscapedPattern $escapedPattern -EscapedAnchor $escapedAnchor `
               -AnchorOccurrence 'L' -With $with -Paste $paste | `
               Should -BeExactly 'In the ZZZ+ year: , Mourning +2525 ZZZ+ ==(12345)== 12345 Sun';
           }
@@ -656,11 +656,11 @@ Describe 'Move-Match' {
             [string]$with = '\d{5}';
             [string]$paste = '${_a}==(${_w})== ';
 
-            Move-Match -Source $source -EscapedPattern $escapedPattern -PatternOccurrence 'L' `
+            Move-MatchLegacy -Source $source -EscapedPattern $escapedPattern -PatternOccurrence 'L' `
               -EscapedAnchor $escapedAnchor -AnchorOccurrence 'L' -With $with -WithOccurrence 'L' -Paste $paste | `
               Should -BeExactly 'In the ZZZ+ year: +2525, Mourning  ZZZ+ ==(12345)== 12345 Sun';
 
-            Move-Match -Source $source -EscapedPattern $escapedPattern -PatternOccurrence 'L' `
+            Move-MatchLegacy -Source $source -EscapedPattern $escapedPattern -PatternOccurrence 'L' `
               -EscapedAnchor $escapedAnchor -AnchorOccurrence 'L' -With $with -WithOccurrence '1' -Paste $paste | `
               Should -BeExactly 'In the ZZZ+ year: +2525, Mourning  ZZZ+ ==(12345)== 12345 Sun';
           }
@@ -673,7 +673,7 @@ Describe 'Move-Match' {
               [string]$paste = '==(COL: ${col}, OBJ: ${obj})== ${_a}';
               [string]$expected = 'In the ZZZ[blue, rose] year: , Mourning +2525 ==(COL: white, OBJ: rabbit)== ZZZ[white, rabbit] 12345 Sun';
 
-              Move-Match -Source $source -EscapedPattern $escapedPattern -Anchor $anchor `
+              Move-MatchLegacy -Source $source -EscapedPattern $escapedPattern -Anchor $anchor `
                 -AnchorOccurrence 'L' -Paste $paste | Should -BeExactly $expected;
             }
           }
@@ -693,4 +693,4 @@ Describe 'Move-Match' {
 
     } # and: vanilla move formatted
   } # and: EscapedPattern matches
-} # Move-Match
+} # Move-MatchLegacy

@@ -1,5 +1,5 @@
 
-function Move-Match {
+function Move-MatchLegacy {
   # PowerShell ParameterSets are too unmanageable and over-bearing for commands that have complex usage
   # scenarios such as with this command. Ideally, ParameterSets should be defined, but the correct definition
   # for this function would be too complex and unmaintainable.
@@ -226,4 +226,4 @@ function Move-Match {
   }
 
   $result;
-} # Move-Match
+} # Move-MatchLegacy
