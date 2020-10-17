@@ -1,4 +1,5 @@
-﻿
+﻿using namespace System.Text.RegularExpressions;
+
 task . Clean, Build, Tests, Stats
 task Tests ImportCompiledModule, Pester
 task CreateManifest CopyPSD, UpdatePublicFunctionsToExport
@@ -29,6 +30,32 @@ if (Test-Path -Path $script:TestHelpers) {
 function Get-FunctionExportList {
   (Get-ChildItem -Path $script:PublicFolder | Where-Object { $_.Name -like '*-*' } |
     Select-Object -ExpandProperty BaseName)
+}
+
+function Get-PublicFunctionAliasesToExport {
+  [string]$expression = 'Alias\((?<aliases>((?<quote>[''"])[\w-]+\k<quote>\s*,?\s*)+)\)';
+  [System.Text.RegularExpressions.RegexOptions]$options = 'IgnoreCase, SingleLine';
+
+  [System.Text.RegularExpressions.RegEx]$aliasesRegEx = `
+    New-Object -TypeName System.Text.RegularExpressions.RegEx -ArgumentList ($expression, $options);
+
+  [string]$publicPath = "$PSScriptRoot/Public";
+
+  [string[]]$aliases = @();
+
+  Get-ChildItem -Recurse -File -Filter '*.ps1' -Path $publicPath | Foreach-Object {
+    [string]$content = Get-Content $_;
+
+    [System.Text.RegularExpressions.Match]$contentMatch = $aliasesRegEx.Match($content);
+
+    if ($contentMatch.Success) {
+      $al = $contentMatch.Groups['aliases'];
+      $al = $($al -split ',' | ForEach-Object { $_.Trim().replace('"', '').replace("'", "") });
+      $aliases += $al;
+    }
+  };
+
+  $aliases;
 }
 
 task Clean {
@@ -78,18 +105,33 @@ task Compile @compileParams {
     }
   }
 
-  $sourceDefinition = Import-PowerShellDataFile -Path $script:SourcePsdPath
+  [System.Collections.Hashtable]$sourceDefinition = Import-PowerShellDataFile -Path $script:SourcePsdPath
 
-  if ($sourceDefinition -and $sourceDefinition.ContainsKey('VariablesToExport')) {
-    [string[]]$exportVariables = $sourceDefinition['VariablesToExport'];
-    Write-Verbose "Found VariablesToExport: $exportVariables in source Psd file: $script:SourcePsdPath";
+  if ($sourceDefinition) {
+    if ($sourceDefinition.ContainsKey('VariablesToExport')) {
+      [string[]]$exportVariables = $sourceDefinition['VariablesToExport'];
+      Write-Verbose "Found VariablesToExport: $exportVariables in source Psd file: $script:SourcePsdPath";
 
-    if (-not([string]::IsNullOrEmpty($exportVariables))) {
-      [string]$variablesArgument = $($exportVariables -join ", ") + [System.Environment]::NewLine;
-      [string]$contentToAdd = "Export-ModuleMember -Variable $variablesArgument";
-      Write-Verbose "Adding content: $contentToAdd";
+      if (-not([string]::IsNullOrEmpty($exportVariables))) {
+        [string]$variablesArgument = $($exportVariables -join ", ") + [System.Environment]::NewLine;
+        [string]$contentToAdd = "Export-ModuleMember -Variable $variablesArgument";
+        Write-Verbose "Adding content: $contentToAdd";
 
-      Add-Content $script:PsmPath "Export-ModuleMember -Variable $variablesArgument";
+        Add-Content $script:PsmPath "Export-ModuleMember -Variable $variablesArgument";
+      }
+    }
+
+    if ($sourceDefinition.ContainsKey('AliasesToExport')) {
+      [string[]]$functionAliases = Get-PublicFunctionAliasesToExport;
+
+      if ($functionAliases.Count -gt 0) {
+        [string]$aliasesArgument = $($functionAliases -join ", ") + [System.Environment]::NewLine;
+
+        Write-Verbose "Found AliasesToExport: $aliasesArgument in source Psd file: $script:SourcePsdPath";
+        [string]$contentToAdd = "Export-ModuleMember -Alias $aliasesArgument";
+
+        Add-Content $script:PsmPath "Export-ModuleMember -Alias $aliasesArgument";
+      } 
     }
   }
 
@@ -125,10 +167,23 @@ task UpdatePublicFunctionsToExport -if (Test-Path -Path $script:PublicFolder) {
 
     # Make sure in your source psd1 file, FunctionsToExport  is set to ''.
     # PowerShell has a problem with trying to replace (), so @() does not
-    # work without jumping through hoops.
+    # work without jumping through hoops. (Same goes for AliasesToExport)
     #
     (Get-Content -Path $script:PsdPath) -replace "FunctionsToExport = ''", $publicFunctions |
     Set-Content -Path $script:PsdPath
+  }
+
+  [System.Collections.Hashtable]$sourceDefinition = Import-PowerShellDataFile -Path $script:PsdPath
+  if ($sourceDefinition.ContainsKey('AliasesToExport')) {
+    [string[]]$aliases = Get-PublicFunctionAliasesToExport;
+
+    if ($aliases.Count -gt 0) {      
+      [string]$aliasesArgument = $($aliases -join ", ");
+      $aliasesStatement = "AliasesToExport = @('{0}')" -f $aliasesArgument
+
+      (Get-Content -Path $script:PsdPath) -replace "AliasesToExport = ''", $aliasesStatement |
+      Set-Content -Path $script:PsdPath
+    }
   }
 }
 

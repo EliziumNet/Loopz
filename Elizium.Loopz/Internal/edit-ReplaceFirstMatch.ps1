@@ -13,7 +13,7 @@ function edit-ReplaceFirstMatch {
     [string]$With,
 
     [Parameter()]
-    [string]$Quantity = 1,
+    [int]$Quantity = 1,
 
     [Parameter()]
     [switch]$Whole
@@ -24,5 +24,11 @@ function edit-ReplaceFirstMatch {
 
   [System.Text.RegularExpressions.RegEx]$patternRegEx = `
     New-Object -TypeName System.Text.RegularExpressions.RegEx -ArgumentList $adjustedPattern;
-  return $patternRegEx.Replace($Source, $With, $Quantity);
+
+  [string]$result = if ($PSBoundParameters.ContainsKey('Quantity') -and ($Quantity -gt 0)) {
+    $patternRegEx.Replace($Source, $With, $Quantity)
+  } else {
+    $patternRegEx.Replace($Source, $With)
+  }
+  return $result;
 }

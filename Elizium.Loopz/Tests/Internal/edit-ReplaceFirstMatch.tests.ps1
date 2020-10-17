@@ -8,7 +8,7 @@ Describe 'edit-ReplaceFirstMatch' {
     Context 'and: no matches' {
       It 'should: return original string unmodified' {
         [string]$source = 'We are like the dreamer who dreams and then lives inside the dream';
-        [string]$pattern = 'rose';
+        [string]$pattern = 'blooper';
         [string]$with = 'dandelion';
 
         edit-ReplaceFirstMatch -Source $source -Pattern $pattern -With $with | `
@@ -21,8 +21,9 @@ Describe 'edit-ReplaceFirstMatch' {
         [string]$source = 'We are like the dreamer';
         [string]$pattern = 'dream';
         [string]$with = 'heal';
+        [int]$quantity = 1;
 
-        edit-ReplaceFirstMatch -Source $source -Pattern $pattern -With $with | `
+        edit-ReplaceFirstMatch -Source $source -Pattern $pattern -With $with -Quantity $quantity | `
           Should -BeExactly 'We are like the healer';
       }
     }
@@ -32,9 +33,21 @@ Describe 'edit-ReplaceFirstMatch' {
         [string]$source = 'We are like the dreamer who dreams and then lives inside the dream';
         [string]$pattern = 'dream';
         [string]$with = 'heal';
+        [int]$quantity = 1;
+
+        edit-ReplaceFirstMatch -Source $source -Pattern $pattern -With $with -Quantity $quantity | `
+          Should -BeExactly 'We are like the healer who dreams and then lives inside the dream';
+      }
+    }
+
+    Context 'and: multiple matches' {
+      It 'should: replace all matches' {
+        [string]$source = 'We are like the dreamer who dreams and then lives inside the dream';
+        [string]$pattern = 'dream';
+        [string]$with = 'heal';
 
         edit-ReplaceFirstMatch -Source $source -Pattern $pattern -With $with | `
-          Should -BeExactly 'We are like the healer who dreams and then lives inside the dream';
+          Should -BeExactly 'We are like the healer who heals and then lives inside the heal';
       }
     }
 
@@ -58,8 +71,9 @@ Describe 'edit-ReplaceFirstMatch' {
           [string]$source = 'We are like the dreamer who dreams and then lives inside the dream';
           [string]$pattern = '\bscream\b';
           [string]$with = 'heal';
+          [int]$quantity = 1;
 
-          edit-ReplaceFirstMatch -Source $source -Pattern $pattern -With $with | `
+          edit-ReplaceFirstMatch -Source $source -Pattern $pattern -With $with -Quantity $quantity | `
             Should -BeExactly 'We are like the dreamer who dreams and then lives inside the dream';
         }
       }
@@ -69,8 +83,9 @@ Describe 'edit-ReplaceFirstMatch' {
           [string]$source = 'We are like the dreamer who dreams and then lives inside the dream';
           [string]$pattern = '\bdream\b';
           [string]$with = 'healer';
+          [int]$quantity = 1;
 
-          edit-ReplaceFirstMatch -Source $source -Pattern $pattern -With $with | `
+          edit-ReplaceFirstMatch -Source $source -Pattern $pattern -With $with -Quantity $quantity | `
             Should -BeExactly 'We are like the dreamer who dreams and then lives inside the healer';
         }
       }
@@ -80,8 +95,9 @@ Describe 'edit-ReplaceFirstMatch' {
           [string]$source = 'We are like the dreamer who has a dream and then lives inside the dream';
           [string]$pattern = '\bdream\b';
           [string]$with = 'scream';
+          [int]$quantity = 1;
 
-          edit-ReplaceFirstMatch -Source $source -Pattern $pattern -With $with | `
+          edit-ReplaceFirstMatch -Source $source -Pattern $pattern -With $with -Quantity $quantity | `
             Should -BeExactly 'We are like the dreamer who has a scream and then lives inside the dream';
         }
       }
@@ -94,8 +110,9 @@ Describe 'edit-ReplaceFirstMatch' {
             [string]$source = 'We are like the dreamer who dreams and then lives inside the dream';
             [string]$pattern = 'dream';
             [string]$with = 'healer';
+            [int]$quantity = 1;
 
-            edit-ReplaceFirstMatch -Source $source -Pattern $pattern -With $with -Whole | `
+            edit-ReplaceFirstMatch -Source $source -Pattern $pattern -With $with -Whole -Quantity $quantity | `
               Should -BeExactly 'We are like the dreamer who dreams and then lives inside the healer';
           }
         }
@@ -110,8 +127,9 @@ Describe 'edit-ReplaceFirstMatch' {
           [string]$source = 'We are like the dreamer who dreams and then lives inside the dream';
           [string]$pattern = '\bdream\b';
           [string]$with = 'healer';
+          [int]$quantity = 1;
 
-          edit-ReplaceFirstMatch -Source $source -Pattern $pattern -With $with -Whole | `
+          edit-ReplaceFirstMatch -Source $source -Pattern $pattern -With $with -Whole -Quantity $quantity | `
             Should -BeExactly 'We are like the dreamer who dreams and then lives inside the healer';
         }
       }
@@ -123,8 +141,9 @@ Describe 'edit-ReplaceFirstMatch' {
           [string]$source = 'Party like its 31-12-1999';
           [string]$pattern = '\d{2}-\d{2}-\d{4}';
           [string]$with = 'Nineteen Ninety Nine';
+          [int]$quantity = 1;
 
-          edit-ReplaceFirstMatch -Source $source -Pattern $pattern -With $with | `
+          edit-ReplaceFirstMatch -Source $source -Pattern $pattern -With $with -Quantity $quantity | `
             Should -BeExactly 'Party like its Nineteen Ninety Nine';
         }
       }
@@ -134,8 +153,9 @@ Describe 'edit-ReplaceFirstMatch' {
           [string]$source = '01-01-2000 Party like its 31-12-1999';
           [string]$pattern = '\d{2}-\d{2}-\d{4}';
           [string]$with = 'New Years Eve 1999';
+          [int]$quantity = 1;
 
-          edit-ReplaceFirstMatch -Source $source -Pattern $pattern -With $with | `
+          edit-ReplaceFirstMatch -Source $source -Pattern $pattern -With $with -Quantity $quantity | `
             Should -BeExactly 'New Years Eve 1999 Party like its 31-12-1999';
         }
       }
