@@ -5,12 +5,12 @@ Describe 'Move-MatchLegacy' {
       -ErrorAction 'stop' -DisableNameChecking
   }
 
-  Context 'given: Pattern' -Tag 'Current' {
+  Context 'given: Pattern' -Skip {
     Context 'and: Pattern matches' {
       Context 'and: vanilla move' { # Pattern
         Context 'and: Anchor matches' {
-          Context 'and: before' {
-            It 'should: move the first match before the first anchor' {
+          Context 'and: before' -Tag 'DONE' {
+            It 'should: move the first match before the first anchor' -Tag 'DONE' {
               [string]$source = 'Judgement Day: [06-06-2626], Judgement Day: [28-02-2727], take your pick!';
               [string]$pattern = '\d{2}-\d{2}-\d{4}';
               [string]$anchor = 'Judgement';
@@ -108,7 +108,7 @@ Describe 'Move-MatchLegacy' {
                 Should -BeExactly '*fight  with +fire*fight +fire';
             }
 
-            It 'should: move the last match before the last anchor' {
+            It 'should: move the last match before the last anchor' -Tag 'DONE' {
               [string]$source = '*fight +fire with *fight +fire';
               [string]$escapedPattern = '+fire';
               [string]$escapedAnchor = '*fight';
@@ -164,7 +164,7 @@ Describe 'Move-MatchLegacy' {
             } # and: Whole
           } # and: before
 
-          Context 'and: after' {
+          Context 'and: after' -Tag 'DONE' {
             It 'should: move the first match after the first anchor' {
               [string]$source = 'so fight the +fire with +fire';
               [string]$escapedPattern = '+fire';
@@ -225,7 +225,7 @@ Describe 'Move-MatchLegacy' {
           } # and: after
         } # and: Anchor matches
 
-        Context 'and: Anchor NOT match' {
+        Context 'and: Anchor NOT match' -Tag 'DONE' {
           Context 'and: vanilla move before' {
             It 'should: return source unmodified' {
               [string]$source = 'fight +fire with +fire';
@@ -239,7 +239,7 @@ Describe 'Move-MatchLegacy' {
           }
         } # and: Anchor NOT match
 
-        Context 'and: Start specified' {
+        Context 'and: Start specified' -Tag 'DONE' {
           Context 'and Pattern is midway in source' {
             It 'should: Move Pattern to Start' {
               [string]$source = 'There is fire where you are going';
@@ -261,7 +261,7 @@ Describe 'Move-MatchLegacy' {
           } # and Pattern is already at Start in source
         } # and: Start specified
 
-        Context 'and: End specified' {
+        Context 'and: End specified' -Tag 'DONE' {
           Context 'and Pattern is midway in source' {
             It 'should: Move Pattern to End' {
               [string]$source = 'There is fire where you are going';
@@ -311,11 +311,11 @@ Describe 'Move-MatchLegacy' {
     } # and: No Pattern match
   } # given: Pattern
 
-  Context 'given: EscapedPattern' {
+  Context 'given: EscapedPattern' -Skip {
     Context 'and: EscapedPattern matches' {
       Context 'and: vanilla move' { # Pattern
         Context 'and: Anchor matches' {
-          Context 'and: before' {
+          Context 'and: before' { # THESE LOOK LIKE DUPLICATES
             It 'should: move the first match before the first anchor' {
               [string]$source = 'fight +fire with +fire';
               [string]$escapedPattern = '+fire';
@@ -379,7 +379,7 @@ Describe 'Move-MatchLegacy' {
             }
           } # and: before
 
-          Context 'and: after' {
+          Context 'and: after' { # THESE LOOK LIKE DUPLICATES
             It 'should: move the first match after the first anchor' {
               [string]$source = 'so fight the +fire with +fire';
               [string]$escapedPattern = '+fire';
@@ -441,7 +441,7 @@ Describe 'Move-MatchLegacy' {
         } # and: Anchor matches
       } # and: vanilla move
 
-      Context 'and: vanilla formatted move' -Tag 'Current' { # Pattern, Paste
+      Context 'and: vanilla formatted move' -Tag 'DONE' { # Pattern, Paste
         Context 'and: Anchor matches' {
           It 'should: move the first match before the first anchor' {
             [string]$source = 'Judgement Day: [06-06-2626], Judgement Day: [28-02-2727], take your pick!';
@@ -478,7 +478,7 @@ Describe 'Move-MatchLegacy' {
             # Paste.
             #
             Context 'and: Last With' {
-              It 'should: move the first match after the first anchor' -Tag 'Focus' {
+              It 'should: move the first match after the first anchor' -Tag 'DONE' {
                 [string]$source = 'Judgement Day [06-06-2626], Judgement Day [28-02-2727], Day: <Friday>';
                 [string]$pattern = '\d{2}-\d{2}-\d{4}';
                 [string]$anchor = 'Judgement\s';
@@ -492,7 +492,7 @@ Describe 'Move-MatchLegacy' {
             } # With
 
             Context 'SKIPPED' -Skip {
-              Context 'and: LiteralWith' {
+              Context 'and: LiteralWith' -Tag 'DUFF' {
                 It 'should: move the first match after the first anchor' {
                   [string]$source = 'Judgement Day [06-06-2626], Judgement Day [28-02-2727], Day: <Friday>';
                   [string]$pattern = '\d{2}-\d{2}-\d{4}';
@@ -507,7 +507,7 @@ Describe 'Move-MatchLegacy' {
               } # and: LiteralWith
 
               Context 'and: EscapedWith' {
-                It 'should: move the last match after the first anchor' {
+                It 'should: move the last match after the first anchor' -Tag 'DONE' {
                   [string]$source = 'Judgement Day [06-06-2626], Judgement Day [28-02-2727], Day: <Friday>';
                   [string]$pattern = '\d{2}-\d{2}-\d{4}';
                   [string]$anchor = 'Judgement Day ';
@@ -521,7 +521,9 @@ Describe 'Move-MatchLegacy' {
               } # EscapedWith
 
               Context 'and: EscapedWith???' {
-                It 'should: move the first match after the last literal anchor' {
+                It 'should: move the first match after the last literal anchor' -Tag 'DUFF' {
+                  # There is no such thing as a literal anchor any more
+                  #
                   [string]$source = 'Judgement^ Day [06-06-2626], Judgement^ Day [28-02-2727], Day: <Friday>';
                   [string]$pattern = '\d{2}-\d{2}-\d{4}';
                   [string]$literalAnchor = 'Judgement^';
@@ -534,7 +536,9 @@ Describe 'Move-MatchLegacy' {
                     Should -BeExactly 'Judgement^ Day [], Judgement^==(Friday)== Day [28-02-2727], Day: <Friday>';
                 }
 
-                It 'should: move the last match after the last literal anchor' {
+                It 'should: move the last match after the last literal anchor' -Tag 'DUFF' {
+                  # There is no such thing as a literal anchor any more
+                  #
                   [string]$source = 'Judgement^ Day [06-06-2626], Judgement^ Day [28-02-2727], Day: <Friday>';
                   [string]$pattern = '\d{2}-\d{2}-\d{4}';
                   [string]$literalAnchor = 'Judgement^';
@@ -549,7 +553,7 @@ Describe 'Move-MatchLegacy' {
 
                 # Cut ?
                 Context 'and: LiteralWith???' {
-                  It 'should: cut the first match and paste after the first anchor' {
+                  It 'should: cut the first match and paste after the first anchor' -Tag 'DONE' {
                     [string]$source = 'There is where +fire your +fire is going';
                     [string]$escapedPattern = '+fire ';
                     [string]$anchor = 'is ';
@@ -562,7 +566,7 @@ Describe 'Move-MatchLegacy' {
                       Should -BeExactly 'There is (ice^) where your +fire is going';
                   }
 
-                  It 'should: cut the last match and paste after the first anchor' {
+                  It 'should: cut the last match and paste after the first anchor' -Tag 'DONE' {
                     [string]$source = 'There is where +fire your +fire is going';
                     [string]$escapedPattern = '+fire ';
                     [string]$anchor = 'is ';
@@ -588,7 +592,7 @@ Describe 'Move-MatchLegacy' {
                       Should -BeExactly 'There is$ where  your +fire is$(ice^) going';
                   }
 
-                  It 'should: cut the last match paste after the last literal anchor' {
+                  It 'should: cut the last match paste after the last literal anchor' -Tag 'DONE' {
                     [string]$source = 'There is$ where +fire your +fire is$ going';
                     [string]$escapedPattern = '+fire';
                     [string]$literalAnchor = 'is$';
@@ -607,7 +611,7 @@ Describe 'Move-MatchLegacy' {
         } # and: after
       } # and: exotic formatted
 
-      Context 'exotic formatted' -Tag 'Current' { # Pattern, Paste, With/EscapedWith/LiteralWith
+      Context 'exotic formatted' -Tag 'DONE' { # Pattern, Paste, With/EscapedWith/LiteralWith
         Context 'and: Anchor matches' {
           # It's looking like there is little point in having the With parameter, because the
           # LiteralWith functionality is provided by the Paste and the With is actually Copy.

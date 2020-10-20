@@ -5,7 +5,6 @@ function Move-MatchLegacy {
   # for this function would be too complex and unmaintainable.
   # TODO: Optimisation, all pattern parameters should be passed in as pre-validated regex objects
   #
-  [Alias('moma')]
   [OutputType([string])]
   param (
     [Parameter(Mandatory)]

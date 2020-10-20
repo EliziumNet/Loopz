@@ -11,25 +11,16 @@ function Get-DeconstructedMatch {
     [string]$Source,
 
     [Parameter()]
-    [string]$Pattern,
+    [System.Text.RegularExpressions.RegEx]$PatternRegEx,
 
     [Parameter()]
     [string]$Occurrence = 'F',
 
     [Parameter()]
-    [switch]$Whole,
-
-    [Parameter()]
     [switch]$CapturedOnly
   )
 
-  [string]$adjustedPattern = $Whole `
-    ? ($adjustedPattern = '\b{0}\b' -f $Pattern.Replace('\b', '')) : $Pattern;
-
-  [System.Text.RegularExpressions.RegEx]$patternRegEx = `
-    New-Object -TypeName System.Text.RegularExpressions.RegEx -ArgumentList $adjustedPattern;
-
-  [System.Text.RegularExpressions.MatchCollection]$mc = $patternRegEx.Matches($Source);
+  [System.Text.RegularExpressions.MatchCollection]$mc = $PatternRegEx.Matches($Source);
 
   if ($mc.Count -gt 0) {
     [System.Text.RegularExpressions.Match]$m = if ($Occurrence -eq 'F') {
