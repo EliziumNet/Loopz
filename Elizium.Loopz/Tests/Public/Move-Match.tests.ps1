@@ -6,13 +6,14 @@ Describe 'Move-Match' {
     Import-Module .\Output\Elizium.Loopz\Elizium.Loopz.psm1 `
       -ErrorAction 'stop' -DisableNameChecking
 
-    function new-expr {
-      param(
-        [Parameter(Position = 0, Mandatory)]
-        [string]$Expression
-      )
-      New-Object -TypeName RegEx -ArgumentList ($Expression);
-    }
+    . .\Tests\Helpers\new-expr.ps1
+    # function new-expr {
+    #   param(
+    #     [Parameter(Position = 0, Mandatory)]
+    #     [string]$Expression
+    #   )
+    #   New-Object -TypeName RegEx -ArgumentList ($Expression);
+    # }
   }
 
   Context 'given: Pattern' -Tag 'Match' {

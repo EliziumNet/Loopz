@@ -14,7 +14,7 @@ function Get-DeconstructedMatch {
     [System.Text.RegularExpressions.RegEx]$PatternRegEx,
 
     [Parameter()]
-    [string]$Occurrence = 'F',
+    [string]$Occurrence = 'f',
 
     [Parameter()]
     [switch]$CapturedOnly
@@ -23,7 +23,7 @@ function Get-DeconstructedMatch {
   [System.Text.RegularExpressions.MatchCollection]$mc = $PatternRegEx.Matches($Source);
 
   if ($mc.Count -gt 0) {
-    [System.Text.RegularExpressions.Match]$m = if ($Occurrence -eq 'F') {
+    [System.Text.RegularExpressions.Match]$m = if ($Occurrence -eq 'f') {
       $mc[0];
     }
     elseif ($Occurrence -eq 'L') {

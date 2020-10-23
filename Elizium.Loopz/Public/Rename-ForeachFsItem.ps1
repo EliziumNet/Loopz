@@ -21,31 +21,38 @@ function Rename-ForeachFsItem {
     [Parameter(Mandatory, ValueFromPipeline = $true)]
     [System.IO.FileSystemInfo]$underscore,
 
-    [Parameter(ParameterSetName = 'ReplaceFirst', Mandatory)]
-    [switch]$First,
-
     [Parameter(ParameterSetName = 'ReplaceFirst')]
     [int]$Quantity = 1,
 
-    [Parameter(ParameterSetName = 'ReplaceWith')]
-    [Parameter(ParameterSetName = 'MoveToEnd')]
-    [Parameter(ParameterSetName = 'MoveToStart')]
-    [Parameter(ParameterSetName = 'MoveRelative')]
-    [switch]$Last,
-
     [Parameter()]
-    [switch]$Whole,
+    [ValidateSet('p', 'a', 'w', '*')]
+    [string]$Whole, # PAW !!!! Handle RegEx
 
     [Parameter(Mandatory, Position = 0)]
-    [string]$Pattern,
+    [ValidateCount(1, 2)]
+    [ValidateScript( { -not([string]::IsNullOrEmpty($_[0])) })]
+    [object[]]$Pattern,
+
+    [Parameter(ParameterSetName = 'MoveRelative')]
+    [ValidateCount(1, 2)]
+    [ValidateScript( { -not([string]::IsNullOrEmpty($_[0])) })]
+    [object[]]$Anchor,
+
+    [Parameter(ParameterSetName = 'MoveRelative')]
+    [string]$Relation = 'after',
 
     [Parameter(ParameterSetName = 'MoveToStart')]
     [Parameter(ParameterSetName = 'MoveToEnd')]
     [Parameter(ParameterSetName = 'MoveRelative')]
     [Parameter(ParameterSetName = 'ReplaceFirst')]
-    [Parameter(ParameterSetName = 'ReplaceWith', Mandatory)]
+    [Parameter(ParameterSetName = 'ReplaceWith')]
     [AllowEmptyString()]
-    [string]$With,
+    [ValidateCount(1, 2)]
+    [ValidateScript( { -not([string]::IsNullOrEmpty($_[0])) })]
+    [object[]]$With,
+
+    [Parameter()]
+    [string]$LiteralWith,
 
     [Parameter()]
     [string]$Except = [string]::Empty,
@@ -53,17 +60,18 @@ function Rename-ForeachFsItem {
     [Parameter()]
     [scriptblock]$Condition = ( { return $true; }),
 
-    [Parameter(ParameterSetName = 'MoveRelative')]
-    [string]$Target,
-
-    [Parameter(ParameterSetName = 'MoveRelative')]
-    [string]$Relation = 'after',
-
     [Parameter(ParameterSetName = 'MoveToStart', Mandatory)]
     [switch]$Start,
 
     [Parameter(ParameterSetName = 'MoveToEnd', Mandatory)]
-    [switch]$End
+    [switch]$End,
+
+    [Parameter(ParameterSetName = 'MoveToStart')]
+    [Parameter(ParameterSetName = 'MoveToEnd')]
+    [Parameter(ParameterSetName = 'MoveRelative')]
+    [Parameter(ParameterSetName = 'ReplaceFirst')]
+    [Parameter(ParameterSetName = 'ReplaceWith')]
+    [string]$Paste
   )
 
   begin {
@@ -85,46 +93,45 @@ function Rename-ForeachFsItem {
       )
 
       [string]$replacePattern = $_passThru['LOOPZ.RN-FOREACH.PATTERN'];
-      [string]$replaceWith = $_passThru['LOOPZ.RN-FOREACH.WITH'];
       [boolean]$itemIsDirectory = ($_underscore.Attributes -band
         [System.IO.FileAttributes]::Directory) -eq [System.IO.FileAttributes]::Directory;
 
       $endAdapter = New-EndAdapter($_underscore);
       [string]$adjustedName = $endAdapter.GetAdjustedName();
 
-      [boolean]$wholeWord = $_passThru.ContainsKey('LOOPZ.RN-FOREACH.WHOLE-WORD') `
-        ? $_passThru['LOOPZ.RN-FOREACH.WHOLE-WORD'] : $false;
-      
       [string]$action = $_passThru['LOOPZ.RN-FOREACH.ACTION'];
 
       [System.Collections.Hashtable]$actionParameters = @{
         'Value'   = $adjustedName;
         'Pattern' = $replacePattern;
-        'With'    = $replaceWith;
-      }
-
-      if ($wholeWord) {
-        $actionParameters['Whole'] = $true;
       }
 
       switch ($action) {
         'REPLACE-WITH' {
-          [string]$actionFn = 'invoke-ReplaceTextAction';
-          $actionParameters['Quantity'] = $_passThru.ContainsKey('LOOPZ.RN-FOREACH.QUANTITY-FIRST') `
-            ? $_passThru['LOOPZ.RN-FOREACH.QUANTITY-FIRST'] : 1;
+          [string]$actionFn = 'invoke-ReplaceMatchAction';
+          $actionParameters['PatternOccurrence'] = $_passThru.ContainsKey('LOOPZ.RN-FOREACH.PATTERN-OCC') `
+            ? $_passThru['LOOPZ.RN-FOREACH.PATTERN-OCC'] : 'f';
 
-          if ($_passThru.ContainsKey('LOOPZ.RN-FOREACH.OCCURRENCE')) {
-            $actionParameters['Occurrence'] = $_passThru['LOOPZ.RN-FOREACH.OCCURRENCE'];
+          if ($_passThru.ContainsKey('LOOPZ.RN-FOREACH.WITH')) {
+            $actionParameters['With'] = $_passThru['LOOPZ.RN-FOREACH.WITH'];
+
+            if ($_passThru.ContainsKey('LOOPZ.RN-FOREACH.WITH-OCC')) {
+              $actionParameters['WithOccurrence'] = $_passThru['LOOPZ.RN-FOREACH.WITH-OCC'];
+            }
+          } elseif ($_passThru.ContainsKey('LOOPZ.RN-FOREACH.LITERAL-WITH')) {
+            $actionParameters['LiteralWith'] = $_passThru['LOOPZ.RN-FOREACH.LITERAL-WITH'];
+          } else {
+            $actionParameters['LiteralWith'] = [string]::Empty;
           }
           break;
         }
 
-        'MOVE-TOKEN' {
-          [string]$actionFn = 'invoke-MoveTextAction';
-          if ($_passThru.ContainsKey('LOOPZ.RN-FOREACH.TARGET')) {
-            $actionParameters['Target'] = $_passThru['LOOPZ.RN-FOREACH.TARGET'];
+        'MOVE-MATCH' {
+          [string]$actionFn = 'invoke-MoveMatchAction';
+          if ($_passThru.ContainsKey('LOOPZ.RN-FOREACH.ANCHOR')) {
+            $actionParameters['Anchor'] = $_passThru['LOOPZ.RN-FOREACH.ANCHOR'];
           }
-          $actionParameters['TargetType'] = $_passThru['LOOPZ.RN-FOREACH.TARGET-TYPE'];
+          $actionParameters['AnchorType'] = $_passThru['LOOPZ.RN-FOREACH.ANCHOR-TYPE'];
           $actionParameters['Relation'] = $Relation;
           break;
         }
@@ -204,35 +211,65 @@ function Rename-ForeachFsItem {
     [boolean]$whatIf = $PSBoundParameters.ContainsKey('WhatIf');
     [string[][]]$wideItems = @();
     [string[][]]$properties = @();
-
-    if ($Pattern.Length -gt $WIDE_THRESHOLD) {
-      $wideItems += , @('[🔍] Pattern', $Pattern);
+    [string]$adjustedWhole = if ($PSBoundParameters.ContainsKey('Whole')) {
+      $Whole.ToLower();
     }
     else {
-      $properties += , @('[🔍] Pattern', $Pattern);
+      [string]::Empty;
+    }
+
+    # RegEx/Occurrence parameters
+    #
+    [string]$patternExpression, [string]$patternOccurrence = resolve-PatternOccurrence $Pattern
+    if ($patternExpression.Length -gt $WIDE_THRESHOLD) {
+      $wideItems += , @('[🔍] Pattern', $patternExpression);
+    }
+    else {
+      $properties += , @('[🔍] Pattern', $patternExpression);
+    }
+
+    if ($PSBoundParameters.ContainsKey('Anchor')) {
+      [string]$anchorExpression, [string]$anchorOccurrence = resolve-PatternOccurrence $Anchor
+      [string]$anchorLabel = '[🎯] Anchor ({0})' -f $Relation;
+      if ($anchorExpression.Length -gt $WIDE_THRESHOLD) {
+        $wideItems += , @($anchorLabel, $anchorExpression);
+      }
+      else {
+        $properties += , @($anchorLabel, $anchorExpression);
+      }
     }
 
     if ($PSBoundParameters.ContainsKey('With')) {
-      if (-not([string]::IsNullOrEmpty($With))) {
-        if ($Pattern.Length -gt $WIDE_THRESHOLD) {
-          $wideItems += , @('[📌] With', $With);
-        }
-        else {
-          $properties += , @('[📌] With', $With);
-        }
+      [string]$withExpression, [string]$withOccurrence = resolve-PatternOccurrence $With;
+      if ($withExpression.Length -gt $WIDE_THRESHOLD) {
+        $wideItems += , @('[📌] With', $withExpression);
       }
       else {
-        $properties += , @('[✂️] Cut', $Pattern);
+        $properties += , @('[📌] With', $withExpression);
+      }
+    }
+    elseif ($PSBoundParameters.ContainsKey('LiteralWith')) {
+      if (-not([string]::IsNullOrEmpty($LiteralWith))) {
+        if ($LiteralWith.Length -gt $WIDE_THRESHOLD) {
+          $wideItems += , @('[📚] LiteralWith', $LiteralWith);
+        }
+        else {
+          $properties += , @('[📚] LiteralWith', $LiteralWith);
+        }
+      }
+      elseif (-not($PSBoundParameters.ContainsKey('Paste'))) {
+        $properties += , @('[✂️] Cut', $patternExpression);
       }
     }
 
-    if ($PSBoundParameters.ContainsKey('Target')) {
-      [string]$targetLabel = '[🎯] Target ({0})' -f $Relation;
-      if ($Target.Length -gt $WIDE_THRESHOLD) {
-        $wideItems += , @($targetLabel, $Target);
-      }
-      else {
-        $properties += , @($targetLabel, $Target);
+    if ($PSBoundParameters.ContainsKey('Paste')) {
+      if (-not([string]::IsNullOrEmpty($Paste))) {
+        if ($Paste.Length -gt $WIDE_THRESHOLD) {
+          $wideItems += , @('[🌶️] Paste', $Paste);
+        }
+        else {
+          $properties += , @('[🌶️] Paste', $Paste);
+        }
       }
     }
 
@@ -242,8 +279,11 @@ function Rename-ForeachFsItem {
       $result.GetType() -in @([System.IO.FileInfo], [System.IO.DirectoryInfo]) ? $result.Name : $result;
     }
 
-    [boolean]$doMoveToken = ($PSBoundParameters.ContainsKey('Target') -or
+    [boolean]$doMoveToken = ($PSBoundParameters.ContainsKey('Anchor') -or
       $PSBoundParameters.ContainsKey('Start') -or $PSBoundParameters.ContainsKey('End'));
+
+    [System.Text.RegularExpressions.RegEx]$patternRegEx = new-RegularExpression -Expression $patternExpression `
+      -WholeWord:$(-not([string]::IsNullOrEmpty($adjustedWhole)) -and ($adjustedWhole -in @('*', 'p')));
 
     [System.Collections.Hashtable]$passThru = @{
       'LOOPZ.WH-FOREACH-DECORATOR.BLOCK'         = $doRenameFsItems;
@@ -257,46 +297,51 @@ function Rename-ForeachFsItem {
       'LOOPZ.SUMMARY-BLOCK.LINE'                 = $LoopzUI.EqualsLine;
       'LOOPZ.SUMMARY-BLOCK.MESSAGE'              = '[💎] Rename Summary';
 
-      'LOOPZ.RN-FOREACH.PATTERN'                 = $Pattern;
+      'LOOPZ.RN-FOREACH.PATTERN'                 = $patternRegEx;
+      'LOOPZ.RN-FOREACH.PATTERN-OCC'             = $patternOccurrence;
       'LOOPZ.RN-FOREACH.FS-ITEM-TYPE'            = $File.ToBool() ? 'FILE' : 'DIRECTORY';
     }
+    $passThru['LOOPZ.RN-FOREACH.ACTION'] = $doMoveToken ? 'MOVE-MATCH' : 'REPLACE-WITH';
 
-    $passThru['LOOPZ.RN-FOREACH.WITH'] = if ($doMoveToken) {
-      -not([string]::IsNullOrEmpty($With)) ? $With : $Pattern;
-    }
-    else {
-      $With;
-    }
+    if ($PSBoundParameters.ContainsKey('With')) {
+      [System.Text.RegularExpressions.RegEx]$withRegEx = new-RegularExpression -Expression $withExpression `
+        -WholeWord:$(-not([string]::IsNullOrEmpty($adjustedWhole)) -and ($adjustedWhole -in @('*', 'w')));
 
-    if ($First.ToBool()) {
-      $properties += , @('First', '[✔️]');
-      $passThru['LOOPZ.RN-FOREACH.OCCURRENCE'] = 'FIRST';
-      $passThru['LOOPZ.RN-FOREACH.QUANTITY-FIRST'] = $Quantity;
+      $passThru['LOOPZ.RN-FOREACH.WITH-OCC'] = $withOccurrence;
+      $passThru['LOOPZ.RN-FOREACH.WITH'] = $withRegEx;
     }
-
-    if ($Last.ToBool()) {
-      $properties += , @('Last', '[✔️]');
-      $passThru['LOOPZ.RN-FOREACH.OCCURRENCE'] = 'LAST';
+    elseif ($PSBoundParameters.ContainsKey('LiteralWith')) {
+      $passThru['LOOPZ.RN-FOREACH.LITERAL-WITH'] = $LiteralWith;
+    } else {
+      if ($doMoveToken) {
+        $passThru['LOOPZ.RN-FOREACH.WITH'] = $patternRegEx;
+      }
     }
 
-    if ($Whole.ToBool()) {
-      $passThru['LOOPZ.RN-FOREACH.WHOLE-WORD'] = $true;
+    if ($PSBoundParameters.ContainsKey('Relation')) {
+      $passThru['LOOPZ.RN-FOREACH.RELATION'] = $Relation;
     }
 
-    $passThru['LOOPZ.RN-FOREACH.ACTION'] = $doMoveToken ? 'MOVE-TOKEN' : 'REPLACE-WITH';
-    $passThru['LOOPZ.RN-FOREACH.RELATION'] = $Relation;
+    if ($PSBoundParameters.ContainsKey('Anchor')) {
 
-    if (-not([string]::IsNullOrEmpty($Target))) {
-      $passThru['LOOPZ.RN-FOREACH.TARGET-TYPE'] = 'MATCHED-ITEM';
-      $passThru['LOOPZ.RN-FOREACH.TARGET'] = $Target;
+      [System.Text.RegularExpressions.RegEx]$anchorRegEx = new-RegularExpression -Expression $anchorExpression `
+        -WholeWord:$(-not([string]::IsNullOrEmpty($adjustedWhole)) -and ($adjustedWhole -in @('*', 'a')));
+
+      $passThru['LOOPZ.RN-FOREACH.ANCHOR-OCC'] = $anchorOccurrence;
+      $passThru['LOOPZ.RN-FOREACH.ANCHOR-TYPE'] = 'MATCHED-ITEM';
+      $passThru['LOOPZ.RN-FOREACH.ANCHOR'] = $anchorRegEx;
     }
     elseif ($PSBoundParameters.ContainsKey('Start')) {
       $properties += , @('Start', '[✔️]');
-      $passThru['LOOPZ.RN-FOREACH.TARGET-TYPE'] = 'START';
+      $passThru['LOOPZ.RN-FOREACH.ANCHOR-TYPE'] = 'START';
     }
     elseif ($PSBoundParameters.ContainsKey('End')) {
       $properties += , @('End', '[✔️]');
-      $passThru['LOOPZ.RN-FOREACH.TARGET-TYPE'] = 'END';
+      $passThru['LOOPZ.RN-FOREACH.ANCHOR-TYPE'] = 'END';
+    }
+
+    if ($PSBoundParameters.ContainsKey('Paste')) {
+      $passThru['LOOPZ.RN-FOREACH.PASTE'] = $Paste;
     }
 
     if ($wideItems.Length -gt 0) {
@@ -318,7 +363,9 @@ function Rename-ForeachFsItem {
       # overflow due to infinite recursion. We need to use a temporary variable so that
       # the client's Condition (Rename-ForeachFsItem) is not accidentally hidden.
       #
-      return ($pipelineItem.Name -match $Pattern) -and `
+      # OLD: $pipelineItem.Name -match $patternExpression
+      #
+      return ($patternRegEx.IsMatch($pipelineItem.Name)) -and `
       (($Except -eq [string]::Empty) -or -not($pipelineItem.Name -match $Except)) -and `
         $clientCondition.Invoke($pipelineItem);
     }
