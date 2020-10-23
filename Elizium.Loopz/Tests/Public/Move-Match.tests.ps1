@@ -9,6 +9,9 @@ Describe 'Move-Match' {
     . .\Tests\Helpers\new-expr.ps1
   }
 
+  # !!! make sure that tests in invoke-MoveMatchAction (Archived) are re-located here
+  #
+
   Context 'given: Pattern' -Tag 'Match' {
     Context 'and: Pattern matches' {
       Context 'and: vanilla move' { # Pattern
