@@ -4,7 +4,7 @@ function Move-Match {
   [OutputType([string])]
   param (
     [Parameter(Mandatory)]
-    [string]$Source,
+    [string]$Value,
 
     [Parameter()]
     [System.Text.RegularExpressions.RegEx]$Pattern,
@@ -23,22 +23,21 @@ function Move-Match {
     [string]$Relation = 'after',
 
     [Parameter()]
-    [switch]$Start,
-
-    [Parameter()]
-    [switch]$End,
-
-    [Parameter()]
     [System.Text.RegularExpressions.RegEx]$With,
+    [Parameter()]
+    [string]$WithOccurrence = 'f',
 
     [Parameter()]
     [string]$LiteralWith,
 
     [Parameter()]
-    [string]$WithOccurrence = 'f',
+    [string]$Paste,
 
     [Parameter()]
-    [string]$Paste
+    [switch]$Start,
+
+    [Parameter()]
+    [switch]$End
   )
 
   # If the move fails, we need to return the reason for the failure so it can be reported back to he user
@@ -48,7 +47,7 @@ function Move-Match {
   # exotic,
   # exotic-formatted
 
-  [string]$result = $Source;
+  [string]$result = $Value;
 
   [boolean]$isFormatted = $PSBoundParameters.ContainsKey('Paste') -and -not([string]::IsNullOrEmpty($Paste));
   [boolean]$failed = $false;
@@ -66,7 +65,7 @@ function Move-Match {
       $PSBoundParameters.ContainsKey('LiteralWith'));
 
   [string]$capturedPattern, [string]$patternRemoved, $null = Get-DeconstructedMatch `
-    -Source $Source -PatternRegEx $Pattern `
+    -Source $Value -PatternRegEx $Pattern `
     -Occurrence ($PSBoundParameters.ContainsKey('PatternOccurrence') ? $PatternOccurrence : 'f');
 
   if (-not([string]::IsNullOrEmpty($capturedPattern))) {

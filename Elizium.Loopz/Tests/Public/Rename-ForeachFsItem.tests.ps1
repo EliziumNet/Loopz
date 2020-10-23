@@ -25,9 +25,6 @@ Describe 'Rename-ForeachFsItem' {
     }
   }
 
-  # TODO: all the patterns must be updated to include the option occurrence value
-  # Get rid of First/Last, this is now part of the Pattern definitions
-
   Context 'given: MoveRelative' {
     Context 'and: TargetType is Anchor' {
       Context 'and Relation is Before' {
@@ -98,7 +95,7 @@ Describe 'Rename-ForeachFsItem' {
     } # and: Source matches Pattern in middle
 
     Context 'and: Source matches Pattern already at start' {
-      It 'should: NOT do rename' {
+      It 'should: NOT do rename' -Tag 'Current' {
         Get-ChildItem -Path $directoryPath -Filter '*.txt' | Rename-ForeachFsItem -File `
           -Pattern 'loopz.' -Start -WhatIf;
       }

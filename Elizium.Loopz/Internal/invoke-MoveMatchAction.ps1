@@ -46,7 +46,7 @@ function invoke-MoveMatchAction {
   # This is simply pointless!!!!
   #
   [System.Collections.Hashtable]$moveMatchParameters = @{
-    'Source'  = $Value;
+    'Value'  = $Value;
     'Pattern' = $Pattern;
   }
 
