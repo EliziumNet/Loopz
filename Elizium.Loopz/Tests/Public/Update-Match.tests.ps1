@@ -1,8 +1,8 @@
 using namespace System.Text.RegularExpressions;
 
-Describe 'invoke-ReplaceMatchAction' {
+Describe 'Update-Match' {
   BeforeAll {
-    . .\Internal\invoke-ReplaceMatchAction.ps1;
+    . .\Public\Update-Match.ps1;
     . .\Public\Get-DeconstructedMatch.ps1;
     . .\Tests\Helpers\new-expr.ps1;
   }
@@ -17,7 +17,7 @@ Describe 'invoke-ReplaceMatchAction' {
           [RegEx]$pattern = new-expr('blooper');
           [string]$literalWith = 'dandelion';
 
-          invoke-ReplaceMatchAction -Value $source -Pattern $pattern -LiteralWith $literalWith | `
+          Update-Match -Value $source -Pattern $pattern -LiteralWith $literalWith | `
             Should -BeExactly $source;
         }
       }
@@ -28,7 +28,7 @@ Describe 'invoke-ReplaceMatchAction' {
           [RegEx]$pattern = new-expr('dream');
           [string]$literalWith = 'heal';
 
-          invoke-ReplaceMatchAction -Value $source -Pattern $pattern -LiteralWith $literalWith | `
+          Update-Match -Value $source -Pattern $pattern -LiteralWith $literalWith | `
             Should -BeExactly 'We are like the healer';
         }
       }
@@ -39,7 +39,7 @@ Describe 'invoke-ReplaceMatchAction' {
           [RegEx]$pattern = new-expr('dream');
           [string]$literalWith = 'heal';
 
-          invoke-ReplaceMatchAction -Value $source -Pattern $pattern -LiteralWith $literalWith | `
+          Update-Match -Value $source -Pattern $pattern -LiteralWith $literalWith | `
             Should -BeExactly 'We are like the healer who dreams and then lives inside the dream';
         }
       }
@@ -50,7 +50,7 @@ Describe 'invoke-ReplaceMatchAction' {
           [RegEx]$pattern = new-expr('dream');
           [string]$literalWith = 'heal';
 
-          invoke-ReplaceMatchAction -Value $source -Pattern $pattern -LiteralWith $literalWith `
+          Update-Match -Value $source -Pattern $pattern -LiteralWith $literalWith `
             -PatternOccurrence '*' | `
             Should -BeExactly 'We are like the healer who heals and then lives inside the heal';
         }
@@ -62,7 +62,7 @@ Describe 'invoke-ReplaceMatchAction' {
           [RegEx]$pattern = new-expr('dream');
           [string]$literalWith = 'heal';
 
-          invoke-ReplaceMatchAction -Value $source -Pattern $pattern -LiteralWith $literalWith `
+          Update-Match -Value $source -Pattern $pattern -LiteralWith $literalWith `
             -PatternOccurrence '2' | `
             Should -BeExactly 'We are like the dreamer who heals and then lives inside the dream';
         }
@@ -74,7 +74,7 @@ Describe 'invoke-ReplaceMatchAction' {
           [RegEx]$pattern = new-expr('dream');
           [string]$literalWith = 'heal';
 
-          invoke-ReplaceMatchAction -Value $source -Pattern $pattern -LiteralWith $literalWith `
+          Update-Match -Value $source -Pattern $pattern -LiteralWith $literalWith `
             -PatternOccurrence '99' | `
             Should -BeExactly $source;
         }
@@ -89,7 +89,7 @@ Describe 'invoke-ReplaceMatchAction' {
             [RegEx]$pattern = new-expr('\bscream\b');
             [string]$literalWith = 'heal';
 
-            invoke-ReplaceMatchAction -Value $source -Pattern $pattern -LiteralWith $literalWith | `
+            Update-Match -Value $source -Pattern $pattern -LiteralWith $literalWith | `
               Should -BeExactly $source;
           }
         }
@@ -100,7 +100,7 @@ Describe 'invoke-ReplaceMatchAction' {
             [RegEx]$pattern = new-expr('\bdream\b');
             [string]$literalWith = 'healer';
 
-            invoke-ReplaceMatchAction -Value $source -Pattern $pattern -LiteralWith $literalWith | `
+            Update-Match -Value $source -Pattern $pattern -LiteralWith $literalWith | `
               Should -BeExactly 'We are like the dreamer who dreams and then lives inside the healer';
           }
         }
@@ -111,7 +111,7 @@ Describe 'invoke-ReplaceMatchAction' {
             [RegEx]$pattern = new-expr('\bdream\b');
             [string]$literalWith = 'healer';
 
-            invoke-ReplaceMatchAction -Value $source -Pattern $pattern -LiteralWith $literalWith | `
+            Update-Match -Value $source -Pattern $pattern -LiteralWith $literalWith | `
               Should -BeExactly 'We are like the dreamer who has a healer and then lives inside the dream';
           }
         }
@@ -124,7 +124,7 @@ Describe 'invoke-ReplaceMatchAction' {
             [RegEx]$pattern = new-expr('\d{2}-\d{2}-\d{4}');
             [string]$literalWith = 'Nineteen Ninety Nine';
 
-            invoke-ReplaceMatchAction -Value $source -Pattern $pattern -LiteralWith $literalWith | `
+            Update-Match -Value $source -Pattern $pattern -LiteralWith $literalWith | `
               Should -BeExactly 'Party like its Nineteen Ninety Nine';
           }
         }
@@ -135,7 +135,7 @@ Describe 'invoke-ReplaceMatchAction' {
             [RegEx]$pattern = new-expr('\d{2}-\d{2}-\d{4}');
             [string]$literalWith = 'New Years Eve 1999';
 
-            invoke-ReplaceMatchAction -Value $source -Pattern $pattern -LiteralWith $literalWith `
+            Update-Match -Value $source -Pattern $pattern -LiteralWith $literalWith `
               -PatternOccurrence 'f' | `
               Should -BeExactly 'New Years Eve 1999 Party like its 31-12-1999';
           }
@@ -145,7 +145,7 @@ Describe 'invoke-ReplaceMatchAction' {
             [RegEx]$pattern = new-expr('\d{2}-\d{2}-\d{4}');
             [string]$literalWith = '[DATE]';
 
-            invoke-ReplaceMatchAction -Value $source -Pattern $pattern -LiteralWith $literalWith `
+            Update-Match -Value $source -Pattern $pattern -LiteralWith $literalWith `
               -PatternOccurrence '2' | `
               Should -BeExactly '01-01-2000 Party like its [DATE], today is 24-09-2020';
           }
@@ -162,7 +162,7 @@ Describe 'invoke-ReplaceMatchAction' {
           [RegEx]$pattern = new-expr('bear');
           [string]$literalWith = 'woods';
 
-          invoke-ReplaceMatchAction -Value $source -Pattern $pattern -LiteralWith $literalWith | `
+          Update-Match -Value $source -Pattern $pattern -LiteralWith $literalWith | `
             Should -BeExactly 'The sound the wind makes in the pines';
         }
       }
@@ -173,7 +173,7 @@ Describe 'invoke-ReplaceMatchAction' {
           [RegEx]$pattern = new-expr('wind');
           [string]$literalWith = 'owl';
 
-          invoke-ReplaceMatchAction -Value $source -Pattern $pattern -LiteralWith $literalWith | `
+          Update-Match -Value $source -Pattern $pattern -LiteralWith $literalWith | `
             Should -BeExactly 'The sound the owl makes in the pines';
         }
       }
@@ -184,7 +184,7 @@ Describe 'invoke-ReplaceMatchAction' {
           [RegEx]$pattern = new-expr('in');
           [string]$literalWith = '==';
 
-          invoke-ReplaceMatchAction -Value $source -Pattern $pattern -LiteralWith $literalWith `
+          Update-Match -Value $source -Pattern $pattern -LiteralWith $literalWith `
             -PatternOccurrence 'l' | `
             Should -BeExactly 'The sound the wind makes in the p==es';
         }
@@ -199,7 +199,7 @@ Describe 'invoke-ReplaceMatchAction' {
             [RegEx]$pattern = new-expr('\bbear\b');
             [string]$literalWith = 'woods';
 
-            invoke-ReplaceMatchAction -Value $source -Pattern $pattern -LiteralWith $literalWith | `
+            Update-Match -Value $source -Pattern $pattern -LiteralWith $literalWith | `
               Should -BeExactly 'The sound the wind makes in the pines';
           }
         }
@@ -210,7 +210,7 @@ Describe 'invoke-ReplaceMatchAction' {
             [RegEx]$pattern = new-expr('\bin\b');
             [string]$literalWith = 'under';
 
-            invoke-ReplaceMatchAction -Value $source -Pattern $pattern -LiteralWith $literalWith | `
+            Update-Match -Value $source -Pattern $pattern -LiteralWith $literalWith | `
               Should -BeExactly 'The sound the wind makes under the pines';
           }
         }
@@ -221,7 +221,7 @@ Describe 'invoke-ReplaceMatchAction' {
             [RegEx]$pattern = new-expr('in');
             [string]$literalWith = 'under';
 
-            invoke-ReplaceMatchAction -Value $source -Pattern $pattern -LiteralWith $literalWith `
+            Update-Match -Value $source -Pattern $pattern -LiteralWith $literalWith `
               -PatternOccurrence 'l' | `
               Should -BeExactly 'The sound the wind makes in the pines or under the woods';
           }
@@ -235,7 +235,7 @@ Describe 'invoke-ReplaceMatchAction' {
             [RegEx]$pattern = new-expr('\d{2}-\d{2}-\d{4}');
             [string]$literalWith = 'Nineteen Ninety Nine';
 
-            invoke-ReplaceMatchAction -Value $source -Pattern $pattern -LiteralWith $literalWith | `
+            Update-Match -Value $source -Pattern $pattern -LiteralWith $literalWith | `
               Should -BeExactly 'Party like its Nineteen Ninety Nine';
           }
         }
@@ -246,7 +246,7 @@ Describe 'invoke-ReplaceMatchAction' {
             [RegEx]$pattern = new-expr('\d{2}-\d{2}-\d{4}');
             [string]$literalWith = 'New Years Eve 1999';
 
-            invoke-ReplaceMatchAction -Value $source -Pattern $pattern -LiteralWith $literalWith `
+            Update-Match -Value $source -Pattern $pattern -LiteralWith $literalWith `
               -PatternOccurrence 'l' | `
               Should -BeExactly '01-01-2000 Party like its New Years Eve 1999';
           }
@@ -262,7 +262,7 @@ Describe 'invoke-ReplaceMatchAction' {
         [RegEx]$pattern = new-expr('blue');
         [string]$literalWith = 'red';
 
-        invoke-ReplaceMatchAction -Value $source -Pattern $pattern -LiteralWith $literalWith `
+        Update-Match -Value $source -Pattern $pattern -LiteralWith $literalWith `
           -PatternOccurrence '*' | `
           Should -BeExactly 'Cyanopsia: red, Cataract: red, Moody: reds, Azora: red, Azul: red, Hinto: red';
       }
@@ -272,7 +272,7 @@ Describe 'invoke-ReplaceMatchAction' {
         [RegEx]$pattern = new-expr('\bblue\b');
         [string]$literalWith = 'red';
 
-        invoke-ReplaceMatchAction -Value $source -Pattern $pattern -LiteralWith $literalWith `
+        Update-Match -Value $source -Pattern $pattern -LiteralWith $literalWith `
           -PatternOccurrence '*' | `
           Should -BeExactly 'Cyanopsia: red, Cataract: red, Moody: blues, Azora: red, Azul: red, Hinto: red';
       }
@@ -287,7 +287,7 @@ Describe 'invoke-ReplaceMatchAction' {
         [RegEx]$pattern = new-expr('\[(?<ccy>[A-Z]{3})\]');
         [string]$literalWith = '(***)';
 
-        invoke-ReplaceMatchAction -Value $source -Pattern $pattern -LiteralWith $literalWith `
+        Update-Match -Value $source -Pattern $pattern -LiteralWith $literalWith `
           -PatternOccurrence '*' | `
           Should -BeExactly 'Currencies: (***), (***), (***), (***), (***)';
       }
@@ -303,7 +303,7 @@ Describe 'invoke-ReplaceMatchAction' {
           [RegEx]$with = new-expr('healer');
           [int]$quantity = 1;
 
-          invoke-ReplaceMatchAction -Occurrence 'FIRST' -Value $source -Pattern $pattern `
+          Update-Match -Occurrence 'FIRST' -Value $source -Pattern $pattern `
             -With $with -Quantity $quantity | Should -BeExactly 'We are like the dreamer';
         } # should: replace the single match
       } # and: no match
@@ -315,7 +315,7 @@ Describe 'invoke-ReplaceMatchAction' {
           [RegEx]$with = new-expr('healer');
           [int]$quantity = 1;
 
-          invoke-ReplaceMatchAction -Occurrence 'FIRST' -Value $source -Pattern $pattern `
+          Update-Match -Occurrence 'FIRST' -Value $source -Pattern $pattern `
             -With $with -Quantity $quantity | Should -BeExactly 'We are like the healer';
         } # should: replace the single match
       } # and: single match
@@ -327,7 +327,7 @@ Describe 'invoke-ReplaceMatchAction' {
           [RegEx]$with = new-expr('heal');
           [int]$quantity = 1;
 
-          invoke-ReplaceMatchAction -Occurrence 'FIRST' -Value $source -Pattern $pattern `
+          Update-Match -Occurrence 'FIRST' -Value $source -Pattern $pattern `
             -With $with -Quantity $quantity | Should -BeExactly 'We are like the dreamer heal';
         } # should: replace the single match
       } # and: single match
@@ -339,7 +339,7 @@ Describe 'invoke-ReplaceMatchAction' {
           [RegEx]$with = new-expr('healer');
           [int]$quantity = 1;
 
-          invoke-ReplaceMatchAction -Occurrence 'FIRST' -Value $source -Pattern $pattern `
+          Update-Match -Occurrence 'FIRST' -Value $source -Pattern $pattern `
             -With $with -Quantity $quantity | Should -BeExactly 'We are like the healer, dreamer';
         }
       } # and: multiple matches, replace first only
@@ -351,7 +351,7 @@ Describe 'invoke-ReplaceMatchAction' {
           [RegEx]$with = new-expr('healer');
           [int]$quantity = 2;
 
-          invoke-ReplaceMatchAction -Occurrence 'FIRST' -Value $source -Pattern $pattern `
+          Update-Match -Occurrence 'FIRST' -Value $source -Pattern $pattern `
             -With $with -Quantity $quantity | Should -BeExactly 'We are like the healer, healer';
         }
       } # and: multiple matches, replace first 2
@@ -365,7 +365,7 @@ Describe 'invoke-ReplaceMatchAction' {
           [RegEx]$with = new-expr('healer');
           [int]$quantity = 1;
 
-          invoke-ReplaceMatchAction -Occurrence 'LAST' -Value $source -Pattern $pattern `
+          Update-Match -Occurrence 'LAST' -Value $source -Pattern $pattern `
             -With $with -Quantity $quantity | Should -BeExactly 'We are like the healer';
         } # should: replace the single match
       } # and: single match
@@ -377,7 +377,7 @@ Describe 'invoke-ReplaceMatchAction' {
           [RegEx]$with = new-expr('healer');
           [int]$quantity = 1;
 
-          invoke-ReplaceMatchAction -Occurrence 'LAST' -Value $source -Pattern $pattern `
+          Update-Match -Occurrence 'LAST' -Value $source -Pattern $pattern `
             -With $with -Quantity $quantity | Should -BeExactly 'We are like the dreamer, healer';
         }
       } # and: multiple matches, replace first only
@@ -390,9 +390,9 @@ Describe 'invoke-ReplaceMatchAction' {
         [RegEx]$with = new-expr('healer');
         [int]$quantity = 1;
 
-        invoke-ReplaceMatchAction -Value $source -Pattern $pattern `
+        Update-Match -Value $source -Pattern $pattern `
           -With $with -Quantity $quantity | Should -BeExactly 'We are like the healer, healer';
       }
     }
   }
-} # invoke-ReplaceMatchAction
+} # Update-Match

@@ -107,8 +107,8 @@ function Rename-ForeachFsItem {
       }
 
       switch ($action) {
-        'REPLACE-WITH' {
-          [string]$actionFn = 'invoke-ReplaceMatchAction';
+        'REPLACE-WITH-ACTION' {
+          [string]$actionFn = 'Update-Match';
           $actionParameters['PatternOccurrence'] = $_passThru.ContainsKey('LOOPZ.RN-FOREACH.PATTERN-OCC') `
             ? $_passThru['LOOPZ.RN-FOREACH.PATTERN-OCC'] : 'f';
 
@@ -126,7 +126,7 @@ function Rename-ForeachFsItem {
           break;
         }
 
-        'MOVE-MATCH' {
+        'MOVE-MATCH-ACTION' {
           [string]$actionFn = 'invoke-MoveMatchAction';
           if ($_passThru.ContainsKey('LOOPZ.RN-FOREACH.ANCHOR')) {
             $actionParameters['Anchor'] = $_passThru['LOOPZ.RN-FOREACH.ANCHOR'];
@@ -301,7 +301,7 @@ function Rename-ForeachFsItem {
       'LOOPZ.RN-FOREACH.PATTERN-OCC'             = $patternOccurrence;
       'LOOPZ.RN-FOREACH.FS-ITEM-TYPE'            = $File.ToBool() ? 'FILE' : 'DIRECTORY';
     }
-    $passThru['LOOPZ.RN-FOREACH.ACTION'] = $doMoveToken ? 'MOVE-MATCH' : 'REPLACE-WITH';
+    $passThru['LOOPZ.RN-FOREACH.ACTION'] = $doMoveToken ? 'MOVE-MATCH-ACTION' : 'REPLACE-WITH-ACTION';
 
     if ($PSBoundParameters.ContainsKey('With')) {
       [System.Text.RegularExpressions.RegEx]$withRegEx = new-RegularExpression -Expression $withExpression `

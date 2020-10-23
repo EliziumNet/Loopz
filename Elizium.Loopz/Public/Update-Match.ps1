@@ -1,5 +1,5 @@
 
-function invoke-ReplaceMatchAction {
+function Update-Match {
   # This will eventually be renamed to be a public function Update-Match
   [OutputType([string])]
   param(
@@ -62,5 +62,5 @@ function invoke-ReplaceMatchAction {
   }
 
   return $result;
-} # invoke-ReplaceMatchAction
+} # Update-Match
 
