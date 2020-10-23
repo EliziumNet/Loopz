@@ -3,6 +3,7 @@ using namespace System.Text.RegularExpressions;
 Describe 'invoke-MoveMatchAction' {
   BeforeAll {
     . .\Public\Move-Match.ps1;
+    . .\Public\Get-DeconstructedMatch.ps1;
     . .\Internal\invoke-MoveMatchAction.ps1;
     . .\Tests\Helpers\new-expr.ps1
   }
