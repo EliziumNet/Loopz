@@ -9,7 +9,10 @@ function new-RegularExpression {
     [switch]$Escape,
 
     [Parameter()]
-    [switch]$WholeWord
+    [switch]$WholeWord,
+
+    [Parameter()]
+    [string]$Label
   )
 
   [System.Text.RegularExpressions.RegEx]$resultRegEx = $null;
@@ -26,7 +29,12 @@ function new-RegularExpression {
       $adjustedExpression);
   }
   catch [System.Management.Automation.MethodInvocationException] {
-
+    [string]$message = ($PSBoundParameters.ContainsKey('Label')) `
+    ? $('Regular expression ({0}) "{1}" is not valid, ... terminating ({2}).' `
+        -f $Label, $adjustedExpression, $_.Exception.Message)
+    : $('Regular expression "{0}" is not valid, ... terminating ({1}).' `
+        -f $adjustedExpression, $_.Exception.Message);
+    Write-Error -Message $message -ErrorAction Stop;
   }
 
   $resultRegEx;
