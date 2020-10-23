@@ -26,7 +26,7 @@ function Rename-ForeachFsItem {
 
     [Parameter()]
     [ValidateSet('p', 'a', 'w', '*')]
-    [string]$Whole, # PAW !!!! Handle RegEx
+    [string]$Whole,
 
     [Parameter(Mandatory, Position = 0)]
     [ValidateCount(1, 2)]
@@ -46,7 +46,6 @@ function Rename-ForeachFsItem {
     [Parameter(ParameterSetName = 'MoveRelative')]
     [Parameter(ParameterSetName = 'ReplaceFirst')]
     [Parameter(ParameterSetName = 'ReplaceWith')]
-    [AllowEmptyString()]
     [ValidateCount(1, 2)]
     [ValidateScript( { -not([string]::IsNullOrEmpty($_[0])) })]
     [object[]]$With,
@@ -127,50 +126,33 @@ function Rename-ForeachFsItem {
         $actionParameters['Paste'] = $_passThru['LOOPZ.RN-FOREACH.PASTE']
       }
 
-      switch ($action) {
-        # the action name should simply be he function name, not a new made up name
-        'REPLACE-WITH-ACTION' {
-          [string]$actionFn = 'Update-Match';
-
-          break;
+      if ($action -eq 'Move-Match') {
+        if ($_passThru.ContainsKey('LOOPZ.RN-FOREACH.ANCHOR')) {
+          $actionParameters['Anchor'] = $_passThru['LOOPZ.RN-FOREACH.ANCHOR'];
         }
 
-        'MOVE-MATCH-ACTION' {
-          [string]$actionFn = 'Move-Match'; # invoke-MoveMatchAction
-          if ($_passThru.ContainsKey('LOOPZ.RN-FOREACH.ANCHOR')) {
-            $actionParameters['Anchor'] = $_passThru['LOOPZ.RN-FOREACH.ANCHOR'];
+        switch ($_passThru['LOOPZ.RN-FOREACH.ANCHOR-TYPE']) {
+          'MATCHED-ITEM' {
+            if ($_passThru.ContainsKey('LOOPZ.RN-FOREACH.RELATION')) {
+              $actionParameters['Relation'] = $_passThru['LOOPZ.RN-FOREACH.RELATION'];
+            }
+            break;
           }
-          # $actionParameters['AnchorType'] = $_passThru['LOOPZ.RN-FOREACH.ANCHOR-TYPE'];
-          # $actionParameters['Relation'] = $Relation;
-
-          switch ($_passThru['LOOPZ.RN-FOREACH.ANCHOR-TYPE']) {
-            'MATCHED-ITEM' {
-              if ($_passThru.ContainsKey('LOOPZ.RN-FOREACH.RELATION')) {
-                $actionParameters['Relation'] = $_passThru['LOOPZ.RN-FOREACH.RELATION'];
-              }
-              break;
-            }
-            'START' {
-              $actionParameters['Start'] = $true;
-              break;
-            }
-            'END' {
-              $actionParameters['End'] = $true;
-              break;
-            }
-            default {
-              throw "doRenameFsItems: encountered Invalid 'LOOPZ.RN-FOREACH.ANCHOR-TYPE': '$AnchorType'";
-            }
+          'START' {
+            $actionParameters['Start'] = $true;
+            break;
           }
-          break;
-        }
-
-        default {
-          throw "doRenameFsItems: encountered Invalid 'LOOPZ.RN-FOREACH.ACTION': '$action'";
+          'END' {
+            $actionParameters['End'] = $true;
+            break;
+          }
+          default {
+            throw "doRenameFsItems: encountered Invalid 'LOOPZ.RN-FOREACH.ANCHOR-TYPE': '$AnchorType'";
+          }
         }
       } # $action
 
-      [string]$newItemName = & $actionFn @actionParameters;
+      [string]$newItemName = & $action @actionParameters;
       $newItemName = $endAdapter.GetNameWithExtension($newItemName);
 
       [boolean]$trigger = $false;
@@ -330,7 +312,7 @@ function Rename-ForeachFsItem {
       'LOOPZ.RN-FOREACH.PATTERN-OCC'             = $patternOccurrence;
       'LOOPZ.RN-FOREACH.FS-ITEM-TYPE'            = $File.ToBool() ? 'FILE' : 'DIRECTORY';
     }
-    $passThru['LOOPZ.RN-FOREACH.ACTION'] = $doMoveToken ? 'MOVE-MATCH-ACTION' : 'REPLACE-WITH-ACTION';
+    $passThru['LOOPZ.RN-FOREACH.ACTION'] = $doMoveToken ? 'Move-Match' : 'Update-Match';
 
     if ($PSBoundParameters.ContainsKey('With')) {
       [System.Text.RegularExpressions.RegEx]$withRegEx = new-RegularExpression -Expression $withExpression `
