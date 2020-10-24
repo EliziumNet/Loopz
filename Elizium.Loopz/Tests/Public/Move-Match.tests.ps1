@@ -12,11 +12,11 @@ Describe 'Move-Match' {
   # !!! make sure that tests in invoke-MoveMatchAction (Archived) are re-located here
   #
 
-  Context 'given: Pattern' -Tag 'Match' {
+  Context 'given: Pattern' {
     Context 'and: Pattern matches' {
       Context 'and: vanilla move' { # Pattern
         Context 'and: Anchor matches' {
-          Context 'and: before' -Tag 'OK' {
+          Context 'and: before' {
             It 'should: move the first match before the first anchor' {
               [string]$source = 'Judgement Day: [06-06-2626], Judgement Day: [28-02-2727], take your pick!';
               [RegEx]$pattern = new-expr('\d{2}-\d{2}-\d{4}');

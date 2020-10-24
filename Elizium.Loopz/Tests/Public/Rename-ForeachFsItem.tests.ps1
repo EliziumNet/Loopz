@@ -25,19 +25,19 @@ Describe 'Rename-ForeachFsItem' {
     }
   }
 
-  Context 'given: MoveRelative' {
+  Context 'given: MoveToAnchor' {
     Context 'and: TargetType is Anchor' {
       Context 'and Relation is Before' {
         Context 'and: Source matches Pattern' {
           Context 'and: Source matches Anchor' {
-            It 'should: do rename; move Pattern match before target' {
+            It 'should: do rename; move Pattern match before Anchor' {
               Get-ChildItem -File -Path $directoryPath | Rename-ForeachFsItem -File `
                 -Pattern 'data.' -Anchor 'loopz' -Relation 'before' -WhatIf;
             }
           } # and: Source matches Anchor
 
           Context 'and: Whole Pattern' {
-            It 'should: do rename; move Pattern match before target' {
+            It 'should: do rename; move Pattern match before Anchor' {
               Get-ChildItem -File -Path $directoryPath | Rename-ForeachFsItem -File `
                 -Pattern 'data' -Anchor 'loopz' -Relation 'before' -Whole p -WhatIf;
             }
@@ -55,13 +55,13 @@ Describe 'Rename-ForeachFsItem' {
       Context 'and Relation is After' {
         Context 'and: Source matches Pattern' {
           Context 'and: Source matches Anchor' {
-            It 'should: do rename; move Pattern match after target' {
+            It 'should: do rename; move Pattern match after Anchor' {
               Get-ChildItem -File -Path $directoryPath | Rename-ForeachFsItem -File `
                 -Pattern 'loopz.' -Anchor 'data.' -Relation 'after' -WhatIf;
             }
 
             Context 'and: Whole Anchor' {
-              It 'should: do rename; move Pattern match after target' {
+              It 'should: do rename; move Pattern match after Anchor' {
                 Get-ChildItem -File -Path $directoryPath | Rename-ForeachFsItem -File `
                   -Pattern 'loopz.' -Anchor 'data' -Relation 'after' -Whole a -WhatIf;
               }
@@ -84,7 +84,7 @@ Describe 'Rename-ForeachFsItem' {
         } # and: Source matches Pattern
       } # and Relation is After
     } # and: TargetType is Anchor
-  } # given: MoveRelative
+  } # given: MoveToAnchor
 
   Context 'given: MoveToStart' {
     Context 'and: Source matches Pattern in middle' {
@@ -95,7 +95,7 @@ Describe 'Rename-ForeachFsItem' {
     } # and: Source matches Pattern in middle
 
     Context 'and: Source matches Pattern already at start' {
-      It 'should: NOT do rename' -Tag 'Current' {
+      It 'should: NOT do rename' {
         Get-ChildItem -Path $directoryPath -Filter '*.txt' | Rename-ForeachFsItem -File `
           -Pattern 'loopz.' -Start -WhatIf;
       }
@@ -131,7 +131,7 @@ Describe 'Rename-ForeachFsItem' {
         Context 'and: replace 3rd match' {
           It 'should: do rename; replace 3rd Occurrence for With text' {
             Get-ChildItem -Path $directoryPath | Rename-ForeachFsItem -File `
-              -Quantity 2 -Pattern 'o', 6 -With '0' -WhatIf;
+              -Pattern 'o', 6 -With '0' -WhatIf;
           }
         } # and: First 2 Only
 
@@ -180,7 +180,7 @@ Describe 'Rename-ForeachFsItem' {
     } # and: Source matches Pattern
   } # given: ReplaceWith
 
-  Context 'given: Parameter Set' -Skip -Tag 'Reason: parameter sets need to be re-defined' {
+  Context 'given: Parameter Set' {
     [string]$script:sourcePath = './Tests/Data/fefsi';
     [string]$script:filter = 'bling.*';
     [scriptblock]$script:successCondition = ( { return $true; })
@@ -191,21 +191,21 @@ Describe 'Rename-ForeachFsItem' {
     }
 
     Context 'is: valid' {
-      Context 'MoveRelative' {
+      Context 'MoveToAnchor' {
         It 'should: not throw ParameterBindingException' {
           {
             Get-ChildItem -File -Path $sourcePath -Filter $filter | Rename-ForeachFsItem -File `
-              -Last -Whole p -Pattern 'data.' -Anchor 't\d{1}\.' -With 'repl' -Except 'fake' `
+              -Whole p -Pattern 'data.' -Anchor 't\d{1}\.' -With 'repl' -Except 'fake' `
               -Condition $successCondition -Relation 'before' -WhatIf:$whatIf; } `
           | Should -Not -Throw;
         }
-      } # MoveRelative
+      } # MoveToAnchor
 
       Context 'MoveToStart' {
         It 'should: not throw ParameterBindingException' {
           {
             Get-ChildItem -File -Path $sourcePath -Filter $filter | Rename-ForeachFsItem -File `
-              -Last -Whole p -Pattern 'data.' -Start -With 'repl' -Except 'fake' -Condition $successCondition `
+              -Whole p -Pattern 'data.' -Start -With 'repl' -Except 'fake' -Condition $successCondition `
               -WhatIf:$whatIf; } `
           | Should -Not -Throw;
         }
@@ -215,7 +215,7 @@ Describe 'Rename-ForeachFsItem' {
         It 'should: not throw ParameterBindingException' {
           {
             Get-ChildItem -File -Path $sourcePath -Filter $filter | Rename-ForeachFsItem -File `
-              -Last -Whole p -Pattern 'data.' -End -With 'repl' -Except 'fake' -Condition $successCondition `
+              -Whole p -Pattern 'data.' -End -With 'repl' -Except 'fake' -Condition $successCondition `
               -WhatIf:$whatIf; } `
           | Should -Not -Throw;
         }
@@ -225,33 +225,14 @@ Describe 'Rename-ForeachFsItem' {
         It 'should: not throw ParameterBindingException' {
           {
             Get-ChildItem -File -Path $sourcePath -Filter $filter | Rename-ForeachFsItem -File `
-              -Last -Whole p -Pattern 'data.' -With 'info.' -Except 'fake' `
+              -Whole p -Pattern 'data.' -With 'info.' -Except 'fake' `
               -Condition $successCondition -WhatIf:$whatIf; } `
           | Should -Not -Throw;
         }
       } # ReplaceWith
-
-      Context 'ReplaceFirst' {
-        It 'should: not throw ParameterBindingException' {
-          {
-            Get-ChildItem -File -Path $sourcePath -Filter $filter | Rename-ForeachFsItem -File `
-              -First -Quantity 2 -Whole p -Pattern 'data.' -With 'info.' -Except 'fake' `
-              -Condition $successCondition -WhatIf:$whatIf; } `
-          | Should -Not -Throw;
-        }
-      } # ReplaceFirst
     } # is: valid
 
-    Context 'is not: valid (MoveRelative)' {
-      Context 'and: "Quantity" specified' {
-        It 'should: throw ParameterBindingException' {
-          {
-            Get-ChildItem -File -Path $sourcePath -Filter $filter | Rename-ForeachFsItem -File `
-              -Pattern 'data.' -Anchor 't\d{1}\.' -Quantity 101 -WhatIf:$whatIf;
-          } | Assert-Throw -ExceptionType ([ParameterBindingException]);
-        }
-      } # MoveToken(MoveRelative)
-
+    Context 'is not: valid (MoveToAnchor)' {
       Context 'and: "First" specified' {
         # Since the default behaviour of move, is to move the token after the
         # first match of the pattern, it does not need to be specified for the move token
@@ -271,19 +252,10 @@ Describe 'Rename-ForeachFsItem' {
         It 'should: ParameterBindingException' {
           {
             Get-ChildItem -File -Path $sourcePath -Filter $filter | Rename-ForeachFsItem -File `
-              -Pattern 'data.' -Start -Relation 'after' -Last -Whole p -Condition $successCondition -WhatIf:$whatIf; } `
+              -Pattern 'data.' -Start -Relation 'after' -Whole p -Condition $successCondition -WhatIf:$whatIf; } `
           | Assert-Throw -ExceptionType ([ParameterBindingException]);
         }
       } # and: "Relation" specified
-
-      Context 'and: "Quantity" specified' {
-        It 'should: throw ParameterBindingException' {
-          {
-            Get-ChildItem -File -Path $sourcePath -Filter $filter | Rename-ForeachFsItem -File `
-              -Pattern 'data.' -Start -Quantity 101 -WhatIf:$whatIf;
-          } | Assert-Throw -ExceptionType ([ParameterBindingException]);
-        }
-      } # and: "Quantity" specified
 
       Context 'and: "End" specified' {
         It 'should: throw ParameterBindingException' {
@@ -309,19 +281,10 @@ Describe 'Rename-ForeachFsItem' {
         It 'should: ParameterBindingException' {
           {
             Get-ChildItem -File -Path $sourcePath -Filter $filter | Rename-ForeachFsItem -File `
-              -Pattern 'data.' -End -Relation 'after' -Last -Whole p -Condition $successCondition -WhatIf:$whatIf; } `
+              -Pattern 'data.' -End -Relation 'after' -Whole p -Condition $successCondition -WhatIf:$whatIf; } `
           | Assert-Throw -ExceptionType ([ParameterBindingException]);
         }
       } # and: "Relation" specified
-
-      Context 'and: "Quantity" specified' {
-        It 'should: throw ParameterBindingException' {
-          {
-            Get-ChildItem -File -Path $sourcePath -Filter $filter | Rename-ForeachFsItem -File `
-              -Pattern 'data.' -End -Quantity 101 -WhatIf:$whatIf;
-          } | Assert-Throw -ExceptionType ([ParameterBindingException]);
-        }
-      } # and: "Quantity" specified
 
       Context 'and: "Start" specified' {
         It 'should: throw ParameterBindingException' {
@@ -342,49 +305,11 @@ Describe 'Rename-ForeachFsItem' {
       } # and: "Anchor" specified
     } # is not: valid (MoveToEnd)
 
-    Context 'is not: valid (ReplaceFirst)' {
-      Context 'and: "Anchor" specified' {
-        It 'should: ParameterBindingException' {
-          {
-            Get-ChildItem -File -Path $sourcePath -Filter $filter | Rename-ForeachFsItem -File `
-              -First -Quantity 2 -Whole p -Pattern 'data.' -Anchor 'blah' -WhatIf:$whatIf;
-          } | Assert-Throw -ExceptionType ([ParameterBindingException]);
-        }
-      } # and: "Anchor" specified
-
-      Context 'and: "Relation" specified' {
-        It 'should: ParameterBindingException' {
-          {
-            Get-ChildItem -File -Path $sourcePath -Filter $filter | Rename-ForeachFsItem -File `
-              -First -Quantity 2 -Whole p -Pattern 'data.' -Relation 'after' -WhatIf:$whatIf;
-          } | Assert-Throw -ExceptionType ([ParameterBindingException]);
-        }
-      } # and: "Relation" specified
-
-      Context 'and: "Start" specified' {
-        It 'should: ParameterBindingException' {
-          {
-            Get-ChildItem -File -Path $sourcePath -Filter $filter | Rename-ForeachFsItem -File `
-              -First -Quantity 2 -Whole p -Pattern 'data.' -Start -WhatIf:$whatIf;
-          } | Assert-Throw -ExceptionType ([ParameterBindingException]);
-        }
-      } # and: "Start" specified
-
-      Context 'and: "End" specified' {
-        It 'should: ParameterBindingException' {
-          {
-            Get-ChildItem -File -Path $sourcePath -Filter $filter | Rename-ForeachFsItem -File `
-              -First -Quantity 2 -Whole p -Pattern 'data.' -End -WhatIf:$whatIf;
-          } | Assert-Throw -ExceptionType ([ParameterBindingException]);
-        }
-      } # and: "End" specified
-    } # is not: valid (ReplaceFirst)
-
     Context 'is not: valid; given: File & Directory specified together' {
       It 'should: throw ParameterBindingException' {
         {
           Get-ChildItem -File -Path $sourcePath -Filter $filter | Rename-ForeachFsItem -File `
-            -Directory -Last -Whole p -Pattern 'data.' -Anchor 't\d{1}\.' -WhatIf:$whatIf;
+            -Directory -Whole p -Pattern 'data.' -Anchor 't\d{1}\.' -WhatIf:$whatIf;
         } | Assert-Throw -ExceptionType ([ParameterBindingException]);
       }
     }
@@ -447,12 +372,12 @@ Describe 'RegEx comprehension' -Skip {
           Write-Host "@@@ Captured name: '$capturedZorg'"
 
           [string]$patternRemovedFromSource = $source -replace $capturedPattern, '';
-          [string]$target = ':"'
+          [string]$Anchor = ':"'
 
           Write-Host "Pattern removed from source: '$patternRemovedFromSource'";
 
-          [string]$with = $target + $capturedZorg;
-          $inserted = $patternRemovedFromSource -replace "$target", $with
+          [string]$with = $Anchor + $capturedZorg;
+          $inserted = $patternRemovedFromSource -replace "$Anchor", $with
  
           Write-Host ">>> INSERTED: '$inserted'";
         }

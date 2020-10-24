@@ -41,7 +41,7 @@ function Update-Match {
     }
     else {
       # throw parameter exception instead?
-      throw 'edit-ReplaceFirstMatch: missing parameter, either With or LiteralWith must be specified'
+      throw 'Update-Match: missing parameter, either With or LiteralWith must be specified'
     }
 
     if ($PSBoundParameters.ContainsKey('Paste')) {

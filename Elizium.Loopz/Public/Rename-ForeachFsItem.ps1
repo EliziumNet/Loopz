@@ -21,9 +21,6 @@ function Rename-ForeachFsItem {
     [Parameter(Mandatory, ValueFromPipeline = $true)]
     [System.IO.FileSystemInfo]$underscore,
 
-    [Parameter(ParameterSetName = 'ReplaceFirst')]
-    [int]$Quantity = 1,
-
     [Parameter()]
     [ValidateSet('p', 'a', 'w', '*')]
     [string]$Whole,
@@ -33,24 +30,21 @@ function Rename-ForeachFsItem {
     [ValidateScript( { -not([string]::IsNullOrEmpty($_[0])) })]
     [object[]]$Pattern,
 
-    [Parameter(ParameterSetName = 'MoveRelative')]
+    [Parameter(ParameterSetName = 'MoveToAnchor', Mandatory)]
     [ValidateCount(1, 2)]
     [ValidateScript( { -not([string]::IsNullOrEmpty($_[0])) })]
     [object[]]$Anchor,
 
-    [Parameter(ParameterSetName = 'MoveRelative')]
+    [Parameter(ParameterSetName = 'MoveToAnchor')]
     [string]$Relation = 'after',
 
-    [Parameter(ParameterSetName = 'MoveToStart')]
-    [Parameter(ParameterSetName = 'MoveToEnd')]
-    [Parameter(ParameterSetName = 'MoveRelative')]
-    [Parameter(ParameterSetName = 'ReplaceFirst')]
-    [Parameter(ParameterSetName = 'ReplaceWith')]
+    [Parameter(ParameterSetName = 'MoveToAnchor')]
+    [Parameter(ParameterSetName = 'ReplaceWith')] # Mandatory
     [ValidateCount(1, 2)]
     [ValidateScript( { -not([string]::IsNullOrEmpty($_[0])) })]
     [object[]]$With,
 
-    [Parameter()]
+    [Parameter(ParameterSetName = 'ReplaceLiteralWith', Mandatory)]
     [string]$LiteralWith,
 
     [Parameter()]
@@ -59,17 +53,19 @@ function Rename-ForeachFsItem {
     [Parameter()]
     [scriptblock]$Condition = ( { return $true; }),
 
+    # Both Start & End are members of ReplaceWith, but they shouldn't be supplied at
+    # the same time. So how to prevent this? Use ValidateScript instead.
+    [Parameter(ParameterSetName = 'ReplaceWith')]
     [Parameter(ParameterSetName = 'MoveToStart', Mandatory)]
+    [ValidateScript( { -not($PSBoundParameters.ContainsKey('End')); })]
     [switch]$Start,
 
+    [Parameter(ParameterSetName = 'ReplaceWith')]
     [Parameter(ParameterSetName = 'MoveToEnd', Mandatory)]
+    [ValidateScript( { -not($PSBoundParameters.ContainsKey('Start')); })]
     [switch]$End,
 
-    [Parameter(ParameterSetName = 'MoveToStart')]
-    [Parameter(ParameterSetName = 'MoveToEnd')]
-    [Parameter(ParameterSetName = 'MoveRelative')]
-    [Parameter(ParameterSetName = 'ReplaceFirst')]
-    [Parameter(ParameterSetName = 'ReplaceWith')]
+    [Parameter()]
     [string]$Paste
   )
 
