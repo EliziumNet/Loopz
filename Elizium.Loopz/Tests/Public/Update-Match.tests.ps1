@@ -79,6 +79,73 @@ Describe 'Update-Match' {
             Should -BeExactly $source;
         }
       }
+
+      Context 'and: Paste references LiteralWith' {
+        Context 'and: single Pattern match' {
+          It 'should: replace the single match' {
+            [string]$source = 'We are like the dreamer';
+            [RegEx]$pattern = new-expr('dream');
+            [string]$literalWith = 'heal';
+            [string]$paste = '==${_w}=='
+
+            Update-Match -Value $source -Pattern $pattern -LiteralWith $literalWith -Paste $paste | `
+              Should -BeExactly 'We are like the ==heal==er';
+          }
+        }
+      } # and: Paste references LiteralWith
+
+      Context 'and: Paste references Pattern' {
+        Context 'and: single Pattern match' {
+          It 'should: replace the single match' {
+            [string]$source = 'We are like the dreamer';
+            [RegEx]$pattern = new-expr('dream');
+            [string]$paste = '==$0=='
+
+            Update-Match -Value $source -Pattern $pattern -Paste $paste | `
+              Should -BeExactly 'We are like the ==dream==er';
+          }
+        }
+      } # and: Paste references Pattern
+
+      Context 'and: Paste & With' {
+        Context 'With matches' {
+          It 'should: replace the single match' -Tag 'Current' {
+            [string]$source = 'We are like the dreamer 1234';
+            [RegEx]$pattern = new-expr('dream');
+            [string]$With = '\d{4}';
+            [string]$paste = '==${_w}=='
+
+            Update-Match -Value $source -Pattern $pattern -With $With -Paste $paste | `
+              Should -BeExactly 'We are like the ==1234==er 1234';
+          }
+        }
+
+        Context 'With does NOT match' {
+          It 'should: replace the single match' -Tag 'Current' {
+            [string]$source = 'We are like the dreamer';
+            [RegEx]$pattern = new-expr('dream');
+            [string]$with = 'blah';
+            [string]$paste = '==${_w}=='
+
+            Update-Match -Value $source -Pattern $pattern -With $with -Paste $paste | `
+              Should -BeExactly $source;
+          }          
+        }
+      } # and: Paste & With
+
+      Context 'and: Paste & LiteralWith' {
+        Context 'With matches' {
+          It 'should: replace the single match' -Tag 'Current' {
+            [string]$source = 'We are like the dreamer';
+            [RegEx]$pattern = new-expr('dream');
+            [string]$literalWith = 'heal';
+            [string]$paste = '==${_w}=='
+
+            Update-Match -Value $source -Pattern $pattern -LiteralWith $literalWith -Paste $paste | `
+              Should -BeExactly 'We are like the ==heal==er';
+          }
+        }
+      } # and: Paste & With
     } # given: plain pattern
 
     Context 'given: regex pattern' {
