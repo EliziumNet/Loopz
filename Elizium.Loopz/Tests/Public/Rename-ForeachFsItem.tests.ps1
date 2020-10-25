@@ -1,4 +1,6 @@
 using namespace System.Management.Automation;
+using namespace System.Collections;
+using namespace System.IO;
 
 Describe 'Rename-ForeachFsItem' {
   BeforeAll {
@@ -8,29 +10,68 @@ Describe 'Rename-ForeachFsItem' {
 
     Import-Module Assert;
     [boolean]$script:whatIf = $false;
+
     [string]$script:directoryPath = './Tests/Data/fefsi/';
 
     Mock -ModuleName Elizium.Loopz rename-FsItem {
       param(
-        [System.IO.FileSystemInfo]$From,
+        [FileSystemInfo]$From,
         [string]$To,
-        [System.Collections.Hashtable]$Undo,
+        [HashTable]$Undo,
         $Shell,
         [switch]$WhatIf
       )
+      #
       # This mock result works only because the actual returned FileSystemInfo returned
       # does not drive any control logic.
-      #
+
+      if ($expected) {
+        # NOTE: Since this rename-FsItem mock is only invoked, if there is actually a rename to be
+        # performed, expectations do not need (or rather should not) add expectations for scenarios
+        # where the new name is the same as the original name (ie not renamed due to a non match).
+        #
+        test-expect -Expects $expected -Item $From.Name -Actual $To;
+      }
       return $From;
+    }
+
+    function test-expect {
+      param(
+        [Parameter(Position = 0)][HashTable]$Expects,
+        [Parameter(Position = 1)][string]$Item,
+        [Parameter(Position = 2)][string]$Actual
+      )
+      if ($Expects.ContainsKey($Item)) {
+        Write-Debug "test-expect; EXPECT: '$($Expects[$Item])'";
+        Write-Debug "test-expect; ACTUAL: '$Actual'";
+        $Actual | Should -BeExactly $Expects[$Item];
+      }
+      else {
+        $false | Should -BeTrue -Because "Bad test!!, Item: '$Item' not defined in Expects";
+      }
     }
   }
 
+  BeforeEach {
+    $script:expected = $null;
+  }
+
+  # All these tests should be converted to work on a copy of the test files. Or perhaps, we can get
+  # Rename-ForeachFsItem to invoke an internal function, so that the new name can be intercepted and tested.
+  # No, you just need to intercept rename-FsItem
+  #
   Context 'given: MoveToAnchor' {
     Context 'and: TargetType is Anchor' {
       Context 'and Relation is Before' {
         Context 'and: Source matches Pattern' {
           Context 'and: Source matches Anchor' {
             It 'should: do rename; move Pattern match before Anchor' {
+              $script:expected = @{
+                'loopz.data.t1.txt' = 'data.loopz.t1.txt';
+                'loopz.data.t2.txt' = 'data.loopz.t2.txt';
+                'loopz.data.t3.txt' = 'data.loopz.t3.txt';
+              }
+
               Get-ChildItem -File -Path $directoryPath | Rename-ForeachFsItem -File `
                 -Pattern 'data.' -Anchor 'loopz' -Relation 'before' -WhatIf;
             }
@@ -38,6 +79,12 @@ Describe 'Rename-ForeachFsItem' {
 
           Context 'and: Whole Pattern' {
             It 'should: do rename; move Pattern match before Anchor' {
+              $script:expected = @{
+                'loopz.data.t1.txt' = 'dataloopz..t1.txt';
+                'loopz.data.t2.txt' = 'dataloopz..t2.txt';
+                'loopz.data.t3.txt' = 'dataloopz..t3.txt';
+              }
+
               Get-ChildItem -File -Path $directoryPath | Rename-ForeachFsItem -File `
                 -Pattern 'data' -Anchor 'loopz' -Relation 'before' -Whole p -WhatIf;
             }
@@ -45,6 +92,12 @@ Describe 'Rename-ForeachFsItem' {
 
           Context 'and: Source does not match Anchor' {
             It 'should: NOT do rename' {
+              $script:expected = @{
+                'loopz.data.t1.txt' = 'loopz.data.t1.txt';
+                'loopz.data.t2.txt' = 'loopz.data.t2.txt';
+                'loopz.data.t3.txt' = 'loopz.data.t3.txt';
+              }
+
               Get-ChildItem -File -Path $directoryPath | Rename-ForeachFsItem -File `
                 -Pattern 'data.' -Anchor 'blooper' -Relation 'before' -WhatIf;
             }
@@ -56,27 +109,33 @@ Describe 'Rename-ForeachFsItem' {
         Context 'and: Source matches Pattern' {
           Context 'and: Source matches Anchor' {
             It 'should: do rename; move Pattern match after Anchor' {
+              $script:expected = @{
+                'loopz.data.t1.txt' = 'data.loopz.t1.txt';
+                'loopz.data.t2.txt' = 'data.loopz.t2.txt';
+                'loopz.data.t3.txt' = 'data.loopz.t3.txt';
+              }
+
               Get-ChildItem -File -Path $directoryPath | Rename-ForeachFsItem -File `
                 -Pattern 'loopz.' -Anchor 'data.' -Relation 'after' -WhatIf;
             }
 
             Context 'and: Whole Anchor' {
               It 'should: do rename; move Pattern match after Anchor' {
+                $script:expected = @{
+                  'loopz.data.t1.txt' = 'dataloopz..t1.txt';
+                  'loopz.data.t2.txt' = 'dataloopz..t2.txt';
+                  'loopz.data.t3.txt' = 'dataloopz..t3.txt';
+                }
+
                 Get-ChildItem -File -Path $directoryPath | Rename-ForeachFsItem -File `
                   -Pattern 'loopz.' -Anchor 'data' -Relation 'after' -Whole a -WhatIf;
               }
             }
           } # and: Source matches Anchor
 
-          # Context 'and: Source matches Anchor which needs escape' {
-          #   # use Literal t (eg, `+^$.,-?()[]{}` are all allowed in win-fs, but are regex characters that needs escape)
-          #   It 'should: ' {
-          #     Write-Host "NOT-IMPLEMENTED YET"
-          #   }
-          # }
-
           Context 'and: Source does not match Anchor' {
             It 'should: NOT do rename' {
+              $script:expected = @{}
               Get-ChildItem -File -Path $directoryPath | Rename-ForeachFsItem -File `
                 -Pattern 'loopz.' -Anchor 'blooper' -Relation 'after' -WhatIf;
             }
@@ -89,6 +148,11 @@ Describe 'Rename-ForeachFsItem' {
   Context 'given: MoveToStart' {
     Context 'and: Source matches Pattern in middle' {
       It 'should: do rename; move Pattern match to start' {
+        $script:expected = @{
+          'loopz.data.t1.txt' = 'data.loopz.t1.txt';
+          'loopz.data.t2.txt' = 'data.loopz.t2.txt';
+          'loopz.data.t3.txt' = 'data.loopz.t3.txt';
+        }
         Get-ChildItem -Path $directoryPath -Filter '*.txt' | Rename-ForeachFsItem -File `
           -Pattern 'data.' -Start -WhatIf;
       }
@@ -96,6 +160,7 @@ Describe 'Rename-ForeachFsItem' {
 
     Context 'and: Source matches Pattern already at start' {
       It 'should: NOT do rename' {
+        $script:expected = @{}
         Get-ChildItem -Path $directoryPath -Filter '*.txt' | Rename-ForeachFsItem -File `
           -Pattern 'loopz.' -Start -WhatIf;
       }
@@ -105,6 +170,11 @@ Describe 'Rename-ForeachFsItem' {
   Context 'given: MoveToEnd' {
     Context 'and: Source matches Pattern in middle' {
       It 'should: do rename; move Pattern match to end' {
+        $script:expected = @{
+          'loopz.data.t1.txt' = 'loopz.t1.data.txt';
+          'loopz.data.t2.txt' = 'loopz.t2.data.txt';
+          'loopz.data.t3.txt' = 'loopz.t3.data.txt';
+        }
         Get-ChildItem -Path $directoryPath -File | Rename-ForeachFsItem -File `
           -Pattern '.data' -End -WhatIf;
       }
@@ -112,6 +182,7 @@ Describe 'Rename-ForeachFsItem' {
 
     Context 'and: Source matches Pattern already at end' {
       It 'should: NOT do rename' {
+        $script:expected = @{}
         Get-ChildItem -Path $directoryPath | Rename-ForeachFsItem -File `
           -Pattern 't1' -End -WhatIf;
       }
@@ -121,48 +192,174 @@ Describe 'Rename-ForeachFsItem' {
   Context 'given: ReplaceWith' {
     Context 'and: Source matches Pattern' {
       Context 'and: With is non-regex static text' {
+        # It seems like this makes no sense; there's no point in testing static -With text as
+        # in reality, the user should use -LiteralWith. However, the user might use -With for
+        # static text and if they do, there's no reason why it shouldn't just work, even though
+        # LiteralWith is designed for this scenario.
+        #
+
+        Context 'With does NOT match' {
+          It 'should: do rename; replace First Pattern for With text' {
+            $script:expected = @{}
+
+            Get-ChildItem -Path $directoryPath | Rename-ForeachFsItem -File `
+              -Pattern 'a', f -With 'blah' -WhatIf;
+          }
+        }
+
         Context 'and: First Only' {
           It 'should: do rename; replace First Pattern for With text' {
+            $script:expected = @{
+              'loopz.application.t1.log' = 'loopz.tpplication.t1.log';
+              'loopz.application.t2.log' = 'loopz.tpplication.t2.log';
+              'loopz.data.t1.txt'        = 'loopz.dtta.t1.txt';
+              'loopz.data.t2.txt'        = 'loopz.dtta.t2.txt';
+              'loopz.data.t3.txt'        = 'loopz.dtta.t3.txt';
+            }
+
             Get-ChildItem -Path $directoryPath | Rename-ForeachFsItem -File `
-              -Pattern 'a', f -With '@' -WhatIf;
+              -Pattern 'a', f -With 't' -WhatIf;
           }
         } # and: First Only
 
         Context 'and: replace 3rd match' {
           It 'should: do rename; replace 3rd Occurrence for With text' {
+            $script:expected = @{
+              'loopz.application.t1.log' = 'loopz.applicati0n.t1.log';
+              'loopz.application.t2.log' = 'loopz.applicati0n.t2.log';
+            }
+
             Get-ChildItem -Path $directoryPath | Rename-ForeachFsItem -File `
-              -Pattern 'o', 6 -With '0' -WhatIf;
+              -Pattern 'o', 3 -With '0' -WhatIf;
           }
-        } # and: First 2 Only
+        } # and: replace 3rd match
 
         Context 'and: Last Only' {
           It 'should: do rename; replace Last Pattern for With text' {
+            $script:expected = @{
+              'loopz.application.t1.log' = 'loopz.applic@tion.t1.log';
+              'loopz.application.t2.log' = 'loopz.applic@tion.t2.log';
+              'loopz.data.t1.txt'        = 'loopz.dat@.t1.txt';
+              'loopz.data.t2.txt'        = 'loopz.dat@.t2.txt';
+              'loopz.data.t3.txt'        = 'loopz.dat@.t3.txt';
+            }
+
             Get-ChildItem -Path $directoryPath | Rename-ForeachFsItem -File `
               -Pattern 'a', l -LiteralWith '@' -WhatIf;
           }
         } # and: Last Only
-      }
+      } # and: With is non-regex static text
 
       Context 'and: With is regex' {
         Context 'and: Whole With' {
           It 'should: do rename; replace First Pattern for With text' {
+            $script:expected = @{
+              'loopz.application.t1.log' = 'loopz.t1pplication.t1.log';
+              'loopz.application.t2.log' = 'loopz.t2pplication.t2.log';
+              'loopz.data.t1.txt'        = 'loopz.dt1ta.t1.txt';
+              'loopz.data.t2.txt'        = 'loopz.dt2ta.t2.txt';
+              'loopz.data.t3.txt'        = 'loopz.dt3ta.t3.txt';
+            }
+
             Get-ChildItem -Path $directoryPath | Rename-ForeachFsItem -File `
               -Pattern 'a', f -With 't\d' -Whole w -WhatIf;
           }
-        }
-      }
+        } # and: Whole With
 
-      Context 'and: With contains static text that needs escape' {
-        Context 'and: First Only' {
+        Context 'With does NOT match' {
           It 'should: do rename; replace First Pattern for With text' {
-            Write-Host "should: do rename; replace First Pattern for With text: NOT-IMPLEMENTED YET"
+            $script:expected = @{}
+
+            Get-ChildItem -Path $directoryPath | Rename-ForeachFsItem -File `
+              -Pattern 'a', f -With '\d{4}' -WhatIf;
           }
         }
-      }
+
+        Context 'and: First Only' {
+          It 'should: do rename; replace First Pattern for With text' {
+            $script:expected = @{
+              'loopz.application.t1.log' = 'loopz.t1pplication.t1.log';
+              'loopz.application.t2.log' = 'loopz.t2pplication.t2.log';
+              'loopz.data.t1.txt'        = 'loopz.dt1ta.t1.txt';
+              'loopz.data.t2.txt'        = 'loopz.dt2ta.t2.txt';
+              'loopz.data.t3.txt'        = 'loopz.dt3ta.t3.txt';
+            }
+
+            Get-ChildItem -Path $directoryPath | Rename-ForeachFsItem -File `
+              -Pattern 'a', f -With 't\d' -WhatIf;
+          }
+        } # and: First Only
+      } # and: With is regex
+
+      Context 'and: With needs escape' {
+        Context 'and: First Only' {
+          It 'should: do rename; replace First Pattern for With text' {
+            $script:expected = @{
+              'loopz.application.t1.log' = 'loopz..apppplication.t1.log';
+              'loopz.application.t2.log' = 'loopz..apppplication.t2.log';
+              'loopz.data.t1.txt'        = 'loopz.d.datta.t1.txt';
+              'loopz.data.t2.txt'        = 'loopz.d.datta.t2.txt';
+              'loopz.data.t3.txt'        = 'loopz.d.datta.t3.txt';
+            }
+
+            Get-ChildItem -Path $directoryPath | Rename-ForeachFsItem -File `
+              -Pattern 'a', f -With ($(esc('.')) + '\w{3}') -WhatIf;
+          }
+        } # and: First Only
+      } # and: With needs escapes
+
+      Context 'LiteralWith' {
+        Context 'and: First Only' {
+          It 'should: do rename; replace First Pattern for With text' {
+            $script:expected = @{
+              'loopz.application.t1.log' = 'loopz.@pplication.t1.log';
+              'loopz.application.t2.log' = 'loopz.@pplication.t2.log';
+              'loopz.data.t1.txt'        = 'loopz.d@ta.t1.txt';
+              'loopz.data.t2.txt'        = 'loopz.d@ta.t2.txt';
+              'loopz.data.t3.txt'        = 'loopz.d@ta.t3.txt';
+            }
+
+            Get-ChildItem -Path $directoryPath | Rename-ForeachFsItem -File `
+              -Pattern 'a', f -LiteralWith '@' -WhatIf;
+          }
+
+          Context 'and: replace 3rd match' {
+            It 'should: do rename; replace 3rd Occurrence for With text' {
+              $script:expected = @{
+                'loopz.application.t1.log' = 'loopz.applicati0n.t1.log';
+                'loopz.application.t2.log' = 'loopz.applicati0n.t2.log';
+              }
+
+              Get-ChildItem -Path $directoryPath | Rename-ForeachFsItem -File `
+                -Pattern 'o', 3 -LiteralWith '0' -WhatIf;
+            }
+          } # and: replace 3rd match
+
+          Context 'and: Last Only' {
+            It 'should: do rename; replace Last Pattern for With text' {
+              $script:expected = @{
+                'loopz.application.t1.log' = 'loopz.applic@tion.t1.log';
+                'loopz.application.t2.log' = 'loopz.applic@tion.t2.log';
+                'loopz.data.t1.txt'        = 'loopz.dat@.t1.txt';
+                'loopz.data.t2.txt'        = 'loopz.dat@.t2.txt';
+                'loopz.data.t3.txt'        = 'loopz.dat@.t3.txt';
+              }
+
+              Get-ChildItem -Path $directoryPath | Rename-ForeachFsItem -File `
+                -Pattern 'a', l -LiteralWith '@' -WhatIf;
+            }
+          } # and: Last Only
+        } # and: First Only
+      } # LiteralWith
 
       Context 'and: Except' {
         Context 'and: Source matches Pattern' {
           It 'should: do rename; replace Last Pattern for With text' {
+            $script:expected = @{
+              'loopz.application.t1.log' = 'h00pz.application.t1.log';
+              'loopz.application.t2.log' = 'h00pz.application.t2.log';
+            }
+
             Get-ChildItem -Path $directoryPath | Rename-ForeachFsItem -File `
               -Pattern 'loopz' -Except 'data' -With 'h00pz' -WhatIf;
           }
@@ -171,6 +368,13 @@ Describe 'Rename-ForeachFsItem' {
 
       Context 'and: Source denotes Directories' {
         It 'should: do rename; replace First Pattern for With text' {
+          $script:expected = @{
+            'Arkives'   = 'Arkiv3s';
+            'Consumed'  = 'Consum3d';
+            'EX'        = '3X';
+            # 'Musik'     = 'Musik';
+            'Sheet One' = 'Sh3et One';
+          }
           [string]$plastikmanPath = './Tests/Data/traverse/Audio/MINIMAL/Plastikman';
 
           Get-ChildItem -Path $plastikmanPath | Rename-ForeachFsItem -Directory `

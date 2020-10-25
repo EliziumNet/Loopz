@@ -39,7 +39,7 @@ function Rename-ForeachFsItem {
     [string]$Relation = 'after',
 
     [Parameter(ParameterSetName = 'MoveToAnchor')]
-    [Parameter(ParameterSetName = 'ReplaceWith')] # Mandatory
+    [Parameter(ParameterSetName = 'ReplaceWith')]
     [ValidateCount(1, 2)]
     [ValidateScript( { -not([string]::IsNullOrEmpty($_[0])) })]
     [object[]]$With,
@@ -55,6 +55,7 @@ function Rename-ForeachFsItem {
 
     # Both Start & End are members of ReplaceWith, but they shouldn't be supplied at
     # the same time. So how to prevent this? Use ValidateScript instead.
+    #
     [Parameter(ParameterSetName = 'ReplaceWith')]
     [Parameter(ParameterSetName = 'MoveToStart', Mandatory)]
     [ValidateScript( { -not($PSBoundParameters.ContainsKey('End')); })]
@@ -113,9 +114,6 @@ function Rename-ForeachFsItem {
       }
       elseif ($_passThru.ContainsKey('LOOPZ.RN-FOREACH.LITERAL-WITH')) {
         $actionParameters['LiteralWith'] = $_passThru['LOOPZ.RN-FOREACH.LITERAL-WITH'];
-      }
-      else {
-        $actionParameters['LiteralWith'] = [string]::Empty;
       }
 
       if ($_passThru.ContainsKey('LOOPZ.RN-FOREACH.PASTE')) {
@@ -322,7 +320,13 @@ function Rename-ForeachFsItem {
     }
     else {
       if ($doMoveToken) {
-        $passThru['LOOPZ.RN-FOREACH.LITERAL-WITH'] = $patternRegEx;
+        #
+        # Rename-ForeachFsItem -File -Pattern 'data' -Anchor 'loopz' -Relation 'before' -Whole p -WhatIf;
+        # does talk into account -Whole. LITERAL-WITH should not be set to the pattern.
+        # Actually this has to be handled on the other end; if there is no literal, then the literal should
+        # created as a result of the pattern capture.
+        #
+        # $passThru['LOOPZ.RN-FOREACH.LITERAL-WITH'] = $patternRegEx;
       }
     }
 
@@ -370,8 +374,6 @@ function Rename-ForeachFsItem {
       # version of the Condition parameter which is this scriptblock and thus results in a stack
       # overflow due to infinite recursion. We need to use a temporary variable so that
       # the client's Condition (Rename-ForeachFsItem) is not accidentally hidden.
-      #
-      # OLD: $pipelineItem.Name -match $patternExpression
       #
       return ($patternRegEx.IsMatch($pipelineItem.Name)) -and `
       (($Except -eq [string]::Empty) -or -not($pipelineItem.Name -match $Except)) -and `

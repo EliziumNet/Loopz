@@ -62,7 +62,7 @@ function Move-Match {
   # to the anchor not the original Pattern capture.
   #
   [boolean]$isVanilla = -not($PSBoundParameters.ContainsKey('With') -or `
-      $PSBoundParameters.ContainsKey('LiteralWith'));
+      ($PSBoundParameters.ContainsKey('LiteralWith') -and -not([string]::IsNullOrEmpty($LiteralWith))));
 
   [string]$capturedPattern, [string]$patternRemoved, $null = Get-DeconstructedMatch `
     -Source $Value -PatternRegEx $Pattern `

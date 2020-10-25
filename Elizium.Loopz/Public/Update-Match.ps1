@@ -1,6 +1,5 @@
 
 function Update-Match {
-  # This will eventually be renamed to be a public function Update-Match
   [OutputType([string])]
   param(
     [Parameter()]
@@ -35,6 +34,9 @@ function Update-Match {
         Get-DeconstructedMatch -Source $Value -PatternRegEx $With `
         -Occurrence ($PSBoundParameters.ContainsKey('WithOccurrence') ? $WithOccurrence : 'f');
 
+        if ([string]::IsNullOrEmpty($replaceWith)) {
+          return $Value;
+        }
     }
     elseif ($PSBoundParameters.ContainsKey('LiteralWith')) {
       [string]$replaceWith = $LiteralWith;
