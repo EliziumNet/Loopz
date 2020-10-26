@@ -36,6 +36,7 @@ function Rename-ForeachFsItem {
     [object[]]$Anchor,
 
     [Parameter(ParameterSetName = 'MoveToAnchor')]
+    [ValidateSet('before', 'after')]
     [string]$Relation = 'after',
 
     [Parameter(ParameterSetName = 'MoveToAnchor')]
@@ -317,17 +318,6 @@ function Rename-ForeachFsItem {
     }
     elseif ($PSBoundParameters.ContainsKey('LiteralWith')) {
       $passThru['LOOPZ.RN-FOREACH.LITERAL-WITH'] = $LiteralWith;
-    }
-    else {
-      if ($doMoveToken) {
-        #
-        # Rename-ForeachFsItem -File -Pattern 'data' -Anchor 'loopz' -Relation 'before' -Whole p -WhatIf;
-        # does talk into account -Whole. LITERAL-WITH should not be set to the pattern.
-        # Actually this has to be handled on the other end; if there is no literal, then the literal should
-        # created as a result of the pattern capture.
-        #
-        # $passThru['LOOPZ.RN-FOREACH.LITERAL-WITH'] = $patternRegEx;
-      }
     }
 
     if ($PSBoundParameters.ContainsKey('Relation')) {

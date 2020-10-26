@@ -109,7 +109,7 @@ Describe 'Update-Match' {
 
       Context 'and: Paste & With' {
         Context 'With matches' {
-          It 'should: replace the single match' -Tag 'Current' {
+          It 'should: replace the single match' {
             [string]$source = 'We are like the dreamer 1234';
             [RegEx]$pattern = new-expr('dream');
             [string]$With = '\d{4}';
@@ -121,7 +121,7 @@ Describe 'Update-Match' {
         }
 
         Context 'With does NOT match' {
-          It 'should: replace the single match' -Tag 'Current' {
+          It 'should: replace the single match' {
             [string]$source = 'We are like the dreamer';
             [RegEx]$pattern = new-expr('dream');
             [string]$with = 'blah';
@@ -135,7 +135,7 @@ Describe 'Update-Match' {
 
       Context 'and: Paste & LiteralWith' {
         Context 'With matches' {
-          It 'should: replace the single match' -Tag 'Current' {
+          It 'should: replace the single match' {
             [string]$source = 'We are like the dreamer';
             [RegEx]$pattern = new-expr('dream');
             [string]$literalWith = 'heal';
