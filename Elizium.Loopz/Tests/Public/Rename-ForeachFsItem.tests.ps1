@@ -366,6 +366,21 @@ Describe 'Rename-ForeachFsItem' {
         }
       } # and: Except
 
+      Context 'and: "Cut" (without replacement)' {
+        It 'should: do rename; cut the Pattern' -Tag 'Current' {
+          $script:expected = @{
+            'loopz.application.t1.log' = 'application.t1.log';
+            'loopz.application.t2.log' = 'application.t2.log';
+            'loopz.data.t1.txt'        = 'data.t1.txt';
+            'loopz.data.t2.txt'        = 'data.t2.txt';
+            'loopz.data.t3.txt'        = 'data.t3.txt';
+          }
+
+          Get-ChildItem -Path $directoryPath | Rename-ForeachFsItem -File `
+            -Pattern $(esc('loopz.')) -WhatIf;
+        }
+      } # and: "Cut" (without replacement)
+
       Context 'and: Source denotes Directories' {
         It 'should: do rename; replace First Pattern for With text' {
           $script:expected = @{

@@ -42,8 +42,7 @@ function Update-Match {
       [string]$replaceWith = $LiteralWith;
     }
     else {
-      # throw parameter exception instead?
-      # throw 'Update-Match: missing parameter, either With or LiteralWith must be specified'
+      [string]$replaceWith = [string]::Empty;
     }
 
     if ($PSBoundParameters.ContainsKey('Paste')) {

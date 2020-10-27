@@ -97,6 +97,8 @@ function Move-Match {
       }
       elseif ($PSBoundParameters.ContainsKey('LiteralWith')) {
         [string]$replaceWith = $LiteralWith;
+      } else {
+        [string]$replaceWith = [string]::Empty;
       }
     }
 
