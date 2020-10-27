@@ -224,11 +224,9 @@ Describe 'Update-Match' {
           [string]$source = '21-04-2000, Party like its 31-12-1999, today is 24-09-2020';
           [RegEx]$pattern = new-expr('(?<day>\d{2})-(?<mon>\d{2})-(?<year>\d{4})');
 
-          # '21-04-2000, Party like its 31-12-1999, today is 24-09-2020'
-
           Update-Match -Value $source -Pattern $pattern -PatternOccurrence '*' `
             -Paste 'Americanised: ${mon}-${day}-${year}' | `
-            Should -BeExactly '21-04-2000, Party like its 31-12-1999, today is 24-09-2020';
+            Should -BeExactly 'Americanised: 04-21-2000, Party like its Americanised: 12-31-1999, today is Americanised: 09-24-2020';
         }
       }
     } # given: regex pattern
