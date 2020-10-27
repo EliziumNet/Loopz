@@ -49,6 +49,7 @@ function Rename-ForeachFsItem {
     [string]$LiteralWith,
 
     [Parameter()]
+    [Alias('x')]
     [string]$Except = [string]::Empty,
 
     [Parameter()]
