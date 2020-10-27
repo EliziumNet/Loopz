@@ -204,6 +204,16 @@ Describe 'Move-Match' {
                 Should -BeExactly '==[fire ]== There is where you are going';
             }
           }
+
+          Context 'and: with Paste containing Pattern named group references' {
+            It 'should: Move Pattern to Start' {
+              [string]$source = 'In the day of 29-03-2525.';
+              [RegEx]$escapedPattern = new-expr('\s(?<d>\d{2})-(?<m>\d{2})-(?<y>\d{4})');
+
+              Move-Match -Value $source -Pattern $escapedPattern -Paste 'Americanised: ${m}-${d}-${y} ' -Start | `
+                Should -BeExactly 'Americanised: 03-29-2525 In the day of.';
+            }
+          }
         } # and: Start specified
 
         Context 'and: End specified' {
@@ -226,6 +236,16 @@ Describe 'Move-Match' {
                 Should -BeExactly $source;
             }
           } # and Pattern is midway in source
+
+          Context 'and: with Paste containing Pattern named group references' {
+            It 'should: Move Pattern to End' {
+              [string]$source = 'In the day of 29-03-2525, Justice will reign.';
+              [RegEx]$escapedPattern = new-expr('\s(?<d>\d{2})-(?<m>\d{2})-(?<y>\d{4})');
+
+              Move-Match -Value $source -Pattern $escapedPattern -Paste 'Americanised: ${m}-${d}-${y}.' -End | `
+                Should -BeExactly 'In the day of, Justice will reign.Americanised: 03-29-2525.';
+            }
+          }
         } # and: End specified
       } # and: vanilla move
 
@@ -416,6 +436,18 @@ Describe 'Move-Match' {
 
               Move-Match -Value $source -Pattern $escapedPattern -Anchor $anchor `
                 -AnchorOccurrence 'L' -Paste $paste | Should -BeExactly $expected;
+            }
+          }
+
+          Context 'and: Pattern defines named captures' {
+            It 'should: rename accessing Pattern defined capture' {
+              [string]$source = '21-04-2000, Party like its 31-12-1999, target: today is 24-09-2020';
+              [RegEx]$pattern = new-expr('(?<day>\d{2})-(?<mon>\d{2})-(?<year>\d{4})');
+              [RegEx]$anchor = new-expr('target:')
+
+              Move-Match -Value $source -Pattern $pattern -Anchor $anchor `
+                -Paste ' Americanised ${_a} ${mon}-${day}-${year}' -Relation 'after' | `
+                Should -BeExactly ', Party like its 31-12-1999,  Americanised target: 04-21-2000 today is 24-09-2020';
             }
           }
         } # and: Anchor matches

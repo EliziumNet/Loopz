@@ -62,7 +62,7 @@ function Move-Match {
   # referenced inside Paste. Another important point of note is that With et al applies
   # to the anchor not the original Pattern capture.
   #
-  [string]$capturedPattern, [string]$patternRemoved, $null = Split-Match `
+  [string]$capturedPattern, [string]$patternRemoved, $patternMatch = Split-Match `
     -Source $Value -PatternRegEx $Pattern `
     -Occurrence ($PSBoundParameters.ContainsKey('PatternOccurrence') ? $PatternOccurrence : 'f');
 
@@ -106,6 +106,11 @@ function Move-Match {
 
     if (-not($PSBoundParameters.ContainsKey('Anchor')) -and ($isFormatted)) {
       $replaceWith = $Paste.Replace('${_w}', $replaceWith).Replace('$0', $capturedPattern);
+
+      # Now apply the user defined Pattern named group references if they exist
+      # to the captured pattern
+      #
+      $replaceWith = $capturedPattern -replace $pattern, $replaceWith;
     }
 
     if ($Start.ToBool()) {
@@ -145,6 +150,11 @@ function Move-Match {
           #
           [string]$format = $Paste.Replace('${_w}', $replaceWith).Replace(
             '$0', $capturedPattern).Replace('${_a}', $capturedAnchor);
+
+          # Now apply the user defined Pattern named group references if they exist
+          # to the captured pattern
+          #
+          $format = $capturedPattern -replace $pattern, $format;
         }
         else {
           # If the user has defined a With/LiteralWith without a format(Paste), we define the format
@@ -167,8 +177,6 @@ function Move-Match {
       # Start or End specified. Ideally this would be prevented by parameter set definition;
       $failed = $true;
     }
-
-    # ....
   }
   else {
     # Source doesn't match Pattern

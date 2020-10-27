@@ -218,6 +218,19 @@ Describe 'Update-Match' {
           }
         } # and: multiple matches
       } # and: date
+
+      Context 'and: Pattern defines named captures' {
+        It 'should: rename accessing Pattern defined capture' {
+          [string]$source = '21-04-2000, Party like its 31-12-1999, today is 24-09-2020';
+          [RegEx]$pattern = new-expr('(?<day>\d{2})-(?<mon>\d{2})-(?<year>\d{4})');
+
+          # '21-04-2000, Party like its 31-12-1999, today is 24-09-2020'
+
+          Update-Match -Value $source -Pattern $pattern -PatternOccurrence '*' `
+            -Paste 'Americanised: ${mon}-${day}-${year}' | `
+            Should -BeExactly '21-04-2000, Party like its 31-12-1999, today is 24-09-2020';
+        }
+      }
     } # given: regex pattern
   } # FIRST
 
