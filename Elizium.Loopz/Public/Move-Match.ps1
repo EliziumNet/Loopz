@@ -24,6 +24,7 @@ function Move-Match {
 
     [Parameter()]
     [System.Text.RegularExpressions.RegEx]$With,
+
     [Parameter()]
     [string]$WithOccurrence = 'f',
 
@@ -61,14 +62,14 @@ function Move-Match {
   # referenced inside Paste. Another important point of note is that With et al applies
   # to the anchor not the original Pattern capture.
   #
-  [boolean]$isVanilla = -not($PSBoundParameters.ContainsKey('With') -or `
-      ($PSBoundParameters.ContainsKey('LiteralWith') -and -not([string]::IsNullOrEmpty($LiteralWith))));
-
   [string]$capturedPattern, [string]$patternRemoved, $null = Get-DeconstructedMatch `
     -Source $Value -PatternRegEx $Pattern `
     -Occurrence ($PSBoundParameters.ContainsKey('PatternOccurrence') ? $PatternOccurrence : 'f');
 
   if (-not([string]::IsNullOrEmpty($capturedPattern))) {
+    [boolean]$isVanilla = -not($PSBoundParameters.ContainsKey('With') -or `
+      ($PSBoundParameters.ContainsKey('LiteralWith') -and -not([string]::IsNullOrEmpty($LiteralWith))));
+
     # Determine the replacement text
     #
     if ($isVanilla) {
@@ -97,9 +98,14 @@ function Move-Match {
       }
       elseif ($PSBoundParameters.ContainsKey('LiteralWith')) {
         [string]$replaceWith = $LiteralWith;
-      } else {
+      }
+      else {
         [string]$replaceWith = [string]::Empty;
       }
+    }
+
+    if (-not($PSBoundParameters.ContainsKey('Anchor')) -and ($isFormatted)) {
+      $replaceWith = $Paste.Replace('${_w}', $replaceWith).Replace('$0', $capturedPattern);
     }
 
     if ($Start.ToBool()) {

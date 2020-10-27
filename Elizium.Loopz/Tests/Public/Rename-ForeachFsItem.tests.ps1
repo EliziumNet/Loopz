@@ -367,7 +367,7 @@ Describe 'Rename-ForeachFsItem' {
       } # and: Except
 
       Context 'and: "Cut" (without replacement)' {
-        It 'should: do rename; cut the Pattern' -Tag 'Current' {
+        It 'should: do rename; cut the Pattern' {
           $script:expected = @{
             'loopz.application.t1.log' = 'application.t1.log';
             'loopz.application.t2.log' = 'application.t2.log';

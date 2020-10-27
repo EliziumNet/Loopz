@@ -191,9 +191,19 @@ Describe 'Move-Match' {
               [RegEx]$escapedPattern = new-expr([regex]::Escape('There'));
 
               Move-Match -Value $source -Pattern $escapedPattern -Start | `
-                Should -BeExactly 'There is fire where you are going';
+                Should -BeExactly $source;
             }
           } # and Pattern is already at Start in source
+
+          Context 'and: with Paste' {
+            It 'should: Move Pattern to Start' {
+              [string]$source = 'There is fire where you are going';
+              [RegEx]$escapedPattern = new-expr([regex]::Escape('fire '));
+
+              Move-Match -Value $source -Pattern $escapedPattern -Paste '==[$0]== ' -Start | `
+                Should -BeExactly '==[fire ]== There is where you are going';
+            }
+          }
         } # and: Start specified
 
         Context 'and: End specified' {
@@ -210,10 +220,10 @@ Describe 'Move-Match' {
           Context 'and Pattern is already at End in source' {
             It 'should: return source unmodified' {
               [string]$source = 'There is fire where you are going';
-              [RegEx]$escapedPattern = new-expr(' fire');
+              [RegEx]$escapedPattern = new-expr('going');
 
               Move-Match -Value $source -Pattern $escapedPattern -End | `
-                Should -BeExactly 'There is where you are going fire';
+                Should -BeExactly $source;
             }
           } # and Pattern is midway in source
         } # and: End specified
