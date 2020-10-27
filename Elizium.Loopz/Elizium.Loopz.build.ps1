@@ -178,8 +178,9 @@ task UpdatePublicFunctionsToExport -if (Test-Path -Path $script:PublicFolder) {
     [string[]]$aliases = Get-PublicFunctionAliasesToExport;
 
     if ($aliases.Count -gt 0) {      
-      [string]$aliasesArgument = $($aliases -join ", ");
+      [string]$aliasesArgument = $($aliases -join "', '");
       $aliasesStatement = "AliasesToExport = @('{0}')" -f $aliasesArgument
+      Write-Verbose "AliasesToExport statement: $aliasesStatement"
 
       (Get-Content -Path $script:PsdPath) -replace "AliasesToExport = ''", $aliasesStatement |
       Set-Content -Path $script:PsdPath
