@@ -2,7 +2,7 @@ using namespace System.Management.Automation;
 using namespace System.Collections;
 using namespace System.IO;
 
-Describe 'Rename-ForeachFsItem' {
+Describe 'Rename-Many' {
   BeforeAll {
     Get-Module Elizium.Loopz | Remove-Module
     Import-Module .\Output\Elizium.Loopz\Elizium.Loopz.psm1 `
@@ -57,7 +57,7 @@ Describe 'Rename-ForeachFsItem' {
   }
 
   # All these tests should be converted to work on a copy of the test files. Or perhaps, we can get
-  # Rename-ForeachFsItem to invoke an internal function, so that the new name can be intercepted and tested.
+  # Rename-Many to invoke an internal function, so that the new name can be intercepted and tested.
   # No, you just need to intercept rename-FsItem
   #
   Context 'given: MoveToAnchor' {
@@ -72,7 +72,7 @@ Describe 'Rename-ForeachFsItem' {
                 'loopz.data.t3.txt' = 'data.loopz.t3.txt';
               }
 
-              Get-ChildItem -File -Path $directoryPath | Rename-ForeachFsItem -File `
+              Get-ChildItem -File -Path $directoryPath | Rename-Many -File `
                 -Pattern 'data.' -Anchor 'loopz' -Relation 'before' -WhatIf;
             }
           } # and: Source matches Anchor
@@ -85,7 +85,7 @@ Describe 'Rename-ForeachFsItem' {
                 'loopz.data.t3.txt' = 'dataloopz..t3.txt';
               }
 
-              Get-ChildItem -File -Path $directoryPath | Rename-ForeachFsItem -File `
+              Get-ChildItem -File -Path $directoryPath | Rename-Many -File `
                 -Pattern 'data' -Anchor 'loopz' -Relation 'before' -Whole p -WhatIf;
             }
           }
@@ -98,7 +98,7 @@ Describe 'Rename-ForeachFsItem' {
                 'loopz.data.t3.txt' = 'loopz.data.t3.txt';
               }
 
-              Get-ChildItem -File -Path $directoryPath | Rename-ForeachFsItem -File `
+              Get-ChildItem -File -Path $directoryPath | Rename-Many -File `
                 -Pattern 'data.' -Anchor 'blooper' -Relation 'before' -WhatIf;
             }
           }
@@ -115,7 +115,7 @@ Describe 'Rename-ForeachFsItem' {
                 'loopz.data.t3.txt' = 'data.loopz.t3.txt';
               }
 
-              Get-ChildItem -File -Path $directoryPath | Rename-ForeachFsItem -File `
+              Get-ChildItem -File -Path $directoryPath | Rename-Many -File `
                 -Pattern 'loopz.' -Anchor 'data.' -Relation 'after' -WhatIf;
             }
 
@@ -127,7 +127,7 @@ Describe 'Rename-ForeachFsItem' {
                   'loopz.data.t3.txt' = 'dataloopz..t3.txt';
                 }
 
-                Get-ChildItem -File -Path $directoryPath | Rename-ForeachFsItem -File `
+                Get-ChildItem -File -Path $directoryPath | Rename-Many -File `
                   -Pattern 'loopz.' -Anchor 'data' -Relation 'after' -Whole a -WhatIf;
               }
             }
@@ -136,7 +136,7 @@ Describe 'Rename-ForeachFsItem' {
           Context 'and: Source does not match Anchor' {
             It 'should: NOT do rename' {
               $script:expected = @{}
-              Get-ChildItem -File -Path $directoryPath | Rename-ForeachFsItem -File `
+              Get-ChildItem -File -Path $directoryPath | Rename-Many -File `
                 -Pattern 'loopz.' -Anchor 'blooper' -Relation 'after' -WhatIf;
             }
           }
@@ -153,7 +153,7 @@ Describe 'Rename-ForeachFsItem' {
           'loopz.data.t2.txt' = 'data.loopz.t2.txt';
           'loopz.data.t3.txt' = 'data.loopz.t3.txt';
         }
-        Get-ChildItem -Path $directoryPath -Filter '*.txt' | Rename-ForeachFsItem -File `
+        Get-ChildItem -Path $directoryPath -Filter '*.txt' | Rename-Many -File `
           -Pattern 'data.' -Start -WhatIf;
       }
     } # and: Source matches Pattern in middle
@@ -161,7 +161,7 @@ Describe 'Rename-ForeachFsItem' {
     Context 'and: Source matches Pattern already at start' {
       It 'should: NOT do rename' {
         $script:expected = @{}
-        Get-ChildItem -Path $directoryPath -Filter '*.txt' | Rename-ForeachFsItem -File `
+        Get-ChildItem -Path $directoryPath -Filter '*.txt' | Rename-Many -File `
           -Pattern 'loopz.' -Start -WhatIf;
       }
     } # and: Source matches Pattern in middle
@@ -175,7 +175,7 @@ Describe 'Rename-ForeachFsItem' {
           'loopz.data.t2.txt' = 'loopz.t2.data.txt';
           'loopz.data.t3.txt' = 'loopz.t3.data.txt';
         }
-        Get-ChildItem -Path $directoryPath -File | Rename-ForeachFsItem -File `
+        Get-ChildItem -Path $directoryPath -File | Rename-Many -File `
           -Pattern '.data' -End -WhatIf;
       }
     }
@@ -183,7 +183,7 @@ Describe 'Rename-ForeachFsItem' {
     Context 'and: Source matches Pattern already at end' {
       It 'should: NOT do rename' {
         $script:expected = @{}
-        Get-ChildItem -Path $directoryPath | Rename-ForeachFsItem -File `
+        Get-ChildItem -Path $directoryPath | Rename-Many -File `
           -Pattern 't1' -End -WhatIf;
       }
     } # and: Source matches Pattern in middle
@@ -202,7 +202,7 @@ Describe 'Rename-ForeachFsItem' {
           It 'should: do rename; replace First Pattern for With text' {
             $script:expected = @{}
 
-            Get-ChildItem -Path $directoryPath | Rename-ForeachFsItem -File `
+            Get-ChildItem -Path $directoryPath | Rename-Many -File `
               -Pattern 'a', f -With 'blah' -WhatIf;
           }
         }
@@ -217,7 +217,7 @@ Describe 'Rename-ForeachFsItem' {
               'loopz.data.t3.txt'        = 'loopz.dtta.t3.txt';
             }
 
-            Get-ChildItem -Path $directoryPath | Rename-ForeachFsItem -File `
+            Get-ChildItem -Path $directoryPath | Rename-Many -File `
               -Pattern 'a', f -With 't' -WhatIf;
           }
         } # and: First Only
@@ -229,7 +229,7 @@ Describe 'Rename-ForeachFsItem' {
               'loopz.application.t2.log' = 'loopz.applicati0n.t2.log';
             }
 
-            Get-ChildItem -Path $directoryPath | Rename-ForeachFsItem -File `
+            Get-ChildItem -Path $directoryPath | Rename-Many -File `
               -Pattern 'o', 3 -With '0' -WhatIf;
           }
         } # and: replace 3rd match
@@ -244,7 +244,7 @@ Describe 'Rename-ForeachFsItem' {
               'loopz.data.t3.txt'        = 'loopz.dat@.t3.txt';
             }
 
-            Get-ChildItem -Path $directoryPath | Rename-ForeachFsItem -File `
+            Get-ChildItem -Path $directoryPath | Rename-Many -File `
               -Pattern 'a', l -LiteralWith '@' -WhatIf;
           }
         } # and: Last Only
@@ -261,7 +261,7 @@ Describe 'Rename-ForeachFsItem' {
               'loopz.data.t3.txt'        = 'loopz.dt3ta.t3.txt';
             }
 
-            Get-ChildItem -Path $directoryPath | Rename-ForeachFsItem -File `
+            Get-ChildItem -Path $directoryPath | Rename-Many -File `
               -Pattern 'a', f -With 't\d' -Whole w -WhatIf;
           }
         } # and: Whole With
@@ -270,7 +270,7 @@ Describe 'Rename-ForeachFsItem' {
           It 'should: do rename; replace First Pattern for With text' {
             $script:expected = @{}
 
-            Get-ChildItem -Path $directoryPath | Rename-ForeachFsItem -File `
+            Get-ChildItem -Path $directoryPath | Rename-Many -File `
               -Pattern 'a', f -With '\d{4}' -WhatIf;
           }
         }
@@ -285,7 +285,7 @@ Describe 'Rename-ForeachFsItem' {
               'loopz.data.t3.txt'        = 'loopz.dt3ta.t3.txt';
             }
 
-            Get-ChildItem -Path $directoryPath | Rename-ForeachFsItem -File `
+            Get-ChildItem -Path $directoryPath | Rename-Many -File `
               -Pattern 'a', f -With 't\d' -WhatIf;
           }
         } # and: First Only
@@ -302,7 +302,7 @@ Describe 'Rename-ForeachFsItem' {
               'loopz.data.t3.txt'        = 'loopz.d.datta.t3.txt';
             }
 
-            Get-ChildItem -Path $directoryPath | Rename-ForeachFsItem -File `
+            Get-ChildItem -Path $directoryPath | Rename-Many -File `
               -Pattern 'a', f -With ($(esc('.')) + '\w{3}') -WhatIf;
           }
         } # and: First Only
@@ -319,7 +319,7 @@ Describe 'Rename-ForeachFsItem' {
               'loopz.data.t3.txt'        = 'loopz.d@ta.t3.txt';
             }
 
-            Get-ChildItem -Path $directoryPath | Rename-ForeachFsItem -File `
+            Get-ChildItem -Path $directoryPath | Rename-Many -File `
               -Pattern 'a', f -LiteralWith '@' -WhatIf;
           }
 
@@ -330,7 +330,7 @@ Describe 'Rename-ForeachFsItem' {
                 'loopz.application.t2.log' = 'loopz.applicati0n.t2.log';
               }
 
-              Get-ChildItem -Path $directoryPath | Rename-ForeachFsItem -File `
+              Get-ChildItem -Path $directoryPath | Rename-Many -File `
                 -Pattern 'o', 3 -LiteralWith '0' -WhatIf;
             }
           } # and: replace 3rd match
@@ -345,7 +345,7 @@ Describe 'Rename-ForeachFsItem' {
                 'loopz.data.t3.txt'        = 'loopz.dat@.t3.txt';
               }
 
-              Get-ChildItem -Path $directoryPath | Rename-ForeachFsItem -File `
+              Get-ChildItem -Path $directoryPath | Rename-Many -File `
                 -Pattern 'a', l -LiteralWith '@' -WhatIf;
             }
           } # and: Last Only
@@ -360,7 +360,7 @@ Describe 'Rename-ForeachFsItem' {
               'loopz.application.t2.log' = 'h00pz.application.t2.log';
             }
 
-            Get-ChildItem -Path $directoryPath | Rename-ForeachFsItem -File `
+            Get-ChildItem -Path $directoryPath | Rename-Many -File `
               -Pattern 'loopz' -Except 'data' -With 'h00pz' -WhatIf;
           }
         }
@@ -376,7 +376,7 @@ Describe 'Rename-ForeachFsItem' {
             'loopz.data.t3.txt'        = 'data.t3.txt';
           }
 
-          Get-ChildItem -Path $directoryPath | Rename-ForeachFsItem -File `
+          Get-ChildItem -Path $directoryPath | Rename-Many -File `
             -Pattern $(esc('loopz.')) -WhatIf;
         }
       } # and: "Cut" (without replacement)
@@ -392,7 +392,7 @@ Describe 'Rename-ForeachFsItem' {
           }
           [string]$plastikmanPath = './Tests/Data/traverse/Audio/MINIMAL/Plastikman';
 
-          Get-ChildItem -Path $plastikmanPath | Rename-ForeachFsItem -Directory `
+          Get-ChildItem -Path $plastikmanPath | Rename-Many -Directory `
             -Pattern 'e' -With '3' -WhatIf;
         }
       }
@@ -413,7 +413,7 @@ Describe 'Rename-ForeachFsItem' {
       Context 'MoveToAnchor' {
         It 'should: not throw ParameterBindingException' {
           {
-            Get-ChildItem -File -Path $sourcePath -Filter $filter | Rename-ForeachFsItem -File `
+            Get-ChildItem -File -Path $sourcePath -Filter $filter | Rename-Many -File `
               -Whole p -Pattern 'data.' -Anchor 't\d{1}\.' -With 'repl' -Except 'fake' `
               -Condition $successCondition -Relation 'before' -WhatIf:$whatIf; } `
           | Should -Not -Throw;
@@ -423,7 +423,7 @@ Describe 'Rename-ForeachFsItem' {
       Context 'MoveToStart' {
         It 'should: not throw ParameterBindingException' {
           {
-            Get-ChildItem -File -Path $sourcePath -Filter $filter | Rename-ForeachFsItem -File `
+            Get-ChildItem -File -Path $sourcePath -Filter $filter | Rename-Many -File `
               -Whole p -Pattern 'data.' -Start -With 'repl' -Except 'fake' -Condition $successCondition `
               -WhatIf:$whatIf; } `
           | Should -Not -Throw;
@@ -433,7 +433,7 @@ Describe 'Rename-ForeachFsItem' {
       Context 'MoveToEnd' {
         It 'should: not throw ParameterBindingException' {
           {
-            Get-ChildItem -File -Path $sourcePath -Filter $filter | Rename-ForeachFsItem -File `
+            Get-ChildItem -File -Path $sourcePath -Filter $filter | Rename-Many -File `
               -Whole p -Pattern 'data.' -End -With 'repl' -Except 'fake' -Condition $successCondition `
               -WhatIf:$whatIf; } `
           | Should -Not -Throw;
@@ -443,7 +443,7 @@ Describe 'Rename-ForeachFsItem' {
       Context 'ReplaceWith' {
         It 'should: not throw ParameterBindingException' {
           {
-            Get-ChildItem -File -Path $sourcePath -Filter $filter | Rename-ForeachFsItem -File `
+            Get-ChildItem -File -Path $sourcePath -Filter $filter | Rename-Many -File `
               -Whole p -Pattern 'data.' -With 'info.' -Except 'fake' `
               -Condition $successCondition -WhatIf:$whatIf; } `
           | Should -Not -Throw;
@@ -459,7 +459,7 @@ Describe 'Rename-ForeachFsItem' {
         #
         It 'should: throw ParameterBindingException' {
           {
-            Get-ChildItem -File -Path $sourcePath -Filter $filter | Rename-ForeachFsItem -File `
+            Get-ChildItem -File -Path $sourcePath -Filter $filter | Rename-Many -File `
               -Pattern 'data.' -Anchor 't\d{1}\.' -First -WhatIf:$whatIf;
           } | Assert-Throw -ExceptionType ([ParameterBindingException]);
         }
@@ -470,7 +470,7 @@ Describe 'Rename-ForeachFsItem' {
       Context 'and: "Relation" specified' {
         It 'should: ParameterBindingException' {
           {
-            Get-ChildItem -File -Path $sourcePath -Filter $filter | Rename-ForeachFsItem -File `
+            Get-ChildItem -File -Path $sourcePath -Filter $filter | Rename-Many -File `
               -Pattern 'data.' -Start -Relation 'after' -Whole p -Condition $successCondition -WhatIf:$whatIf; } `
           | Assert-Throw -ExceptionType ([ParameterBindingException]);
         }
@@ -479,7 +479,7 @@ Describe 'Rename-ForeachFsItem' {
       Context 'and: "End" specified' {
         It 'should: throw ParameterBindingException' {
           {
-            Get-ChildItem -File -Path $sourcePath -Filter $filter | Rename-ForeachFsItem -File `
+            Get-ChildItem -File -Path $sourcePath -Filter $filter | Rename-Many -File `
               -Pattern 'data.' -Start -End -WhatIf:$whatIf;
           } | Assert-Throw -ExceptionType ([ParameterBindingException]);
         }
@@ -488,7 +488,7 @@ Describe 'Rename-ForeachFsItem' {
       Context 'and: "Anchor" specified' {
         It 'should: throw ParameterBindingException' {
           {
-            Get-ChildItem -File -Path $sourcePath -Filter $filter | Rename-ForeachFsItem -File `
+            Get-ChildItem -File -Path $sourcePath -Filter $filter | Rename-Many -File `
               -Pattern 'data.' -Start -Anchor 't\d{1}\.' -WhatIf:$whatIf;
           } | Assert-Throw -ExceptionType ([ParameterBindingException]);
         }
@@ -499,7 +499,7 @@ Describe 'Rename-ForeachFsItem' {
       Context 'and: "Relation" specified' {
         It 'should: ParameterBindingException' {
           {
-            Get-ChildItem -File -Path $sourcePath -Filter $filter | Rename-ForeachFsItem -File `
+            Get-ChildItem -File -Path $sourcePath -Filter $filter | Rename-Many -File `
               -Pattern 'data.' -End -Relation 'after' -Whole p -Condition $successCondition -WhatIf:$whatIf; } `
           | Assert-Throw -ExceptionType ([ParameterBindingException]);
         }
@@ -508,7 +508,7 @@ Describe 'Rename-ForeachFsItem' {
       Context 'and: "Start" specified' {
         It 'should: throw ParameterBindingException' {
           {
-            Get-ChildItem -File -Path $sourcePath -Filter $filter | Rename-ForeachFsItem -File `
+            Get-ChildItem -File -Path $sourcePath -Filter $filter | Rename-Many -File `
               -Pattern 'data.' -Start -End -WhatIf:$whatIf;
           } | Assert-Throw -ExceptionType ([ParameterBindingException]);
         }
@@ -517,7 +517,7 @@ Describe 'Rename-ForeachFsItem' {
       Context 'and: "Anchor" specified' {
         It 'should: throw ParameterBindingException' {
           {
-            Get-ChildItem -File -Path $sourcePath -Filter $filter | Rename-ForeachFsItem -File `
+            Get-ChildItem -File -Path $sourcePath -Filter $filter | Rename-Many -File `
               -Pattern 'data.' -End -Anchor 't\d{1}\.' -WhatIf:$whatIf;
           } | Assert-Throw -ExceptionType ([ParameterBindingException]);
         }
@@ -527,7 +527,7 @@ Describe 'Rename-ForeachFsItem' {
     Context 'is not: valid; given: File & Directory specified together' {
       It 'should: throw ParameterBindingException' {
         {
-          Get-ChildItem -File -Path $sourcePath -Filter $filter | Rename-ForeachFsItem -File `
+          Get-ChildItem -File -Path $sourcePath -Filter $filter | Rename-Many -File `
             -Directory -Whole p -Pattern 'data.' -Anchor 't\d{1}\.' -WhatIf:$whatIf;
         } | Assert-Throw -ExceptionType ([ParameterBindingException]);
       }
@@ -538,7 +538,7 @@ Describe 'Rename-ForeachFsItem' {
     It 'should: throw' {
       {
         [string]$badPattern = '(((';
-        Get-ChildItem -File -Path $directoryPath | Rename-ForeachFsItem -File `
+        Get-ChildItem -File -Path $directoryPath | Rename-Many -File `
           -Pattern $badPattern -Anchor 'loopz' -Relation 'before' -WhatIf;
       } | Should -Throw;
     }
@@ -548,7 +548,7 @@ Describe 'Rename-ForeachFsItem' {
     It 'should: throw' {
       {
         [string]$badWith = '(((';
-        Get-ChildItem -Path $directoryPath | Rename-ForeachFsItem -File `
+        Get-ChildItem -Path $directoryPath | Rename-Many -File `
           -Pattern 'o', 3 -With $badWith -WhatIf;
       } | Should -Throw;
     }
@@ -558,10 +558,10 @@ Describe 'Rename-ForeachFsItem' {
     It 'should: throw' {
       {
         [string]$badAnchor = '(((';
-        Get-ChildItem -File -Path $directoryPath | Rename-ForeachFsItem -File `
+        Get-ChildItem -File -Path $directoryPath | Rename-Many -File `
           -Pattern 'data.' -Anchor $badAnchor -Relation 'before' -WhatIf;
 
       } | Should -Throw;
     }
   } # given: invalid Anchor expression
-} # Rename-ForeachFsItem
+} # Rename-Many

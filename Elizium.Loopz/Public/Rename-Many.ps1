@@ -1,9 +1,9 @@
 
-function Rename-ForeachFsItem {
+function Rename-Many {
   [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSShouldProcess', '',
     Justification = 'WhatIf IS accessed and passed into PassThru')]
   [CmdletBinding(SupportsShouldProcess, DefaultParameterSetName = 'ReplaceWith')]
-  [Alias('rnfsi', 'rnall')]
+  [Alias('remy')]
   param
   (
     # Defining parameter sets for File and Directory, just to ensure both of these switches
@@ -73,7 +73,7 @@ function Rename-ForeachFsItem {
   )
 
   begin {
-    Write-Debug ">>> Rename-ForeachFsItem [ParamaterSet: '$($PSCmdlet.ParameterSetName)]' >>>";
+    Write-Debug ">>> Rename-Many [ParamaterSet: '$($PSCmdlet.ParameterSetName)]' >>>";
 
     [scriptblock]$doRenameFsItems = {
       param(
@@ -206,13 +206,13 @@ function Rename-ForeachFsItem {
   } # begin
 
   process {
-    Write-Debug "=== Rename-ForeachFsItem [$($underscore.Name)] ===";
+    Write-Debug "=== Rename-Many [$($underscore.Name)] ===";
 
     $collection += $underscore;
   }
 
   end {
-    Write-Debug '<<< Rename-ForeachFsItem <<<';
+    Write-Debug '<<< Rename-Many <<<';
     [int]$WIDE_THRESHOLD = 6;
 
     [boolean]$whatIf = $PSBoundParameters.ContainsKey('WhatIf');
@@ -364,7 +364,7 @@ function Rename-ForeachFsItem {
       # Inside the scope of this script block, $Condition is assigned to Invoke-ForeachFsItem's
       # version of the Condition parameter which is this scriptblock and thus results in a stack
       # overflow due to infinite recursion. We need to use a temporary variable so that
-      # the client's Condition (Rename-ForeachFsItem) is not accidentally hidden.
+      # the client's Condition (Rename-Many) is not accidentally hidden.
       #
       return ($patternRegEx.IsMatch($pipelineItem.Name)) -and `
       (($Except -eq [string]::Empty) -or -not($pipelineItem.Name -match $Except)) -and `
@@ -392,4 +392,4 @@ function Rename-ForeachFsItem {
 
     $null = $collection | Invoke-ForeachFsItem @parameters;
   } # end
-} # Rename-ForeachFsItem
+} # Rename-Many
