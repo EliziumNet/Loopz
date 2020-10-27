@@ -3,7 +3,7 @@ using namespace System.Text.RegularExpressions;
 Describe 'Update-Match' {
   BeforeAll {
     . .\Public\Update-Match.ps1;
-    . .\Public\Get-DeconstructedMatch.ps1;
+    . .\Public\Split-Match.ps1;
     . .\Tests\Helpers\new-expr.ps1;
   }
 

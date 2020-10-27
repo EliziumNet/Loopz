@@ -5,7 +5,7 @@
 # the source with the matched text removed and the third is the match object
 # that represents the matched text.
 #
-function Get-DeconstructedMatch {
+function Split-Match {
   param(
     [Parameter(Mandatory)]
     [string]$Source,

@@ -25,13 +25,13 @@ function Update-Match {
   )
 
   [string]$capturedPattern, $null, [System.Text.RegularExpressions.Match]$patternMatch = `
-    Get-DeconstructedMatch -Source $Value -PatternRegEx $Pattern `
+    Split-Match -Source $Value -PatternRegEx $Pattern `
     -Occurrence ($PSBoundParameters.ContainsKey('PatternOccurrence') ? $PatternOccurrence : 'f');
 
   if (-not([string]::IsNullOrEmpty($capturedPattern))) {
     if ($PSBoundParameters.ContainsKey('With')) {
       [string]$replaceWith, $null, [System.Text.RegularExpressions.Match]$withMatch = `
-        Get-DeconstructedMatch -Source $Value -PatternRegEx $With `
+        Split-Match -Source $Value -PatternRegEx $With `
         -Occurrence ($PSBoundParameters.ContainsKey('WithOccurrence') ? $WithOccurrence : 'f');
 
         if ([string]::IsNullOrEmpty($replaceWith)) {

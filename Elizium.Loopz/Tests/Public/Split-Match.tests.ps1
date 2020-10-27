@@ -1,5 +1,5 @@
 
-Describe 'Get-DeconstructedMatch' {
+Describe 'Split-Match' {
   BeforeAll {
     Get-Module Elizium.Loopz | Remove-Module
     Import-Module .\Output\Elizium.Loopz\Elizium.Loopz.psm1 `
@@ -14,7 +14,7 @@ Describe 'Get-DeconstructedMatch' {
       Context 'and: CapturedOnly' {
         Context 'and: First' {
           It 'should: Get first Occurrence' {
-            Get-DeconstructedMatch -Source $source -Pattern $pattern -Occurrence 'F' -CapturedOnly | `
+            Split-Match -Source $source -Pattern $pattern -Occurrence 'F' -CapturedOnly | `
               Should -BeExactly '23-05-2017';
           }
         } # and: First
@@ -24,7 +24,7 @@ Describe 'Get-DeconstructedMatch' {
         Context 'and: First' {
           It 'should: Get first Occurrence' {
             [string]$captured, [string]$remainder, $matchInfo = `
-              Get-DeconstructedMatch -Source $source -Pattern $pattern -Occurrence 'F';
+              Split-Match -Source $source -Pattern $pattern -Occurrence 'F';
             $captured | Should -BeExactly '23-05-2017';
             $remainder | Should -BeExactly 'Greetings; spot: , tom-next: 22-05-2017, cob: 21-05-2017.';
             $matchInfo | Should -Not -BeNullOrEmpty;
@@ -34,7 +34,7 @@ Describe 'Get-DeconstructedMatch' {
         Context 'and: Last' {
           It 'should: Get last Occurrence' {
             [string]$captured, [string]$remainder, $matchInfo = `
-              Get-DeconstructedMatch -Source $source -Pattern $pattern -Occurrence 'L';
+              Split-Match -Source $source -Pattern $pattern -Occurrence 'L';
             $captured | Should -BeExactly '21-05-2017';
             $remainder | Should -BeExactly 'Greetings; spot: 23-05-2017, tom-next: 22-05-2017, cob: .';
             $matchInfo | Should -Not -BeNullOrEmpty;
@@ -44,7 +44,7 @@ Describe 'Get-DeconstructedMatch' {
         Context 'and: 2nd' {
           It 'should: Get second Occurrence' {
             [string]$captured, [string]$remainder, $matchInfo = `
-              Get-DeconstructedMatch -Source $source -Pattern $pattern -Occurrence '2';
+              Split-Match -Source $source -Pattern $pattern -Occurrence '2';
             $captured | Should -BeExactly '22-05-2017';
             $remainder | Should -BeExactly 'Greetings; spot: 23-05-2017, tom-next: , cob: 21-05-2017.';
             $matchInfo | Should -Not -BeNullOrEmpty;
@@ -53,4 +53,4 @@ Describe 'Get-DeconstructedMatch' {
       }
     } # and: multiple matches
   } # given: Pattern does match
-} # Get-DeconstructedMatch
+} # Split-Match

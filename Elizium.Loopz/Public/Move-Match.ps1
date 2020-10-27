@@ -62,7 +62,7 @@ function Move-Match {
   # referenced inside Paste. Another important point of note is that With et al applies
   # to the anchor not the original Pattern capture.
   #
-  [string]$capturedPattern, [string]$patternRemoved, $null = Get-DeconstructedMatch `
+  [string]$capturedPattern, [string]$patternRemoved, $null = Split-Match `
     -Source $Value -PatternRegEx $Pattern `
     -Occurrence ($PSBoundParameters.ContainsKey('PatternOccurrence') ? $PatternOccurrence : 'f');
 
@@ -85,7 +85,7 @@ function Move-Match {
           # pattern, so if the With contains regex chars, they must pass in the string
           # pre-escaped: -With $(esc('some-pattern') + 'other stuff') or -EscapedWith 'some-pattern'
           #
-          [string]$replaceWith = Get-DeconstructedMatch `
+          [string]$replaceWith = Split-Match `
             -Source $patternRemoved -PatternRegEx $With `
             -Occurrence ($PSBoundParameters.ContainsKey('WithOccurrence') ? $WithOccurrence : 'f') `
             -CapturedOnly;
@@ -121,7 +121,7 @@ function Move-Match {
       # have to do the escaping themselves: -Anchor $(esc('some-pattern') + 'other stuff')
       #
       [string]$capturedAnchor, $null, [System.Text.RegularExpressions.Match]$anchorMatch = `
-        Get-DeconstructedMatch -Source $patternRemoved -PatternRegEx $Anchor `
+        Split-Match -Source $patternRemoved -PatternRegEx $Anchor `
         -Occurrence ($PSBoundParameters.ContainsKey('AnchorOccurrence') ? $AnchorOccurrence : 'f');
 
       if (-not([string]::IsNullOrEmpty($capturedAnchor))) {
