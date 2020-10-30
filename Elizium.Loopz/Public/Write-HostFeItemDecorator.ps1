@@ -212,14 +212,31 @@
     $parameters['Pairs'] = $themedPairs;
     $parameters['Theme'] = $krayolaTheme;
 
-    [string]$writerFn = 'Write-ThemedPairsInColour';
-
     if (-not([string]::IsNullOrWhiteSpace($message))) {
       $parameters['Message'] = $message;
     }
 
-    if (-not([string]::IsNullOrWhiteSpace($writerFn))) {
-      & $writerFn @parameters;
+    # Write the primary line
+    #
+    Write-ThemedPairsInColour @parameters;
+
+    # Write additional lines
+    #
+    if ($invokeResult -and $invokeResult.psobject.properties.match('Lines') -and $invokeResult.Lines) {
+      [int]$indent = $PassThru.ContainsKey('LOOPZ.WH-FOREACH-DECORATOR.INDENT') `
+        ? $PassThru['LOOPZ.WH-FOREACH-DECORATOR.INDENT'] : 3;
+      $parameters['Message'] = [string]::new(' ', $indent);
+
+      [System.Collections.Hashtable]$adjustedTheme = $krayolaTheme.Clone();
+      $adjustedTheme['MESSAGE-SUFFIX'] = [string]::Empty;
+      $adjustedTheme['OPEN'] = [string]::Empty;
+      $adjustedTheme['CLOSE'] = [string]::Empty;
+      $parameters['Theme'] = $adjustedTheme;
+
+      foreach ($line in $invokeResult.Lines) {
+        $parameters['Pairs'] = @(, $line);
+        Write-ThemedPairsInColour @parameters;
+      }
     }
   }
 

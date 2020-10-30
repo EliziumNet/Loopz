@@ -155,6 +155,7 @@ function Rename-Many {
       [boolean]$affirm = $false;
       [boolean]$whatIf = $_passThru.ContainsKey('WHAT-IF') -and ($_passThru['WHAT-IF']);
       [string[][]]$properties = @();
+      [string[][]]$lines = @();
 
       [string]$parent = $itemIsDirectory ? $_underscore.Parent.FullName : $_underscore.Directory.FullName;
       [boolean]$nameHasChanged = -not($_underscore.Name -ceq $newItemName);
@@ -176,8 +177,8 @@ function Rename-Many {
       [boolean]$differsByCaseOnly = $newItemName.ToLower() -eq $_underscore.Name.ToLower();
       [boolean]$affirm = $trigger -and ($product) -and -not($differsByCaseOnly);
 
-      if ($trigger) {
-        $properties += , @('To', $newItemName, $affirm);
+      if ($trigger) {       
+        $lines += , @($_passThru['LOOPZ.RN-FOREACH.TO-LABEL'], $newItemName, $affirm);
       }
       else {
         if ($clash) {
@@ -194,6 +195,10 @@ function Rename-Many {
       }
 
       $result | Add-Member -MemberType NoteProperty -Name 'Pairs' -Value (, $properties);
+
+      if ($lines.Length -gt 0) {
+        $result | Add-Member -MemberType NoteProperty -Name 'Lines' -Value (, $lines);
+      }
 
       if ($trigger) {
         $result | Add-Member -MemberType NoteProperty -Name 'Trigger' -Value $true;
@@ -294,12 +299,14 @@ function Rename-Many {
 
     [System.Collections.Hashtable]$passThru = @{
       'LOOPZ.WH-FOREACH-DECORATOR.BLOCK'         = $doRenameFsItems;
-      'LOOPZ.WH-FOREACH-DECORATOR.PRODUCT-LABEL' = $File.ToBool() ? 'File' : 'Directory';
+      'LOOPZ.WH-FOREACH-DECORATOR.PRODUCT-LABEL' = $File.ToBool() `
+        ? (get-PaddedLabel -Label 'File' -Width 9) : 'Directory';
       'LOOPZ.WH-FOREACH-DECORATOR.GET-RESULT'    = $getResult;
 
       'LOOPZ.HEADER-BLOCK.CRUMB'                 = '[🛡️] '
       'LOOPZ.HEADER-BLOCK.LINE'                  = $LoopzUI.DashLine;
       'LOOPZ.HEADER-BLOCK.MESSAGE'               = $whatIf ? 'Rename (WhatIf)' : 'Rename';
+      'LOOPZ.WH-FOREACH-DECORATOR.INDENT'        = 49;
 
       'LOOPZ.SUMMARY-BLOCK.LINE'                 = $LoopzUI.EqualsLine;
       'LOOPZ.SUMMARY-BLOCK.MESSAGE'              = '[💎] Rename Summary';
@@ -307,6 +314,8 @@ function Rename-Many {
       'LOOPZ.RN-FOREACH.PATTERN'                 = $patternRegEx;
       'LOOPZ.RN-FOREACH.PATTERN-OCC'             = $patternOccurrence;
       'LOOPZ.RN-FOREACH.FS-ITEM-TYPE'            = $File.ToBool() ? 'FILE' : 'DIRECTORY';
+
+      'LOOPZ.RN-FOREACH.TO-LABEL'                = get-PaddedLabel -Label 'To' -Width 9;
     }
     $passThru['LOOPZ.RN-FOREACH.ACTION'] = $doMoveToken ? 'Move-Match' : 'Update-Match';
 
