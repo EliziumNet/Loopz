@@ -163,8 +163,18 @@ function Rename-Many {
       [boolean]$clash = (Test-Path -Path $newItemFullPath) -and $nameHasChanged;
 
       [string]$itemEmoji = $itemIsDirectory ? '📁' : '🏷️';
-      [string]$message = '   [{0}] Rename Item{1}' -f $itemEmoji, ($whatIf ? ' (WhatIf)' : '');
+      [string]$message = '   [{0}] Rename Item' -f $itemEmoji;
       $_passThru['LOOPZ.WH-FOREACH-DECORATOR.MESSAGE'] = $message;
+
+      # THIS IS A HACK UNTIL WE FIND THE SOLUTION TO THE PROBLEM WHERE FOR FILES, THE
+      # MESSAGE-SUFFIX IS DISPLAYED WITH AN EXTRA PRECEDING SPACE (AND AFTER $message as above)
+      # WHICH THROWS OUT OUR INDENT BY 1 POSITION.
+      #
+      $_passThru['LOOPZ.WH-FOREACH-DECORATOR.INDENT'] = $($itemIsDirectory ? 39 : 40);
+
+      $_passThru['LOOPZ.WH-FOREACH-DECORATOR.PRODUCT-LABEL'] = $(get-PaddedLabel -Label $(
+          $itemIsDirectory ? 'Directory' : 'File'
+        ) -Width 9);
 
       if ($nameHasChanged -and -not($clash)) {
         $trigger = $true;
@@ -188,6 +198,10 @@ function Rename-Many {
         else {
           $properties += , @('Not renamed', '⛔');
         }
+      }
+
+      if ($whatIf) {
+        $properties += , @('WhatIf', '✔️');
       }
 
       [PSCustomObject]$result = [PSCustomObject]@{
@@ -298,24 +312,19 @@ function Rename-Many {
       -WholeWord:$(-not([string]::IsNullOrEmpty($adjustedWhole)) -and ($adjustedWhole -in @('*', 'p')));
 
     [System.Collections.Hashtable]$passThru = @{
-      'LOOPZ.WH-FOREACH-DECORATOR.BLOCK'         = $doRenameFsItems;
-      'LOOPZ.WH-FOREACH-DECORATOR.PRODUCT-LABEL' = $File.ToBool() `
-        ? (get-PaddedLabel -Label 'File' -Width 9) : 'Directory';
-      'LOOPZ.WH-FOREACH-DECORATOR.GET-RESULT'    = $getResult;
+      'LOOPZ.WH-FOREACH-DECORATOR.BLOCK'      = $doRenameFsItems;
+      'LOOPZ.WH-FOREACH-DECORATOR.GET-RESULT' = $getResult;
 
-      'LOOPZ.HEADER-BLOCK.CRUMB'                 = '[🛡️] '
-      'LOOPZ.HEADER-BLOCK.LINE'                  = $LoopzUI.DashLine;
-      'LOOPZ.HEADER-BLOCK.MESSAGE'               = $whatIf ? 'Rename (WhatIf)' : 'Rename';
-      'LOOPZ.WH-FOREACH-DECORATOR.INDENT'        = 49;
+      'LOOPZ.HEADER-BLOCK.CRUMB'              = '[🛡️] '
+      'LOOPZ.HEADER-BLOCK.LINE'               = $LoopzUI.DashLine;
 
-      'LOOPZ.SUMMARY-BLOCK.LINE'                 = $LoopzUI.EqualsLine;
-      'LOOPZ.SUMMARY-BLOCK.MESSAGE'              = '[💎] Rename Summary';
+      'LOOPZ.SUMMARY-BLOCK.LINE'              = $LoopzUI.EqualsLine;
+      'LOOPZ.SUMMARY-BLOCK.MESSAGE'           = '[💎] Rename Summary';
 
-      'LOOPZ.RN-FOREACH.PATTERN'                 = $patternRegEx;
-      'LOOPZ.RN-FOREACH.PATTERN-OCC'             = $patternOccurrence;
-      'LOOPZ.RN-FOREACH.FS-ITEM-TYPE'            = $File.ToBool() ? 'FILE' : 'DIRECTORY';
+      'LOOPZ.RN-FOREACH.PATTERN'              = $patternRegEx;
+      'LOOPZ.RN-FOREACH.PATTERN-OCC'          = $patternOccurrence;
 
-      'LOOPZ.RN-FOREACH.TO-LABEL'                = get-PaddedLabel -Label 'To' -Width 9;
+      'LOOPZ.RN-FOREACH.TO-LABEL'             = get-PaddedLabel -Label 'To' -Width 9;
     }
     $passThru['LOOPZ.RN-FOREACH.ACTION'] = $doMoveToken ? 'Move-Match' : 'Update-Match';
 
@@ -391,7 +400,7 @@ function Rename-Many {
     if ($PSBoundParameters.ContainsKey('File')) {
       $parameters['File'] = $true;
     }
-    else {
+    elseif ($PSBoundParameters.ContainsKey('Directory')) {
       $parameters['Directory'] = $true;
     }
 
