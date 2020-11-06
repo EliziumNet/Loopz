@@ -288,6 +288,20 @@ function Rename-Many {
       }
     }
 
+    [boolean]$doMoveToken = ($PSBoundParameters.ContainsKey('Anchor') -or
+      $PSBoundParameters.ContainsKey('Start') -or $PSBoundParameters.ContainsKey('End'));
+
+    [boolean]$doCut = (
+      -not($doMoveToken) -and
+      -not($PSBoundParameters.ContainsKey('With')) -and
+      -not($PSBoundParameters.ContainsKey('LiteralWith')) -and
+      -not($PSBoundParameters.ContainsKey('Paste'))
+    )
+
+    if ($doCut) {
+      $properties += , @('[✂️] Cut', $patternExpression);
+    }
+
     if ($PSBoundParameters.ContainsKey('Paste')) {
       if (-not([string]::IsNullOrEmpty($Paste))) {
         if ($Paste.Length -gt $WIDE_THRESHOLD) {
@@ -304,9 +318,6 @@ function Rename-Many {
 
       $result.GetType() -in @([System.IO.FileInfo], [System.IO.DirectoryInfo]) ? $result.Name : $result;
     }
-
-    [boolean]$doMoveToken = ($PSBoundParameters.ContainsKey('Anchor') -or
-      $PSBoundParameters.ContainsKey('Start') -or $PSBoundParameters.ContainsKey('End'));
 
     [System.Text.RegularExpressions.RegEx]$patternRegEx = new-RegularExpression -Expression $patternExpression `
       -WholeWord:$(-not([string]::IsNullOrEmpty($adjustedWhole)) -and ($adjustedWhole -in @('*', 'p')));
