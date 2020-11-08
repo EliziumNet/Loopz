@@ -184,11 +184,8 @@ function Rename-Many {
         $product = $_underscore;
       }
 
-      [boolean]$differsByCaseOnly = $newItemName.ToLower() -eq $_underscore.Name.ToLower();
-      [boolean]$affirm = $trigger -and ($product) -and -not($differsByCaseOnly);
-
       if ($trigger) {       
-        $lines += , @($_passThru['LOOPZ.RN-FOREACH.TO-LABEL'], $newItemName, $affirm);
+        $lines += , @($_passThru['LOOPZ.RN-FOREACH.FROM-LABEL'], $_underscore.Name);
       }
       else {
         if ($clash) {
@@ -216,6 +213,12 @@ function Rename-Many {
 
       if ($trigger) {
         $result | Add-Member -MemberType NoteProperty -Name 'Trigger' -Value $true;
+      }
+
+      [boolean]$differsByCaseOnly = $newItemName.ToLower() -eq $_underscore.Name.ToLower();
+      [boolean]$affirm = $trigger -and ($product) -and -not($differsByCaseOnly);
+      if ($affirm) {
+        $result | Add-Member -MemberType NoteProperty -Name 'Affirm' -Value $true;
       }
 
       return $result;
@@ -335,7 +338,7 @@ function Rename-Many {
       'LOOPZ.RN-FOREACH.PATTERN'              = $patternRegEx;
       'LOOPZ.RN-FOREACH.PATTERN-OCC'          = $patternOccurrence;
 
-      'LOOPZ.RN-FOREACH.TO-LABEL'             = get-PaddedLabel -Label 'To' -Width 9;
+      'LOOPZ.RN-FOREACH.FROM-LABEL'             = get-PaddedLabel -Label 'From' -Width 9;
     }
     $passThru['LOOPZ.RN-FOREACH.ACTION'] = $doMoveToken ? 'Move-Match' : 'Update-Match';
 

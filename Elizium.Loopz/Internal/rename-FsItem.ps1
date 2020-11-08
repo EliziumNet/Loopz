@@ -59,7 +59,7 @@ function rename-FsItem {
     }
   }
   else {
-    $result = $From;
+    $result = $To;
   }
 
   return $result;

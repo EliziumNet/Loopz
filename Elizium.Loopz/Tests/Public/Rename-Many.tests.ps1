@@ -32,7 +32,7 @@ Describe 'Rename-Many' {
         #
         test-expect -Expects $expected -Item $From.Name -Actual $To;
       }
-      return $From;
+      return $To;
     }
 
     function test-expect {
