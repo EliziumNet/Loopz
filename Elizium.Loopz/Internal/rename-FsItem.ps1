@@ -52,7 +52,7 @@ function rename-FsItem {
         #
       }
 
-      $result = Get-Item -Path $destinationPath;
+      $result = Get-Item -LiteralPath $destinationPath;
     }
     catch [System.IO.IOException] {
       $result = $null;

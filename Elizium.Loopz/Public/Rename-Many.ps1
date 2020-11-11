@@ -160,7 +160,7 @@ function Rename-Many {
       [string]$parent = $itemIsDirectory ? $_underscore.Parent.FullName : $_underscore.Directory.FullName;
       [boolean]$nameHasChanged = -not($_underscore.Name -ceq $newItemName);
       [string]$newItemFullPath = Join-Path -Path $parent -ChildPath $newItemName;
-      [boolean]$clash = (Test-Path -Path $newItemFullPath) -and $nameHasChanged;
+      [boolean]$clash = (Test-Path -LiteralPath $newItemFullPath) -and $nameHasChanged;
 
       [string]$itemEmoji = $itemIsDirectory ? '📁' : '🏷️';
       [string]$message = '   [{0}] Rename Item' -f $itemEmoji;
