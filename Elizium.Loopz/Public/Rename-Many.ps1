@@ -69,7 +69,14 @@ function Rename-Many {
     [switch]$End,
 
     [Parameter()]
-    [string]$Paste
+    [string]$Paste,
+
+    [Parameter()]
+    [PSCustomObject]$Context = [PSCustomObject]@{
+      Title          = 'Rename'
+      ItemMessage    = 'Rename Item'
+      SummaryMessage = 'Rename Summary'
+    }
   )
 
   begin {
@@ -163,18 +170,33 @@ function Rename-Many {
       [boolean]$clash = (Test-Path -LiteralPath $newItemFullPath) -and $nameHasChanged;
 
       [string]$itemEmoji = $itemIsDirectory ? '📁' : '🏷️';
-      [string]$message = '   [{0}] Rename Item' -f $itemEmoji;
-      $_passThru['LOOPZ.WH-FOREACH-DECORATOR.MESSAGE'] = $message;
-
+      [string]$fileSystemItemType = $itemIsDirectory ? 'Directory' : 'File';
+      
       # THIS IS A HACK UNTIL WE FIND THE SOLUTION TO THE PROBLEM WHERE FOR FILES, THE
-      # MESSAGE-SUFFIX IS DISPLAYED WITH AN EXTRA PRECEDING SPACE (AND AFTER $message as above)
+      # MESSAGE-SUFFIX IS DISPLAYED WITH AN EXTRA PRECEDING SPACE (AND AFTER $message as below)
       # WHICH THROWS OUT OUR INDENT BY 1 POSITION.
       #
       $_passThru['LOOPZ.WH-FOREACH-DECORATOR.INDENT'] = $($itemIsDirectory ? 39 : 40);
 
+      [PSCustomObject]$context = $_passThru['LOOPZ.RN-FOREACH.CONTEXT'];
+      [int]$maxItemMessageSize = $_passThru['LOOPZ.RN-FOREACH.MAX-ITEM-MESSAGE-SIZE'];
+
+      [string]$message = if ($context.psobject.properties.match('ItemMessage') -and `
+          -not([string]::IsNullOrEmpty($Context.ItemMessage))) {
+
+        $paddedLabel = get-PaddedLabel -Label $($Context.ItemMessage.replace(
+            $Loopz.FsItemTypePlaceholder, $fileSystemItemType)) -Width $maxItemMessageSize;
+
+        '   [{0}] {1}' -f $itemEmoji, $paddedLabel;
+      }
+      else {
+        '   [{0}] Rename Item' -f $itemEmoji;
+      }
+
+      $_passThru['LOOPZ.WH-FOREACH-DECORATOR.MESSAGE'] = $message;
+
       $_passThru['LOOPZ.WH-FOREACH-DECORATOR.PRODUCT-LABEL'] = $(get-PaddedLabel -Label $(
-          $itemIsDirectory ? 'Directory' : 'File'
-        ) -Width 9);
+          $fileSystemItemType) -Width 9);
 
       if ($nameHasChanged -and -not($clash)) {
         $trigger = $true;
@@ -325,20 +347,36 @@ function Rename-Many {
     [System.Text.RegularExpressions.RegEx]$patternRegEx = new-RegularExpression -Expression $patternExpression `
       -WholeWord:$(-not([string]::IsNullOrEmpty($adjustedWhole)) -and ($adjustedWhole -in @('*', 'p')));
 
+    [string]$title = $Context.psobject.properties.match('Title') -and `
+      -not([string]::IsNullOrEmpty($Context.Title)) `
+      ? $Context.Title : 'Rename';
+
+    [int]$maxItemMessageSize = ($Context.psobject.properties.match('ItemMessage') -and `
+        -not([string]::IsNullOrEmpty($Context.ItemMessage))) `
+      ? $Context.ItemMessage.replace($Loopz.FsItemTypePlaceholder, 'Directory').Length `
+      : $Context.ItemMessage.Length;
+
+    [string]$summaryMessage = $Context.psobject.properties.match('SummaryMessage') -and `
+      -not([string]::IsNullOrEmpty($Context.SummaryMessage)) `
+      ? $Context.SummaryMessage : 'Rename Summary';
+
     [System.Collections.Hashtable]$passThru = @{
-      'LOOPZ.WH-FOREACH-DECORATOR.BLOCK'      = $doRenameFsItems;
-      'LOOPZ.WH-FOREACH-DECORATOR.GET-RESULT' = $getResult;
+      'LOOPZ.WH-FOREACH-DECORATOR.BLOCK'       = $doRenameFsItems;
+      'LOOPZ.WH-FOREACH-DECORATOR.GET-RESULT'  = $getResult;
 
-      'LOOPZ.HEADER-BLOCK.CRUMB'              = '[🛡️] '
-      'LOOPZ.HEADER-BLOCK.LINE'               = $LoopzUI.DashLine;
+      'LOOPZ.HEADER-BLOCK.CRUMB'               = '[🛡️] '
+      'LOOPZ.HEADER-BLOCK.LINE'                = $LoopzUI.DashLine;
 
-      'LOOPZ.SUMMARY-BLOCK.LINE'              = $LoopzUI.EqualsLine;
-      'LOOPZ.SUMMARY-BLOCK.MESSAGE'           = '[💎] Rename Summary';
+      'LOOPZ.SUMMARY-BLOCK.LINE'               = $LoopzUI.EqualsLine;
+      'LOOPZ.SUMMARY-BLOCK.MESSAGE'            = '[💎] {0}' -f $summaryMessage;
+      'LOOPZ.HEADER-BLOCK.MESSAGE'             = $title;
 
-      'LOOPZ.RN-FOREACH.PATTERN'              = $patternRegEx;
-      'LOOPZ.RN-FOREACH.PATTERN-OCC'          = $patternOccurrence;
+      'LOOPZ.RN-FOREACH.PATTERN'               = $patternRegEx;
+      'LOOPZ.RN-FOREACH.PATTERN-OCC'           = $patternOccurrence;
+      'LOOPZ.RN-FOREACH.CONTEXT'               = $Context;
+      'LOOPZ.RN-FOREACH.MAX-ITEM-MESSAGE-SIZE' = $maxItemMessageSize;
 
-      'LOOPZ.RN-FOREACH.FROM-LABEL'             = get-PaddedLabel -Label 'From' -Width 9;
+      'LOOPZ.RN-FOREACH.FROM-LABEL'            = get-PaddedLabel -Label 'From' -Width 9;
     }
     $passThru['LOOPZ.RN-FOREACH.ACTION'] = $doMoveToken ? 'Move-Match' : 'Update-Match';
 

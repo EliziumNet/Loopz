@@ -366,8 +366,29 @@ Describe 'Rename-Many' {
         }
       } # and: Except
 
+      Context 'and: Context' {
+        It 'should: show the Context' -Tag 'Current' {
+          $script:expected = @{
+            'loopz.application.t1.log' = 'loopz.applic@tion.t1.log';
+            'loopz.application.t2.log' = 'loopz.applic@tion.t2.log';
+            'loopz.data.t1.txt'        = 'loopz.dat@.t1.txt';
+            'loopz.data.t2.txt'        = 'loopz.dat@.t2.txt';
+            'loopz.data.t3.txt'        = 'loopz.dat@.t3.txt';
+          }
+
+          [PSCustomObject]$context = [PSCustomObject]@{
+            Title = 'TITLE'
+            ItemMessage = 'Rename *{_fileSystemItemType}'
+            SummaryMessage = '... and finally'
+          }
+
+          Get-ChildItem -Path $directoryPath | Rename-Many -Context $context -File `
+            -Pattern 'a', l -LiteralWith '@' -WhatIf;
+        }
+      }
+
       Context 'and: "Cut" (without replacement)' {
-        It 'should: do rename; cut the Pattern' {
+        It 'should: do rename; cut the Pattern' -Tag 'Current' {
           $script:expected = @{
             'loopz.application.t1.log' = 'application.t1.log';
             'loopz.application.t2.log' = 'application.t2.log';

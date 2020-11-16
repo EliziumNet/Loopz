@@ -23,7 +23,7 @@ $global:LoopzHelpers = @{
       -Trigger $_trigger
   } # WhItemDecoratorBlock
 
-  DefaultHeaderBlock    = [scriptblock] {
+  DefaultHeaderBlock   = [scriptblock] {
     param(
       [System.Collections.Hashtable]$PassThru = @{}
     )
@@ -69,11 +69,13 @@ $global:LoopzUI = [ordered]@{
 }
 
 $global:Loopz = [PSCustomObject]@{
-  InlineCodeToOption = [System.Collections.Hashtable]@{
+  InlineCodeToOption    = [System.Collections.Hashtable]@{
     'm' = 'Multiline';
     'i' = 'IgnoreCase';
     'x' = 'IgnorePatternWhitespace';
     's' = 'Singleline';
     'n' = 'ExplicitCapture';
   }
+
+  FsItemTypePlaceholder = '*{_fileSystemItemType}';
 }

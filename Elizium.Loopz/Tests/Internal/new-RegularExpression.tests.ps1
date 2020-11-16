@@ -1,7 +1,7 @@
 
 using namespace System.Text.RegularExpressions;
 
-Describe 'new-RegularExpression' -Tag 'Current' {
+Describe 'new-RegularExpression' {
   BeforeAll {
     . .\Public\globals.ps1
     . .\Internal\new-RegularExpression.ps1
@@ -22,7 +22,7 @@ Describe 'new-RegularExpression' -Tag 'Current' {
   }
 
   Context 'given: Pattern contains multiple inline codes' {
-    It 'should: Create regex with multiple options' -Tag 'Current' {
+    It 'should: Create regex with multiple options' {
       [Regex]$expression = new-RegularExpression -Expression "utopia\mix";
       $expression.Options -band [RegexOptions]::Multiline | Should -BeTrue;
       $expression.Options -band [RegexOptions]::IgnoreCase | Should -BeTrue;
