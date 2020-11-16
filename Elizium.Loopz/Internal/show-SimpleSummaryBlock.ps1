@@ -47,16 +47,9 @@ function show-SimpleSummaryBlock {
   #
   if ($PassThru.ContainsKey('LOOPZ.SUMMARY-BLOCK.WIDE-ITEMS')) {
     [string[][]]$wideItems = $PassThru['LOOPZ.SUMMARY-BLOCK.WIDE-ITEMS'];
-    $keyColours = $krayolaTheme['KEY-COLOURS'];
-    $valueColours = $krayolaTheme['VALUE-COLOURS'];
 
-    foreach ($item in $wideItems) {
-      Write-InColour -TextSnippets @(
-        @(@(, $item[0]) + $keyColours),
-        @(@(, ': ') + $metaColours),
-        @(@(, $item[1]) + $valueColours)
-      )
-    }
+    Write-ThemedPairsInColour -Pairs $wideItems -Theme $krayolaTheme `
+      -Message (New-Object String(' ', $message.Length));
   }
 
   # Second line
