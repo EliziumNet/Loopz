@@ -22,9 +22,7 @@ function new-RegularExpression {
 
   try {
     [string]$adjustedExpression = $Expression;
-
     [string[]]$optionsArray = @();
-    [string]$options = 'None';
 
     [string]$options = if ($extractOptionsRegEx.IsMatch($adjustedExpression)) {
       $null, $adjustedExpression, [System.Text.RegularExpressions.Match]$optionsMatch = `
