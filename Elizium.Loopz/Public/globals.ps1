@@ -67,3 +67,13 @@ $global:LoopzUI = [ordered]@{
   SmallLightDashLine  = ((New-Object String("-", (($_SmallLineLength - 1) / 2))).Replace("-", "- ") + "-");
   SmallTildeLine      = (New-Object String("~", $_SmallLineLength));
 }
+
+$global:Loopz = [PSCustomObject]@{
+  InlineCodeToOption = [System.Collections.Hashtable]@{
+    'm' = 'Multiline';
+    'i' = 'IgnoreCase';
+    'x' = 'IgnorePatternWhitespace';
+    's' = 'Singleline';
+    'n' = 'ExplicitCapture';
+  }
+}
