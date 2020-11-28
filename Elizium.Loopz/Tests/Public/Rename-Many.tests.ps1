@@ -367,7 +367,7 @@ Describe 'Rename-Many' {
       } # and: Except
 
       Context 'and: Context' {
-        It 'should: show the Context' -Tag 'Current' {
+        It 'should: show the Context' {
           $script:expected = @{
             'loopz.application.t1.log' = 'loopz.applic@tion.t1.log';
             'loopz.application.t2.log' = 'loopz.applic@tion.t2.log';
@@ -388,7 +388,7 @@ Describe 'Rename-Many' {
       }
 
       Context 'and: "Cut" (without replacement)' {
-        It 'should: do rename; cut the Pattern' -Tag 'Current' {
+        It 'should: do rename; cut the Pattern' {
           $script:expected = @{
             'loopz.application.t1.log' = 'application.t1.log';
             'loopz.application.t2.log' = 'application.t2.log';
