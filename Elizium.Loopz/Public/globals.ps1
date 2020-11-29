@@ -78,4 +78,107 @@ $global:Loopz = [PSCustomObject]@{
   }
 
   FsItemTypePlaceholder = '*{_fileSystemItemType}';
+
+  SignalLabel           = 0;
+  SignalEmoji           = 1;
+
+  MissingSignal         = @{
+    'windows' = @{
+      Missing = @('???', '🔻')
+    };
+    'linux'   = @{
+      Missing = @('???', '🔴')
+    };
+    'mac'     = @{
+      Missing = @('???', '🔺')
+    };
+  }
+
+  DefaultSignals        = [ordered]@{
+    # Operations
+    #
+    'CUT-A'        = @('Cut', '✂️')
+    'CUT-B'        = @('Cut', '🔪')
+    'COPY-A'       = @('Copy', '🍒')
+    'COPY-B'       = @('Copy', '🥒')
+    'MOVE-A'       = @('Move', '🍺')
+    'MOVE-B'       = @('Move', '🍻')
+    'PASTE-A'      = @('Paste', '🌶️')
+    'PASTE-B'      = @('Paste', '🥜')
+    'OVERWRITE-A'  = @('Overwrite', '♻️')
+    'OVERWRITE-B'  = @('Overwrite', '❗')
+
+    # Thingies
+    #
+    'DIRECTORY-A'  = @('Directory', '📁')
+    'DIRECTORY-B'  = @('Directory', '🗂️')
+    'FILE-A'       = @('File', '🏷️')
+    'FILE-B'       = @('File', '📝')
+    'PATTERN'      = @('Pattern', '🔍')
+    'LITERAL'      = @('Literal', '📚')
+    'WITH'         = @('With', '📌')
+    'CRUMB-A'      = @('Crumb', '🎯')
+    'CRUMB-B'      = @('Crumb', '🧿')
+    'CRUMB-C'      = @('Crumb', '💎')
+    'SUMMARY-A'    = @('Summary', '🔆')
+    'SUMMARY-B'    = @('Summary', '✨')
+
+    # Media
+    #
+    'AUDIO'        = @('Audio', '🎶')
+    'TEXT'         = @('Text', '🆎')
+    'DOCUMENT'     = @('Document', '📜')
+    'IMAGE'        = @('Image', '🌤️')
+    'MOVIE'        = @('Movie', '🎬')
+
+    # Indicators
+    #
+    'WHAT-IF'      = @('WhatIf', '🍂')
+    'WARNING-A'    = @('Warning', '⚠️')
+    'WARNING-B'    = @('Warning', '👻')
+    'SWITCH-ON'    = @('On', '✔️')
+    'SWITCH-OFF'   = @('Off', '❌')
+    'OK-A'         = @('🆗', '🚀')
+    'OK-B'         = @('🆗', '🌟')
+    'BAD-A'        = @('Bad', '💥')
+    'BAD-B'        = @('Bad', '💢')
+    'PROHIBITED'   = @('Prohibited', '🚫')
+
+    # Outcomes
+    #
+    'FAILED-A'     = @('Failed', '💀')
+    'FAILED-B'     = @('Failed', '💩')
+    'SKIPPED-A'    = @('Skipped', '💤')
+    'SKIPPED-B'    = @('Skipped', '👾')
+    'ABORTED-A'    = @('Aborted', '✖️')
+    'ABORTED-B'    = @('Aborted', '👽')
+    'CLASH'        = @('Clash', '📛')
+    'NOT-ACTIONED' = @('Not Actioned', '⛔')
+
+    # Command Specific
+    #
+    'REMY.ANCHOR'  = @('Anchor', '⚓')
+  }
+
+  OverrideSignals       = @{ # Label, Emoji
+    'windows' = @{
+      # defaults based on windows, so there should be no need for overrides
+    };
+
+    'linux'   = @{
+      # tbd
+    };
+
+    'mac'     = @{
+      # tbd
+    };
+  }
+
+  # DefaultSignals resolved into Signals by Initialize-Signals
+  #
+  Signals               = $null;
+
+  # User defined signals, should be populated by profile
+  #
+  CustomSignals         = $null;
 }

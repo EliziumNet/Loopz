@@ -140,6 +140,19 @@ task Compile @compileParams {
   if ($publicFunctions.Length -gt 0) {
     Add-Content $script:PsmPath "Export-ModuleMember -Function $($publicFunctions -join ', ')";
   }
+
+  # Insert custom module initialisation (./Init/module.ps1)
+  #
+  $initFolder = Join-Path -Path $script:ModuleRoot -ChildPath 'Init'
+  if (Test-Path -Path $initFolder) {
+    Write-Verbose "Injecting custom module initialisation code";
+    "" >> $script:PsmPath;
+    "# Custom Module Initialisation" >> $script:PsmPath;
+    "#" >> $script:PsmPath;
+    $moduleInitPath = Join-Path -Path $initFolder -ChildPath 'module.ps1';
+    $moduleInitContent = Get-Content -LiteralPath $moduleInitPath;
+    $moduleInitContent >> $script:PsmPath;
+  }
 }
 
 task CopyPSD {
