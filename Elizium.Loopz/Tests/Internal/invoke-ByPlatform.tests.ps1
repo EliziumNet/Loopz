@@ -1,5 +1,5 @@
 ﻿
-Describe 'invoke-ByPlatform' -Tag 'Current' {
+Describe 'invoke-ByPlatform' {
   BeforeAll {
     . .\Internal\get-PlatformName
     . .\Internal\invoke-ByPlatform.ps1

@@ -1,5 +1,5 @@
 
-Describe 'resolve-ByPlatform' -Tag 'Current' {
+Describe 'resolve-ByPlatform' {
   BeforeAll {
     . .\Internal\get-PlatformName
     . .\Internal\resolve-ByPlatform.ps1

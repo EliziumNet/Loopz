@@ -84,16 +84,21 @@ $global:Loopz = [PSCustomObject]@{
 
   MissingSignal         = @{
     'windows' = @{
-      Missing = @('???', '🔻')
+      'MISSING' = @('???', '🔻')
     };
     'linux'   = @{
-      Missing = @('???', '🔴')
+      'MISSING' = @('???', '🔴')
     };
     'mac'     = @{
-      Missing = @('???', '🔺')
+      'MISSING' = @('???', '🔺')
     };
   }
 
+  # TODO:
+  # - See 
+  #   * https://devblogs.microsoft.com/commandline/windows-command-line-unicode-and-utf-8-output-text-buffer/
+  #   * https://stackoverflow.com/questions/49476326/displaying-unicode-in-powershell
+  #
   DefaultSignals        = [ordered]@{
     # Operations
     #
@@ -122,6 +127,7 @@ $global:Loopz = [PSCustomObject]@{
     'CRUMB-C'      = @('Crumb', '💎')
     'SUMMARY-A'    = @('Summary', '🔆')
     'SUMMARY-B'    = @('Summary', '✨')
+    'MESSAGE'      = @('Message', '💭')
 
     # Media
     #

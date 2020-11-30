@@ -168,8 +168,10 @@ function Rename-Many {
       [boolean]$nameHasChanged = -not($_underscore.Name -ceq $newItemName);
       [string]$newItemFullPath = Join-Path -Path $parent -ChildPath $newItemName;
       [boolean]$clash = (Test-Path -LiteralPath $newItemFullPath) -and $nameHasChanged;
+      [System.Collections.Hashtable]$signals = $_passThru['LOOPZ.SIGNALS']
 
-      [string]$itemEmoji = $itemIsDirectory ? '📁' : '🏷️';
+      # [string]$itemEmoji = $itemIsDirectory ? '📁' : '🏷️';
+      [string]$itemEmoji = $signals[$($itemIsDirectory ? 'DIRECTORY-A' : 'FILE-A')][1];
       [string]$fileSystemItemType = $itemIsDirectory ? 'Directory' : 'File';
       
       # THIS IS A HACK UNTIL WE FIND THE SOLUTION TO THE PROBLEM WHERE FOR FILES, THE
@@ -257,11 +259,13 @@ function Rename-Many {
 
   end {
     Write-Debug '<<< Rename-Many <<<';
-    [int]$WIDE_THRESHOLD = 6;
 
     [boolean]$whatIf = $PSBoundParameters.ContainsKey('WhatIf');
-    [string[][]]$wideItems = @();
-    [string[][]]$properties = @();
+    [PSCustomObject]$containers = @{
+      Wide  = [string[][]]@();
+      Props = [string[][]]@();
+    }
+
     [string]$adjustedWhole = if ($PSBoundParameters.ContainsKey('Whole')) {
       $Whole.ToLower();
     }
@@ -269,47 +273,57 @@ function Rename-Many {
       [string]::Empty;
     }
 
+    [System.Collections.Hashtable]$signals = Get-Signals;
+
     # RegEx/Occurrence parameters
     #
     [string]$patternExpression, [string]$patternOccurrence = resolve-PatternOccurrence $Pattern
-    if ($patternExpression.Length -gt $WIDE_THRESHOLD) {
-      $wideItems += , @('[🔍] Pattern', $patternExpression);
-    }
-    else {
-      $properties += , @('[🔍] Pattern', $patternExpression);
-    }
+
+    Select-SignalContainer -Containers $containers -Name 'PATTERN' `
+      -Value $patternExpression -Signals $signals;
 
     if ($PSBoundParameters.ContainsKey('Anchor')) {
       [string]$anchorExpression, [string]$anchorOccurrence = resolve-PatternOccurrence $Anchor
-      [string]$anchorLabel = '[🎯] Anchor ({0})' -f $Relation;
-      if ($anchorExpression.Length -gt $WIDE_THRESHOLD) {
-        $wideItems += , @($anchorLabel, $anchorExpression);
-      }
-      else {
-        $properties += , @($anchorLabel, $anchorExpression);
-      }
+      # [string]$anchorLabel = '[🎯] Anchor ({0})' -f $Relation;
+      # if ($anchorExpression.Length -gt $WIDE_THRESHOLD) {
+      #   $wideItems += , @($anchorLabel, $anchorExpression);
+      # }
+      # else {
+      #   $properties += , @($anchorLabel, $anchorExpression);
+      # }
+
+      Select-SignalContainer -Containers $containers -Name 'REMY.ANCHOR' `
+        -Value $anchorExpression -Signals $signals -CustomLabel 'Anchor ({0})' -f $Relation;
     }
 
     if ($PSBoundParameters.ContainsKey('With')) {
       [string]$withExpression, [string]$withOccurrence = resolve-PatternOccurrence $With;
-      if ($withExpression.Length -gt $WIDE_THRESHOLD) {
-        $wideItems += , @('[📌] With', $withExpression);
-      }
-      else {
-        $properties += , @('[📌] With', $withExpression);
-      }
+      # if ($withExpression.Length -gt $WIDE_THRESHOLD) {
+      #   $wideItems += , @('[📌] With', $withExpression);
+      # }
+      # else {
+      #   $properties += , @('[📌] With', $withExpression);
+      # }
+
+      Select-SignalContainer -Containers $containers -Name 'WITH' `
+        -Value $withExpression -Signals $signals;
     }
     elseif ($PSBoundParameters.ContainsKey('LiteralWith')) {
       if (-not([string]::IsNullOrEmpty($LiteralWith))) {
-        if ($LiteralWith.Length -gt $WIDE_THRESHOLD) {
-          $wideItems += , @('[📚] LiteralWith', $LiteralWith);
-        }
-        else {
-          $properties += , @('[📚] LiteralWith', $LiteralWith);
-        }
+        # if ($LiteralWith.Length -gt $WIDE_THRESHOLD) {
+        #   $wideItems += , @('[📚] LiteralWith', $LiteralWith);
+        # }
+        # else {
+        #   $properties += , @('[📚] LiteralWith', $LiteralWith);
+        # }
+
+        Select-SignalContainer -Containers $containers -Name 'LITERAL' `
+          -Value $LiteralWith -Signals $signals;
       }
       elseif (-not($PSBoundParameters.ContainsKey('Paste'))) {
-        $properties += , @('[✂️] Cut', $patternExpression);
+        # $properties += , @('[✂️] Cut', $patternExpression);
+
+        $containers.Props += Get-FormattedSignal -Name 'CUT' -Value $patternExpression -Signals $Signals;
       }
     }
 
@@ -324,17 +338,19 @@ function Rename-Many {
     )
 
     if ($doCut) {
-      $properties += , @('[✂️] Cut', $patternExpression);
+      $containers.Props += Get-FormattedSignal -Name 'CUT' -Value $patternExpression -Signals $Signals;
     }
 
     if ($PSBoundParameters.ContainsKey('Paste')) {
       if (-not([string]::IsNullOrEmpty($Paste))) {
-        if ($Paste.Length -gt $WIDE_THRESHOLD) {
-          $wideItems += , @('[🌶️] Paste', $Paste);
-        }
-        else {
-          $properties += , @('[🌶️] Paste', $Paste);
-        }
+        # if ($Paste.Length -gt $WIDE_THRESHOLD) {
+        #   $wideItems += , @('[🌶️] Paste', $Paste);
+        # }
+        # else {
+        #   $properties += , @('[🌶️] Paste', $Paste);
+        # }
+        Select-SignalContainer -Containers $containers -Name 'PASTE-A' `
+          -Value $Paste -Signals $signals;
       }
     }
 
@@ -360,11 +376,13 @@ function Rename-Many {
       -not([string]::IsNullOrEmpty($Context.SummaryMessage)) `
       ? $Context.SummaryMessage : 'Rename Summary';
 
+    [string]$crumb = Get-FormattedSignal -Name 'CRUMB-B' -Signals $signals -EmojiOnly;
+
     [System.Collections.Hashtable]$passThru = @{
       'LOOPZ.WH-FOREACH-DECORATOR.BLOCK'       = $doRenameFsItems;
       'LOOPZ.WH-FOREACH-DECORATOR.GET-RESULT'  = $getResult;
 
-      'LOOPZ.HEADER-BLOCK.CRUMB'               = '[🛡️] '
+      'LOOPZ.HEADER-BLOCK.CRUMB'               = $crumb;
       'LOOPZ.HEADER-BLOCK.LINE'                = $LoopzUI.DashLine;
 
       'LOOPZ.SUMMARY-BLOCK.LINE'               = $LoopzUI.EqualsLine;
@@ -377,6 +395,7 @@ function Rename-Many {
       'LOOPZ.RN-FOREACH.MAX-ITEM-MESSAGE-SIZE' = $maxItemMessageSize;
 
       'LOOPZ.RN-FOREACH.FROM-LABEL'            = get-PaddedLabel -Label 'From' -Width 9;
+      'LOOPZ.SIGNALS'                          = $signals;
     }
     $passThru['LOOPZ.RN-FOREACH.ACTION'] = $doMoveToken ? 'Move-Match' : 'Update-Match';
 
@@ -405,11 +424,15 @@ function Rename-Many {
       $passThru['LOOPZ.RN-FOREACH.ANCHOR'] = $anchorRegEx;
     }
     elseif ($PSBoundParameters.ContainsKey('Start')) {
-      $properties += , @('Start', '[✔️]');
+      # $properties += , @('Start', '[✔️]');
+      $containers.Props += , @(Get-FormattedSignal -Name 'SWITCH-ON' `
+          -Value $patternExpression -Signals $Signals -CustomLabel 'Start');
       $passThru['LOOPZ.RN-FOREACH.ANCHOR-TYPE'] = 'START';
     }
     elseif ($PSBoundParameters.ContainsKey('End')) {
-      $properties += , @('End', '[✔️]');
+      # $properties += , @('End', '[✔️]');
+      $containers.Props += , @(Get-FormattedSignal -Name 'SWITCH-ON' `
+          -Value $patternExpression -Signals $Signals -CustomLabel 'End');
       $passThru['LOOPZ.RN-FOREACH.ANCHOR-TYPE'] = 'END';
     }
 
@@ -417,12 +440,12 @@ function Rename-Many {
       $passThru['LOOPZ.RN-FOREACH.PASTE'] = $Paste;
     }
 
-    if ($wideItems.Length -gt 0) {
-      $passThru['LOOPZ.SUMMARY-BLOCK.WIDE-ITEMS'] = $wideItems;
+    if ($containers.Wide.Length -gt 0) {
+      $passThru['LOOPZ.SUMMARY-BLOCK.WIDE-ITEMS'] = $containers.Wide;
     }
 
-    if ($properties.Length -gt 0) {
-      $passThru['LOOPZ.SUMMARY-BLOCK.PROPERTIES'] = $properties;
+    if ($containers.Props.Length -gt 0) {
+      $passThru['LOOPZ.SUMMARY-BLOCK.PROPERTIES'] = $containers.Props;
     }
 
     [scriptblock]$clientCondition = $Condition;

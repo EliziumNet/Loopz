@@ -2,7 +2,7 @@ using namespace System.Management.Automation;
 using namespace System.Collections;
 using namespace System.IO;
 
-Describe 'Rename-Many' {
+Describe 'Rename-Many' -Tag 'Current' {
   BeforeAll {
     Get-Module Elizium.Loopz | Remove-Module
     Import-Module .\Output\Elizium.Loopz\Elizium.Loopz.psm1 `

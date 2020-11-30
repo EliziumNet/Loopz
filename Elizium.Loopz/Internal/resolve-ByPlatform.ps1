@@ -1,7 +1,10 @@
 
 function resolve-ByPlatform {
   param(
+    [Parameter()]
     [System.Collections.Hashtable]$Hash,
+
+    [Parameter()]
     $Default
   )
 
