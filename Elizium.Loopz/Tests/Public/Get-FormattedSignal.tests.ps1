@@ -1,5 +1,5 @@
 
-Describe 'Get-FormattedSignal' -Tag 'Current' {
+Describe 'Get-FormattedSignal' {
   BeforeAll {
     Get-Module Elizium.Loopz | Remove-Module
     Import-Module .\Output\Elizium.Loopz\Elizium.Loopz.psm1 `
@@ -43,6 +43,13 @@ Describe 'Get-FormattedSignal' -Tag 'Current' {
         Get-FormattedSignal -Name 'GO' -Value 'getter' -Signals $signals `
           -EmojiOnlyFormat '[{0}] ' -EmojiOnly | `
           Should -BeExactly @('[@@] ', 'getter');
+      }
+    }
+
+    Context 'and: Emoji As Value' {
+      It 'should: Get Formatted Signal With Emoji As Value' {
+        Get-FormattedSignal -Name 'GO' -Signals $signals -EmojiAsValue -EmojiOnlyFormat '=({0})=' | `
+          Should -BeExactly @('Go', '=(@@)=');
       }
     }
   }

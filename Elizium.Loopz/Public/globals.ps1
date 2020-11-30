@@ -117,7 +117,7 @@ $global:Loopz = [PSCustomObject]@{
     #
     'DIRECTORY-A'  = @('Directory', '📁')
     'DIRECTORY-B'  = @('Directory', '🗂️')
-    'FILE-A'       = @('File', '🏷️')
+    'FILE-A'       = @('File', '🔖')
     'FILE-B'       = @('File', '📝')
     'PATTERN'      = @('Pattern', '🔍')
     'LITERAL'      = @('Literal', '📚')
@@ -134,12 +134,12 @@ $global:Loopz = [PSCustomObject]@{
     'AUDIO'        = @('Audio', '🎶')
     'TEXT'         = @('Text', '🆎')
     'DOCUMENT'     = @('Document', '📜')
-    'IMAGE'        = @('Image', '🌤️')
+    'IMAGE'        = @('Image', '🖼️')
     'MOVIE'        = @('Movie', '🎬')
 
     # Indicators
     #
-    'WHAT-IF'      = @('WhatIf', '🍂')
+    'WHAT-IF'      = @('WhatIf', '☑️')
     'WARNING-A'    = @('Warning', '⚠️')
     'WARNING-B'    = @('Warning', '👻')
     'SWITCH-ON'    = @('On', '✔️')
@@ -152,7 +152,7 @@ $global:Loopz = [PSCustomObject]@{
 
     # Outcomes
     #
-    'FAILED-A'     = @('Failed', '💀')
+    'FAILED-A'     = @('Failed', '☢️')
     'FAILED-B'     = @('Failed', '💩')
     'SKIPPED-A'    = @('Skipped', '💤')
     'SKIPPED-B'    = @('Skipped', '👾')

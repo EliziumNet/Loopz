@@ -20,23 +20,30 @@ function Get-FormattedSignal {
     [string]$EmojiOnlyFormat = '[{0}] ',
 
     [Parameter()]
-    [switch]$EmojiOnly
+    [switch]$EmojiOnly,
+
+    [Parameter()]
+    [switch]$EmojiAsValue
   )
 
   $signal = $Signals.ContainsKey($Name) `
     ? $Signals[$Name] : $(resolve-ByPlatform -Hash $Loopz.MissingSignal);
 
-  if ($EmojiOnly.ToBool()) {
-    [string]$formatted = $EmojiOnlyFormat -f $signal[1]
-  } else {
-    [string]$label = ($PSBoundParameters.ContainsKey('CustomLabel') -and
-      (-not([string]::IsNullOrEmpty($CustomLabel)))) ? $CustomLabel : $signal[0];
+  [string]$label = ($PSBoundParameters.ContainsKey('CustomLabel') -and
+    (-not([string]::IsNullOrEmpty($CustomLabel)))) ? $CustomLabel : $signal[0];
 
-    [string]$formatted = $Format -f $label, $signal[1]
+  [string]$formatted = $EmojiOnly.ToBool() `
+    ? $EmojiOnlyFormat -f $signal[1] : $Format -f $label, $signal[1];
+
+  $result = if ($PSBoundParameters.ContainsKey('Value')) {
+    @($formatted, $Value);
   }
-
-  $result = $PSBoundParameters.ContainsKey('Value') `
-    ? @($formatted, $Value) : $formatted;
+  elseif ($EmojiAsValue.ToBool()) {
+    @($label, $($EmojiOnlyFormat -f $signal[1]));
+  }
+  else {
+    $formatted;
+  }
 
   return $result;
 }

@@ -1,5 +1,5 @@
 
-Describe 'Select-SignalContainer' -Tag 'Current' {
+Describe 'Select-SignalContainer' {
   BeforeAll {
     Get-Module Elizium.Loopz | Remove-Module
     Import-Module .\Output\Elizium.Loopz\Elizium.Loopz.psm1 `
@@ -73,15 +73,6 @@ Describe 'Select-SignalContainer' -Tag 'Current' {
         $containers.Props.Count | Should -Be 2;
         $containers.Props[0] | Should -BeExactly @('[$$] Alert', 'watch it');
         $containers.Props[1] | Should -BeExactly @('[^^] Error', 'computer says no');
-      }
-    }
-
-    Context 'and: Without Label' {
-      It 'should: Select un-labelled signal into Wide' -Skip {
-        Select-SignalContainer -Containers $containers -Name 'GO' -Value 'getter' `
-          -Signals $signals -Threshold 4 -;
-        $containers.Wide.Count | Should -Be 1;
-        $containers.Wide[0] | Should -BeExactly @('[@@] Go', 'getter');
       }
     }
   }
