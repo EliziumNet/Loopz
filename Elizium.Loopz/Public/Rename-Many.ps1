@@ -389,6 +389,11 @@ function Rename-Many {
       $passThru['LOOPZ.RN-FOREACH.RELATION'] = $Relation;
     }
 
+    # NB: anchoredRegEx refers to whether -Start or -End anchors have been specified,
+    # NOT the -Anchor pattern (when ANCHOR-TYPE = 'MATCHED-ITEM') itself.
+    #
+    [System.Text.RegularExpressions.RegEx]$anchoredRegEx = $null;
+
     if ($PSBoundParameters.ContainsKey('Anchor')) {
 
       [System.Text.RegularExpressions.RegEx]$anchorRegEx = new-RegularExpression -Expression $anchorExpression `
@@ -403,12 +408,18 @@ function Rename-Many {
       $containers.Props += , @(Get-FormattedSignal -Name 'SWITCH-ON' `
           -Value $patternExpression -Signals $Signals -CustomLabel 'Start');
       $passThru['LOOPZ.RN-FOREACH.ANCHOR-TYPE'] = 'START';
+
+      [System.Text.RegularExpressions.RegEx]$anchoredRegEx = new-RegularExpression `
+        -Expression $('^' + $patternExpression);
     }
     elseif ($PSBoundParameters.ContainsKey('End')) {
 
       $containers.Props += , @(Get-FormattedSignal -Name 'SWITCH-ON' `
           -Value $patternExpression -Signals $Signals -CustomLabel 'End');
       $passThru['LOOPZ.RN-FOREACH.ANCHOR-TYPE'] = 'END';
+
+      [System.Text.RegularExpressions.RegEx]$anchoredRegEx = new-RegularExpression `
+        -Expression $($patternExpression + '$');
     }
 
     if ($PSBoundParameters.ContainsKey('Paste')) {
@@ -424,6 +435,14 @@ function Rename-Many {
     }
 
     [scriptblock]$clientCondition = $Condition;
+    [scriptblock]$compoundCondition = {
+      param(
+        [System.IO.FileSystemInfo]$pipelineItem
+      )
+      [boolean]$clientResult = $clientCondition.Invoke($pipelineItem);
+      [boolean]$isAlreadyAnchoredAt = $anchoredRegEx -and $anchoredRegEx.IsMatch($pipelineItem.Name);
+      return $($clientResult -and -not($isAlreadyAnchoredAt));
+    };
 
     [scriptblock]$matchesPattern = {
       param(
@@ -436,7 +455,7 @@ function Rename-Many {
       #
       return ($patternRegEx.IsMatch($pipelineItem.Name)) -and `
       (($Except -eq [string]::Empty) -or -not($pipelineItem.Name -match $Except)) -and `
-        $clientCondition.Invoke($pipelineItem);
+        $compoundCondition.Invoke($pipelineItem);
     }
 
     [System.Collections.Hashtable]$parameters = @{
