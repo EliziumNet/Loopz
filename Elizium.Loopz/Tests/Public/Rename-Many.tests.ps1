@@ -377,8 +377,8 @@ Describe 'Rename-Many' {
           }
 
           [PSCustomObject]$context = [PSCustomObject]@{
-            Title = 'TITLE'
-            ItemMessage = 'Rename *{_fileSystemItemType}'
+            Title          = 'TITLE'
+            ItemMessage    = 'Widget *{_fileSystemItemType}'
             SummaryMessage = '... and finally'
           }
 

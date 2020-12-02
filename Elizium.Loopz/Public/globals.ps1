@@ -83,15 +83,9 @@ $global:Loopz = [PSCustomObject]@{
   SignalEmoji           = 1;
 
   MissingSignal         = @{
-    'windows' = @{
-      'MISSING' = @('???', '🔻')
-    };
-    'linux'   = @{
-      'MISSING' = @('???', '🔴')
-    };
-    'mac'     = @{
-      'MISSING' = @('???', '🔺')
-    };
+    'windows' = @('???', '🔻');
+    'linux'   = @('???', '🔴');
+    'mac'     = @('???', '🔺');
   }
 
   # TODO:
@@ -117,17 +111,17 @@ $global:Loopz = [PSCustomObject]@{
     #
     'DIRECTORY-A'  = @('Directory', '📁')
     'DIRECTORY-B'  = @('Directory', '🗂️')
-    'FILE-A'       = @('File', '🔖')
+    'FILE-A'       = @('File', '🏷️')
     'FILE-B'       = @('File', '📝')
     'PATTERN'      = @('Pattern', '🔍')
-    'LITERAL'      = @('Literal', '📚')
+    'LITERAL'      = @('Literal', '🍑')
     'WITH'         = @('With', '📌')
     'CRUMB-A'      = @('Crumb', '🎯')
     'CRUMB-B'      = @('Crumb', '🧿')
     'CRUMB-C'      = @('Crumb', '💎')
     'SUMMARY-A'    = @('Summary', '🔆')
     'SUMMARY-B'    = @('Summary', '✨')
-    'MESSAGE'      = @('Message', '💭')
+    'MESSAGE'      = @('Message', '🗯️')
 
     # Media
     #
@@ -187,4 +181,12 @@ $global:Loopz = [PSCustomObject]@{
   # User defined signals, should be populated by profile
   #
   CustomSignals         = $null;
+
+  Defaults = [PSCustomObject]@{
+    Remy = [PSCustomObject]@{
+      Title          = 'Rename'
+      ItemMessage    = 'Rename Item'
+      SummaryMessage = 'Rename Summary'
+    }
+  }
 }

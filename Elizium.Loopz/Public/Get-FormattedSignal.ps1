@@ -27,7 +27,8 @@ function Get-FormattedSignal {
   )
 
   $signal = $Signals.ContainsKey($Name) `
-    ? $Signals[$Name] : $(resolve-ByPlatform -Hash $Loopz.MissingSignal);
+    ? $Signals[$Name] `
+    : @($("??? ({0})" -f $Name), $(resolve-ByPlatform -Hash $Loopz.MissingSignal)[1]);
 
   [string]$label = ($PSBoundParameters.ContainsKey('CustomLabel') -and
     (-not([string]::IsNullOrEmpty($CustomLabel)))) ? $CustomLabel : $signal[0];
