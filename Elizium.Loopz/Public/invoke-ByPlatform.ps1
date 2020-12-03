@@ -1,28 +1,45 @@
 
-function invoke-ByPlatform {
+function Invoke-ByPlatform {
   [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingWriteHost", "")]
   param(
-    [System.Collections.Hashtable]$Hash,
-
-    [PSCustomObject]$Default
+    [Parameter()]
+    [System.Collections.Hashtable]$Hash
   )
 
   $result = $null;
   [string]$platform = Get-PlatformName;
 
-  if ($Hash.ContainsKey($platform)) {
-    [System.Collections.Hashtable]$invokeInfo = $Hash[$platform];
-
-    if (($null -ne $invokeInfo.FunctionName) -and ($null -ne $invokeInfo.FunctionParameters)) {
-
-      [System.Collections.Hashtable]$parameters = $invokeInfo.FunctionParameters;
-      $result = &($invokeInfo.FunctionName) @parameters;
-    } else {
-      Write-warning $("Function info for '{0}' platform is missing 'FunctionName' and/or 'FunctionParameters'" -f $platform);
-    }
-  } elseif ($PSBoundParameters.ContainsKey('Default')) {
-    Write-Error "!!!!!! Missing platform: '$platform'" -ErrorAction Continue;
-    $result = &($Default.FunctionName) @($Default.FunctionParameters);
+  [PSCustomObject]$invokeInfo = if ($Hash.ContainsKey($platform)) {
+    $Hash[$platform];
   }
+  elseif ($Hash.ContainsKey('default')) {
+    $Hash['default'];
+  }
+  else {
+    Write-Error "!!!!!! Missing platform: '$platform' (and no default available)" -ErrorAction Continue;
+    $null;
+  }
+  
+  if ($invokeInfo.FnInfo) {
+    if ($invokeInfo.psobject.properties.match('Positional') -and $invokeInfo.Positional) {
+      [object[]]$positional = $invokeInfo.Positional;
+
+      if ([scriptblock]$block = $invokeInfo.FnInfo.ScriptBlock) {
+        $result = $block.Invoke($positional);
+      }
+      else {
+        Write-Error $("ScriptBlock for function: '$($invokeInfo.FnInfo.Name)', ('$platform': platform) is missing") `
+          -ErrorAction Continue;
+      }
+    } elseif ($invokeInfo.psobject.properties.match('Named') -and $invokeInfo.Named) {
+      [System.Collections.Hashtable]$named = $invokeInfo.Named;
+
+      $result = & $invokeInfo.FnInfo.Name @named;
+    } else {
+      Write-Error $("Missing Positional/Named: '$($invokeInfo.FnInfo.Name)', ('$platform': platform)") `
+        -ErrorAction Continue;
+    }
+  }
+
   return $result;
 }
