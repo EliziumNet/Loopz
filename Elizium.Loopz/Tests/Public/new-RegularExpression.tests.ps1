@@ -1,7 +1,7 @@
 
 using namespace System.Text.RegularExpressions;
 
-Describe 'New-RegularExpression' -Tag 'Current' {
+Describe 'New-RegularExpression' {
   BeforeAll {
     Get-Module Elizium.Loopz | Remove-Module
     Import-Module .\Output\Elizium.Loopz\Elizium.Loopz.psm1 `
