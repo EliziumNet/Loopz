@@ -1,5 +1,5 @@
 
-function resolve-PatternOccurrence {
+function Resolve-PatternOccurrence {
   param (
     [Parameter(Position = 0)]
     [object[]]$Value

@@ -1,5 +1,5 @@
 
-function get-PlatformName {
+function Get-PlatformName {
   $result = if ($IsWindows) {
     'windows';
   } elseif ($IsLinux) {

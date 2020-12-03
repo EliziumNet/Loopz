@@ -1,5 +1,5 @@
 
-function resolve-ByPlatform {
+function Resolve-ByPlatform {
   param(
     [Parameter()]
     [System.Collections.Hashtable]$Hash,

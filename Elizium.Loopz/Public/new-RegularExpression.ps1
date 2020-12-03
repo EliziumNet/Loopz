@@ -1,5 +1,5 @@
 
-function new-RegularExpression {
+function New-RegularExpression {
   [OutputType([System.Text.RegularExpressions.RegEx])]
   param(
     [Parameter(Position = 0, Mandatory)]

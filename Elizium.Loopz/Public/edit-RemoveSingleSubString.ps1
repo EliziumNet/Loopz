@@ -1,5 +1,5 @@
 
-function edit-RemoveSingleSubString {
+function Edit-RemoveSingleSubString {
   <#
 .NAME
   edit-RemoveSingleSubString
