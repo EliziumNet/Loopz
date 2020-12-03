@@ -1,5 +1,5 @@
 
-function resolve-ByPlatform {
+function Resolve-ByPlatform {
   param(
     [Parameter()]
     [System.Collections.Hashtable]$Hash,
@@ -9,7 +9,7 @@ function resolve-ByPlatform {
   )
 
   $result = $null;
-  [string]$platform = get-PlatformName;
+  [string]$platform = Get-PlatformName;
 
   if ($Hash.ContainsKey($platform)) {
     $result = $Hash[$platform];

@@ -10,7 +10,7 @@ function initialize-Signals {
   )
 
   [System.Collections.Hashtable]$result = $Signals.Clone();
-  [System.Collections.Hashtable]$withOverrides = resolve-ByPlatform -Hash $Overrides;
+  [System.Collections.Hashtable]$withOverrides = Resolve-ByPlatform -Hash $Overrides;
 
   $withOverrides.GetEnumerator() | ForEach-Object {
     try {

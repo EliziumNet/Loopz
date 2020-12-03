@@ -56,7 +56,7 @@ Describe 'Get-FormattedSignal' {
 
   Context 'given: Missing Signal Name' {
     It 'should: Get the Missing Signal' -Tag 'Current' {
-      Mock -ModuleName Elizium.Loopz resolve-ByPlatform { return @('Missing', '**') }
+      Mock -ModuleName Elizium.Loopz Resolve-ByPlatform { return @('Missing', '**') }
       Get-FormattedSignal -Name 'ABORT' -Value 'aborted' -Signals $signals | `
         Should -BeExactly @('[**] ??? (ABORT)', 'aborted');
     }

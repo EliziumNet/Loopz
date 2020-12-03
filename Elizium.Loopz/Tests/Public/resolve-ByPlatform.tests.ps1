@@ -1,8 +1,8 @@
-
-Describe 'resolve-ByPlatform' {
+Describe 'Resolve-ByPlatform' {
   BeforeAll {
-    . .\Internal\get-PlatformName
-    . .\Internal\resolve-ByPlatform.ps1
+    Get-Module Elizium.Loopz | Remove-Module
+    Import-Module .\Output\Elizium.Loopz\Elizium.Loopz.psm1 `
+      -ErrorAction 'stop' -DisableNameChecking;
 
     [System.Collections.Hashtable]$script:platforms = @{
       'windows' = 'windows-info';
@@ -13,44 +13,44 @@ Describe 'resolve-ByPlatform' {
 
   Context 'given: windows platform' {
     It 'should: resolve to the windows value' {
-      Mock get-PlatformName { return 'windows' }
+      Mock -ModuleName Elizium.Loopz Get-PlatformName { return 'windows' }
       [string]$expected = 'windows-info';
-      $result = resolve-ByPlatform -Hash $platforms
+      $result = Resolve-ByPlatform -Hash $platforms
       $result | Should -Be $expected;
     }
   }
 
   Context 'given: linux platform' {
     It 'should: resolve to the linux value' {
-      Mock get-PlatformName { return 'linux' }
+      Mock -ModuleName Elizium.Loopz Get-PlatformName { return 'linux' }
       [string]$expected = 'linux-info';
-      $result = resolve-ByPlatform -Hash $platforms
+      $result = Resolve-ByPlatform -Hash $platforms
       $result | Should -Be $expected;
     }
   }
 
   Context 'given: mac platform' {
     It 'should: resolve to the mac value' {
-      Mock get-PlatformName { return 'mac' }
+      Mock -ModuleName Elizium.Loopz Get-PlatformName { return 'mac' }
       [string]$expected = 'mac-info';
-      $result = resolve-ByPlatform -Hash $platforms
+      $result = Resolve-ByPlatform -Hash $platforms
       $result | Should -Be $expected;
     }
   }
 
   Context 'given: undefined platform' {
     It 'should: resolve to the default value provided' {
-      Mock get-PlatformName { return 'UBUNTU' }
+      Mock -ModuleName Elizium.Loopz Get-PlatformName { return 'UBUNTU' }
       [string]$expected = 'default-info';
-      $result = resolve-ByPlatform -Hash $platforms -Default 'default-info'
+      $result = Resolve-ByPlatform -Hash $platforms -Default 'default-info'
       $result | Should -Be $expected;
     }
   }
 
   Context 'given: undefined platform' {
     It 'should: resolve to null' {
-      Mock get-PlatformName { return 'UBUNTU' }
-      $result = resolve-ByPlatform -Hash $platforms
+      Mock -ModuleName Elizium.Loopz Get-PlatformName { return 'UBUNTU' }
+      $result = Resolve-ByPlatform -Hash $platforms
       $result | Should -BeNullOrEmpty
     }
   }

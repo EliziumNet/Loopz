@@ -1,10 +1,11 @@
 
 using namespace System.Text.RegularExpressions;
 
-Describe 'new-RegularExpression' {
+Describe 'New-RegularExpression' {
   BeforeAll {
-    . .\Public\globals.ps1
-    . .\Internal\new-RegularExpression.ps1
+    Get-Module Elizium.Loopz | Remove-Module
+    Import-Module .\Output\Elizium.Loopz\Elizium.Loopz.psm1 `
+      -ErrorAction 'stop' -DisableNameChecking
   }
 
   Context 'given: Pattern contains single inline code' {
@@ -15,7 +16,7 @@ Describe 'new-RegularExpression' {
       @{ Inc = 's'; Expected = [RegexOptions]::Singleline }
       @{ Inc = 'n'; Expected = [RegexOptions]::ExplicitCapture }
     ) {
-      [Regex]$expression = new-RegularExpression -Expression "utopia/$Inc";
+      [Regex]$expression = New-RegularExpression -Expression "utopia/$Inc";
 
       $expression.Options | Should -Be $Expected
     }
@@ -23,7 +24,7 @@ Describe 'new-RegularExpression' {
 
   Context 'given: Pattern contains multiple inline codes' {
     It 'should: Create regex with multiple options' {
-      [Regex]$expression = new-RegularExpression -Expression "utopia\mix";
+      [Regex]$expression = New-RegularExpression -Expression "utopia\mix";
       $expression.Options -band [RegexOptions]::Multiline | Should -BeTrue;
       $expression.Options -band [RegexOptions]::IgnoreCase | Should -BeTrue;
       $expression.Options -band [RegexOptions]::IgnorePatternWhitespace | Should -BeTrue;
@@ -42,7 +43,7 @@ Describe 'new-RegularExpression' {
 
   Context 'given: Pattern contains no inline codes' {
     It 'should: Create regex with no custom options' {
-      [Regex]$expression = new-RegularExpression -Expression "utopia";
+      [Regex]$expression = New-RegularExpression -Expression "utopia";
       $expression.Options | Should -Be 'None' # ... not [RegexOptions]::None;
     }
   }
