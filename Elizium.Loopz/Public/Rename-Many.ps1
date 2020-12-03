@@ -22,7 +22,7 @@ function Rename-Many {
     [System.IO.FileSystemInfo]$underscore,
 
     [Parameter()]
-    [ValidateSet('p', 'a', 'w', '*')]
+    [ValidateSet('p', 'a', 'w', 'i', '*')]
     [string]$Whole,
 
     [Parameter(Mandatory, Position = 0)]
@@ -51,6 +51,10 @@ function Rename-Many {
     [Parameter()]
     [Alias('x')]
     [string]$Except = [string]::Empty,
+
+    [Parameter()]
+    [Alias('i')]
+    [string]$Include,
 
     [Parameter()]
     [scriptblock]$Condition = ( { return $true; }),
@@ -316,6 +320,13 @@ function Rename-Many {
       }
     }
 
+    if ($PSBoundParameters.ContainsKey('Include')) {
+      [string]$includeExpression, [string]$includeOccurrence = resolve-PatternOccurrence $Include
+
+      Select-SignalContainer -Containers $containers -Name 'INCLUDE' `
+        -Value $includeExpression -Signals $signals;
+    }
+
     [boolean]$doMoveToken = ($PSBoundParameters.ContainsKey('Anchor') -or
       $PSBoundParameters.ContainsKey('Start') -or $PSBoundParameters.ContainsKey('End'));
 
@@ -353,11 +364,6 @@ function Rename-Many {
 
     [int]$maxItemMessageSize = $Context.ItemMessage.replace(
       $Loopz.FsItemTypePlaceholder, 'Directory').Length;
-
-    # [int]$maxItemMessageSize = ($Context.psobject.properties.match('ItemMessage') -and `
-    #     -not([string]::IsNullOrEmpty($Context.ItemMessage))) `
-    #   ? $Context.ItemMessage.replace($Loopz.FsItemTypePlaceholder, 'Directory').Length `
-    #   : $Context.ItemMessage.Length; # => THIS IS NOT CORRECT: Context.ItemMessage is null
 
     [string]$summaryMessage = $Context.psobject.properties.match('SummaryMessage') -and `
       -not([string]::IsNullOrEmpty($Context.SummaryMessage)) `
@@ -435,6 +441,12 @@ function Rename-Many {
         -Expression $($patternExpression + '$');
     }
 
+    [boolean]$includeDefined = $PSBoundParameters.ContainsKey('Include');
+    [System.Text.RegularExpressions.RegEx]$includeRegEx = $includeDefined `
+      ? (new-RegularExpression -Expression $includeExpression `
+        -WholeWord:$(-not([string]::IsNullOrEmpty($adjustedWhole)) -and ($adjustedWhole -in @('*', 'i')))) `
+      : $null;
+
     if ($PSBoundParameters.ContainsKey('Paste')) {
       $passThru['LOOPZ.RN-FOREACH.PASTE'] = $Paste;
     }
@@ -446,7 +458,7 @@ function Rename-Many {
     if ($containers.Props.Length -gt 0) {
       $passThru['LOOPZ.SUMMARY-BLOCK.PROPERTIES'] = $containers.Props;
     }
-
+       
     [scriptblock]$clientCondition = $Condition;
     [scriptblock]$compoundCondition = {
       param(
@@ -454,6 +466,7 @@ function Rename-Many {
       )
       [boolean]$clientResult = $clientCondition.Invoke($pipelineItem);
       [boolean]$isAlreadyAnchoredAt = $anchoredRegEx -and $anchoredRegEx.IsMatch($pipelineItem.Name);
+
       return $($clientResult -and -not($isAlreadyAnchoredAt));
     };
 
@@ -466,7 +479,8 @@ function Rename-Many {
       # overflow due to infinite recursion. We need to use a temporary variable so that
       # the client's Condition (Rename-Many) is not accidentally hidden.
       #
-      return ($patternRegEx.IsMatch($pipelineItem.Name)) -and `
+      [boolean]$isIncluded = $includeDefined ? $includeRegEx.IsMatch($pipelineItem.Name) : $true;
+      return ($patternRegEx.IsMatch($pipelineItem.Name)) -and $isIncluded -and `
       (($Except -eq [string]::Empty) -or -not($pipelineItem.Name -match $Except)) -and `
         $compoundCondition.Invoke($pipelineItem);
     }

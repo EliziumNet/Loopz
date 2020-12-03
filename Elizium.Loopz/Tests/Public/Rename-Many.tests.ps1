@@ -354,7 +354,7 @@ Describe 'Rename-Many' {
 
       Context 'and: Except' {
         Context 'and: Source matches Pattern' {
-          It 'should: do rename; replace Last Pattern for With text' {
+          It 'should: do rename; replace Last Pattern for With text, Except excluded items' {
             $script:expected = @{
               'loopz.application.t1.log' = 'h00pz.application.t1.log';
               'loopz.application.t2.log' = 'h00pz.application.t2.log';
@@ -362,6 +362,21 @@ Describe 'Rename-Many' {
 
             Get-ChildItem -Path $directoryPath | Rename-Many -File `
               -Pattern 'loopz' -Except 'data' -With 'h00pz' -WhatIf;
+          }
+        }
+      } # and: Except
+
+      Context 'and: Include' {
+        Context 'and: Source matches Pattern' {
+          It 'should: do rename; replace Last Pattern for With text, for Include items only' {
+            $script:expected = @{
+                'loopz.data.t1.txt'        = 'loopz.dat@.t1.txt';
+                'loopz.data.t2.txt'        = 'loopz.dat@.t2.txt';
+                'loopz.data.t3.txt'        = 'loopz.dat@.t3.txt';
+            }
+
+            Get-ChildItem -Path $directoryPath | Rename-Many -File `
+              -Pattern 'loopz' -Include 'data' -With 'h00pz' -WhatIf;
           }
         }
       } # and: Except

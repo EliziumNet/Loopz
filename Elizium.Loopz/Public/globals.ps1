@@ -143,6 +143,7 @@ $global:Loopz = [PSCustomObject]@{
     'BAD-A'        = @('Bad', '💥')
     'BAD-B'        = @('Bad', '💢')
     'PROHIBITED'   = @('Prohibited', '🚫')
+    'INCLUDE'      = @('Include', '💠')
 
     # Outcomes
     #
@@ -182,7 +183,7 @@ $global:Loopz = [PSCustomObject]@{
   #
   CustomSignals         = $null;
 
-  Defaults = [PSCustomObject]@{
+  Defaults              = [PSCustomObject]@{
     Remy = [PSCustomObject]@{
       Title          = 'Rename'
       ItemMessage    = 'Rename Item'
