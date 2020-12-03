@@ -1,5 +1,4 @@
-
-Describe 'Resolve-ByPlatform' -Tag 'Current' {
+Describe 'Resolve-ByPlatform' {
   BeforeAll {
     Get-Module Elizium.Loopz | Remove-Module
     Import-Module .\Output\Elizium.Loopz\Elizium.Loopz.psm1 `
