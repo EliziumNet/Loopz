@@ -8,7 +8,7 @@ function invoke-ByPlatform {
   )
 
   $result = $null;
-  [string]$platform = get-PlatformName;
+  [string]$platform = Get-PlatformName;
 
   if ($Hash.ContainsKey($platform)) {
     [System.Collections.Hashtable]$invokeInfo = $Hash[$platform];

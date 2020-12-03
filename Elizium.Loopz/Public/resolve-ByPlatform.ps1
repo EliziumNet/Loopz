@@ -9,7 +9,7 @@ function resolve-ByPlatform {
   )
 
   $result = $null;
-  [string]$platform = get-PlatformName;
+  [string]$platform = Get-PlatformName;
 
   if ($Hash.ContainsKey($platform)) {
     $result = $Hash[$platform];

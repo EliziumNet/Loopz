@@ -183,7 +183,7 @@ function Rename-Many {
       [string]$messageLabel = if ($context.psobject.properties.match('ItemMessage') -and `
           -not([string]::IsNullOrEmpty($Context.ItemMessage))) {
 
-        get-PaddedLabel -Label $($Context.ItemMessage.replace(
+        Get-PaddedLabel -Label $($Context.ItemMessage.replace(
             $Loopz.FsItemTypePlaceholder, $fileSystemItemType)) -Width $maxItemMessageSize;
       }
       else {
@@ -203,7 +203,7 @@ function Rename-Many {
       $_passThru['LOOPZ.WH-FOREACH-DECORATOR.INDENT'] = $indent;
 
       $_passThru['LOOPZ.WH-FOREACH-DECORATOR.MESSAGE'] = $message;
-      $_passThru['LOOPZ.WH-FOREACH-DECORATOR.PRODUCT-LABEL'] = $(get-PaddedLabel -Label $(
+      $_passThru['LOOPZ.WH-FOREACH-DECORATOR.PRODUCT-LABEL'] = $(Get-PaddedLabel -Label $(
           $fileSystemItemType) -Width 9);
 
       if ($nameHasChanged -and -not($clash)) {
@@ -289,20 +289,20 @@ function Rename-Many {
 
     # RegEx/Occurrence parameters
     #
-    [string]$patternExpression, [string]$patternOccurrence = resolve-PatternOccurrence $Pattern
+    [string]$patternExpression, [string]$patternOccurrence = Resolve-PatternOccurrence $Pattern
 
     Select-SignalContainer -Containers $containers -Name 'PATTERN' `
       -Value $patternExpression -Signals $signals;
 
     if ($PSBoundParameters.ContainsKey('Anchor')) {
-      [string]$anchorExpression, [string]$anchorOccurrence = resolve-PatternOccurrence $Anchor
+      [string]$anchorExpression, [string]$anchorOccurrence = Resolve-PatternOccurrence $Anchor
 
       Select-SignalContainer -Containers $containers -Name 'REMY.ANCHOR' `
         -Value $anchorExpression -Signals $signals -CustomLabel 'Anchor ({0})' -f $Relation;
     }
 
     if ($PSBoundParameters.ContainsKey('With')) {
-      [string]$withExpression, [string]$withOccurrence = resolve-PatternOccurrence $With;
+      [string]$withExpression, [string]$withOccurrence = Resolve-PatternOccurrence $With;
 
       Select-SignalContainer -Containers $containers -Name 'WITH' `
         -Value $withExpression -Signals $signals;
@@ -321,7 +321,7 @@ function Rename-Many {
     }
 
     if ($PSBoundParameters.ContainsKey('Include')) {
-      [string]$includeExpression, [string]$includeOccurrence = resolve-PatternOccurrence $Include
+      [string]$includeExpression, [string]$includeOccurrence = Resolve-PatternOccurrence $Include
 
       Select-SignalContainer -Containers $containers -Name 'INCLUDE' `
         -Value $includeExpression -Signals $signals;
@@ -355,7 +355,7 @@ function Rename-Many {
       $result.GetType() -in @([System.IO.FileInfo], [System.IO.DirectoryInfo]) ? $result.Name : $result;
     }
 
-    [System.Text.RegularExpressions.RegEx]$patternRegEx = new-RegularExpression -Expression $patternExpression `
+    [System.Text.RegularExpressions.RegEx]$patternRegEx = New-RegularExpression -Expression $patternExpression `
       -WholeWord:$(-not([string]::IsNullOrEmpty($adjustedWhole)) -and ($adjustedWhole -in @('*', 'p')));
 
     [string]$title = $Context.psobject.properties.match('Title') -and `
@@ -388,13 +388,13 @@ function Rename-Many {
       'LOOPZ.REMY.CONTEXT'                    = $Context;
       'LOOPZ.REMY.MAX-ITEM-MESSAGE-SIZE'      = $maxItemMessageSize;
 
-      'LOOPZ.REMY.FROM-LABEL'                 = get-PaddedLabel -Label 'From' -Width 9;
+      'LOOPZ.REMY.FROM-LABEL'                 = Get-PaddedLabel -Label 'From' -Width 9;
       'LOOPZ.SIGNALS'                         = $signals;
     }
     $passThru['LOOPZ.REMY.ACTION'] = $doMoveToken ? 'Move-Match' : 'Update-Match';
 
     if ($PSBoundParameters.ContainsKey('With')) {
-      [System.Text.RegularExpressions.RegEx]$withRegEx = new-RegularExpression -Expression $withExpression `
+      [System.Text.RegularExpressions.RegEx]$withRegEx = New-RegularExpression -Expression $withExpression `
         -WholeWord:$(-not([string]::IsNullOrEmpty($adjustedWhole)) -and ($adjustedWhole -in @('*', 'w')));
 
       $passThru['LOOPZ.REMY.WITH-OCC'] = $withOccurrence;
@@ -415,7 +415,7 @@ function Rename-Many {
 
     if ($PSBoundParameters.ContainsKey('Anchor')) {
 
-      [System.Text.RegularExpressions.RegEx]$anchorRegEx = new-RegularExpression -Expression $anchorExpression `
+      [System.Text.RegularExpressions.RegEx]$anchorRegEx = New-RegularExpression -Expression $anchorExpression `
         -WholeWord:$(-not([string]::IsNullOrEmpty($adjustedWhole)) -and ($adjustedWhole -in @('*', 'a')));
 
       $passThru['LOOPZ.REMY.ANCHOR-OCC'] = $anchorOccurrence;
@@ -428,7 +428,7 @@ function Rename-Many {
           -Value $patternExpression -Signals $signals -CustomLabel 'Start');
       $passThru['LOOPZ.REMY.ANCHOR-TYPE'] = 'START';
 
-      [System.Text.RegularExpressions.RegEx]$anchoredRegEx = new-RegularExpression `
+      [System.Text.RegularExpressions.RegEx]$anchoredRegEx = New-RegularExpression `
         -Expression $('^' + $patternExpression);
     }
     elseif ($PSBoundParameters.ContainsKey('End')) {
@@ -437,13 +437,13 @@ function Rename-Many {
           -Value $patternExpression -Signals $signals -CustomLabel 'End');
       $passThru['LOOPZ.REMY.ANCHOR-TYPE'] = 'END';
 
-      [System.Text.RegularExpressions.RegEx]$anchoredRegEx = new-RegularExpression `
+      [System.Text.RegularExpressions.RegEx]$anchoredRegEx = New-RegularExpression `
         -Expression $($patternExpression + '$');
     }
 
     [boolean]$includeDefined = $PSBoundParameters.ContainsKey('Include');
     [System.Text.RegularExpressions.RegEx]$includeRegEx = $includeDefined `
-      ? (new-RegularExpression -Expression $includeExpression `
+      ? (New-RegularExpression -Expression $includeExpression `
         -WholeWord:$(-not([string]::IsNullOrEmpty($adjustedWhole)) -and ($adjustedWhole -in @('*', 'i')))) `
       : $null;
 
