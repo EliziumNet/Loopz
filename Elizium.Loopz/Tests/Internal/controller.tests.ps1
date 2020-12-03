@@ -2,7 +2,7 @@
 Describe 'controller' {
 
   BeforeAll {
-    . .\Internal\controller.class.ps1
+    . .\Classes\controller.class.ps1
 
     [scriptblock]$script:_Header = {
       param(
