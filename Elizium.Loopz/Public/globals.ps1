@@ -143,6 +143,8 @@ $global:Loopz = [PSCustomObject]@{
     'BAD-B'        = @('Bad', '💢')
     'PROHIBITED'   = @('Prohibited', '🚫')
     'INCLUDE'      = @('Include', '💠')
+    'SOURCE'       = @('Source', '🎀')
+    'DESTINATION'  = @('Destination', '☀️')
 
     # Outcomes
     #
