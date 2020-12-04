@@ -193,7 +193,7 @@ Describe 'Rename-Many' {
     Context 'and: Source matches Pattern' {
       Context 'and: With is non-regex static text' {
         # It seems like this makes no sense; there's no point in testing static -With text as
-        # in reality, the user should use -LiteralWith. However, the user might use -With for
+        # in reality, the user should use -LiteralCopy. However, the user might use -With for
         # static text and if they do, there's no reason why it shouldn't just work, even though
         # LiteralWith is designed for this scenario.
         #
@@ -245,7 +245,7 @@ Describe 'Rename-Many' {
             }
 
             Get-ChildItem -Path $directoryPath | Rename-Many -File `
-              -Pattern 'a', l -LiteralWith '@' -WhatIf;
+              -Pattern 'a', l -LiteralCopy '@' -WhatIf;
           }
         } # and: Last Only
       } # and: With is non-regex static text
@@ -320,7 +320,7 @@ Describe 'Rename-Many' {
             }
 
             Get-ChildItem -Path $directoryPath | Rename-Many -File `
-              -Pattern 'a', f -LiteralWith '@' -WhatIf;
+              -Pattern 'a', f -LiteralCopy '@' -WhatIf;
           }
 
           Context 'and: replace 3rd match' {
@@ -331,7 +331,7 @@ Describe 'Rename-Many' {
               }
 
               Get-ChildItem -Path $directoryPath | Rename-Many -File `
-                -Pattern 'o', 3 -LiteralWith '0' -WhatIf;
+                -Pattern 'o', 3 -LiteralCopy '0' -WhatIf;
             }
           } # and: replace 3rd match
 
@@ -346,7 +346,7 @@ Describe 'Rename-Many' {
               }
 
               Get-ChildItem -Path $directoryPath | Rename-Many -File `
-                -Pattern 'a', l -LiteralWith '@' -WhatIf;
+                -Pattern 'a', l -LiteralCopy '@' -WhatIf;
             }
           } # and: Last Only
         } # and: First Only
@@ -398,7 +398,7 @@ Describe 'Rename-Many' {
           }
 
           Get-ChildItem -Path $directoryPath | Rename-Many -Context $context -File `
-            -Pattern 'a', l -LiteralWith '@' -WhatIf;
+            -Pattern 'a', l -LiteralCopy '@' -WhatIf;
         }
       }
 
