@@ -26,7 +26,7 @@ function Move-Match {
     [System.Text.RegularExpressions.RegEx]$Copy,
 
     [Parameter()]
-    [string]$WithOccurrence = 'f',
+    [string]$CopyOccurrence = 'f',
 
     [Parameter()]
     [string]$LiteralCopy,
@@ -87,7 +87,7 @@ function Move-Match {
           #
           [string]$replaceWith = Split-Match `
             -Source $patternRemoved -PatternRegEx $Copy `
-            -Occurrence ($PSBoundParameters.ContainsKey('WithOccurrence') ? $WithOccurrence : 'f') `
+            -Occurrence ($PSBoundParameters.ContainsKey('CopyOccurrence') ? $CopyOccurrence : 'f') `
             -CapturedOnly;
         }
         else {

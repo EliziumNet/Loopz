@@ -15,7 +15,7 @@ function Update-Match {
     [System.Text.RegularExpressions.RegEx]$Copy,
 
     [Parameter()]
-    [string]$WithOccurrence = 'f',
+    [string]$CopyOccurrence = 'f',
 
     [Parameter()]
     [string]$LiteralCopy,
@@ -30,9 +30,9 @@ function Update-Match {
 
   if (-not([string]::IsNullOrEmpty($capturedPattern))) {
     if ($PSBoundParameters.ContainsKey('Copy')) {
-      [string]$replaceWith, $null, [System.Text.RegularExpressions.Match]$withMatch = `
+      [string]$replaceWith, $null, [System.Text.RegularExpressions.Match]$copyMatch = `
         Split-Match -Source $Value -PatternRegEx $Copy `
-        -Occurrence ($PSBoundParameters.ContainsKey('WithOccurrence') ? $WithOccurrence : 'f');
+        -Occurrence ($PSBoundParameters.ContainsKey('CopyOccurrence') ? $CopyOccurrence : 'f');
 
         if ([string]::IsNullOrEmpty($replaceWith)) {
           return $Value;

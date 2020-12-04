@@ -1,6 +1,6 @@
 using namespace System.Text.RegularExpressions;
 
-Describe 'Update-Match' -Tag 'Current' {
+Describe 'Update-Match' {
   BeforeAll {
     . .\Public\Update-Match.ps1;
     . .\Public\Split-Match.ps1;

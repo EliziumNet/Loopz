@@ -122,8 +122,7 @@ function Rename-Many {
         $actionParameters['Copy'] = $_passThru['LOOPZ.REMY.COPY'];
 
         if ($_passThru.ContainsKey('LOOPZ.REMY.COPY-OCC')) {
-          # TODO: change WithOccurrence => CopyOccurrence
-          $actionParameters['WithOccurrence'] = $_passThru['LOOPZ.REMY.COPY-OCC'];
+          $actionParameters['CopyOccurrence'] = $_passThru['LOOPZ.REMY.COPY-OCC'];
         }
       }
       elseif ($_passThru.ContainsKey('LOOPZ.REMY.LITERAL-COPY')) {

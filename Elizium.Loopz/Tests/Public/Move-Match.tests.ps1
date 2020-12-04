@@ -288,7 +288,7 @@ Describe 'Move-Match' {
             [RegEx]$copy = new-expr('\d{2}-\d{2}-\d{4}');
 
             Move-Match -Value $source -Pattern $pattern -Relation $relation -Anchor $anchor `
-              -Copy $copy -WithOccurrence 'L' -Paste $paste | `
+              -Copy $copy -CopyOccurrence 'L' -Paste $paste | `
               Should -BeExactly 'Judgement 28-02-2727Day [], Judgement Day [28-02-2727], Day: <Friday>';
           }
         } # and: Last Copy
@@ -366,7 +366,7 @@ Describe 'Move-Match' {
 
             Move-Match -Value $source -Pattern $escapedPattern -PatternOccurrence 'L' `
               -Anchor $literalAnchor -AnchorOccurrence 'L' `
-              -LiteralCopy $literalCopy -WithOccurrence 'L' -Paste $paste | `
+              -LiteralCopy $literalCopy -CopyOccurrence 'L' -Paste $paste | `
               Should -BeExactly 'There is$ where +fire your is$(ice^) going';
           }
         } # and: LiteralCopy
@@ -422,7 +422,7 @@ Describe 'Move-Match' {
             [string]$paste = '${_a}==(${_w})== ';
 
             Move-Match -Value $source -Pattern $escapedPattern -PatternOccurrence 'L' `
-              -Anchor $escapedAnchor -AnchorOccurrence 'L' -Copy $copy -WithOccurrence 'L' -Paste $paste | `
+              -Anchor $escapedAnchor -AnchorOccurrence 'L' -Copy $copy -CopyOccurrence 'L' -Paste $paste | `
               Should -BeExactly 'In the ZZZ+ year: +2525, Mourning  ZZZ+ ==(12345)== 12345 Sun';
           }
 

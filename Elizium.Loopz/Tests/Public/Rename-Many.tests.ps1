@@ -195,7 +195,7 @@ Describe 'Rename-Many' {
         # It seems like this makes no sense; there's no point in testing static -Copy text as
         # in reality, the user should use -LiteralCopy. However, the user might use -Copy for
         # static text and if they do, there's no reason why it shouldn't just work, even though
-        # LiteralWith is designed for this scenario.
+        # LiteralCopy is designed for this scenario.
         #
 
         Context 'Copy does NOT match' {
@@ -308,7 +308,7 @@ Describe 'Rename-Many' {
         } # and: First Only
       } # and: Copy needs escapes
 
-      Context 'LiteralWith' {
+      Context 'LiteralCopy' {
         Context 'and: First Only' {
           It 'should: do rename; replace First Pattern for Copy text' {
             $script:expected = @{
@@ -350,7 +350,7 @@ Describe 'Rename-Many' {
             }
           } # and: Last Only
         } # and: First Only
-      } # LiteralWith
+      } # LiteralCopy
 
       Context 'and: Except' {
         Context 'and: Source matches Pattern' {
