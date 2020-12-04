@@ -105,7 +105,7 @@ function Move-Match {
     }
 
     if (-not($PSBoundParameters.ContainsKey('Anchor')) -and ($isFormatted)) {
-      $replaceWith = $Paste.Replace('${_w}', $replaceWith).Replace('$0', $capturedPattern);
+      $replaceWith = $Paste.Replace('${_c}', $replaceWith).Replace('$0', $capturedPattern);
 
       # Now apply the user defined Pattern named group references if they exist
       # to the captured pattern
@@ -142,13 +142,13 @@ function Move-Match {
         # all matches, when we only want to replace the specified Pattern occurrence.
         #
         if ($isFormatted) {
-          # Paste can be something like '=== ${_a}, (${a}, ${b}, [$0], ${_w} ===', where $0
+          # Paste can be something like '=== ${_a}, (${a}, ${b}, [$0], ${_c} ===', where $0
           # represents the pattern capture, the special variable _w represents With/LiteralWith,
           # _a represents the anchor and ${a} and ${b} represents user defined capture groups.
           # The Paste replaces the anchor, so to re-insert the anchor _a, it must be referenced
           # in the Paste format. Numeric captures may also be referenced.
           #
-          [string]$format = $Paste.Replace('${_w}', $replaceWith).Replace(
+          [string]$format = $Paste.Replace('${_c}', $replaceWith).Replace(
             '$0', $capturedPattern).Replace('${_a}', $capturedAnchor);
 
           # Now apply the user defined Pattern named group references if they exist

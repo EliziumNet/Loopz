@@ -22,7 +22,7 @@ function Rename-Many {
     [System.IO.FileSystemInfo]$underscore,
 
     [Parameter()]
-    [ValidateSet('p', 'a', 'w', 'i', '*')]
+    [ValidateSet('p', 'a', 'c', 'i', '*')]
     [string]$Whole,
 
     [Parameter(Mandatory, Position = 0)]

@@ -1,6 +1,6 @@
 using namespace System.Text.RegularExpressions;
 
-Describe 'Move-Match' {
+Describe 'Move-Match' -Tag 'Current' {
   BeforeAll {
     Get-Module Elizium.Loopz | Remove-Module
     Import-Module .\Output\Elizium.Loopz\Elizium.Loopz.psm1 `
@@ -313,7 +313,7 @@ Describe 'Move-Match' {
             [RegEx]$escapedPattern = new-expr([regex]::Escape('+fire') + '\s');
             [RegEx]$anchor = new-expr('is ');
             [string]$literalCopy = 'ice^';
-            [string]$paste = '${_a}(${_w}) ';
+            [string]$paste = '${_a}(${_c}) ';
 
             Move-Match -Value $source -Pattern $escapedPattern -Anchor $anchor `
               -LiteralCopy $literalCopy -Paste $paste | `
@@ -326,7 +326,7 @@ Describe 'Move-Match' {
             [RegEx]$anchor = new-expr('is ');
             [string]$relation = 'after'
             [string]$literalCopy = 'ice^';
-            [string]$paste = '${_a}(${_w}) ';
+            [string]$paste = '${_a}(${_c}) ';
 
             Move-Match -Value $source -Pattern $escapedPattern -Relation $relation -Anchor $anchor `
               -LiteralCopy $literalCopy -Paste $paste | `
@@ -350,7 +350,7 @@ Describe 'Move-Match' {
             [RegEx]$escapedPattern = new-expr([regex]::Escape('+fire') + '\s');
             [RegEx]$literalAnchor = new-expr([regex]::Escape('is$'));
             [string]$literalCopy = 'ice^';
-            [string]$paste = '${_a}(${_w})';
+            [string]$paste = '${_a}(${_c})';
 
             Move-Match -Value $source -Pattern $escapedPattern -Anchor $literalAnchor `
               -AnchorOccurrence 'L' -LiteralCopy $literalCopy -Paste $paste | `
@@ -362,7 +362,7 @@ Describe 'Move-Match' {
             [RegEx]$escapedPattern = new-expr([regex]::Escape('+fire') + '\s');
             [RegEx]$literalAnchor = new-expr([regex]::Escape('is$'));
             [string]$literalCopy = 'ice^';
-            [string]$paste = '${_a}(${_w})';
+            [string]$paste = '${_a}(${_c})';
 
             Move-Match -Value $source -Pattern $escapedPattern -PatternOccurrence 'L' `
               -Anchor $literalAnchor -AnchorOccurrence 'L' `
@@ -407,7 +407,7 @@ Describe 'Move-Match' {
             [RegEx]$escapedPattern = new-expr([regex]::Escape('+2525'));
             [RegEx]$escapedAnchor = new-expr([regex]::Escape('ZZZ+ '));
             [RegEx]$copy = new-expr('\d{5}');
-            [string]$paste = '${_a}==(${_w})== ';
+            [string]$paste = '${_a}==(${_c})== ';
 
             Move-Match -Value $source -Pattern $escapedPattern -Anchor $escapedAnchor `
               -AnchorOccurrence 'L' -Copy $copy -Paste $paste | `
@@ -419,7 +419,7 @@ Describe 'Move-Match' {
             [RegEx]$escapedPattern = new-expr([regex]::Escape('+2525'));
             [RegEx]$escapedAnchor = new-expr([regex]::Escape('ZZZ+ '));
             [RegEx]$copy = new-expr('\d{5}');
-            [string]$paste = '${_a}==(${_w})== ';
+            [string]$paste = '${_a}==(${_c})== ';
 
             Move-Match -Value $source -Pattern $escapedPattern -PatternOccurrence 'L' `
               -Anchor $escapedAnchor -AnchorOccurrence 'L' -Copy $copy -CopyOccurrence 'L' -Paste $paste | `

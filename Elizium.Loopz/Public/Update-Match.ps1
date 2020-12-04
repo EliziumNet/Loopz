@@ -46,7 +46,7 @@ function Update-Match {
     }
 
     if ($PSBoundParameters.ContainsKey('Paste')) {
-      [string]$format = $Paste.Replace('${_w}', $replaceWith).Replace(
+      [string]$format = $Paste.Replace('${_c}', $replaceWith).Replace(
         '$0', $capturedPattern);
     }
     else {

@@ -86,7 +86,7 @@ Describe 'Update-Match' {
             [string]$source = 'We are like the dreamer';
             [RegEx]$pattern = new-expr('dream');
             [string]$literalCopy = 'heal';
-            [string]$paste = '==${_w}=='
+            [string]$paste = '==${_c}=='
 
             Update-Match -Value $source -Pattern $pattern -LiteralCopy $literalCopy -Paste $paste | `
               Should -BeExactly 'We are like the ==heal==er';
@@ -113,7 +113,7 @@ Describe 'Update-Match' {
             [string]$source = 'We are like the dreamer 1234';
             [RegEx]$pattern = new-expr('dream');
             [string]$copy = '\d{4}';
-            [string]$paste = '==${_w}=='
+            [string]$paste = '==${_c}=='
 
             Update-Match -Value $source -Pattern $pattern -Copy $copy -Paste $paste | `
               Should -BeExactly 'We are like the ==1234==er 1234';
@@ -125,7 +125,7 @@ Describe 'Update-Match' {
             [string]$source = 'We are like the dreamer';
             [RegEx]$pattern = new-expr('dream');
             [string]$copy = 'blah';
-            [string]$paste = '==${_w}=='
+            [string]$paste = '==${_c}=='
 
             Update-Match -Value $source -Pattern $pattern -Copy $copy -Paste $paste | `
               Should -BeExactly $source;
@@ -139,7 +139,7 @@ Describe 'Update-Match' {
             [string]$source = 'We are like the dreamer';
             [RegEx]$pattern = new-expr('dream');
             [string]$literalCopy = 'heal';
-            [string]$paste = '==${_w}=='
+            [string]$paste = '==${_c}=='
 
             Update-Match -Value $source -Pattern $pattern -LiteralCopy $literalCopy -Paste $paste | `
               Should -BeExactly 'We are like the ==heal==er';
