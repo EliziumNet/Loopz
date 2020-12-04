@@ -118,11 +118,12 @@ function Rename-Many {
       $actionParameters['PatternOccurrence'] = $_passThru.ContainsKey('LOOPZ.REMY.PATTERN-OCC') `
         ? $_passThru['LOOPZ.REMY.PATTERN-OCC'] : 'f';
 
-      if ($_passThru.ContainsKey('LOOPZ.REMY.WITH')) {
-        $actionParameters['Copy'] = $_passThru['LOOPZ.REMY.WITH'];
+      if ($_passThru.ContainsKey('LOOPZ.REMY.COPY')) {
+        $actionParameters['Copy'] = $_passThru['LOOPZ.REMY.COPY'];
 
-        if ($_passThru.ContainsKey('LOOPZ.REMY.WITH-OCC')) {
-          $actionParameters['WithOccurrence'] = $_passThru['LOOPZ.REMY.WITH-OCC'];
+        if ($_passThru.ContainsKey('LOOPZ.REMY.COPY-OCC')) {
+          # TODO: change WithOccurrence => CopyOccurrence
+          $actionParameters['WithOccurrence'] = $_passThru['LOOPZ.REMY.COPY-OCC'];
         }
       }
       elseif ($_passThru.ContainsKey('LOOPZ.REMY.LITERAL-COPY')) {
@@ -302,10 +303,10 @@ function Rename-Many {
     }
 
     if ($PSBoundParameters.ContainsKey('Copy')) {
-      [string]$withExpression, [string]$withOccurrence = Resolve-PatternOccurrence $Copy;
+      [string]$copyExpression, [string]$copyOccurrence = Resolve-PatternOccurrence $Copy;
 
-      Select-SignalContainer -Containers $containers -Name 'WITH' `
-        -Value $withExpression -Signals $signals;
+      Select-SignalContainer -Containers $containers -Name 'COPY' `
+        -Value $copyExpression -Signals $signals;
     }
     elseif ($PSBoundParameters.ContainsKey('LiteralCopy')) {
       if (-not([string]::IsNullOrEmpty($LiteralCopy))) {
@@ -394,11 +395,11 @@ function Rename-Many {
     $passThru['LOOPZ.REMY.ACTION'] = $doMoveToken ? 'Move-Match' : 'Update-Match';
 
     if ($PSBoundParameters.ContainsKey('Copy')) {
-      [System.Text.RegularExpressions.RegEx]$withRegEx = New-RegularExpression -Expression $withExpression `
+      [System.Text.RegularExpressions.RegEx]$copyRegEx = New-RegularExpression -Expression $copyExpression `
         -WholeWord:$(-not([string]::IsNullOrEmpty($adjustedWhole)) -and ($adjustedWhole -in @('*', 'w')));
 
-      $passThru['LOOPZ.REMY.WITH-OCC'] = $withOccurrence;
-      $passThru['LOOPZ.REMY.WITH'] = $withRegEx;
+      $passThru['LOOPZ.REMY.COPY-OCC'] = $copyOccurrence;
+      $passThru['LOOPZ.REMY.COPY'] = $copyRegEx;
     }
     elseif ($PSBoundParameters.ContainsKey('LiteralCopy')) {
       $passThru['LOOPZ.REMY.LITERAL-COPY'] = $LiteralCopy;
