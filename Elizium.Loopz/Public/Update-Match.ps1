@@ -12,13 +12,13 @@ function Update-Match {
     [string]$PatternOccurrence = 'f',
 
     [Parameter()]
-    [System.Text.RegularExpressions.RegEx]$With,
+    [System.Text.RegularExpressions.RegEx]$Copy,
 
     [Parameter()]
-    [string]$WithOccurrence = 'f',
+    [string]$CopyOccurrence = 'f',
 
     [Parameter()]
-    [string]$LiteralWith,
+    [string]$With,
 
     [Parameter()]
     [string]$Paste
@@ -29,24 +29,24 @@ function Update-Match {
     -Occurrence ($PSBoundParameters.ContainsKey('PatternOccurrence') ? $PatternOccurrence : 'f');
 
   if (-not([string]::IsNullOrEmpty($capturedPattern))) {
-    if ($PSBoundParameters.ContainsKey('With')) {
-      [string]$replaceWith, $null, [System.Text.RegularExpressions.Match]$withMatch = `
-        Split-Match -Source $Value -PatternRegEx $With `
-        -Occurrence ($PSBoundParameters.ContainsKey('WithOccurrence') ? $WithOccurrence : 'f');
+    if ($PSBoundParameters.ContainsKey('Copy')) {
+      [string]$replaceWith, $null, [System.Text.RegularExpressions.Match]$copyMatch = `
+        Split-Match -Source $Value -PatternRegEx $Copy `
+        -Occurrence ($PSBoundParameters.ContainsKey('CopyOccurrence') ? $CopyOccurrence : 'f');
 
         if ([string]::IsNullOrEmpty($replaceWith)) {
           return $Value;
         }
     }
-    elseif ($PSBoundParameters.ContainsKey('LiteralWith')) {
-      [string]$replaceWith = $LiteralWith;
+    elseif ($PSBoundParameters.ContainsKey('With')) {
+      [string]$replaceWith = $With;
     }
     else {
       [string]$replaceWith = [string]::Empty;
     }
 
     if ($PSBoundParameters.ContainsKey('Paste')) {
-      [string]$format = $Paste.Replace('${_w}', $replaceWith).Replace(
+      [string]$format = $Paste.Replace('${_c}', $replaceWith).Replace(
         '$0', $capturedPattern);
     }
     else {

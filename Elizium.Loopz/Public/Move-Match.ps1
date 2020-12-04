@@ -23,13 +23,13 @@ function Move-Match {
     [string]$Relation = 'after',
 
     [Parameter()]
-    [System.Text.RegularExpressions.RegEx]$With,
+    [System.Text.RegularExpressions.RegEx]$Copy,
 
     [Parameter()]
-    [string]$WithOccurrence = 'f',
+    [string]$CopyOccurrence = 'f',
 
     [Parameter()]
-    [string]$LiteralWith,
+    [string]$With,
 
     [Parameter()]
     [string]$Paste,
@@ -67,27 +67,27 @@ function Move-Match {
     -Occurrence ($PSBoundParameters.ContainsKey('PatternOccurrence') ? $PatternOccurrence : 'f');
 
   if (-not([string]::IsNullOrEmpty($capturedPattern))) {
-    [boolean]$isVanilla = -not($PSBoundParameters.ContainsKey('With') -or `
-      ($PSBoundParameters.ContainsKey('LiteralWith') -and -not([string]::IsNullOrEmpty($LiteralWith))));
+    [boolean]$isVanilla = -not($PSBoundParameters.ContainsKey('Copy') -or `
+      ($PSBoundParameters.ContainsKey('With') -and -not([string]::IsNullOrEmpty($With))));
 
     # Determine the replacement text
     #
     if ($isVanilla) {
-      # Insert the original pattern match, because there is no With/LiteralWith.
+      # Insert the original pattern match, because there is no Copy/With.
       #
       [string]$replaceWith = $capturedPattern;
     }
     else {
       [string]$replaceWith = [string]::Empty;
-      if ($PSBoundParameters.ContainsKey('With')) {
-        if ($patternRemoved -match $With) {
+      if ($PSBoundParameters.ContainsKey('Copy')) {
+        if ($patternRemoved -match $Copy) {
           # With this implementation, it is up to the user to supply a regex proof
-          # pattern, so if the With contains regex chars, they must pass in the string
-          # pre-escaped: -With $(esc('some-pattern') + 'other stuff') or -EscapedWith 'some-pattern'
+          # pattern, so if the Copy contains regex chars, they must pass in the string
+          # pre-escaped: -Copy $(esc('some-pattern') + 'other stuff').
           #
           [string]$replaceWith = Split-Match `
-            -Source $patternRemoved -PatternRegEx $With `
-            -Occurrence ($PSBoundParameters.ContainsKey('WithOccurrence') ? $WithOccurrence : 'f') `
+            -Source $patternRemoved -PatternRegEx $Copy `
+            -Occurrence ($PSBoundParameters.ContainsKey('CopyOccurrence') ? $CopyOccurrence : 'f') `
             -CapturedOnly;
         }
         else {
@@ -96,8 +96,8 @@ function Move-Match {
           $failed = $true;         
         }
       }
-      elseif ($PSBoundParameters.ContainsKey('LiteralWith')) {
-        [string]$replaceWith = $LiteralWith;
+      elseif ($PSBoundParameters.ContainsKey('With')) {
+        [string]$replaceWith = $With;
       }
       else {
         [string]$replaceWith = [string]::Empty;
@@ -105,7 +105,7 @@ function Move-Match {
     }
 
     if (-not($PSBoundParameters.ContainsKey('Anchor')) -and ($isFormatted)) {
-      $replaceWith = $Paste.Replace('${_w}', $replaceWith).Replace('$0', $capturedPattern);
+      $replaceWith = $Paste.Replace('${_c}', $replaceWith).Replace('$0', $capturedPattern);
 
       # Now apply the user defined Pattern named group references if they exist
       # to the captured pattern
@@ -120,10 +120,10 @@ function Move-Match {
       $result = $patternRemoved + $replaceWith;
     }
     elseif ($PSBoundParameters.ContainsKey('Anchor')) {
-      # As with the With/EscapedWith parameters, if the user wants to specify an anchor by a pattern which
-      # contains regex chars, then can use -EscapedAnchor 'anchor-pattern'. If there are no regex chars,
+      # As with the Copy parameter, if the user wants to specify an anchor by a pattern which
+      # contains regex chars, then can use -Anchor $(esc('anchor-pattern')). If there are no regex chars,
       # then they can use -Anchor 'pattern'. However, if the user needs to do partial escapes, then they will
-      # have to do the escaping themselves: -Anchor $(esc('some-pattern') + 'other stuff')
+      # have to do the escaping themselves: -Anchor $(esc('partial-pattern') + 'remaining-pattern')
       #
       [string]$capturedAnchor, $null, [System.Text.RegularExpressions.Match]$anchorMatch = `
         Split-Match -Source $patternRemoved -PatternRegEx $Anchor `
@@ -142,13 +142,13 @@ function Move-Match {
         # all matches, when we only want to replace the specified Pattern occurrence.
         #
         if ($isFormatted) {
-          # Paste can be something like '=== ${_a}, (${a}, ${b}, [$0], ${_w} ===', where $0
-          # represents the pattern capture, the special variable _w represents With/LiteralWith,
+          # Paste can be something like '=== ${_a}, (${a}, ${b}, [$0], ${_c} ===', where $0
+          # represents the pattern capture, the special variable _w represents Copy/With,
           # _a represents the anchor and ${a} and ${b} represents user defined capture groups.
           # The Paste replaces the anchor, so to re-insert the anchor _a, it must be referenced
           # in the Paste format. Numeric captures may also be referenced.
           #
-          [string]$format = $Paste.Replace('${_w}', $replaceWith).Replace(
+          [string]$format = $Paste.Replace('${_c}', $replaceWith).Replace(
             '$0', $capturedPattern).Replace('${_a}', $capturedAnchor);
 
           # Now apply the user defined Pattern named group references if they exist
@@ -157,7 +157,7 @@ function Move-Match {
           $format = $capturedPattern -replace $pattern, $format;
         }
         else {
-          # If the user has defined a With/LiteralWith without a format(Paste), we define the format
+          # If the user has defined a Copy/With without a format(Paste), we define the format
           # in terms of the relationship specified.
           #
           [string]$format = ($Relation -eq 'before') `

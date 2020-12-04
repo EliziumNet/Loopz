@@ -191,24 +191,24 @@ Describe 'Rename-Many' {
 
   Context 'given: ReplaceWith' {
     Context 'and: Source matches Pattern' {
-      Context 'and: With is non-regex static text' {
-        # It seems like this makes no sense; there's no point in testing static -With text as
-        # in reality, the user should use -LiteralWith. However, the user might use -With for
+      Context 'and: Copy is non-regex static text' {
+        # It seems like this makes no sense; there's no point in testing static -Copy text as
+        # in reality, the user should use -With. However, the user might use -Copy for
         # static text and if they do, there's no reason why it shouldn't just work, even though
-        # LiteralWith is designed for this scenario.
+        # With is designed for this scenario.
         #
 
-        Context 'With does NOT match' {
-          It 'should: do rename; replace First Pattern for With text' {
+        Context 'Copy does NOT match' {
+          It 'should: do rename; replace First Pattern for Copy text' {
             $script:expected = @{}
 
             Get-ChildItem -Path $directoryPath | Rename-Many -File `
-              -Pattern 'a', f -With 'blah' -WhatIf;
+              -Pattern 'a', f -Copy 'blah' -WhatIf;
           }
         }
 
         Context 'and: First Only' {
-          It 'should: do rename; replace First Pattern for With text' {
+          It 'should: do rename; replace First Pattern for Copy text' {
             $script:expected = @{
               'loopz.application.t1.log' = 'loopz.tpplication.t1.log';
               'loopz.application.t2.log' = 'loopz.tpplication.t2.log';
@@ -218,24 +218,24 @@ Describe 'Rename-Many' {
             }
 
             Get-ChildItem -Path $directoryPath | Rename-Many -File `
-              -Pattern 'a', f -With 't' -WhatIf;
+              -Pattern 'a', f -Copy 't' -WhatIf;
           }
         } # and: First Only
 
         Context 'and: replace 3rd match' {
-          It 'should: do rename; replace 3rd Occurrence for With text' {
+          It 'should: do rename; replace 3rd Occurrence for Copy text' {
             $script:expected = @{
               'loopz.application.t1.log' = 'loopz.applicati0n.t1.log';
               'loopz.application.t2.log' = 'loopz.applicati0n.t2.log';
             }
 
             Get-ChildItem -Path $directoryPath | Rename-Many -File `
-              -Pattern 'o', 3 -With '0' -WhatIf;
+              -Pattern 'o', 3 -Copy '0' -WhatIf;
           }
         } # and: replace 3rd match
 
         Context 'and: Last Only' {
-          It 'should: do rename; replace Last Pattern for With text' {
+          It 'should: do rename; replace Last Pattern for Copy text' {
             $script:expected = @{
               'loopz.application.t1.log' = 'loopz.applic@tion.t1.log';
               'loopz.application.t2.log' = 'loopz.applic@tion.t2.log';
@@ -245,14 +245,14 @@ Describe 'Rename-Many' {
             }
 
             Get-ChildItem -Path $directoryPath | Rename-Many -File `
-              -Pattern 'a', l -LiteralWith '@' -WhatIf;
+              -Pattern 'a', l -With '@' -WhatIf;
           }
         } # and: Last Only
-      } # and: With is non-regex static text
+      } # and: Copy is non-regex static text
 
-      Context 'and: With is regex' {
-        Context 'and: Whole With' {
-          It 'should: do rename; replace First Pattern for With text' {
+      Context 'and: Copy is regex' {
+        Context 'and: Whole Copy' {
+          It 'should: do rename; replace First Pattern for Copy text' {
             $script:expected = @{
               'loopz.application.t1.log' = 'loopz.t1pplication.t1.log';
               'loopz.application.t2.log' = 'loopz.t2pplication.t2.log';
@@ -262,21 +262,21 @@ Describe 'Rename-Many' {
             }
 
             Get-ChildItem -Path $directoryPath | Rename-Many -File `
-              -Pattern 'a', f -With 't\d' -Whole w -WhatIf;
+              -Pattern 'a', f -Copy 't\d' -Whole c -WhatIf;
           }
-        } # and: Whole With
+        } # and: Whole Copy
 
-        Context 'With does NOT match' {
-          It 'should: do rename; replace First Pattern for With text' {
+        Context 'Copy does NOT match' {
+          It 'should: do rename; replace First Pattern for Copy text' {
             $script:expected = @{}
 
             Get-ChildItem -Path $directoryPath | Rename-Many -File `
-              -Pattern 'a', f -With '\d{4}' -WhatIf;
+              -Pattern 'a', f -Copy '\d{4}' -WhatIf;
           }
         }
 
         Context 'and: First Only' {
-          It 'should: do rename; replace First Pattern for With text' {
+          It 'should: do rename; replace First Pattern for Copy text' {
             $script:expected = @{
               'loopz.application.t1.log' = 'loopz.t1pplication.t1.log';
               'loopz.application.t2.log' = 'loopz.t2pplication.t2.log';
@@ -286,14 +286,14 @@ Describe 'Rename-Many' {
             }
 
             Get-ChildItem -Path $directoryPath | Rename-Many -File `
-              -Pattern 'a', f -With 't\d' -WhatIf;
+              -Pattern 'a', f -Copy 't\d' -WhatIf;
           }
         } # and: First Only
-      } # and: With is regex
+      } # and: Copy is regex
 
-      Context 'and: With needs escape' {
+      Context 'and: Copy needs escape' {
         Context 'and: First Only' {
-          It 'should: do rename; replace First Pattern for With text' {
+          It 'should: do rename; replace First Pattern for Copy text' {
             $script:expected = @{
               'loopz.application.t1.log' = 'loopz..apppplication.t1.log';
               'loopz.application.t2.log' = 'loopz..apppplication.t2.log';
@@ -303,14 +303,14 @@ Describe 'Rename-Many' {
             }
 
             Get-ChildItem -Path $directoryPath | Rename-Many -File `
-              -Pattern 'a', f -With ($(esc('.')) + '\w{3}') -WhatIf;
+              -Pattern 'a', f -Copy ($(esc('.')) + '\w{3}') -WhatIf;
           }
         } # and: First Only
-      } # and: With needs escapes
+      } # and: Copy needs escapes
 
-      Context 'LiteralWith' {
+      Context 'With' {
         Context 'and: First Only' {
-          It 'should: do rename; replace First Pattern for With text' {
+          It 'should: do rename; replace First Pattern for Copy text' {
             $script:expected = @{
               'loopz.application.t1.log' = 'loopz.@pplication.t1.log';
               'loopz.application.t2.log' = 'loopz.@pplication.t2.log';
@@ -320,23 +320,23 @@ Describe 'Rename-Many' {
             }
 
             Get-ChildItem -Path $directoryPath | Rename-Many -File `
-              -Pattern 'a', f -LiteralWith '@' -WhatIf;
+              -Pattern 'a', f -With '@' -WhatIf;
           }
 
           Context 'and: replace 3rd match' {
-            It 'should: do rename; replace 3rd Occurrence for With text' {
+            It 'should: do rename; replace 3rd Occurrence for Copy text' {
               $script:expected = @{
                 'loopz.application.t1.log' = 'loopz.applicati0n.t1.log';
                 'loopz.application.t2.log' = 'loopz.applicati0n.t2.log';
               }
 
               Get-ChildItem -Path $directoryPath | Rename-Many -File `
-                -Pattern 'o', 3 -LiteralWith '0' -WhatIf;
+                -Pattern 'o', 3 -With '0' -WhatIf;
             }
           } # and: replace 3rd match
 
           Context 'and: Last Only' {
-            It 'should: do rename; replace Last Pattern for With text' {
+            It 'should: do rename; replace Last Pattern for Copy text' {
               $script:expected = @{
                 'loopz.application.t1.log' = 'loopz.applic@tion.t1.log';
                 'loopz.application.t2.log' = 'loopz.applic@tion.t2.log';
@@ -346,29 +346,29 @@ Describe 'Rename-Many' {
               }
 
               Get-ChildItem -Path $directoryPath | Rename-Many -File `
-                -Pattern 'a', l -LiteralWith '@' -WhatIf;
+                -Pattern 'a', l -With '@' -WhatIf;
             }
           } # and: Last Only
         } # and: First Only
-      } # LiteralWith
+      } # With
 
       Context 'and: Except' {
         Context 'and: Source matches Pattern' {
-          It 'should: do rename; replace Last Pattern for With text, Except excluded items' {
+          It 'should: do rename; replace Last Pattern for Copy text, Except excluded items' {
             $script:expected = @{
               'loopz.application.t1.log' = 'h00pz.application.t1.log';
               'loopz.application.t2.log' = 'h00pz.application.t2.log';
             }
 
             Get-ChildItem -Path $directoryPath | Rename-Many -File `
-              -Pattern 'loopz' -Except 'data' -With 'h00pz' -WhatIf;
+              -Pattern 'loopz' -Except 'data' -Copy 'h00pz' -WhatIf;
           }
         }
       } # and: Except
 
       Context 'and: Include' {
         Context 'and: Source matches Pattern' {
-          It 'should: do rename; replace Last Pattern for With text, for Include items only' {
+          It 'should: do rename; replace Last Pattern for Copy text, for Include items only' {
             $script:expected = @{
                 'loopz.data.t1.txt'        = 'loopz.dat@.t1.txt';
                 'loopz.data.t2.txt'        = 'loopz.dat@.t2.txt';
@@ -376,7 +376,7 @@ Describe 'Rename-Many' {
             }
 
             Get-ChildItem -Path $directoryPath | Rename-Many -File `
-              -Pattern 'loopz' -Include 'data' -With 'h00pz' -WhatIf;
+              -Pattern 'loopz' -Include 'data' -Copy 'h00pz' -WhatIf;
           }
         }
       } # and: Except
@@ -398,7 +398,7 @@ Describe 'Rename-Many' {
           }
 
           Get-ChildItem -Path $directoryPath | Rename-Many -Context $context -File `
-            -Pattern 'a', l -LiteralWith '@' -WhatIf;
+            -Pattern 'a', l -With '@' -WhatIf;
         }
       }
 
@@ -418,7 +418,7 @@ Describe 'Rename-Many' {
       } # and: "Cut" (without replacement)
 
       Context 'and: Source denotes Directories' {
-        It 'should: do rename; replace First Pattern for With text' {
+        It 'should: do rename; replace First Pattern for Copy text' {
           $script:expected = @{
             'Arkives'   = 'Arkiv3s';
             'Consumed'  = 'Consum3d';
@@ -429,7 +429,7 @@ Describe 'Rename-Many' {
           [string]$plastikmanPath = './Tests/Data/traverse/Audio/MINIMAL/Plastikman';
 
           Get-ChildItem -Path $plastikmanPath | Rename-Many -Directory `
-            -Pattern 'e' -With '3' -WhatIf;
+            -Pattern 'e' -Copy '3' -WhatIf;
         }
       }
     } # and: Source matches Pattern
@@ -450,7 +450,7 @@ Describe 'Rename-Many' {
         It 'should: not throw ParameterBindingException' {
           {
             Get-ChildItem -File -Path $sourcePath -Filter $filter | Rename-Many -File `
-              -Whole p -Pattern 'data.' -Anchor 't\d{1}\.' -With 'repl' -Except 'fake' `
+              -Whole p -Pattern 'data.' -Anchor 't\d{1}\.' -Copy 'repl' -Except 'fake' `
               -Condition $successCondition -Relation 'before' -WhatIf:$whatIf; } `
           | Should -Not -Throw;
         }
@@ -460,7 +460,7 @@ Describe 'Rename-Many' {
         It 'should: not throw ParameterBindingException' {
           {
             Get-ChildItem -File -Path $sourcePath -Filter $filter | Rename-Many -File `
-              -Whole p -Pattern 'data.' -Start -With 'repl' -Except 'fake' -Condition $successCondition `
+              -Whole p -Pattern 'data.' -Start -Copy 'repl' -Except 'fake' -Condition $successCondition `
               -WhatIf:$whatIf; } `
           | Should -Not -Throw;
         }
@@ -470,7 +470,7 @@ Describe 'Rename-Many' {
         It 'should: not throw ParameterBindingException' {
           {
             Get-ChildItem -File -Path $sourcePath -Filter $filter | Rename-Many -File `
-              -Whole p -Pattern 'data.' -End -With 'repl' -Except 'fake' -Condition $successCondition `
+              -Whole p -Pattern 'data.' -End -Copy 'repl' -Except 'fake' -Condition $successCondition `
               -WhatIf:$whatIf; } `
           | Should -Not -Throw;
         }
@@ -480,7 +480,7 @@ Describe 'Rename-Many' {
         It 'should: not throw ParameterBindingException' {
           {
             Get-ChildItem -File -Path $sourcePath -Filter $filter | Rename-Many -File `
-              -Whole p -Pattern 'data.' -With 'info.' -Except 'fake' `
+              -Whole p -Pattern 'data.' -Copy 'info.' -Except 'fake' `
               -Condition $successCondition -WhatIf:$whatIf; } `
           | Should -Not -Throw;
         }
@@ -580,15 +580,15 @@ Describe 'Rename-Many' {
     }
   } # given: invalid Pattern expression
 
-  Context 'given: invalid With expression' {
+  Context 'given: invalid Copy expression' {
     It 'should: throw' {
       {
         [string]$badWith = '(((';
         Get-ChildItem -Path $directoryPath | Rename-Many -File `
-          -Pattern 'o', 3 -With $badWith -WhatIf;
+          -Pattern 'o', 3 -Copy $badWith -WhatIf;
       } | Should -Throw;
     }
-  } # given: invalid With expression
+  } # given: invalid Copy expression
 
   Context 'given: invalid Anchor expression' {
     It 'should: throw' {

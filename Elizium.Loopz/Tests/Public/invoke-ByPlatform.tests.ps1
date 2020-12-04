@@ -109,7 +109,7 @@ Describe 'Invoke-ByPlatform' {
     } # and: Unknown platform and Default supplied
   } # given: Parameters By Position
 
-  Context 'given: Named Parameters' {
+  Context 'given: Named Parameters' -Skip {
     BeforeAll {
       [System.Collections.Hashtable]$script:platformsNamed = @{
         'windows' = [PSCustomObject]@{
