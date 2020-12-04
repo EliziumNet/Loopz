@@ -273,25 +273,25 @@ Describe 'Move-Match' {
         } # and: Anchor matches
       } # and: vanilla move formatted
 
-      Context 'and: exotic' { # Pattern, With/EscapedWith/LiteralCopy
+      Context 'and: exotic' { # Pattern, Copy/EscapedWith/LiteralCopy
 
-        # The With tests only make sense if not using Paste, although you can use Paste with,
+        # The Copy tests only make sense if not using Paste, although you can use Paste with,
         # Relation, but LiteralCopy is pointless, because you can just insert that text inside the
         # Paste.
         #
-        Context 'and: Last With' {
+        Context 'and: Last Copy' {
           It 'should: move the first match after the first anchor' {
             [string]$source = 'Judgement Day [06-06-2626], Judgement Day [28-02-2727], Day: <Friday>';
             [RegEx]$pattern = new-expr('\d{2}-\d{2}-\d{4}');
             [RegEx]$anchor = new-expr('Judgement\s');
             [string]$relation = 'after'
-            [RegEx]$With = new-expr('\d{2}-\d{2}-\d{4}');
+            [RegEx]$copy = new-expr('\d{2}-\d{2}-\d{4}');
 
             Move-Match -Value $source -Pattern $pattern -Relation $relation -Anchor $anchor `
-              -With $With -WithOccurrence 'L' -Paste $paste | `
+              -Copy $copy -WithOccurrence 'L' -Paste $paste | `
               Should -BeExactly 'Judgement 28-02-2727Day [], Judgement Day [28-02-2727], Day: <Friday>';
           }
-        } # and: Last With
+        } # and: Last Copy
 
         Context 'and: EscapedWith' {
           It 'should: move the last match after the first anchor' {
@@ -299,10 +299,10 @@ Describe 'Move-Match' {
             [RegEx]$pattern = new-expr('\d{2}-\d{2}-\d{4}');
             [RegEx]$anchor = new-expr('Judgement Day ');
             [string]$relation = 'after'
-            [RegEx]$with = new-expr('\<' + '\w+' + '\>');
+            [RegEx]$copy = new-expr('\<' + '\w+' + '\>');
 
             Move-Match -Value $source -Pattern $pattern -PatternOccurrence 'L' `
-              -Relation $relation -Anchor $anchor -With $with | `
+              -Relation $relation -Anchor $anchor -Copy $copy | `
               Should -BeExactly 'Judgement Day <Friday>[06-06-2626], Judgement Day [], Day: <Friday>';
           }
         } # and: EscapedWith
@@ -320,7 +320,7 @@ Describe 'Move-Match' {
               Should -BeExactly 'There is (ice^) where your +fire is going';
           }
 
-          It 'should: cut the last match and paste With after the first anchor' {
+          It 'should: cut the last match and paste Copy after the first anchor' {
             [string]$source = 'There is where +fire your +fire is going';
             [RegEx]$escapedPattern = new-expr([regex]::Escape('+fire') + '\s');
             [RegEx]$anchor = new-expr('is ');
@@ -372,21 +372,21 @@ Describe 'Move-Match' {
         } # and: LiteralCopy
       } # and: exotic
 
-      Context 'and: exotic formatted' { # Pattern, Paste, With/EscapedWith/LiteralCopy
+      Context 'and: exotic formatted' { # Pattern, Paste, Copy/EscapedWith/LiteralCopy
         Context 'and: Anchor matches' {
-          # It's looking like there is little point in having the With parameter, because the
-          # LiteralCopy functionality is provided by the Paste and the With is actually Copy.
-          # But With is useful with Relation if not using Paste.
+          # It's looking like there is little point in having the Copy parameter, because the
+          # LiteralCopy functionality is provided by the Paste and the Copy is actually Copy.
+          # But Copy is useful with Relation if not using Paste.
           #
           It 'should: cut the first match and paste after the first anchor' {
             [string]$source = 'In the ZZZ year: +2525, Mourning +2525 ZZZ 12345 Sun';
             [RegEx]$escapedPattern = new-expr([regex]::Escape('+2525'));
             [RegEx]$anchor = new-expr('ZZZ ');
-            [RegEx]$with = new-expr('\d{5}');
+            [RegEx]$copy = new-expr('\d{5}');
             [string]$paste = '${_a}==($0)== ';
 
             Move-Match -Value $source -Pattern $escapedPattern -Anchor $anchor `
-              -With $with -Paste $paste | `
+              -Copy $copy -Paste $paste | `
               Should -BeExactly 'In the ZZZ ==(+2525)== year: , Mourning +2525 ZZZ 12345 Sun';
           }
 
@@ -394,11 +394,11 @@ Describe 'Move-Match' {
             [string]$source = 'In the ZZZ year: +2525, Mourning +2525 ZZZ 12345 Sun';
             [RegEx]$escapedPattern = new-expr([regex]::Escape('+2525'));
             [RegEx]$anchor = new-expr('ZZZ ');
-            [RegEx]$with = new-expr('\d{5}');
+            [RegEx]$copy = new-expr('\d{5}');
             [string]$paste = '${_a}==($0)== ';
 
             Move-Match -Value $source -Pattern $escapedPattern -PatternOccurrence 'L' `
-              -Anchor $anchor -With $with -Paste $paste | `
+              -Anchor $anchor -Copy $copy -Paste $paste | `
               Should -BeExactly 'In the ZZZ ==(+2525)== year: +2525, Mourning  ZZZ 12345 Sun';
           }
 
@@ -406,11 +406,11 @@ Describe 'Move-Match' {
             [string]$source = 'In the ZZZ+ year: +2525, Mourning +2525 ZZZ+ 12345 Sun';
             [RegEx]$escapedPattern = new-expr([regex]::Escape('+2525'));
             [RegEx]$escapedAnchor = new-expr([regex]::Escape('ZZZ+ '));
-            [RegEx]$with = new-expr('\d{5}');
+            [RegEx]$copy = new-expr('\d{5}');
             [string]$paste = '${_a}==(${_w})== ';
 
             Move-Match -Value $source -Pattern $escapedPattern -Anchor $escapedAnchor `
-              -AnchorOccurrence 'L' -With $with -Paste $paste | `
+              -AnchorOccurrence 'L' -Copy $copy -Paste $paste | `
               Should -BeExactly 'In the ZZZ+ year: , Mourning +2525 ZZZ+ ==(12345)== 12345 Sun';
           }
 
@@ -418,11 +418,11 @@ Describe 'Move-Match' {
             [string]$source = 'In the ZZZ+ year: +2525, Mourning +2525 ZZZ+ 12345 Sun';
             [RegEx]$escapedPattern = new-expr([regex]::Escape('+2525'));
             [RegEx]$escapedAnchor = new-expr([regex]::Escape('ZZZ+ '));
-            [RegEx]$with = new-expr('\d{5}');
+            [RegEx]$copy = new-expr('\d{5}');
             [string]$paste = '${_a}==(${_w})== ';
 
             Move-Match -Value $source -Pattern $escapedPattern -PatternOccurrence 'L' `
-              -Anchor $escapedAnchor -AnchorOccurrence 'L' -With $with -WithOccurrence 'L' -Paste $paste | `
+              -Anchor $escapedAnchor -AnchorOccurrence 'L' -Copy $copy -WithOccurrence 'L' -Paste $paste | `
               Should -BeExactly 'In the ZZZ+ year: +2525, Mourning  ZZZ+ ==(12345)== 12345 Sun';
           }
 

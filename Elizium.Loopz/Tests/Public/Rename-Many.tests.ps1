@@ -191,15 +191,15 @@ Describe 'Rename-Many' {
 
   Context 'given: ReplaceWith' {
     Context 'and: Source matches Pattern' {
-      Context 'and: With is non-regex static text' {
+      Context 'and: Copy is non-regex static text' {
         # It seems like this makes no sense; there's no point in testing static -Copy text as
         # in reality, the user should use -LiteralCopy. However, the user might use -Copy for
         # static text and if they do, there's no reason why it shouldn't just work, even though
         # LiteralWith is designed for this scenario.
         #
 
-        Context 'With does NOT match' {
-          It 'should: do rename; replace First Pattern for With text' {
+        Context 'Copy does NOT match' {
+          It 'should: do rename; replace First Pattern for Copy text' {
             $script:expected = @{}
 
             Get-ChildItem -Path $directoryPath | Rename-Many -File `
@@ -208,7 +208,7 @@ Describe 'Rename-Many' {
         }
 
         Context 'and: First Only' {
-          It 'should: do rename; replace First Pattern for With text' {
+          It 'should: do rename; replace First Pattern for Copy text' {
             $script:expected = @{
               'loopz.application.t1.log' = 'loopz.tpplication.t1.log';
               'loopz.application.t2.log' = 'loopz.tpplication.t2.log';
@@ -223,7 +223,7 @@ Describe 'Rename-Many' {
         } # and: First Only
 
         Context 'and: replace 3rd match' {
-          It 'should: do rename; replace 3rd Occurrence for With text' {
+          It 'should: do rename; replace 3rd Occurrence for Copy text' {
             $script:expected = @{
               'loopz.application.t1.log' = 'loopz.applicati0n.t1.log';
               'loopz.application.t2.log' = 'loopz.applicati0n.t2.log';
@@ -235,7 +235,7 @@ Describe 'Rename-Many' {
         } # and: replace 3rd match
 
         Context 'and: Last Only' {
-          It 'should: do rename; replace Last Pattern for With text' {
+          It 'should: do rename; replace Last Pattern for Copy text' {
             $script:expected = @{
               'loopz.application.t1.log' = 'loopz.applic@tion.t1.log';
               'loopz.application.t2.log' = 'loopz.applic@tion.t2.log';
@@ -248,11 +248,11 @@ Describe 'Rename-Many' {
               -Pattern 'a', l -LiteralCopy '@' -WhatIf;
           }
         } # and: Last Only
-      } # and: With is non-regex static text
+      } # and: Copy is non-regex static text
 
-      Context 'and: With is regex' {
-        Context 'and: Whole With' {
-          It 'should: do rename; replace First Pattern for With text' {
+      Context 'and: Copy is regex' {
+        Context 'and: Whole Copy' {
+          It 'should: do rename; replace First Pattern for Copy text' {
             $script:expected = @{
               'loopz.application.t1.log' = 'loopz.t1pplication.t1.log';
               'loopz.application.t2.log' = 'loopz.t2pplication.t2.log';
@@ -264,10 +264,10 @@ Describe 'Rename-Many' {
             Get-ChildItem -Path $directoryPath | Rename-Many -File `
               -Pattern 'a', f -Copy 't\d' -Whole w -WhatIf;
           }
-        } # and: Whole With
+        } # and: Whole Copy
 
-        Context 'With does NOT match' {
-          It 'should: do rename; replace First Pattern for With text' {
+        Context 'Copy does NOT match' {
+          It 'should: do rename; replace First Pattern for Copy text' {
             $script:expected = @{}
 
             Get-ChildItem -Path $directoryPath | Rename-Many -File `
@@ -276,7 +276,7 @@ Describe 'Rename-Many' {
         }
 
         Context 'and: First Only' {
-          It 'should: do rename; replace First Pattern for With text' {
+          It 'should: do rename; replace First Pattern for Copy text' {
             $script:expected = @{
               'loopz.application.t1.log' = 'loopz.t1pplication.t1.log';
               'loopz.application.t2.log' = 'loopz.t2pplication.t2.log';
@@ -289,11 +289,11 @@ Describe 'Rename-Many' {
               -Pattern 'a', f -Copy 't\d' -WhatIf;
           }
         } # and: First Only
-      } # and: With is regex
+      } # and: Copy is regex
 
-      Context 'and: With needs escape' {
+      Context 'and: Copy needs escape' {
         Context 'and: First Only' {
-          It 'should: do rename; replace First Pattern for With text' {
+          It 'should: do rename; replace First Pattern for Copy text' {
             $script:expected = @{
               'loopz.application.t1.log' = 'loopz..apppplication.t1.log';
               'loopz.application.t2.log' = 'loopz..apppplication.t2.log';
@@ -306,11 +306,11 @@ Describe 'Rename-Many' {
               -Pattern 'a', f -Copy ($(esc('.')) + '\w{3}') -WhatIf;
           }
         } # and: First Only
-      } # and: With needs escapes
+      } # and: Copy needs escapes
 
       Context 'LiteralWith' {
         Context 'and: First Only' {
-          It 'should: do rename; replace First Pattern for With text' {
+          It 'should: do rename; replace First Pattern for Copy text' {
             $script:expected = @{
               'loopz.application.t1.log' = 'loopz.@pplication.t1.log';
               'loopz.application.t2.log' = 'loopz.@pplication.t2.log';
@@ -324,7 +324,7 @@ Describe 'Rename-Many' {
           }
 
           Context 'and: replace 3rd match' {
-            It 'should: do rename; replace 3rd Occurrence for With text' {
+            It 'should: do rename; replace 3rd Occurrence for Copy text' {
               $script:expected = @{
                 'loopz.application.t1.log' = 'loopz.applicati0n.t1.log';
                 'loopz.application.t2.log' = 'loopz.applicati0n.t2.log';
@@ -336,7 +336,7 @@ Describe 'Rename-Many' {
           } # and: replace 3rd match
 
           Context 'and: Last Only' {
-            It 'should: do rename; replace Last Pattern for With text' {
+            It 'should: do rename; replace Last Pattern for Copy text' {
               $script:expected = @{
                 'loopz.application.t1.log' = 'loopz.applic@tion.t1.log';
                 'loopz.application.t2.log' = 'loopz.applic@tion.t2.log';
@@ -354,7 +354,7 @@ Describe 'Rename-Many' {
 
       Context 'and: Except' {
         Context 'and: Source matches Pattern' {
-          It 'should: do rename; replace Last Pattern for With text, Except excluded items' {
+          It 'should: do rename; replace Last Pattern for Copy text, Except excluded items' {
             $script:expected = @{
               'loopz.application.t1.log' = 'h00pz.application.t1.log';
               'loopz.application.t2.log' = 'h00pz.application.t2.log';
@@ -368,7 +368,7 @@ Describe 'Rename-Many' {
 
       Context 'and: Include' {
         Context 'and: Source matches Pattern' {
-          It 'should: do rename; replace Last Pattern for With text, for Include items only' {
+          It 'should: do rename; replace Last Pattern for Copy text, for Include items only' {
             $script:expected = @{
                 'loopz.data.t1.txt'        = 'loopz.dat@.t1.txt';
                 'loopz.data.t2.txt'        = 'loopz.dat@.t2.txt';
@@ -418,7 +418,7 @@ Describe 'Rename-Many' {
       } # and: "Cut" (without replacement)
 
       Context 'and: Source denotes Directories' {
-        It 'should: do rename; replace First Pattern for With text' {
+        It 'should: do rename; replace First Pattern for Copy text' {
           $script:expected = @{
             'Arkives'   = 'Arkiv3s';
             'Consumed'  = 'Consum3d';
@@ -580,7 +580,7 @@ Describe 'Rename-Many' {
     }
   } # given: invalid Pattern expression
 
-  Context 'given: invalid With expression' {
+  Context 'given: invalid Copy expression' {
     It 'should: throw' {
       {
         [string]$badWith = '(((';
@@ -588,7 +588,7 @@ Describe 'Rename-Many' {
           -Pattern 'o', 3 -Copy $badWith -WhatIf;
       } | Should -Throw;
     }
-  } # given: invalid With expression
+  } # given: invalid Copy expression
 
   Context 'given: invalid Anchor expression' {
     It 'should: throw' {

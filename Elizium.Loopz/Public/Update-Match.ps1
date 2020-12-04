@@ -12,7 +12,7 @@ function Update-Match {
     [string]$PatternOccurrence = 'f',
 
     [Parameter()]
-    [System.Text.RegularExpressions.RegEx]$With,
+    [System.Text.RegularExpressions.RegEx]$Copy,
 
     [Parameter()]
     [string]$WithOccurrence = 'f',
@@ -29,9 +29,9 @@ function Update-Match {
     -Occurrence ($PSBoundParameters.ContainsKey('PatternOccurrence') ? $PatternOccurrence : 'f');
 
   if (-not([string]::IsNullOrEmpty($capturedPattern))) {
-    if ($PSBoundParameters.ContainsKey('With')) {
+    if ($PSBoundParameters.ContainsKey('Copy')) {
       [string]$replaceWith, $null, [System.Text.RegularExpressions.Match]$withMatch = `
-        Split-Match -Source $Value -PatternRegEx $With `
+        Split-Match -Source $Value -PatternRegEx $Copy `
         -Occurrence ($PSBoundParameters.ContainsKey('WithOccurrence') ? $WithOccurrence : 'f');
 
         if ([string]::IsNullOrEmpty($replaceWith)) {

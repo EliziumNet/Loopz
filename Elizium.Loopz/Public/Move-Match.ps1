@@ -23,7 +23,7 @@ function Move-Match {
     [string]$Relation = 'after',
 
     [Parameter()]
-    [System.Text.RegularExpressions.RegEx]$With,
+    [System.Text.RegularExpressions.RegEx]$Copy,
 
     [Parameter()]
     [string]$WithOccurrence = 'f',
@@ -67,7 +67,7 @@ function Move-Match {
     -Occurrence ($PSBoundParameters.ContainsKey('PatternOccurrence') ? $PatternOccurrence : 'f');
 
   if (-not([string]::IsNullOrEmpty($capturedPattern))) {
-    [boolean]$isVanilla = -not($PSBoundParameters.ContainsKey('With') -or `
+    [boolean]$isVanilla = -not($PSBoundParameters.ContainsKey('Copy') -or `
       ($PSBoundParameters.ContainsKey('LiteralCopy') -and -not([string]::IsNullOrEmpty($LiteralCopy))));
 
     # Determine the replacement text
@@ -79,14 +79,14 @@ function Move-Match {
     }
     else {
       [string]$replaceWith = [string]::Empty;
-      if ($PSBoundParameters.ContainsKey('With')) {
-        if ($patternRemoved -match $With) {
+      if ($PSBoundParameters.ContainsKey('Copy')) {
+        if ($patternRemoved -match $Copy) {
           # With this implementation, it is up to the user to supply a regex proof
           # pattern, so if the With contains regex chars, they must pass in the string
           # pre-escaped: -With $(esc('some-pattern') + 'other stuff') or -EscapedWith 'some-pattern'
           #
           [string]$replaceWith = Split-Match `
-            -Source $patternRemoved -PatternRegEx $With `
+            -Source $patternRemoved -PatternRegEx $Copy `
             -Occurrence ($PSBoundParameters.ContainsKey('WithOccurrence') ? $WithOccurrence : 'f') `
             -CapturedOnly;
         }

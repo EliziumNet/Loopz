@@ -1,6 +1,6 @@
 using namespace System.Text.RegularExpressions;
 
-Describe 'Update-Match' {
+Describe 'Update-Match' -Tag 'Current' {
   BeforeAll {
     . .\Public\Update-Match.ps1;
     . .\Public\Split-Match.ps1;
@@ -107,34 +107,34 @@ Describe 'Update-Match' {
         }
       } # and: Paste references Pattern
 
-      Context 'and: Paste & With' {
-        Context 'With matches' {
+      Context 'and: Paste & Copy' {
+        Context 'Copy matches' {
           It 'should: replace the single match' {
             [string]$source = 'We are like the dreamer 1234';
             [RegEx]$pattern = new-expr('dream');
-            [string]$With = '\d{4}';
+            [string]$copy = '\d{4}';
             [string]$paste = '==${_w}=='
 
-            Update-Match -Value $source -Pattern $pattern -With $With -Paste $paste | `
+            Update-Match -Value $source -Pattern $pattern -Copy $copy -Paste $paste | `
               Should -BeExactly 'We are like the ==1234==er 1234';
           }
         }
 
-        Context 'With does NOT match' {
+        Context 'Copy does NOT match' {
           It 'should: replace the single match' {
             [string]$source = 'We are like the dreamer';
             [RegEx]$pattern = new-expr('dream');
-            [string]$with = 'blah';
+            [string]$copy = 'blah';
             [string]$paste = '==${_w}=='
 
-            Update-Match -Value $source -Pattern $pattern -With $with -Paste $paste | `
+            Update-Match -Value $source -Pattern $pattern -Copy $copy -Paste $paste | `
               Should -BeExactly $source;
           }          
         }
-      } # and: Paste & With
+      } # and: Paste & Copy
 
       Context 'and: Paste & LiteralWith' {
-        Context 'With matches' {
+        Context 'Copy matches' {
           It 'should: replace the single match' {
             [string]$source = 'We are like the dreamer';
             [RegEx]$pattern = new-expr('dream');
@@ -145,7 +145,7 @@ Describe 'Update-Match' {
               Should -BeExactly 'We are like the ==heal==er';
           }
         }
-      } # and: Paste & With
+      } # and: Paste & Copy
     } # given: plain pattern
 
     Context 'given: regex pattern' {
@@ -378,11 +378,11 @@ Describe 'Update-Match' {
         It 'should: return original value unmodified' {
           [string]$source = 'We are like the dreamer';
           [RegEx]$pattern = new-expr('rose');
-          [RegEx]$with = new-expr('healer');
+          [RegEx]$copy = new-expr('healer');
           [int]$quantity = 1;
 
           Update-Match -Occurrence 'FIRST' -Value $source -Pattern $pattern `
-            -With $with -Quantity $quantity | Should -BeExactly 'We are like the dreamer';
+            -Copy $copy -Quantity $quantity | Should -BeExactly 'We are like the dreamer';
         } # should: replace the single match
       } # and: no match
 
@@ -390,11 +390,11 @@ Describe 'Update-Match' {
         It 'should: replace the single match' {
           [string]$source = 'We are like the dreamer';
           [RegEx]$pattern = new-expr('dreamer');
-          [RegEx]$with = new-expr('healer');
+          [RegEx]$copy = new-expr('healer');
           [int]$quantity = 1;
 
           Update-Match -Occurrence 'FIRST' -Value $source -Pattern $pattern `
-            -With $with -Quantity $quantity | Should -BeExactly 'We are like the healer';
+            -Copy $copy -Quantity $quantity | Should -BeExactly 'We are like the healer';
         } # should: replace the single match
       } # and: single match
 
@@ -402,11 +402,11 @@ Describe 'Update-Match' {
         It 'should: replace the single match' {
           [string]$source = 'We are like the dreamer dream';
           [RegEx]$pattern = new-expr('\bdream\b');
-          [RegEx]$with = new-expr('heal');
+          [RegEx]$copy = new-expr('heal');
           [int]$quantity = 1;
 
           Update-Match -Occurrence 'FIRST' -Value $source -Pattern $pattern `
-            -With $with -Quantity $quantity | Should -BeExactly 'We are like the dreamer heal';
+            -Copy $copy -Quantity $quantity | Should -BeExactly 'We are like the dreamer heal';
         } # should: replace the single match
       } # and: single match
 
@@ -414,11 +414,11 @@ Describe 'Update-Match' {
         It 'should: replace the single match' {
           [string]$source = 'We are like the dreamer, dreamer';
           [RegEx]$pattern = new-expr('dreamer');
-          [RegEx]$with = new-expr('healer');
+          [RegEx]$copy = new-expr('healer');
           [int]$quantity = 1;
 
           Update-Match -Occurrence 'FIRST' -Value $source -Pattern $pattern `
-            -With $with -Quantity $quantity | Should -BeExactly 'We are like the healer, dreamer';
+            -Copy $copy -Quantity $quantity | Should -BeExactly 'We are like the healer, dreamer';
         }
       } # and: multiple matches, replace first only
 
@@ -426,11 +426,11 @@ Describe 'Update-Match' {
         It 'should: replace the single match' {
           [string]$source = 'We are like the dreamer, dreamer';
           [RegEx]$pattern = new-expr('dreamer');
-          [RegEx]$with = new-expr('healer');
+          [RegEx]$copy = new-expr('healer');
           [int]$quantity = 2;
 
           Update-Match -Occurrence 'FIRST' -Value $source -Pattern $pattern `
-            -With $with -Quantity $quantity | Should -BeExactly 'We are like the healer, healer';
+            -Copy $copy -Quantity $quantity | Should -BeExactly 'We are like the healer, healer';
         }
       } # and: multiple matches, replace first 2
     }
@@ -440,11 +440,11 @@ Describe 'Update-Match' {
         It 'should: replace the single match' {
           [string]$source = 'We are like the dreamer';
           [RegEx]$pattern = new-expr('dreamer');
-          [RegEx]$with = new-expr('healer');
+          [RegEx]$copy = new-expr('healer');
           [int]$quantity = 1;
 
           Update-Match -Occurrence 'LAST' -Value $source -Pattern $pattern `
-            -With $with -Quantity $quantity | Should -BeExactly 'We are like the healer';
+            -Copy $copy -Quantity $quantity | Should -BeExactly 'We are like the healer';
         } # should: replace the single match
       } # and: single match
 
@@ -452,11 +452,11 @@ Describe 'Update-Match' {
         It 'should: replace the single match' {
           [string]$source = 'We are like the dreamer, dreamer';
           [RegEx]$pattern = new-expr('dreamer');
-          [RegEx]$with = new-expr('healer');
+          [RegEx]$copy = new-expr('healer');
           [int]$quantity = 1;
 
           Update-Match -Occurrence 'LAST' -Value $source -Pattern $pattern `
-            -With $with -Quantity $quantity | Should -BeExactly 'We are like the dreamer, healer';
+            -Copy $copy -Quantity $quantity | Should -BeExactly 'We are like the dreamer, healer';
         }
       } # and: multiple matches, replace first only
     }
@@ -465,11 +465,11 @@ Describe 'Update-Match' {
       It 'should: replace the single match' {
         [string]$source = 'We are like the dreamer, dreamer';
         [RegEx]$pattern = new-expr('dreamer');
-        [RegEx]$with = new-expr('healer');
+        [RegEx]$copy = new-expr('healer');
         [int]$quantity = 1;
 
         Update-Match -Value $source -Pattern $pattern `
-          -With $with -Quantity $quantity | Should -BeExactly 'We are like the healer, healer';
+          -Copy $copy -Quantity $quantity | Should -BeExactly 'We are like the healer, healer';
       }
     }
   }
