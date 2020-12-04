@@ -43,7 +43,7 @@ function Rename-Many {
     [Parameter(ParameterSetName = 'ReplaceWith')]
     [ValidateCount(1, 2)]
     [ValidateScript( { -not([string]::IsNullOrEmpty($_[0])) })]
-    [object[]]$With,
+    [object[]]$Copy,
 
     [Parameter(ParameterSetName = 'ReplaceLiteralCopy', Mandatory)]
     [string]$LiteralCopy,
@@ -119,6 +119,7 @@ function Rename-Many {
         ? $_passThru['LOOPZ.REMY.PATTERN-OCC'] : 'f';
 
       if ($_passThru.ContainsKey('LOOPZ.REMY.WITH')) {
+        # TODO: Change With to Copy
         $actionParameters['With'] = $_passThru['LOOPZ.REMY.WITH'];
 
         if ($_passThru.ContainsKey('LOOPZ.REMY.WITH-OCC')) {
@@ -301,8 +302,8 @@ function Rename-Many {
         -Value $anchorExpression -Signals $signals -CustomLabel 'Anchor ({0})' -f $Relation;
     }
 
-    if ($PSBoundParameters.ContainsKey('With')) {
-      [string]$withExpression, [string]$withOccurrence = Resolve-PatternOccurrence $With;
+    if ($PSBoundParameters.ContainsKey('Copy')) {
+      [string]$withExpression, [string]$withOccurrence = Resolve-PatternOccurrence $Copy;
 
       Select-SignalContainer -Containers $containers -Name 'WITH' `
         -Value $withExpression -Signals $signals;
@@ -332,7 +333,7 @@ function Rename-Many {
 
     [boolean]$doCut = (
       -not($doMoveToken) -and
-      -not($PSBoundParameters.ContainsKey('With')) -and
+      -not($PSBoundParameters.ContainsKey('Copy')) -and
       -not($PSBoundParameters.ContainsKey('LiteralCopy')) -and
       -not($PSBoundParameters.ContainsKey('Paste'))
     )
@@ -393,7 +394,7 @@ function Rename-Many {
     }
     $passThru['LOOPZ.REMY.ACTION'] = $doMoveToken ? 'Move-Match' : 'Update-Match';
 
-    if ($PSBoundParameters.ContainsKey('With')) {
+    if ($PSBoundParameters.ContainsKey('Copy')) {
       [System.Text.RegularExpressions.RegEx]$withRegEx = New-RegularExpression -Expression $withExpression `
         -WholeWord:$(-not([string]::IsNullOrEmpty($adjustedWhole)) -and ($adjustedWhole -in @('*', 'w')));
 

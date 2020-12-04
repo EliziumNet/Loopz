@@ -192,8 +192,8 @@ Describe 'Rename-Many' {
   Context 'given: ReplaceWith' {
     Context 'and: Source matches Pattern' {
       Context 'and: With is non-regex static text' {
-        # It seems like this makes no sense; there's no point in testing static -With text as
-        # in reality, the user should use -LiteralCopy. However, the user might use -With for
+        # It seems like this makes no sense; there's no point in testing static -Copy text as
+        # in reality, the user should use -LiteralCopy. However, the user might use -Copy for
         # static text and if they do, there's no reason why it shouldn't just work, even though
         # LiteralWith is designed for this scenario.
         #
@@ -203,7 +203,7 @@ Describe 'Rename-Many' {
             $script:expected = @{}
 
             Get-ChildItem -Path $directoryPath | Rename-Many -File `
-              -Pattern 'a', f -With 'blah' -WhatIf;
+              -Pattern 'a', f -Copy 'blah' -WhatIf;
           }
         }
 
@@ -218,7 +218,7 @@ Describe 'Rename-Many' {
             }
 
             Get-ChildItem -Path $directoryPath | Rename-Many -File `
-              -Pattern 'a', f -With 't' -WhatIf;
+              -Pattern 'a', f -Copy 't' -WhatIf;
           }
         } # and: First Only
 
@@ -230,7 +230,7 @@ Describe 'Rename-Many' {
             }
 
             Get-ChildItem -Path $directoryPath | Rename-Many -File `
-              -Pattern 'o', 3 -With '0' -WhatIf;
+              -Pattern 'o', 3 -Copy '0' -WhatIf;
           }
         } # and: replace 3rd match
 
@@ -262,7 +262,7 @@ Describe 'Rename-Many' {
             }
 
             Get-ChildItem -Path $directoryPath | Rename-Many -File `
-              -Pattern 'a', f -With 't\d' -Whole w -WhatIf;
+              -Pattern 'a', f -Copy 't\d' -Whole w -WhatIf;
           }
         } # and: Whole With
 
@@ -271,7 +271,7 @@ Describe 'Rename-Many' {
             $script:expected = @{}
 
             Get-ChildItem -Path $directoryPath | Rename-Many -File `
-              -Pattern 'a', f -With '\d{4}' -WhatIf;
+              -Pattern 'a', f -Copy '\d{4}' -WhatIf;
           }
         }
 
@@ -286,7 +286,7 @@ Describe 'Rename-Many' {
             }
 
             Get-ChildItem -Path $directoryPath | Rename-Many -File `
-              -Pattern 'a', f -With 't\d' -WhatIf;
+              -Pattern 'a', f -Copy 't\d' -WhatIf;
           }
         } # and: First Only
       } # and: With is regex
@@ -303,7 +303,7 @@ Describe 'Rename-Many' {
             }
 
             Get-ChildItem -Path $directoryPath | Rename-Many -File `
-              -Pattern 'a', f -With ($(esc('.')) + '\w{3}') -WhatIf;
+              -Pattern 'a', f -Copy ($(esc('.')) + '\w{3}') -WhatIf;
           }
         } # and: First Only
       } # and: With needs escapes
@@ -361,7 +361,7 @@ Describe 'Rename-Many' {
             }
 
             Get-ChildItem -Path $directoryPath | Rename-Many -File `
-              -Pattern 'loopz' -Except 'data' -With 'h00pz' -WhatIf;
+              -Pattern 'loopz' -Except 'data' -Copy 'h00pz' -WhatIf;
           }
         }
       } # and: Except
@@ -376,7 +376,7 @@ Describe 'Rename-Many' {
             }
 
             Get-ChildItem -Path $directoryPath | Rename-Many -File `
-              -Pattern 'loopz' -Include 'data' -With 'h00pz' -WhatIf;
+              -Pattern 'loopz' -Include 'data' -Copy 'h00pz' -WhatIf;
           }
         }
       } # and: Except
@@ -429,7 +429,7 @@ Describe 'Rename-Many' {
           [string]$plastikmanPath = './Tests/Data/traverse/Audio/MINIMAL/Plastikman';
 
           Get-ChildItem -Path $plastikmanPath | Rename-Many -Directory `
-            -Pattern 'e' -With '3' -WhatIf;
+            -Pattern 'e' -Copy '3' -WhatIf;
         }
       }
     } # and: Source matches Pattern
@@ -450,7 +450,7 @@ Describe 'Rename-Many' {
         It 'should: not throw ParameterBindingException' {
           {
             Get-ChildItem -File -Path $sourcePath -Filter $filter | Rename-Many -File `
-              -Whole p -Pattern 'data.' -Anchor 't\d{1}\.' -With 'repl' -Except 'fake' `
+              -Whole p -Pattern 'data.' -Anchor 't\d{1}\.' -Copy 'repl' -Except 'fake' `
               -Condition $successCondition -Relation 'before' -WhatIf:$whatIf; } `
           | Should -Not -Throw;
         }
@@ -460,7 +460,7 @@ Describe 'Rename-Many' {
         It 'should: not throw ParameterBindingException' {
           {
             Get-ChildItem -File -Path $sourcePath -Filter $filter | Rename-Many -File `
-              -Whole p -Pattern 'data.' -Start -With 'repl' -Except 'fake' -Condition $successCondition `
+              -Whole p -Pattern 'data.' -Start -Copy 'repl' -Except 'fake' -Condition $successCondition `
               -WhatIf:$whatIf; } `
           | Should -Not -Throw;
         }
@@ -470,7 +470,7 @@ Describe 'Rename-Many' {
         It 'should: not throw ParameterBindingException' {
           {
             Get-ChildItem -File -Path $sourcePath -Filter $filter | Rename-Many -File `
-              -Whole p -Pattern 'data.' -End -With 'repl' -Except 'fake' -Condition $successCondition `
+              -Whole p -Pattern 'data.' -End -Copy 'repl' -Except 'fake' -Condition $successCondition `
               -WhatIf:$whatIf; } `
           | Should -Not -Throw;
         }
@@ -480,7 +480,7 @@ Describe 'Rename-Many' {
         It 'should: not throw ParameterBindingException' {
           {
             Get-ChildItem -File -Path $sourcePath -Filter $filter | Rename-Many -File `
-              -Whole p -Pattern 'data.' -With 'info.' -Except 'fake' `
+              -Whole p -Pattern 'data.' -Copy 'info.' -Except 'fake' `
               -Condition $successCondition -WhatIf:$whatIf; } `
           | Should -Not -Throw;
         }
@@ -585,7 +585,7 @@ Describe 'Rename-Many' {
       {
         [string]$badWith = '(((';
         Get-ChildItem -Path $directoryPath | Rename-Many -File `
-          -Pattern 'o', 3 -With $badWith -WhatIf;
+          -Pattern 'o', 3 -Copy $badWith -WhatIf;
       } | Should -Throw;
     }
   } # given: invalid With expression
