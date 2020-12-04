@@ -126,8 +126,7 @@ function Rename-Many {
         }
       }
       elseif ($_passThru.ContainsKey('LOOPZ.REMY.LITERAL-COPY')) {
-        # TODO: change LiteralWith to LiteralCopy
-        $actionParameters['LiteralWith'] = $_passThru['LOOPZ.REMY.LITERAL-COPY'];
+        $actionParameters['LiteralCopy'] = $_passThru['LOOPZ.REMY.LITERAL-COPY'];
       }
 
       if ($_passThru.ContainsKey('LOOPZ.REMY.PASTE')) {

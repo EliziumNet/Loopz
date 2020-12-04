@@ -15,9 +15,9 @@ Describe 'Update-Match' {
         It 'should: return original string unmodified' {
           [string]$source = 'We are like the dreamer who dreams and then lives inside the dream';
           [RegEx]$pattern = new-expr('blooper');
-          [string]$literalWith = 'dandelion';
+          [string]$literalCopy = 'dandelion';
 
-          Update-Match -Value $source -Pattern $pattern -LiteralWith $literalWith | `
+          Update-Match -Value $source -Pattern $pattern -LiteralCopy $literalCopy | `
             Should -BeExactly $source;
         }
       }
@@ -26,9 +26,9 @@ Describe 'Update-Match' {
         It 'should: replace the single match' {
           [string]$source = 'We are like the dreamer';
           [RegEx]$pattern = new-expr('dream');
-          [string]$literalWith = 'heal';
+          [string]$literalCopy = 'heal';
 
-          Update-Match -Value $source -Pattern $pattern -LiteralWith $literalWith | `
+          Update-Match -Value $source -Pattern $pattern -LiteralCopy $literalCopy | `
             Should -BeExactly 'We are like the healer';
         }
       }
@@ -37,9 +37,9 @@ Describe 'Update-Match' {
         It 'should: replace the first match only' {
           [string]$source = 'We are like the dreamer who dreams and then lives inside the dream';
           [RegEx]$pattern = new-expr('dream');
-          [string]$literalWith = 'heal';
+          [string]$literalCopy = 'heal';
 
-          Update-Match -Value $source -Pattern $pattern -LiteralWith $literalWith | `
+          Update-Match -Value $source -Pattern $pattern -LiteralCopy $literalCopy | `
             Should -BeExactly 'We are like the healer who dreams and then lives inside the dream';
         }
       }
@@ -48,9 +48,9 @@ Describe 'Update-Match' {
         It 'should: replace all matches' {
           [string]$source = 'We are like the dreamer who dreams and then lives inside the dream';
           [RegEx]$pattern = new-expr('dream');
-          [string]$literalWith = 'heal';
+          [string]$literalCopy = 'heal';
 
-          Update-Match -Value $source -Pattern $pattern -LiteralWith $literalWith `
+          Update-Match -Value $source -Pattern $pattern -LiteralCopy $literalCopy `
             -PatternOccurrence '*' | `
             Should -BeExactly 'We are like the healer who heals and then lives inside the heal';
         }
@@ -60,9 +60,9 @@ Describe 'Update-Match' {
         It 'should: replace specified match only' {
           [string]$source = 'We are like the dreamer who dreams and then lives inside the dream';
           [RegEx]$pattern = new-expr('dream');
-          [string]$literalWith = 'heal';
+          [string]$literalCopy = 'heal';
 
-          Update-Match -Value $source -Pattern $pattern -LiteralWith $literalWith `
+          Update-Match -Value $source -Pattern $pattern -LiteralCopy $literalCopy `
             -PatternOccurrence '2' | `
             Should -BeExactly 'We are like the dreamer who heals and then lives inside the dream';
         }
@@ -72,9 +72,9 @@ Describe 'Update-Match' {
         It 'should: return value unmodified' {
           [string]$source = 'We are like the dreamer who dreams and then lives inside the dream';
           [RegEx]$pattern = new-expr('dream');
-          [string]$literalWith = 'heal';
+          [string]$literalCopy = 'heal';
 
-          Update-Match -Value $source -Pattern $pattern -LiteralWith $literalWith `
+          Update-Match -Value $source -Pattern $pattern -LiteralCopy $literalCopy `
             -PatternOccurrence '99' | `
             Should -BeExactly $source;
         }
@@ -85,10 +85,10 @@ Describe 'Update-Match' {
           It 'should: replace the single match' {
             [string]$source = 'We are like the dreamer';
             [RegEx]$pattern = new-expr('dream');
-            [string]$literalWith = 'heal';
+            [string]$literalCopy = 'heal';
             [string]$paste = '==${_w}=='
 
-            Update-Match -Value $source -Pattern $pattern -LiteralWith $literalWith -Paste $paste | `
+            Update-Match -Value $source -Pattern $pattern -LiteralCopy $literalCopy -Paste $paste | `
               Should -BeExactly 'We are like the ==heal==er';
           }
         }
@@ -138,10 +138,10 @@ Describe 'Update-Match' {
           It 'should: replace the single match' {
             [string]$source = 'We are like the dreamer';
             [RegEx]$pattern = new-expr('dream');
-            [string]$literalWith = 'heal';
+            [string]$literalCopy = 'heal';
             [string]$paste = '==${_w}=='
 
-            Update-Match -Value $source -Pattern $pattern -LiteralWith $literalWith -Paste $paste | `
+            Update-Match -Value $source -Pattern $pattern -LiteralCopy $literalCopy -Paste $paste | `
               Should -BeExactly 'We are like the ==heal==er';
           }
         }
@@ -154,9 +154,9 @@ Describe 'Update-Match' {
           It 'should: return original string unmodified' {
             [string]$source = 'We are like the dreamer who dreams and then lives inside the dream';
             [RegEx]$pattern = new-expr('\bscream\b');
-            [string]$literalWith = 'heal';
+            [string]$literalCopy = 'heal';
 
-            Update-Match -Value $source -Pattern $pattern -LiteralWith $literalWith | `
+            Update-Match -Value $source -Pattern $pattern -LiteralCopy $literalCopy | `
               Should -BeExactly $source;
           }
         }
@@ -165,9 +165,9 @@ Describe 'Update-Match' {
           It 'should: replace the single match' {
             [string]$source = 'We are like the dreamer who dreams and then lives inside the dream';
             [RegEx]$pattern = new-expr('\bdream\b');
-            [string]$literalWith = 'healer';
+            [string]$literalCopy = 'healer';
 
-            Update-Match -Value $source -Pattern $pattern -LiteralWith $literalWith | `
+            Update-Match -Value $source -Pattern $pattern -LiteralCopy $literalCopy | `
               Should -BeExactly 'We are like the dreamer who dreams and then lives inside the healer';
           }
         }
@@ -176,9 +176,9 @@ Describe 'Update-Match' {
           It 'should: replace the first single match only' {
             [string]$source = 'We are like the dreamer who has a dream and then lives inside the dream';
             [RegEx]$pattern = new-expr('\bdream\b');
-            [string]$literalWith = 'healer';
+            [string]$literalCopy = 'healer';
 
-            Update-Match -Value $source -Pattern $pattern -LiteralWith $literalWith | `
+            Update-Match -Value $source -Pattern $pattern -LiteralCopy $literalCopy | `
               Should -BeExactly 'We are like the dreamer who has a healer and then lives inside the dream';
           }
         }
@@ -189,9 +189,9 @@ Describe 'Update-Match' {
           It 'should: replace the single match' {
             [string]$source = 'Party like its 31-12-1999';
             [RegEx]$pattern = new-expr('\d{2}-\d{2}-\d{4}');
-            [string]$literalWith = 'Nineteen Ninety Nine';
+            [string]$literalCopy = 'Nineteen Ninety Nine';
 
-            Update-Match -Value $source -Pattern $pattern -LiteralWith $literalWith | `
+            Update-Match -Value $source -Pattern $pattern -LiteralCopy $literalCopy | `
               Should -BeExactly 'Party like its Nineteen Ninety Nine';
           }
         }
@@ -200,9 +200,9 @@ Describe 'Update-Match' {
           It 'should: replace the first match only' {
             [string]$source = '01-01-2000 Party like its 31-12-1999';
             [RegEx]$pattern = new-expr('\d{2}-\d{2}-\d{4}');
-            [string]$literalWith = 'New Years Eve 1999';
+            [string]$literalCopy = 'New Years Eve 1999';
 
-            Update-Match -Value $source -Pattern $pattern -LiteralWith $literalWith `
+            Update-Match -Value $source -Pattern $pattern -LiteralCopy $literalCopy `
               -PatternOccurrence 'f' | `
               Should -BeExactly 'New Years Eve 1999 Party like its 31-12-1999';
           }
@@ -210,9 +210,9 @@ Describe 'Update-Match' {
           It 'should: replace identified match only' {
             [string]$source = '01-01-2000 Party like its 31-12-1999, today is 24-09-2020';
             [RegEx]$pattern = new-expr('\d{2}-\d{2}-\d{4}');
-            [string]$literalWith = '[DATE]';
+            [string]$literalCopy = '[DATE]';
 
-            Update-Match -Value $source -Pattern $pattern -LiteralWith $literalWith `
+            Update-Match -Value $source -Pattern $pattern -LiteralCopy $literalCopy `
               -PatternOccurrence '2' | `
               Should -BeExactly '01-01-2000 Party like its [DATE], today is 24-09-2020';
           }
@@ -238,9 +238,9 @@ Describe 'Update-Match' {
         It 'should: return original string unmodified' {
           [string]$source = 'The sound the wind makes in the pines';
           [RegEx]$pattern = new-expr('bear');
-          [string]$literalWith = 'woods';
+          [string]$literalCopy = 'woods';
 
-          Update-Match -Value $source -Pattern $pattern -LiteralWith $literalWith | `
+          Update-Match -Value $source -Pattern $pattern -LiteralCopy $literalCopy | `
             Should -BeExactly 'The sound the wind makes in the pines';
         }
       }
@@ -249,9 +249,9 @@ Describe 'Update-Match' {
         It 'should: replace the single match' {
           [string]$source = 'The sound the wind makes in the pines';
           [RegEx]$pattern = new-expr('wind');
-          [string]$literalWith = 'owl';
+          [string]$literalCopy = 'owl';
 
-          Update-Match -Value $source -Pattern $pattern -LiteralWith $literalWith | `
+          Update-Match -Value $source -Pattern $pattern -LiteralCopy $literalCopy | `
             Should -BeExactly 'The sound the owl makes in the pines';
         }
       }
@@ -260,9 +260,9 @@ Describe 'Update-Match' {
         It 'should: replace the last single match only' {
           [string]$source = 'The sound the wind makes in the pines';
           [RegEx]$pattern = new-expr('in');
-          [string]$literalWith = '==';
+          [string]$literalCopy = '==';
 
-          Update-Match -Value $source -Pattern $pattern -LiteralWith $literalWith `
+          Update-Match -Value $source -Pattern $pattern -LiteralCopy $literalCopy `
             -PatternOccurrence 'l' | `
             Should -BeExactly 'The sound the wind makes in the p==es';
         }
@@ -275,9 +275,9 @@ Describe 'Update-Match' {
           It 'should: return original string unmodified' {
             [string]$source = 'The sound the wind makes in the pines';
             [RegEx]$pattern = new-expr('\bbear\b');
-            [string]$literalWith = 'woods';
+            [string]$literalCopy = 'woods';
 
-            Update-Match -Value $source -Pattern $pattern -LiteralWith $literalWith | `
+            Update-Match -Value $source -Pattern $pattern -LiteralCopy $literalCopy | `
               Should -BeExactly 'The sound the wind makes in the pines';
           }
         }
@@ -286,9 +286,9 @@ Describe 'Update-Match' {
           It 'should: replace the single match' {
             [string]$source = 'The sound the wind makes in the pines';
             [RegEx]$pattern = new-expr('\bin\b');
-            [string]$literalWith = 'under';
+            [string]$literalCopy = 'under';
 
-            Update-Match -Value $source -Pattern $pattern -LiteralWith $literalWith | `
+            Update-Match -Value $source -Pattern $pattern -LiteralCopy $literalCopy | `
               Should -BeExactly 'The sound the wind makes under the pines';
           }
         }
@@ -297,9 +297,9 @@ Describe 'Update-Match' {
           It 'should: replace the last single match only' {
             [string]$source = 'The sound the wind makes in the pines or in the woods';
             [RegEx]$pattern = new-expr('in');
-            [string]$literalWith = 'under';
+            [string]$literalCopy = 'under';
 
-            Update-Match -Value $source -Pattern $pattern -LiteralWith $literalWith `
+            Update-Match -Value $source -Pattern $pattern -LiteralCopy $literalCopy `
               -PatternOccurrence 'l' | `
               Should -BeExactly 'The sound the wind makes in the pines or under the woods';
           }
@@ -311,9 +311,9 @@ Describe 'Update-Match' {
           It 'should: replace the single match' {
             [string]$source = 'Party like its 31-12-1999';
             [RegEx]$pattern = new-expr('\d{2}-\d{2}-\d{4}');
-            [string]$literalWith = 'Nineteen Ninety Nine';
+            [string]$literalCopy = 'Nineteen Ninety Nine';
 
-            Update-Match -Value $source -Pattern $pattern -LiteralWith $literalWith | `
+            Update-Match -Value $source -Pattern $pattern -LiteralCopy $literalCopy | `
               Should -BeExactly 'Party like its Nineteen Ninety Nine';
           }
         }
@@ -322,9 +322,9 @@ Describe 'Update-Match' {
           It 'should: replace the last match only' {
             [string]$source = '01-01-2000 Party like its 31-12-1999';
             [RegEx]$pattern = new-expr('\d{2}-\d{2}-\d{4}');
-            [string]$literalWith = 'New Years Eve 1999';
+            [string]$literalCopy = 'New Years Eve 1999';
 
-            Update-Match -Value $source -Pattern $pattern -LiteralWith $literalWith `
+            Update-Match -Value $source -Pattern $pattern -LiteralCopy $literalCopy `
               -PatternOccurrence 'l' | `
               Should -BeExactly '01-01-2000 Party like its New Years Eve 1999';
           }
@@ -338,9 +338,9 @@ Describe 'Update-Match' {
       It 'should: replace all matches' {
         [string]$source = 'Cyanopsia: blue, Cataract: blue, Moody: blues, Azora: blue, Azul: blue, Hinto: blue';
         [RegEx]$pattern = new-expr('blue');
-        [string]$literalWith = 'red';
+        [string]$literalCopy = 'red';
 
-        Update-Match -Value $source -Pattern $pattern -LiteralWith $literalWith `
+        Update-Match -Value $source -Pattern $pattern -LiteralCopy $literalCopy `
           -PatternOccurrence '*' | `
           Should -BeExactly 'Cyanopsia: red, Cataract: red, Moody: reds, Azora: red, Azul: red, Hinto: red';
       }
@@ -348,9 +348,9 @@ Describe 'Update-Match' {
       It 'should: replace all whole word matches' {
         [string]$source = 'Cyanopsia: blue, Cataract: blue, Moody: blues, Azora: blue, Azul: blue, Hinto: blue';
         [RegEx]$pattern = new-expr('\bblue\b');
-        [string]$literalWith = 'red';
+        [string]$literalCopy = 'red';
 
-        Update-Match -Value $source -Pattern $pattern -LiteralWith $literalWith `
+        Update-Match -Value $source -Pattern $pattern -LiteralCopy $literalCopy `
           -PatternOccurrence '*' | `
           Should -BeExactly 'Cyanopsia: red, Cataract: red, Moody: blues, Azora: red, Azul: red, Hinto: red';
       }
@@ -363,9 +363,9 @@ Describe 'Update-Match' {
         #
         [string]$source = 'Currencies: [GBP], [CHF], [CUC], [CZK], [GHS]';
         [RegEx]$pattern = new-expr('\[(?<ccy>[A-Z]{3})\]');
-        [string]$literalWith = '(***)';
+        [string]$literalCopy = '(***)';
 
-        Update-Match -Value $source -Pattern $pattern -LiteralWith $literalWith `
+        Update-Match -Value $source -Pattern $pattern -LiteralCopy $literalCopy `
           -PatternOccurrence '*' | `
           Should -BeExactly 'Currencies: (***), (***), (***), (***), (***)';
       }

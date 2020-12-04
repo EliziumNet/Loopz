@@ -29,7 +29,7 @@ function Move-Match {
     [string]$WithOccurrence = 'f',
 
     [Parameter()]
-    [string]$LiteralWith,
+    [string]$LiteralCopy,
 
     [Parameter()]
     [string]$Paste,
@@ -68,7 +68,7 @@ function Move-Match {
 
   if (-not([string]::IsNullOrEmpty($capturedPattern))) {
     [boolean]$isVanilla = -not($PSBoundParameters.ContainsKey('With') -or `
-      ($PSBoundParameters.ContainsKey('LiteralWith') -and -not([string]::IsNullOrEmpty($LiteralWith))));
+      ($PSBoundParameters.ContainsKey('LiteralCopy') -and -not([string]::IsNullOrEmpty($LiteralCopy))));
 
     # Determine the replacement text
     #
@@ -96,8 +96,8 @@ function Move-Match {
           $failed = $true;         
         }
       }
-      elseif ($PSBoundParameters.ContainsKey('LiteralWith')) {
-        [string]$replaceWith = $LiteralWith;
+      elseif ($PSBoundParameters.ContainsKey('LiteralCopy')) {
+        [string]$replaceWith = $LiteralCopy;
       }
       else {
         [string]$replaceWith = [string]::Empty;

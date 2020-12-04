@@ -273,10 +273,10 @@ Describe 'Move-Match' {
         } # and: Anchor matches
       } # and: vanilla move formatted
 
-      Context 'and: exotic' { # Pattern, With/EscapedWith/LiteralWith
+      Context 'and: exotic' { # Pattern, With/EscapedWith/LiteralCopy
 
         # The With tests only make sense if not using Paste, although you can use Paste with,
-        # Relation, but LiteralWith is pointless, because you can just insert that text inside the
+        # Relation, but LiteralCopy is pointless, because you can just insert that text inside the
         # Paste.
         #
         Context 'and: Last With' {
@@ -307,16 +307,16 @@ Describe 'Move-Match' {
           }
         } # and: EscapedWith
 
-        Context 'and: LiteralWith' {
+        Context 'and: LiteralCopy' {
           It 'should: cut the first match and paste after the first anchor' {
             [string]$source = 'There is where +fire your +fire is going';
             [RegEx]$escapedPattern = new-expr([regex]::Escape('+fire') + '\s');
             [RegEx]$anchor = new-expr('is ');
-            [string]$literalWith = 'ice^';
+            [string]$literalCopy = 'ice^';
             [string]$paste = '${_a}(${_w}) ';
 
             Move-Match -Value $source -Pattern $escapedPattern -Anchor $anchor `
-              -LiteralWith $literalWith -Paste $paste | `
+              -LiteralCopy $literalCopy -Paste $paste | `
               Should -BeExactly 'There is (ice^) where your +fire is going';
           }
 
@@ -325,11 +325,11 @@ Describe 'Move-Match' {
             [RegEx]$escapedPattern = new-expr([regex]::Escape('+fire') + '\s');
             [RegEx]$anchor = new-expr('is ');
             [string]$relation = 'after'
-            [string]$literalWith = 'ice^';
+            [string]$literalCopy = 'ice^';
             [string]$paste = '${_a}(${_w}) ';
 
             Move-Match -Value $source -Pattern $escapedPattern -Relation $relation -Anchor $anchor `
-              -LiteralWith $literalWith -Paste $paste | `
+              -LiteralCopy $literalCopy -Paste $paste | `
               Should -BeExactly 'There is (ice^) where your +fire is going';
           }
 
@@ -337,11 +337,11 @@ Describe 'Move-Match' {
             [string]$source = 'There is where +fire your +fire is going';
             [RegEx]$escapedPattern = new-expr([regex]::Escape('+fire') + '\s');
             [RegEx]$anchor = new-expr('is ');
-            [string]$literalWith = 'ice^';
+            [string]$literalCopy = 'ice^';
             [string]$paste = '${_a}($0) ';
 
             Move-Match -Value $source -Pattern $escapedPattern -Anchor $anchor `
-              -LiteralWith $literalWith -Paste $paste | `
+              -LiteralCopy $literalCopy -Paste $paste | `
               Should -BeExactly 'There is (+fire ) where your +fire is going';
           }
 
@@ -349,11 +349,11 @@ Describe 'Move-Match' {
             [string]$source = 'There is$ where +fire your +fire is$ going';
             [RegEx]$escapedPattern = new-expr([regex]::Escape('+fire') + '\s');
             [RegEx]$literalAnchor = new-expr([regex]::Escape('is$'));
-            [string]$literalWith = 'ice^';
+            [string]$literalCopy = 'ice^';
             [string]$paste = '${_a}(${_w})';
 
             Move-Match -Value $source -Pattern $escapedPattern -Anchor $literalAnchor `
-              -AnchorOccurrence 'L' -LiteralWith $literalWith -Paste $paste | `
+              -AnchorOccurrence 'L' -LiteralCopy $literalCopy -Paste $paste | `
               Should -BeExactly 'There is$ where your +fire is$(ice^) going';
           }
 
@@ -361,21 +361,21 @@ Describe 'Move-Match' {
             [string]$source = 'There is$ where +fire your +fire is$ going';
             [RegEx]$escapedPattern = new-expr([regex]::Escape('+fire') + '\s');
             [RegEx]$literalAnchor = new-expr([regex]::Escape('is$'));
-            [string]$literalWith = 'ice^';
+            [string]$literalCopy = 'ice^';
             [string]$paste = '${_a}(${_w})';
 
             Move-Match -Value $source -Pattern $escapedPattern -PatternOccurrence 'L' `
               -Anchor $literalAnchor -AnchorOccurrence 'L' `
-              -LiteralWith $literalWith -WithOccurrence 'L' -Paste $paste | `
+              -LiteralCopy $literalCopy -WithOccurrence 'L' -Paste $paste | `
               Should -BeExactly 'There is$ where +fire your is$(ice^) going';
           }
-        } # and: LiteralWith
+        } # and: LiteralCopy
       } # and: exotic
 
-      Context 'and: exotic formatted' { # Pattern, Paste, With/EscapedWith/LiteralWith
+      Context 'and: exotic formatted' { # Pattern, Paste, With/EscapedWith/LiteralCopy
         Context 'and: Anchor matches' {
           # It's looking like there is little point in having the With parameter, because the
-          # LiteralWith functionality is provided by the Paste and the With is actually Copy.
+          # LiteralCopy functionality is provided by the Paste and the With is actually Copy.
           # But With is useful with Relation if not using Paste.
           #
           It 'should: cut the first match and paste after the first anchor' {
