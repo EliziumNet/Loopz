@@ -29,7 +29,7 @@ function Move-Match {
     [string]$CopyOccurrence = 'f',
 
     [Parameter()]
-    [string]$LiteralCopy,
+    [string]$With,
 
     [Parameter()]
     [string]$Paste,
@@ -68,12 +68,12 @@ function Move-Match {
 
   if (-not([string]::IsNullOrEmpty($capturedPattern))) {
     [boolean]$isVanilla = -not($PSBoundParameters.ContainsKey('Copy') -or `
-      ($PSBoundParameters.ContainsKey('LiteralCopy') -and -not([string]::IsNullOrEmpty($LiteralCopy))));
+      ($PSBoundParameters.ContainsKey('With') -and -not([string]::IsNullOrEmpty($With))));
 
     # Determine the replacement text
     #
     if ($isVanilla) {
-      # Insert the original pattern match, because there is no With/LiteralWith.
+      # Insert the original pattern match, because there is no Copy/With.
       #
       [string]$replaceWith = $capturedPattern;
     }
@@ -96,8 +96,8 @@ function Move-Match {
           $failed = $true;         
         }
       }
-      elseif ($PSBoundParameters.ContainsKey('LiteralCopy')) {
-        [string]$replaceWith = $LiteralCopy;
+      elseif ($PSBoundParameters.ContainsKey('With')) {
+        [string]$replaceWith = $With;
       }
       else {
         [string]$replaceWith = [string]::Empty;
@@ -143,7 +143,7 @@ function Move-Match {
         #
         if ($isFormatted) {
           # Paste can be something like '=== ${_a}, (${a}, ${b}, [$0], ${_c} ===', where $0
-          # represents the pattern capture, the special variable _w represents With/LiteralWith,
+          # represents the pattern capture, the special variable _w represents Copy/With,
           # _a represents the anchor and ${a} and ${b} represents user defined capture groups.
           # The Paste replaces the anchor, so to re-insert the anchor _a, it must be referenced
           # in the Paste format. Numeric captures may also be referenced.
@@ -157,7 +157,7 @@ function Move-Match {
           $format = $capturedPattern -replace $pattern, $format;
         }
         else {
-          # If the user has defined a With/LiteralWith without a format(Paste), we define the format
+          # If the user has defined a Copy/With without a format(Paste), we define the format
           # in terms of the relationship specified.
           #
           [string]$format = ($Relation -eq 'before') `

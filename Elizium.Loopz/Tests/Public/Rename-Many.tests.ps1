@@ -193,9 +193,9 @@ Describe 'Rename-Many' {
     Context 'and: Source matches Pattern' {
       Context 'and: Copy is non-regex static text' {
         # It seems like this makes no sense; there's no point in testing static -Copy text as
-        # in reality, the user should use -LiteralCopy. However, the user might use -Copy for
+        # in reality, the user should use -With. However, the user might use -Copy for
         # static text and if they do, there's no reason why it shouldn't just work, even though
-        # LiteralCopy is designed for this scenario.
+        # With is designed for this scenario.
         #
 
         Context 'Copy does NOT match' {
@@ -245,7 +245,7 @@ Describe 'Rename-Many' {
             }
 
             Get-ChildItem -Path $directoryPath | Rename-Many -File `
-              -Pattern 'a', l -LiteralCopy '@' -WhatIf;
+              -Pattern 'a', l -With '@' -WhatIf;
           }
         } # and: Last Only
       } # and: Copy is non-regex static text
@@ -308,7 +308,7 @@ Describe 'Rename-Many' {
         } # and: First Only
       } # and: Copy needs escapes
 
-      Context 'LiteralCopy' {
+      Context 'With' {
         Context 'and: First Only' {
           It 'should: do rename; replace First Pattern for Copy text' {
             $script:expected = @{
@@ -320,7 +320,7 @@ Describe 'Rename-Many' {
             }
 
             Get-ChildItem -Path $directoryPath | Rename-Many -File `
-              -Pattern 'a', f -LiteralCopy '@' -WhatIf;
+              -Pattern 'a', f -With '@' -WhatIf;
           }
 
           Context 'and: replace 3rd match' {
@@ -331,7 +331,7 @@ Describe 'Rename-Many' {
               }
 
               Get-ChildItem -Path $directoryPath | Rename-Many -File `
-                -Pattern 'o', 3 -LiteralCopy '0' -WhatIf;
+                -Pattern 'o', 3 -With '0' -WhatIf;
             }
           } # and: replace 3rd match
 
@@ -346,11 +346,11 @@ Describe 'Rename-Many' {
               }
 
               Get-ChildItem -Path $directoryPath | Rename-Many -File `
-                -Pattern 'a', l -LiteralCopy '@' -WhatIf;
+                -Pattern 'a', l -With '@' -WhatIf;
             }
           } # and: Last Only
         } # and: First Only
-      } # LiteralCopy
+      } # With
 
       Context 'and: Except' {
         Context 'and: Source matches Pattern' {
@@ -398,7 +398,7 @@ Describe 'Rename-Many' {
           }
 
           Get-ChildItem -Path $directoryPath | Rename-Many -Context $context -File `
-            -Pattern 'a', l -LiteralCopy '@' -WhatIf;
+            -Pattern 'a', l -With '@' -WhatIf;
         }
       }
 

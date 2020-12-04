@@ -18,7 +18,7 @@ function Update-Match {
     [string]$CopyOccurrence = 'f',
 
     [Parameter()]
-    [string]$LiteralCopy,
+    [string]$With,
 
     [Parameter()]
     [string]$Paste
@@ -38,8 +38,8 @@ function Update-Match {
           return $Value;
         }
     }
-    elseif ($PSBoundParameters.ContainsKey('LiteralCopy')) {
-      [string]$replaceWith = $LiteralCopy;
+    elseif ($PSBoundParameters.ContainsKey('With')) {
+      [string]$replaceWith = $With;
     }
     else {
       [string]$replaceWith = [string]::Empty;

@@ -1,6 +1,6 @@
 using namespace System.Text.RegularExpressions;
 
-Describe 'Move-Match' -Tag 'Current' {
+Describe 'Move-Match' {
   BeforeAll {
     Get-Module Elizium.Loopz | Remove-Module
     Import-Module .\Output\Elizium.Loopz\Elizium.Loopz.psm1 `
@@ -273,10 +273,10 @@ Describe 'Move-Match' -Tag 'Current' {
         } # and: Anchor matches
       } # and: vanilla move formatted
 
-      Context 'and: exotic' { # Pattern, Copy/EscapedWith/LiteralCopy
+      Context 'and: exotic' { # Pattern, Copy/EscapedWith/With
 
         # The Copy tests only make sense if not using Paste, although you can use Paste with,
-        # Relation, but LiteralCopy is pointless, because you can just insert that text inside the
+        # Relation, but With is pointless, because you can just insert that text inside the
         # Paste.
         #
         Context 'and: Last Copy' {
@@ -307,16 +307,16 @@ Describe 'Move-Match' -Tag 'Current' {
           }
         } # and: EscapedWith
 
-        Context 'and: LiteralCopy' {
+        Context 'and: With' {
           It 'should: cut the first match and paste after the first anchor' {
             [string]$source = 'There is where +fire your +fire is going';
             [RegEx]$escapedPattern = new-expr([regex]::Escape('+fire') + '\s');
             [RegEx]$anchor = new-expr('is ');
-            [string]$literalCopy = 'ice^';
+            [string]$with = 'ice^';
             [string]$paste = '${_a}(${_c}) ';
 
             Move-Match -Value $source -Pattern $escapedPattern -Anchor $anchor `
-              -LiteralCopy $literalCopy -Paste $paste | `
+              -With $with -Paste $paste | `
               Should -BeExactly 'There is (ice^) where your +fire is going';
           }
 
@@ -325,11 +325,11 @@ Describe 'Move-Match' -Tag 'Current' {
             [RegEx]$escapedPattern = new-expr([regex]::Escape('+fire') + '\s');
             [RegEx]$anchor = new-expr('is ');
             [string]$relation = 'after'
-            [string]$literalCopy = 'ice^';
+            [string]$with = 'ice^';
             [string]$paste = '${_a}(${_c}) ';
 
             Move-Match -Value $source -Pattern $escapedPattern -Relation $relation -Anchor $anchor `
-              -LiteralCopy $literalCopy -Paste $paste | `
+              -With $with -Paste $paste | `
               Should -BeExactly 'There is (ice^) where your +fire is going';
           }
 
@@ -337,11 +337,11 @@ Describe 'Move-Match' -Tag 'Current' {
             [string]$source = 'There is where +fire your +fire is going';
             [RegEx]$escapedPattern = new-expr([regex]::Escape('+fire') + '\s');
             [RegEx]$anchor = new-expr('is ');
-            [string]$literalCopy = 'ice^';
+            [string]$with = 'ice^';
             [string]$paste = '${_a}($0) ';
 
             Move-Match -Value $source -Pattern $escapedPattern -Anchor $anchor `
-              -LiteralCopy $literalCopy -Paste $paste | `
+              -With $with -Paste $paste | `
               Should -BeExactly 'There is (+fire ) where your +fire is going';
           }
 
@@ -349,11 +349,11 @@ Describe 'Move-Match' -Tag 'Current' {
             [string]$source = 'There is$ where +fire your +fire is$ going';
             [RegEx]$escapedPattern = new-expr([regex]::Escape('+fire') + '\s');
             [RegEx]$literalAnchor = new-expr([regex]::Escape('is$'));
-            [string]$literalCopy = 'ice^';
+            [string]$with = 'ice^';
             [string]$paste = '${_a}(${_c})';
 
             Move-Match -Value $source -Pattern $escapedPattern -Anchor $literalAnchor `
-              -AnchorOccurrence 'L' -LiteralCopy $literalCopy -Paste $paste | `
+              -AnchorOccurrence 'L' -With $with -Paste $paste | `
               Should -BeExactly 'There is$ where your +fire is$(ice^) going';
           }
 
@@ -361,21 +361,21 @@ Describe 'Move-Match' -Tag 'Current' {
             [string]$source = 'There is$ where +fire your +fire is$ going';
             [RegEx]$escapedPattern = new-expr([regex]::Escape('+fire') + '\s');
             [RegEx]$literalAnchor = new-expr([regex]::Escape('is$'));
-            [string]$literalCopy = 'ice^';
+            [string]$with = 'ice^';
             [string]$paste = '${_a}(${_c})';
 
             Move-Match -Value $source -Pattern $escapedPattern -PatternOccurrence 'L' `
               -Anchor $literalAnchor -AnchorOccurrence 'L' `
-              -LiteralCopy $literalCopy -CopyOccurrence 'L' -Paste $paste | `
+              -With $with -CopyOccurrence 'L' -Paste $paste | `
               Should -BeExactly 'There is$ where +fire your is$(ice^) going';
           }
-        } # and: LiteralCopy
+        } # and: With
       } # and: exotic
 
-      Context 'and: exotic formatted' { # Pattern, Paste, Copy/EscapedWith/LiteralCopy
+      Context 'and: exotic formatted' { # Pattern, Paste, Copy/EscapedWith/With
         Context 'and: Anchor matches' {
           # It's looking like there is little point in having the Copy parameter, because the
-          # LiteralCopy functionality is provided by the Paste and the Copy is actually Copy.
+          # With functionality is provided by the Paste and the Copy is actually Copy.
           # But Copy is useful with Relation if not using Paste.
           #
           It 'should: cut the first match and paste after the first anchor' {
