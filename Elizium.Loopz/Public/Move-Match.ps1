@@ -82,8 +82,8 @@ function Move-Match {
       if ($PSBoundParameters.ContainsKey('Copy')) {
         if ($patternRemoved -match $Copy) {
           # With this implementation, it is up to the user to supply a regex proof
-          # pattern, so if the With contains regex chars, they must pass in the string
-          # pre-escaped: -With $(esc('some-pattern') + 'other stuff') or -EscapedWith 'some-pattern'
+          # pattern, so if the Copy contains regex chars, they must pass in the string
+          # pre-escaped: -Copy $(esc('some-pattern') + 'other stuff').
           #
           [string]$replaceWith = Split-Match `
             -Source $patternRemoved -PatternRegEx $Copy `
@@ -120,10 +120,10 @@ function Move-Match {
       $result = $patternRemoved + $replaceWith;
     }
     elseif ($PSBoundParameters.ContainsKey('Anchor')) {
-      # As with the With/EscapedWith parameters, if the user wants to specify an anchor by a pattern which
-      # contains regex chars, then can use -EscapedAnchor 'anchor-pattern'. If there are no regex chars,
+      # As with the Copy parameter, if the user wants to specify an anchor by a pattern which
+      # contains regex chars, then can use -Anchor $(esc('anchor-pattern')). If there are no regex chars,
       # then they can use -Anchor 'pattern'. However, if the user needs to do partial escapes, then they will
-      # have to do the escaping themselves: -Anchor $(esc('some-pattern') + 'other stuff')
+      # have to do the escaping themselves: -Anchor $(esc('partial-pattern') + 'remaining-pattern')
       #
       [string]$capturedAnchor, $null, [System.Text.RegularExpressions.Match]$anchorMatch = `
         Split-Match -Source $patternRemoved -PatternRegEx $Anchor `

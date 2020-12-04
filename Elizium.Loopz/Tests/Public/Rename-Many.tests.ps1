@@ -252,7 +252,7 @@ Describe 'Rename-Many' {
 
       Context 'and: Copy is regex' {
         Context 'and: Whole Copy' {
-          It 'should: do rename; replace First Pattern for Copy text' -Tag 'Current' {
+          It 'should: do rename; replace First Pattern for Copy text' {
             $script:expected = @{
               'loopz.application.t1.log' = 'loopz.t1pplication.t1.log';
               'loopz.application.t2.log' = 'loopz.t2pplication.t2.log';

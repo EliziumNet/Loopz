@@ -304,13 +304,13 @@ function Rename-Many {
     if ($PSBoundParameters.ContainsKey('Copy')) {
       [string]$copyExpression, [string]$copyOccurrence = Resolve-PatternOccurrence $Copy;
 
-      Select-SignalContainer -Containers $containers -Name 'COPY' `
+      Select-SignalContainer -Containers $containers -Name 'COPY-A' `
         -Value $copyExpression -Signals $signals;
     }
     elseif ($PSBoundParameters.ContainsKey('With')) {
       if (-not([string]::IsNullOrEmpty($With))) {
 
-        Select-SignalContainer -Containers $containers -Name 'LITERAL' `
+        Select-SignalContainer -Containers $containers -Name 'WITH' `
           -Value $With -Signals $signals;
       }
       elseif (-not($PSBoundParameters.ContainsKey('Paste'))) {
@@ -395,7 +395,7 @@ function Rename-Many {
 
     if ($PSBoundParameters.ContainsKey('Copy')) {
       [System.Text.RegularExpressions.RegEx]$copyRegEx = New-RegularExpression -Expression $copyExpression `
-        -WholeWord:$(-not([string]::IsNullOrEmpty($adjustedWhole)) -and ($adjustedWhole -in @('*', 'w')));
+        -WholeWord:$(-not([string]::IsNullOrEmpty($adjustedWhole)) -and ($adjustedWhole -in @('*', 'c')));
 
       $passThru['LOOPZ.REMY.COPY-OCC'] = $copyOccurrence;
       $passThru['LOOPZ.REMY.COPY'] = $copyRegEx;
