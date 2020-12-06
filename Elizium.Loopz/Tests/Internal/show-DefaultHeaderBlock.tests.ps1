@@ -24,6 +24,19 @@ Describe 'show-DefaultHeaderBlock' {
 
         show-DefaultHeaderBlock($passThru);
       }
+
+      It 'should: display header with Signal crumb' {
+        [System.Collections.Hashtable]$signals = @{
+          'CRUMB-B' = @('Crumb', '🚀')
+        }
+        [System.Collections.Hashtable]$passThru = @{
+          'LOOPZ.SIGNALS'              = $signals;
+          'LOOPZ.HEADER-BLOCK.MESSAGE' = 'The sound the wind makes in the pines';
+          'LOOPZ.HEADER-BLOCK.LINE'    = $LoopzUI.EqualsLine;
+        }
+
+        show-DefaultHeaderBlock($passThru);
+      }
     } # and: message
 
     Context 'and: no message' {
@@ -75,6 +88,29 @@ Describe 'show-DefaultHeaderBlock' {
 
           show-DefaultHeaderBlock($passThru);
         }
+      }
+    }
+
+    Context 'and: no message' {
+      It 'should: display header with crumb' {
+        [System.Collections.Hashtable]$passThru = @{
+          'LOOPZ.HEADER-BLOCK.CRUMB' = '🎵';
+          'LOOPZ.HEADER-BLOCK.LINE'  = $LoopzUI.EqualsLine;
+        }
+
+        show-DefaultHeaderBlock($passThru);
+      }
+
+      It 'should: display header with Signal crumb' {
+        [System.Collections.Hashtable]$signals = @{
+          'CRUMB-B' = @('Crumb', '🚀')
+        }
+        [System.Collections.Hashtable]$passThru = @{
+          'LOOPZ.SIGNALS'           = $signals;
+          'LOOPZ.HEADER-BLOCK.LINE' = $LoopzUI.EqualsLine;
+        }
+
+        show-DefaultHeaderBlock($passThru);
       }
     }
 
