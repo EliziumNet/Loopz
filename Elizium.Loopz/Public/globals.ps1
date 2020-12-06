@@ -51,21 +51,21 @@ $global:LoopzHelpers = @{
 $global:LoopzUI = [ordered]@{
   # Line definitions:
   #
-  UnderscoreLine      = (New-Object String("_", $_LineLength));
-  EqualsLine          = (New-Object String("=", $_LineLength));
-  DotsLine            = (New-Object String(".", $_LineLength));
-  DashLine            = (New-Object String("-", $_LineLength));
-  LightDotsLine       = ((New-Object String(".", (($_LineLength - 1) / 2))).Replace(".", ". ") + ".");
-  LightDashLine       = ((New-Object String("-", (($_LineLength - 1) / 2))).Replace("-", "- ") + "-");
-  TildeLine           = (New-Object String("~", $_LineLength));
+  UnderscoreLine      = ([string]::new("_", $_LineLength));
+  EqualsLine          = ([string]::new("=", $_LineLength));
+  DotsLine            = ([string]::new(".", $_LineLength));
+  DashLine            = ([string]::new("-", $_LineLength));
+  LightDotsLine       = (([string]::new(".", (($_LineLength - 1) / 2))).Replace(".", ". ") + ".");
+  LightDashLine       = (([string]::new("-", (($_LineLength - 1) / 2))).Replace("-", "- ") + "-");
+  TildeLine           = ([string]::new("~", $_LineLength));
 
-  SmallUnderscoreLine = (New-Object String("_", $_SmallLineLength));
-  SmallEqualsLine     = (New-Object String("=", $_SmallLineLength));
-  SmallDotsLine       = (New-Object String(".", $_SmallLineLength));
-  SmallDashLine       = (New-Object String("-", $_SmallLineLength));
-  SmallLightDotsLine  = ((New-Object String(".", (($_SmallLineLength - 1) / 2))).Replace(".", ". ") + ".");
-  SmallLightDashLine  = ((New-Object String("-", (($_SmallLineLength - 1) / 2))).Replace("-", "- ") + "-");
-  SmallTildeLine      = (New-Object String("~", $_SmallLineLength));
+  SmallUnderscoreLine = ([string]::new("_", $_SmallLineLength));
+  SmallEqualsLine     = ([string]::new("=", $_SmallLineLength));
+  SmallDotsLine       = ([string]::new(".", $_SmallLineLength));
+  SmallDashLine       = ([string]::new("-", $_SmallLineLength));
+  SmallLightDotsLine  = (([string]::new(".", (($_SmallLineLength - 1) / 2))).Replace(".", ". ") + ".");
+  SmallLightDashLine  = (([string]::new("-", (($_SmallLineLength - 1) / 2))).Replace("-", "- ") + "-");
+  SmallTildeLine      = ([string]::new("~", $_SmallLineLength));
 }
 
 $global:Loopz = [PSCustomObject]@{
