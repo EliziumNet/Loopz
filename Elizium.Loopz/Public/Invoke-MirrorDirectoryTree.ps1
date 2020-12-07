@@ -121,7 +121,7 @@
     The Header can be customised with the following PassThru entries:
     - 'LOOPZ.KRAYOLA-THEME': Krayola Theme generally in use
     - 'LOOPZ.HEADER-BLOCK.MESSAGE': message displayed as part of the header
-    - 'LOOPZ.HEADER-BLOCK.CRUMB': Lead text displayed in header, default: '[+] '
+    - 'LOOPZ.HEADER-BLOCK.CRUMB-SIGNAL': Lead text displayed in header, default: '[+] '
     - 'LOOPZ.HEADER.PROPERTIES': An array of Key/Value pairs of items to be displayed
     - 'LOOPZ.HEADER-BLOCK.LINE': A string denoting the line to be displayed. (There are
     predefined lines available to use in $LoopzUI, or a custom one can be used instead)
@@ -401,7 +401,8 @@
       if (Test-Path -Path $destinationDirectory) {
         Write-Debug "    [-] (WhatIf) Get existing destination branch directory: '$destinationBranch'";
         $destinationInfo = (Get-Item -Path $destinationDirectory);
-      } else {
+      }
+      else {
         Write-Debug "    [-] (WhatIf) Creating synthetic destination branch directory: '$destinationBranch'";
         $destinationInfo = ([System.IO.DirectoryInfo]::new($destinationDirectory));
       }

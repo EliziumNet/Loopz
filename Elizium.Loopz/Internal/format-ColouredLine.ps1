@@ -18,14 +18,18 @@ function format-ColouredLine {
     [switch]$Truncate,
 
     [Parameter()]
-    [int]$WingLength = 3,
-
-    [Parameter()]
-    [int]$MinimumFlexSize = 6,
-
-    [Parameter()]
-    [string]$Ellipses = ' ... '
+    [PSCustomObject]$Options = (@{
+        WingLength      = 3;
+        MinimumFlexSize = 6;
+        Ellipses        = ' ...';
+        WithLead        = $false;
+      })
   )
+  [int]$wingLength = Get-PsObjectField $Options 'WingLength' 3;
+  [int]$minimumFlexSize = Get-PsObjectField $Options 'MinimumFlexSize' 6;
+  [string]$ellipses = Get-PsObjectField $Options 'Ellipses' ' ...';
+  [boolean]$withLead = Get-PsObjectField $Options 'WithLead' $false;
+
   [System.Collections.Hashtable]$theme = $PassThru.ContainsKey(
     'LOOPZ.KRAYOLA-THEME') `
     ? $PassThru['LOOPZ.KRAYOLA-THEME'] : $(Get-KrayolaTheme);
@@ -36,7 +40,7 @@ function format-ColouredLine {
   [string]$line = $PassThru.ContainsKey($LineKey) `
     ? $PassThru[$LineKey] : ([string]::new("_", 81));
   [string]$char = ($line -match '[^\s]') ? $matches[0] : ' ';
-  [string]$wing = [string]::new($char, $WingLength);
+  [string]$wing = [string]::new($char, $wingLength);
 
   [string]$message = -not([string]::IsNullOrEmpty($MessageKey)) -and ($PassThru.ContainsKey($MessageKey)) `
     ? $PassThru[$MessageKey] : $null;
@@ -79,7 +83,10 @@ function format-ColouredLine {
       # +-----------------------------------------------|--------|-----------------+
       # | Start                                         |        | End             | => Snippet
       #
-      [string]$startFormat = '*{lead} *{open}*{crumb}*{close} *{mid} *{open} ';
+      [string]$startFormat = '*{open}*{crumb}*{close} *{mid} *{open} ';
+      if ($withLead) {
+        $startFormat = '*{lead} ' + $startFormat;
+      }
       [string]$endFormat = ' *{close} *{tail}';
 
       [string]$startSnippet = $startFormat.Replace('*{lead}', $wing). `
@@ -91,20 +98,28 @@ function format-ColouredLine {
         Replace('*{tail}', $wing);
 
       [string]$withoutMid = $startSnippet.Replace('*{mid}', '') + $endSnippet;
-      [int]$deductions = $withoutMid.Length + $($message.Length);
-      [int]$midSize = $($line.Length) - $deductions;
-      [boolean]$overflow = $midSize -lt $MinimumFlexSize;
+      [int]$deductions = $withoutMid.Length + $minimumFlexSize;
+      [int]$messageSpace = $line.Length - $deductions;
+      [boolean]$overflow = $message.Length -gt $messageSpace;
 
-      if ($overflow) {
-        $midSize = $MinimumFlexSize;
-
+      [int]$midSize = if ($overflow) {
+        # message size is the unknown variable and $midSize is a known
+        # quantity: minimumFlexSize.
+        #
         if ($Truncate.ToBool()) {
-          # Truncate the message
-          #
-          [int]$messageKeepAmount = $line.Length - $withoutMid.Length - $midSize - $Ellipses.Length;
-          $message = $message.Substring(0, $messageKeepAmount) + $Ellipses;
+          [int]$messageKeepAmount = $messageSpace - $ellipses.Length;
+          $message = $message.Substring(0, $messageKeepAmount) + $ellipses;
         }
+        $minimumFlexSize;
       }
+      else {
+        # midSize is the unknown variable and the message size is a known
+        # quantity: $message.Length
+        #
+        [int]$deductions = $withoutMid.Length + $message.Length;
+        $line.Length - $deductions;
+      }
+
       [string]$mid = [string]::new($char, $midSize);
       $startSnippet = $startSnippet.Replace('*{mid}', $mid);
 
@@ -121,26 +136,27 @@ function format-ColouredLine {
       # +----------------|--------|-----------------+
       # | Start          |        | End             | => Snippet
       #
+      # The lead is mandatory in this case so ignore withLead
+      #
       [string]$startFormat = '*{lead} *{open} ';
       [string]$endFormat = ' *{close} *{tail}';
-
       [string]$endSnippet = $endFormat.Replace('*{close}', $close). `
         Replace('*{tail}', $wing);
 
       [string]$withoutLead = $startFormat.Replace('*{lead}', ''). `
         Replace('*{open}', $open);
 
-      [int]$deductions = $MinimumFlexSize + $withoutLead.Length + $endSnippet.Length;
-      [int]$delta = $line.Length - $deductions;
-      [boolean]$overflow = $message.Length -gt $delta;
+      [int]$deductions = $minimumFlexSize + $withoutLead.Length + $endSnippet.Length;
+      [int]$messageSpace = $line.Length - $deductions;
+      [boolean]$overflow = $message.Length -gt $messageSpace;
       [int]$leadSize = if ($overflow) {
         if ($Truncate.ToBool()) {
           # Truncate the message
           #
-          [int]$messageKeepAmount = $delta - $Ellipses.Length;
+          [int]$messageKeepAmount = $messageSpace - $Ellipses.Length;
           $message = $message.Substring(0, $messageKeepAmount) + $Ellipses;
         }
-        $MinimumFlexSize;
+        $minimumFlexSize;
       }
       else {
         $line.Length - $withoutLead.Length - $message.Length - $endSnippet.Length;
@@ -166,7 +182,12 @@ function format-ColouredLine {
       # |Start                           |End   | => 2 Snippets can be combined into lineSnippet
       #                                              because they use the same colours.
       #
-      [string]$startFormat = '*{lead} *{open}*{crumb}*{close} ';
+      [string]$startFormat = '*{open}*{crumb}*{close} ';
+      if ($withLead) {
+        $startFormat = '*{lead} ' + $startFormat;
+      }
+
+      [string]$startFormat = '*{open}*{crumb}*{close} ';
       [string]$startSnippet = $startFormat.Replace('*{lead}', $wing). `
         Replace('*{open}', $open). `
         Replace('*{crumb}', $crumb). `

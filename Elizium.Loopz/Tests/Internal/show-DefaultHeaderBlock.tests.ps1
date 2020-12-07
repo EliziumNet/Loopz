@@ -7,6 +7,7 @@ Describe 'show-DefaultHeaderBlock' {
     #
     . .\Public\globals.ps1;
     . .\Internal\show-DefaultHeaderBlock.ps1
+    . .\Internal\format-ColouredLine.ps1
   }
 
   Context 'given: properties' {
@@ -93,9 +94,13 @@ Describe 'show-DefaultHeaderBlock' {
 
     Context 'and: no message' {
       It 'should: display header with crumb' {
+        [System.Collections.Hashtable]$signals = @{
+          'TUNE' = @('Toon', '🎵')
+        }
         [System.Collections.Hashtable]$passThru = @{
-          'LOOPZ.HEADER-BLOCK.CRUMB' = '🎵';
-          'LOOPZ.HEADER-BLOCK.LINE'  = $LoopzUI.EqualsLine;
+          'LOOPZ.SIGNALS'                   = $signals;
+          'LOOPZ.HEADER-BLOCK.CRUMB-SIGNAL' = 'TUNE';
+          'LOOPZ.HEADER-BLOCK.LINE'         = $LoopzUI.EqualsLine;
         }
 
         show-DefaultHeaderBlock($passThru);
