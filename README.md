@@ -156,7 +156,7 @@ The *DefaultHeaderBlock* can be used on any compound function that that has a *H
 
 * 'LOOPZ.KRAYOLA-THEME': Krayola Theme generally in use
 * 'LOOPZ.HEADER-BLOCK.MESSAGE': message displayed as part of the header
-* 'LOOPZ.HEADER-BLOCK.CRUMB': Lead text displayed in header, default: '[+] '
+* 'LOOPZ.HEADER-BLOCK.CRUMB-SIGNAL': Lead text displayed in header, default: '[+] '
 * 'LOOPZ.HEADER.PROPERTIES': An array of Key/Value pairs of items to be displayed
 * 'LOOPZ.HEADER-BLOCK.LINE': A string denoting the line to be displayed. (There are
 predefined lines available to use in $LoopzUI, or a custom one can be used instead)
@@ -177,7 +177,7 @@ If no properties have been defined then a single line Header will be generated, 
 
 What is displayed in the Header is driven by what is defined in the Krayola theme or items in the PassThru, so in this example
 
-* '[+] ' (*PassThru*): 'LOOPZ.HEADER-BLOCK.CRUMB'
+* 'CRUMB-A' (*PassThru*): 'LOOPZ.HEADER-BLOCK.CRUMB-SIGNAL'
 * 'What lies in the darkness' (*PassThru*): 'LOOPZ.HEADER-BLOCK.MESSAGE'
 * '[': (*Theme*): 'OPEN'
 * ']': (*Theme*): 'CLOSE'

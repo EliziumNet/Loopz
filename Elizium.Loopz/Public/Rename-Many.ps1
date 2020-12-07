@@ -201,7 +201,6 @@ function Rename-Many {
       #
       [int]$indent = 28 + $maxItemMessageSize + $($signalLength - 2);
       $_passThru['LOOPZ.WH-FOREACH-DECORATOR.INDENT'] = $indent;
-
       $_passThru['LOOPZ.WH-FOREACH-DECORATOR.MESSAGE'] = $message;
       $_passThru['LOOPZ.WH-FOREACH-DECORATOR.PRODUCT-LABEL'] = $(Get-PaddedLabel -Label $(
           $fileSystemItemType) -Width 9);
@@ -370,13 +369,12 @@ function Rename-Many {
       ? $Context.SummaryMessage : 'Rename Summary';
 
     $summaryMessage = Get-FormattedSignal -Name 'SUMMARY-A' -Signals $signals -CustomLabel $summaryMessage;
-    [string]$crumb = Get-FormattedSignal -Name 'CRUMB-A' -Signals $signals -EmojiOnly;
 
     [System.Collections.Hashtable]$passThru = @{
       'LOOPZ.WH-FOREACH-DECORATOR.BLOCK'      = $doRenameFsItems;
       'LOOPZ.WH-FOREACH-DECORATOR.GET-RESULT' = $getResult;
 
-      'LOOPZ.HEADER-BLOCK.CRUMB'              = $crumb;
+      'LOOPZ.HEADER-BLOCK.CRUMB-SIGNAL'       = 'CRUMB-A';
       'LOOPZ.HEADER-BLOCK.LINE'               = $LoopzUI.DashLine;
 
       'LOOPZ.SUMMARY-BLOCK.LINE'              = $LoopzUI.EqualsLine;

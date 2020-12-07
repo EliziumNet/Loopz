@@ -280,7 +280,7 @@ The script-block is invoked with the following positional parameters:
 
 * 'LOOPZ.KRAYOLA-THEME': Krayola Theme generally in use
 * 'LOOPZ.HEADER-BLOCK.MESSAGE': message displayed as part of the header
-* 'LOOPZ.HEADER-BLOCK.CRUMB': Lead text displayed in header, default: '[+] '
+* 'LOOPZ.HEADER-BLOCK.CRUMB-SIGNAL': Signal Emoji displayed in header
 * 'LOOPZ.HEADER.PROPERTIES': An array of Key/Value pairs of items to be displayed
 * 'LOOPZ.HEADER-BLOCK.LINE': A string denoting the line to be displayed. (There are
 predefined lines available to use in $LoopzUI, or a custom one can be used instead)

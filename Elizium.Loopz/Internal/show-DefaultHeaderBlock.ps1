@@ -13,9 +13,6 @@ function show-DefaultHeaderBlock {
   [string]$message = $PassThru.ContainsKey(
     'LOOPZ.HEADER-BLOCK.MESSAGE') ? $PassThru['LOOPZ.HEADER-BLOCK.MESSAGE'] : [string]::Empty;
 
-  [string]$crumb = $PassThru.ContainsKey(
-    'LOOPZ.HEADER-BLOCK.CRUMB') ? $PassThru['LOOPZ.HEADER-BLOCK.CRUMB'] : $null;
-
   [string[][]]$properties = $PassThru.ContainsKey(
     'LOOPZ.HEADER.PROPERTIES') ? $PassThru['LOOPZ.HEADER.PROPERTIES'] : @();
 
@@ -44,7 +41,6 @@ function show-DefaultHeaderBlock {
     if (-not([string]::IsNullOrEmpty($message))) {
       $parameters['Message'] = $message;
     }
-
     Write-ThemedPairsInColour @parameters;
 
     # Second line
@@ -56,60 +52,13 @@ function show-DefaultHeaderBlock {
   else {
     # Alternative line
     #
-    [string]$open = $krayolaTheme['OPEN'];
-    [string]$close = $krayolaTheme['CLOSE'];
-    [string]$char = ($line -match '[^\s]') ? $matches[0] : ' ';
+    [string]$lineKey = 'LOOPZ.HEADER-BLOCK.LINE';
+    [string]$crumbKey = 'LOOPZ.HEADER-BLOCK.CRUMB-SIGNAL';
+    [string]$messageKey = 'LOOPZ.HEADER-BLOCK.MESSAGE';
 
-    if ([string]::IsNullOrEmpty($message)) {
-      if (-not([string]::IsNullOrEmpty($crumb))) {
-        [int]$leadLength = 3;
-        [string]$lead = (New-Object String($char, $leadLength));
-        [string]$lineFormat = "{0} {1}{2}{3} {4}";
-        [int]$extra = 2; # no of extra spaces in $lineFormat
-        [int]$deductions = $lead.Length + $open.Length + $crumb.Length + $close.Length + $extra;
-        [int]$tailLength = $line.Length - $deductions;
-        [string]$tail = (New-Object String($char, $tailLength));
+    $colouredLine = format-ColouredLine -PassThru $PassThru `
+      -LineKey $lineKey -CrumbKey $crumbKey -MessageKey $messageKey -Truncate;
 
-        $colouredLine = @(
-          @(@($lineFormat -f $lead, $open, $crumb, $close, $tail) + $metaColours)
-        );
-      } else {
-        $colouredLine = @($line) + $metaColours;
-      }
-      Write-InColour -TextSnippets @(, $colouredLine);
-    }
-    else {
-      if ([string]::IsNullOrEmpty($crumb)) {
-        $crumb = if ($PassThru.ContainsKey('LOOPZ.SIGNALS')) {
-          [System.Collections.Hashtable]$signals = $PassThru['LOOPZ.SIGNALS'];
-          $signals['CRUMB-B'][1];
-        } else {
-           '+';
-        }
-      }
-      [int]$extra = 4 + $crumb.Length; # extra chars in formats
-      [int]$tailLength = 3;
-      [object[]]$messageColours = $krayolaTheme['MESSAGE-COLOURS'];
-      [string]$leadFormat = "{0}{1} {2} ";
-      [string]$tailFormat = " {0} {1}";
-
-      if ($message.Length -gt ($line.Length - $open.Length - $close.Length - $extra)) {
-        [string]$lead = (New-Object String($char, $tailLength));
-        [string]$tail = (New-Object String($char, $tailLength));
-      }
-      else {
-        [int]$deductions = $open.Length + $message.Length + $close.Length + $extra + $tailLength;
-        [int]$leadLength = $line.Length - $deductions;
-        [string]$lead = (New-Object String($char, $leadLength));
-        [string]$tail = (New-Object String($char, $tailLength));
-      }
-
-      $colouredLine = @(
-        @(@($leadFormat -f $crumb, $lead, $open) + $metaColours),
-        @(@($message) + $messageColours),
-        @(@($tailFormat -f $close, $tail) + $metaColours)
-      );
-      Write-InColour -TextSnippets $colouredLine;
-    }
+    Write-InColour -TextSnippets $colouredLine;
   }
 } # show-DefaultHeaderBlock
