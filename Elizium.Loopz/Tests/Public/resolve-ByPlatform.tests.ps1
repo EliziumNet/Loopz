@@ -42,7 +42,11 @@ Describe 'Resolve-ByPlatform' {
     It 'should: resolve to the default value provided' {
       Mock -ModuleName Elizium.Loopz Get-PlatformName { return 'UBUNTU' }
       [string]$expected = 'default-info';
-      $result = Resolve-ByPlatform -Hash $platforms -Default 'default-info'
+
+      [System.Collections.Hashtable]$withDefault = $platforms.Clone();
+      $withDefault['default'] = 'default-info';
+
+      $result = Resolve-ByPlatform -Hash $withDefault;
       $result | Should -Be $expected;
     }
   }
