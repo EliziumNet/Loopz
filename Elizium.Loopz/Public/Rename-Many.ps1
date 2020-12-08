@@ -297,7 +297,7 @@ function Rename-Many {
       [string]$anchorExpression, [string]$anchorOccurrence = Resolve-PatternOccurrence $Anchor
 
       Select-SignalContainer -Containers $containers -Name 'REMY.ANCHOR' `
-        -Value $anchorExpression -Signals $signals -CustomLabel 'Anchor ({0})' -f $Relation;
+        -Value $anchorExpression -Signals $signals -CustomLabel $('Anchor ({0})' -f $Relation);
     }
 
     if ($PSBoundParameters.ContainsKey('Copy')) {
@@ -314,8 +314,8 @@ function Rename-Many {
       }
       elseif (-not($PSBoundParameters.ContainsKey('Paste'))) {
 
-        $cutSignal = Get-FormattedSignal -Name 'CUT-A' -Value $patternExpression -Signals $signals;
-        $containers.Props += , $cutSignal;
+        Select-SignalContainer -Containers $containers -Name 'CUT-A' `
+          -Value $patternExpression -Signals $signals -Force 'Props';
       }
     }
 
@@ -337,8 +337,8 @@ function Rename-Many {
     )
 
     if ($doCut) {
-      $cutSignal = Get-FormattedSignal -Name 'CUT-A' -Value $patternExpression -Signals $signals;
-      $containers.Props += , $cutSignal;
+      Select-SignalContainer -Containers $containers -Name 'CUT-A' `
+        -Value $patternExpression -Signals $signals -Force 'Props';
     }
 
     if ($PSBoundParameters.ContainsKey('Paste')) {
@@ -422,8 +422,9 @@ function Rename-Many {
     }
     elseif ($PSBoundParameters.ContainsKey('Start')) {
 
-      $containers.Props += , @(Get-FormattedSignal -Name 'SWITCH-ON' `
-          -Value $patternExpression -Signals $signals -CustomLabel 'Start');
+      Select-SignalContainer -Containers $containers -Name 'SWITCH-ON' `
+        -Value $patternExpression -Signals $signals -Force 'Props';
+
       $passThru['LOOPZ.REMY.ANCHOR-TYPE'] = 'START';
 
       [System.Text.RegularExpressions.RegEx]$anchoredRegEx = New-RegularExpression `
@@ -431,8 +432,9 @@ function Rename-Many {
     }
     elseif ($PSBoundParameters.ContainsKey('End')) {
 
-      $containers.Props += , @(Get-FormattedSignal -Name 'SWITCH-ON' `
-          -Value $patternExpression -Signals $signals -CustomLabel 'End');
+      Select-SignalContainer -Containers $containers -Name 'SWITCH-ON' `
+        -Value $patternExpression -Signals $signals -CustomLabel 'End' -Force 'Props';
+
       $passThru['LOOPZ.REMY.ANCHOR-TYPE'] = 'END';
 
       [System.Text.RegularExpressions.RegEx]$anchoredRegEx = New-RegularExpression `

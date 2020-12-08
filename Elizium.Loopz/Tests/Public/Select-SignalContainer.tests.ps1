@@ -75,5 +75,15 @@ Describe 'Select-SignalContainer' {
         $containers.Props[1] | Should -BeExactly @('[^^] Error', 'computer says no');
       }
     }
+
+    Context 'and: Force into Props' {
+      It 'should: Ignore Threshold and Select signal into Props' {
+        Select-SignalContainer -Containers $containers -Name 'GO' -Value 'getter' `
+          -Signals $signals -Threshold 4 -Force 'Props';
+        $containers.Wide.Count | Should -Be 0;
+        $containers.Props.Count | Should -Be 1;
+        $containers.Props[0] | Should -BeExactly @('[@@] Go', 'getter');
+      }
+    }
   }
 }
