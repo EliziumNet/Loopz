@@ -48,8 +48,23 @@ function show-SimpleSummaryBlock {
   if ($PassThru.ContainsKey('LOOPZ.SUMMARY-BLOCK.WIDE-ITEMS')) {
     [string[][]]$wideItems = $PassThru['LOOPZ.SUMMARY-BLOCK.WIDE-ITEMS'];
 
-    Write-ThemedPairsInColour -Pairs $wideItems -Theme $krayolaTheme `
-      -Message (New-Object String(' ', $message.Length));
+    [boolean]$group = ($PassThru.ContainsKey('LOOPZ.SUMMARY-BLOCK.GROUP-WIDE-ITEMS') -and
+      $PassThru['LOOPZ.SUMMARY-BLOCK.GROUP-WIDE-ITEMS']);
+
+    if ($group) {
+      Write-ThemedPairsInColour -Pairs $wideItems -Theme $krayolaTheme `
+        -Message (New-Object String(' ', $message.Length));
+    }
+    else {
+      foreach ($wideItem in $wideItems) {
+        [string[][]]$syntheticWide = @(
+          , $wideItem
+        );
+
+        Write-ThemedPairsInColour -Pairs $syntheticWide -Theme $krayolaTheme `
+          -Message (New-Object String(' ', $message.Length));
+      }
+    }
   }
 
   # Second line
