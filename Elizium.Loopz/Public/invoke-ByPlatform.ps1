@@ -20,7 +20,7 @@ function Invoke-ByPlatform {
     $null;
   }
   
-  if ($invokeInfo.FnInfo) {
+  if ($invokeInfo -and $invokeInfo.FnInfo) {
     if ($invokeInfo.psobject.properties.match('Positional') -and $invokeInfo.Positional) {
       [object[]]$positional = $invokeInfo.Positional;
 
