@@ -2,10 +2,7 @@
 function Resolve-ByPlatform {
   param(
     [Parameter()]
-    [System.Collections.Hashtable]$Hash,
-
-    [Parameter()]
-    $Default
+    [System.Collections.Hashtable]$Hash
   )
 
   $result = $null;
@@ -13,8 +10,8 @@ function Resolve-ByPlatform {
 
   if ($Hash.ContainsKey($platform)) {
     $result = $Hash[$platform];
-  } elseif ($PSBoundParameters.ContainsKey('Default')) {
-    $result = $Default;
+  } elseif ($Hash.ContainsKey('default')) {
+    $result = $Hash['default'];
   }
 
   return $result;
