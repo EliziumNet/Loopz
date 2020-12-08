@@ -28,8 +28,17 @@ Describe 'show-SimpleSummaryBlock' {
   Context 'given: wide items specified' {
     It 'should: display summary with wide items' {
       [System.Collections.Hashtable]$passThru = @{
-        'LOOPZ.SUMMARY-BLOCK.LINE' = $LoopzUI.DashLine;
+        'LOOPZ.SUMMARY-BLOCK.LINE'       = $LoopzUI.DashLine;
         'LOOPZ.SUMMARY-BLOCK.WIDE-ITEMS' = @(@('From', '/source/'), @('To', '/destination/'));
+      }
+      show-SimpleSummaryBlock -Count 999 -Skipped 0 -Triggered $false -PassThru $passThru;
+    }
+
+    It 'should: display summary with wide items grouped together' {
+      [System.Collections.Hashtable]$passThru = @{
+        'LOOPZ.SUMMARY-BLOCK.LINE'             = $LoopzUI.DashLine;
+        'LOOPZ.SUMMARY-BLOCK.WIDE-ITEMS'       = @(@('From', '/source/'), @('To', '/destination/'));
+        'LOOPZ.SUMMARY-BLOCK.GROUP-WIDE-ITEMS' = $true
       }
       show-SimpleSummaryBlock -Count 999 -Skipped 0 -Triggered $false -PassThru $passThru;
     }
