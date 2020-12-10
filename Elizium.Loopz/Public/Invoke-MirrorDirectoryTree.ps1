@@ -442,16 +442,26 @@
       # files to copy over which pass the include/exclude filters. This is
       # required in the case where CreateDirs has not been specified.
       #
-      if (Get-ChildItem $sourceDirectoryWithWildCard `
-          -Include $adjustedFileIncludes -Exclude $adjustedFileExcludes) {
+      [object[]]$filesToCopy = Get-ChildItem $sourceDirectoryWithWildCard `
+          -Include $adjustedFileIncludes -Exclude $adjustedFileExcludes -File;
+
+      if ($filesToCopy) {
         if (-not(Test-Path -Path $destinationDirectory)) {
           New-Item -ItemType 'Directory' -Path $destinationDirectory;
         }
-      }
 
-      Copy-Item -Path $sourceDirectoryWithWildCard `
-        -Include $adjustedFileIncludes -Exclude $adjustedFileExcludes `
-        -Destination $destinationDirectory -WhatIf:$whatIf;
+        if (-not($whatIf)) {
+          Copy-Item -Path $sourceDirectoryWithWildCard `
+            -Include $adjustedFileIncludes -Exclude $adjustedFileExcludes `
+            -Destination $destinationDirectory;
+        }
+        $_passThru['LOOPZ.MIRROR.COPIED-FILES.COUNT'] = $filesToCopy.Count;
+
+        Write-Debug "    [-] No of files copied: '$($filesToCopy.Count)'";
+      }
+      else {
+        $_passThru.Remove('LOOPZ.MIRROR.COPIED-FILES.COUNT');
+      }
     }
 
     # To be consistent with Invoke-ForeachFsItem, the user function/block is invoked
@@ -486,7 +496,6 @@
     else {
       Write-Warning "User defined function/block not valid, not invoking.";
     }
-
 
     @{ Product = $destinationInfo }
   } #doMirrorBlock
@@ -530,6 +539,4 @@
   $null = Invoke-TraverseDirectory -Path $resolvedSourcePath `
     -Block $doMirrorBlock -PassThru $PassThru -Header $Header -Summary $Summary `
     -SessionHeader $SessionHeader -SessionSummary $SessionSummary -Condition $filterDirectories -Hoist:$Hoist;
-
-  # $PassThru['LOOPZ.MIRROR.COUNT'] = $PassThru['LOOPZ.TRAVERSE.COUNT'];
 } # Invoke-MirrorDirectoryTree

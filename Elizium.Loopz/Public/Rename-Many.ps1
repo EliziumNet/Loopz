@@ -423,7 +423,7 @@ function Rename-Many {
     elseif ($PSBoundParameters.ContainsKey('Start')) {
 
       Select-SignalContainer -Containers $containers -Name 'SWITCH-ON' `
-        -Value $patternExpression -Signals $signals -Force 'Props';
+        -Value $patternExpression -Signals $signals -CustomLabel 'Start' -Force 'Props';
 
       $passThru['LOOPZ.REMY.ANCHOR-TYPE'] = 'START';
 

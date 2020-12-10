@@ -35,7 +35,7 @@ Describe 'Invoke-MirrorDirectoryTree' {
     }
 
     Context 'and: script block with extra custom parameters specified' {
-      It 'Should: traverse and invoke scrip block for each directory' {
+      It 'Should: traverse and invoke script block for each directory' {
         $container = @{
           count = 0;
         };
