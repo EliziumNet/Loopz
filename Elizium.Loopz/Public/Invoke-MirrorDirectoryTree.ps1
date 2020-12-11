@@ -446,11 +446,11 @@
           -Include $adjustedFileIncludes -Exclude $adjustedFileExcludes -File;
 
       if ($filesToCopy) {
-        if (-not(Test-Path -Path $destinationDirectory)) {
-          New-Item -ItemType 'Directory' -Path $destinationDirectory;
-        }
-
         if (-not($whatIf)) {
+          if (-not(Test-Path -Path $destinationDirectory)) {
+            New-Item -ItemType 'Directory' -Path $destinationDirectory;
+          }
+
           Copy-Item -Path $sourceDirectoryWithWildCard `
             -Include $adjustedFileIncludes -Exclude $adjustedFileExcludes `
             -Destination $destinationDirectory;
@@ -461,6 +461,7 @@
       }
       else {
         $_passThru.Remove('LOOPZ.MIRROR.COPIED-FILES.COUNT');
+        $_passThru.Remove('LOOPZ.MIRROR.COPIED-FILES.INCLUDES');
       }
     }
 
@@ -525,6 +526,10 @@
 
   if ($PSBoundParameters.ContainsKey('WhatIf') -and ($true -eq $PSBoundParameters['WhatIf'])) {
     $PassThru['WHAT-IF'] = $true;
+  }
+
+  if ($CopyFiles.ToBool()) {
+    $PassThru['LOOPZ.MIRROR.COPIED-FILES.INCLUDES'] = $FileIncludes -join ', ';
   }
 
   [scriptblock]$filterDirectories = {
