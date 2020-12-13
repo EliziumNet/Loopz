@@ -145,6 +145,8 @@ $global:Loopz = [PSCustomObject]@{
     'INCLUDE'      = @('Include', '💠')
     'SOURCE'       = @('Source', '🎀')
     'DESTINATION'  = @('Destination', '☀️')
+    'TRIM'         = @('Trim', '🌊')
+    'MULTI-SPACES' = @('Spaces', '❄️')
 
     # Outcomes
     #
@@ -160,6 +162,7 @@ $global:Loopz = [PSCustomObject]@{
     # Command Specific
     #
     'REMY.ANCHOR'  = @('Anchor', '⚓')
+    'REMY.POST'    = @('Post Process', '🌈')
   }
 
   OverrideSignals       = @{ # Label, Emoji
@@ -189,6 +192,36 @@ $global:Loopz = [PSCustomObject]@{
       Title          = 'Rename'
       ItemMessage    = 'Rename Item'
       SummaryMessage = 'Rename Summary'
+    }
+  }
+
+  Rules                 = [PSCustomObject]@{
+    Remy = [PSCustomObject]@{
+      Trim   = @{
+        'IsApplicable' = [scriptblock] {
+          param([string]$_Input)
+          $($_Input.StartsWith(' ') -or $_Input.EndsWith(' '));
+        };
+
+        'Transform'    = [scriptblock] {
+          param([string]$_Input)
+          $_Input.Trim();
+        };
+        'Signal'       = 'TRIM'
+      }
+
+      Spaces = @{
+        'IsApplicable' = [scriptblock] {
+          param([string]$_Input)
+          $_Input -match "\s{2,}";
+        };
+
+        'Transform'    = [scriptblock] {
+          param([string]$_Input)
+          $_Input -replace "\s{2,}", ' '
+        };
+        'Signal'       = 'MULTI-SPACES'
+      }
     }
   }
 }

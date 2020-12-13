@@ -159,14 +159,28 @@ function Rename-Many {
         }
       } # $action
 
+      [string[][]]$properties = @();
+      [string[][]]$lines = @();
+      [System.Collections.Hashtable]$signals = $_passThru['LOOPZ.SIGNALS'];
+
+      # Perform Rename Action, then post process
+      #
       [string]$newItemName = & $action @actionParameters;
+      $postResult = invoke-PostProcessing -InputSource $newItemName -Rules $Loopz.Rules.Remy `
+        -Signals $signals;
+
+      if ($postResult.Modified) {
+        [string[]]$postSignal = Get-FormattedSignal -Name 'REMY.POST' `
+          -Signals $signals -Value $postResult.Indication -CustomLabel $postResult.Label;
+        $properties += , $postSignal;
+        $newItemName = $postResult.TransformResult;
+      }
+
       $newItemName = $endAdapter.GetNameWithExtension($newItemName);
 
       [boolean]$trigger = $false;
       [boolean]$affirm = $false;
       [boolean]$whatIf = $_passThru.ContainsKey('WHAT-IF') -and ($_passThru['WHAT-IF']);
-      [string[][]]$properties = @();
-      [string[][]]$lines = @();
 
       [string]$parent = $itemIsDirectory ? $_underscore.Parent.FullName : $_underscore.Directory.FullName;
       [boolean]$nameHasChanged = -not($_underscore.Name -ceq $newItemName);
@@ -176,7 +190,6 @@ function Rename-Many {
 
       [PSCustomObject]$context = $_passThru['LOOPZ.REMY.CONTEXT'];
       [int]$maxItemMessageSize = $_passThru['LOOPZ.REMY.MAX-ITEM-MESSAGE-SIZE'];
-      [System.Collections.Hashtable]$signals = $_passThru['LOOPZ.SIGNALS'];
       [string]$normalisedItemMessage = $Context.ItemMessage.replace(
         $Loopz.FsItemTypePlaceholder, $fileSystemItemType);
 
