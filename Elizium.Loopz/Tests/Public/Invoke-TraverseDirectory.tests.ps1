@@ -176,6 +176,30 @@ Describe 'Invoke-TraverseDirectory' {
   Context 'given: custom function specified' {
     Context 'and: directory tree and Hoist specified' {
       It 'should: traverse child directories whose ancestors don\`t match filter' {
+        function global:Test-HoistResult {
+          [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', '')]
+          param(
+            [Parameter(Mandatory)]
+            [System.IO.DirectoryInfo]$Underscore,
+
+            [Parameter(Mandatory)]
+            [int]$Index,
+
+            [Parameter(Mandatory)]
+            [System.Collections.Hashtable]$PassThru,
+
+            [Parameter(Mandatory)]
+            [boolean]$Trigger,
+
+            [Parameter(Mandatory = $false)]
+            [string]$Format = "These aren't the droids you're looking for, ..., move along, move along!:___{0}___"
+          )
+
+          [string]$result = $Format -f ($Underscore.Name);
+          Write-Debug "Custom function; Test-HoistResult: '$result'";
+          @{ Product = $Underscore }
+        }
+
         [scriptblock]$sessionSummary = {
           param(
             [int]$_count,
@@ -392,6 +416,26 @@ Describe 'Invoke-TraverseDirectory' {
     Context 'and: trigger is fired' {
       Context 'and: multiple iterations' {
         It 'should: stop iterating' {
+          function global:Test-FireEXTrigger {
+            [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', '')]
+            param(
+              [Parameter(Mandatory)]
+              [System.IO.DirectoryInfo]$Underscore,
+
+              [Parameter(Mandatory)]
+              [int]$Index,
+
+              [Parameter(Mandatory)]
+              [System.Collections.Hashtable]$PassThru,
+
+              [Parameter(Mandatory)]
+              [boolean]$Trigger
+            )
+            $localTrigger = ('EX' -eq $Underscore.Name);
+            Write-Host "  [-] Test-FireEXTrigger(index: $Index, local trigger: $localTrigger, Trigger: $Trigger): directory: $($Underscore.Name)";
+            @{ Product = $Underscore; Trigger = $localTrigger }
+          }
+
           Mock -ModuleName Elizium.Loopz Test-FireEXTrigger -Verifiable {
             param(
               [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', '')]
@@ -431,6 +475,28 @@ Describe 'Invoke-TraverseDirectory' {
     } # and: trigger is fired
 
     Context 'and: break is fired' {
+      BeforeAll {
+        function global:Test-FireBreakOnFirstItem {
+          [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', '')]
+          param(
+            [Parameter(Mandatory)]
+            [System.IO.DirectoryInfo]$Underscore,
+
+            [Parameter(Mandatory)]
+            [int]$Index,
+
+            [Parameter(Mandatory)]
+            [System.Collections.Hashtable]$PassThru,
+
+            [Parameter(Mandatory)]
+            [boolean]$Trigger
+          )
+          Write-Host "  [-] Test-FireBreakOnFirstItem(index: $Index): directory: $($Underscore.Name)";
+          @{ Product = $Underscore; Break = $true }
+        }
+
+      }
+
       It 'should: stop iterating' -Skip {
         Mock -ModuleName Elizium.Loopz Test-FireBreakOnFirstItem -Verifiable {
           param(

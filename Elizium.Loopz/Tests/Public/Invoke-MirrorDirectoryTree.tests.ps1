@@ -25,6 +25,30 @@ Describe 'Invoke-MirrorDirectoryTree' {
 
     Context 'and: function specified' {
       It 'Should: traverse and invoke function for each directory' {
+        function global:Test-ShowMirror {
+          [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', '')]
+          param(
+            [Parameter(Mandatory)]
+            [System.IO.DirectoryInfo]$Underscore,
+
+            [Parameter(Mandatory)]
+            [int]$Index,
+
+            [Parameter(Mandatory)]
+            [System.Collections.Hashtable]$PassThru,
+
+            [Parameter(Mandatory)]
+            [boolean]$Trigger,
+
+            [Parameter(Mandatory)]
+            [string]$Format
+          )
+
+          [string]$result = $Format -f ($Underscore.Name);
+          Write-Debug "Custom function; Show-Mirror: '$result'";
+          @{ Product = $Underscore }
+        }
+
         [System.Collections.Hashtable]$parameters = @{
           'Format' = '---- {0} ----';
         }
