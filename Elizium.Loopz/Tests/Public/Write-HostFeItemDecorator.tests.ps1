@@ -5,27 +5,55 @@ Describe 'Write-HostFeItemDecorator' {
     Import-Module .\Output\Elizium.Loopz\Elizium.Loopz.psm1 `
       -ErrorAction 'stop' -DisableNameChecking
 
-    [scriptblock]$script:decorator = {
-      param(
-        $_underscore, $_index, $_passthru, $_trigger
-      )
+    InModuleScope Elizium.Loopz {
+      [scriptblock]$script:decorator = {
+        param(
+          $_underscore, $_index, $_passthru, $_trigger
+        )
 
-      return Write-HostFeItemDecorator -Underscore $_underscore `
-        -Index $_index `
-        -PassThru $_passthru `
-        -Trigger $_trigger
-    }
-  }
+        return Write-HostFeItemDecorator -Underscore $_underscore `
+          -Index $_index `
+          -PassThru $_passthru `
+          -Trigger $_trigger
+      }
+
+      [System.Collections.Hashtable]$script:_passThru = @{
+        'LOOPZ.WH-FOREACH-DECORATOR.FUNCTION-NAME' = 'get-AnswerAdvancedFn';
+        'LOOPZ.WH-FOREACH-DECORATOR.MESSAGE'       = 'Test Advanced Function';
+        'LOOPZ.KRAYOLA-THEME'                      = $(Get-KrayolaTheme);
+        'LOOPZ.WH-FOREACH-DECORATOR.PRODUCT-LABEL' = 'Test product';
+        'WHAT-IF'                                  = $false;
+      }
+
+      function script:get-AnswerAdvancedFn {
+
+        # This function is only required because the tests using the invoke operator
+        # on a string can not correctly pick up the local function name (ie defined as part
+        # of the test fixture) and see its definition to be invoked.
+        #
+        [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSShouldProcess', '')]
+        [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', '')]
+        [CmdletBinding(SupportsShouldProcess)]
+        param(
+          [Parameter(Mandatory)]
+          $Underscore,
+
+          [Parameter(Mandatory)]
+          [int]$Index,
+
+          [Parameter(Mandatory)]
+          [System.Collections.Hashtable]$PassThru,
+
+          [Parameter(Mandatory)]
+          [boolean]$Trigger
+        )
+
+        [PSCustomObject]@{ Product = "{0}: {1}" -f $Underscore, $PassThru['ANSWER'] }
+      }
+    } # InModuleScope Elizium.Loopz
+  } # BeforeAll
 
   Context 'given: Invoke Result contains Pairs' {
-    [System.Collections.Hashtable]$script:_passThru = @{
-      'LOOPZ.WH-FOREACH-DECORATOR.FUNCTION-NAME' = 'get-AnswerAdvancedFn';
-      'LOOPZ.WH-FOREACH-DECORATOR.MESSAGE'       = 'Test Advanced Function';
-      'LOOPZ.KRAYOLA-THEME'                      = $(Get-KrayolaTheme);
-      'LOOPZ.WH-FOREACH-DECORATOR.PRODUCT-LABEL' = 'Test product';
-      'WHAT-IF'                                  = $false;
-    }
-
     Context 'and: contains single item' {
       It 'should: invoke and write' {
         Mock get-AnswerAdvancedFn -ModuleName Elizium.Loopz {
@@ -43,8 +71,10 @@ Describe 'Write-HostFeItemDecorator' {
           $first[1] | Should -BeExactly 'Douglas Madcap Adams';
         }
 
-        $underscore = 'What is the answer to the universe';
-        $decorator.Invoke($underscore, 0, $_passThru, $false);
+        InModuleScope ELizium.Loopz {
+          $underscore = 'What is the answer to the universe';
+          $decorator.Invoke($underscore, 0, $_passThru, $false);
+        }
       }
 
       Context 'and: using pre-defined WhItemDecoratorBlock' {
@@ -64,8 +94,10 @@ Describe 'Write-HostFeItemDecorator' {
             $first[1] | Should -BeExactly 'Douglas Madcap Adams';
           }
 
-          $underscore = 'What is the answer to the universe';
-          $LoopzHelpers.WhItemDecoratorBlock.Invoke($underscore, 0, $_passThru, $false);
+          InModuleScope ELizium.Loopz {
+            $underscore = 'What is the answer to the universe';
+            $LoopzHelpers.WhItemDecoratorBlock.Invoke($underscore, 0, $_passThru, $false);
+          }
         }
       }
     } # and: contains single item
@@ -87,8 +119,10 @@ Describe 'Write-HostFeItemDecorator' {
           $second[1] | Should -BeExactly 'Sci-Fi';
         }
 
-        $underscore = 'What is the answer to the universe';
-        $decorator.Invoke($underscore, 0, $_passThru, $false);
+        InModuleScope ELizium.Loopz {
+          $underscore = 'What is the answer to the universe';
+          $decorator.Invoke($underscore, 0, $_passThru, $false);
+        }
       }
     } # and: contains 2 items
 
@@ -125,9 +159,10 @@ Describe 'Write-HostFeItemDecorator' {
           $fourth[1] | Should -BeExactly 'D';
         }
 
-
-        $underscore = 'What is the answer to the universe';
-        $decorator.Invoke($underscore, 0, $_passThru, $false);
+        InModuleScope ELizium.Loopz {
+          $underscore = 'What is the answer to the universe';
+          $decorator.Invoke($underscore, 0, $_passThru, $false);
+        }
       } # should: invoke and write
     } # and: contains many items
   } # given: Invoke Result contains Pairs
@@ -145,11 +180,27 @@ Describe 'Write-HostFeItemDecorator' {
         $productValue[2] | Should -BeTrue; # affirm value
       }
 
-      $myPassThru = $_passThru.Clone();
-      $myPassThru['LOOPZ.WH-FOREACH-DECORATOR.FUNCTION-NAME'] = 'get-AffirmedProduct';
+      InModuleScope Elizium.Loopz {
+        function get-AffirmedProduct {
+          [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', '')]
+          [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingWriteHost', '')]
+          param(
+            [Alias('Underscore')]
+            [System.IO.FileInfo]$FileInfo,
+            [int]$Index,
+            [System.Collections.Hashtable]$PassThru,
+            [boolean]$Trigger
+          )
 
-      $underscore = 'The owls are not what they seem';
-      $decorator.Invoke($underscore, 0, $myPassThru, $false);
+          [PSCustomObject]@{ Product = $FileInfo; Affirm = $true }
+        }
+
+        $myPassThru = $_passThru.Clone();
+        $myPassThru['LOOPZ.WH-FOREACH-DECORATOR.FUNCTION-NAME'] = 'get-AffirmedProduct';
+
+        $underscore = 'The owls are not what they seem';
+        $decorator.Invoke($underscore, 0, $myPassThru, $false);
+      }
     } # should: write affirmed Product
   } # given: Product is Affirmed
 
@@ -158,20 +209,45 @@ Describe 'Write-HostFeItemDecorator' {
       It 'should: invoke Write-ThemedPairsInColour' {
         Mock Write-ThemedPairsInColour -ModuleName Elizium.Loopz -Verifiable { }
 
-        [System.Collections.Hashtable]$passThru = @{
-          'LOOPZ.WH-FOREACH-DECORATOR.FUNCTION-NAME' = 'get-AnswerAdvancedFnWithTrigger';
-          'ANSWER'                                   = 'Fourty Two';
-          'LOOPZ.WH-FOREACH-DECORATOR.MESSAGE'       = 'Test Advanced Function';
-          'LOOPZ.KRAYOLA-THEME'                      = $(Get-KrayolaTheme);
-          'LOOPZ.WH-FOREACH-DECORATOR.PRODUCT-LABEL' = 'Test product';
-          'WHAT-IF'                                  = $false;
-          'LOOPZ.WH-FOREACH-DECORATOR.IF-TRIGGERED'  = $true;
+        InModuleScope Elizium.Loopz {
+          function get-AnswerAdvancedFnWithTrigger {
+            [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSShouldProcess', '')]
+            [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', '')]
+            [CmdletBinding(SupportsShouldProcess)]
+            param(
+              [Parameter(Mandatory)]
+              $Underscore,
+
+              [Parameter(Mandatory)]
+              [int]$Index,
+
+              [Parameter(Mandatory)]
+              [System.Collections.Hashtable]$PassThru,
+
+              [Parameter(Mandatory)]
+              [boolean]$Trigger
+            )
+
+            [PSCustomObject]@{ Product = ("{0}: {1}" -f $Underscore, $PassThru['ANSWER']);
+              Trigger                  = $true 
+            }
+          }
+
+          [System.Collections.Hashtable]$passThru = @{
+            'LOOPZ.WH-FOREACH-DECORATOR.FUNCTION-NAME' = 'get-AnswerAdvancedFnWithTrigger';
+            'ANSWER'                                   = 'Fourty Two';
+            'LOOPZ.WH-FOREACH-DECORATOR.MESSAGE'       = 'Test Advanced Function';
+            'LOOPZ.KRAYOLA-THEME'                      = $(Get-KrayolaTheme);
+            'LOOPZ.WH-FOREACH-DECORATOR.PRODUCT-LABEL' = 'Test product';
+            'WHAT-IF'                                  = $false;
+            'LOOPZ.WH-FOREACH-DECORATOR.IF-TRIGGERED'  = $true;
+          }
+
+          $underscore = 'What is the answer to the universe';
+          $decorator.Invoke($underscore, 0, $passThru, $false);
+
+          Assert-MockCalled Write-ThemedPairsInColour -ModuleName Elizium.Loopz -Times 1;
         }
-
-        $underscore = 'What is the answer to the universe';
-        $decorator.Invoke($underscore, 0, $passThru, $false);
-
-        Assert-MockCalled Write-ThemedPairsInColour -ModuleName Elizium.Loopz -Times 1;
       } # should: invoke Write-ThemedPairsInColour
     } # and: IF-TRIGGERED is set
 
@@ -179,20 +255,22 @@ Describe 'Write-HostFeItemDecorator' {
       It 'should: NOT invoke Write-ThemedPairsInColour' {
         Mock Write-ThemedPairsInColour -ModuleName Elizium.Loopz -Verifiable { }
 
-        [System.Collections.Hashtable]$passThru = @{
-          'LOOPZ.WH-FOREACH-DECORATOR.FUNCTION-NAME' = 'get-AnswerAdvancedFn';
-          'ANSWER'                                   = 'Fourty Two';
-          'LOOPZ.WH-FOREACH-DECORATOR.MESSAGE'       = 'Test Advanced Function';
-          'LOOPZ.KRAYOLA-THEME'                      = $(Get-KrayolaTheme);
-          'LOOPZ.WH-FOREACH-DECORATOR.PRODUCT-LABEL' = 'Test product';
-          'WHAT-IF'                                  = $false;
-          'LOOPZ.WH-FOREACH-DECORATOR.IF-TRIGGERED'  = $true;
+        InModuleScope Elizium.Loopz {
+          [System.Collections.Hashtable]$passThru = @{
+            'LOOPZ.WH-FOREACH-DECORATOR.FUNCTION-NAME' = 'get-AnswerAdvancedFn';
+            'ANSWER'                                   = 'Fourty Two';
+            'LOOPZ.WH-FOREACH-DECORATOR.MESSAGE'       = 'Test Advanced Function';
+            'LOOPZ.KRAYOLA-THEME'                      = $(Get-KrayolaTheme);
+            'LOOPZ.WH-FOREACH-DECORATOR.PRODUCT-LABEL' = 'Test product';
+            'WHAT-IF'                                  = $false;
+            'LOOPZ.WH-FOREACH-DECORATOR.IF-TRIGGERED'  = $true;
+          }
+
+          $underscore = 'What is the answer to the universe';
+          $decorator.Invoke($underscore, 0, $passThru, $false);
+
+          Assert-MockCalled Write-ThemedPairsInColour -ModuleName Elizium.Loopz -Times 0;
         }
-
-        $underscore = 'What is the answer to the universe';
-        $decorator.Invoke($underscore, 0, $passThru, $false);
-
-        Assert-MockCalled Write-ThemedPairsInColour -ModuleName Elizium.Loopz -Times 0;
       } # should: NOT invoke Write-ThemedPairsInColour
     } # and: IF-TRIGGERED is set
   } # given: IF-TRIGGERED is set

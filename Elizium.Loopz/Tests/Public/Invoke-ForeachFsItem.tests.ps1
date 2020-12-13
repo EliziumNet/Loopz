@@ -288,6 +288,21 @@ Describe 'Invoke-ForeachFsItem' {
   Context 'given: invoke named function' {
     Context 'and: files piped from different directories' {
       It 'should: send objects out of the pipeline' {
+        function global:invoke-Dummy {
+          [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', '')]
+          [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingWriteHost', '')]
+          param(
+            [Alias('Underscore')]
+            [System.IO.FileInfo]$FileInfo,
+            [int]$Index,
+            [System.Collections.Hashtable]$PassThru,
+            [boolean]$Trigger
+          )
+          Write-Warning "These aren't the droids you're looking for, ..., move along, move along!";
+
+          [PSCustomObject]@{ Product = $FileInfo; }
+        }
+
         Mock -ModuleName Elizium.Loopz invoke-Dummy -Verifiable {
           param(
             [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', '')]
@@ -316,6 +331,31 @@ Describe 'Invoke-ForeachFsItem' {
   Context 'given: invoke named function with additional param(s)' {
     Context 'and: files piped from different directories' {
       It 'should: send objects out of the pipeline' {
+
+        function global:Test-FileResult {
+          [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', '')]
+          param(
+            [Parameter(Mandatory)]
+            [System.IO.FileInfo]$Underscore,
+
+            [Parameter(Mandatory)]
+            [int]$Index,
+
+            [Parameter(Mandatory)]
+            [System.Collections.Hashtable]$PassThru,
+
+            [Parameter(Mandatory)]
+            [boolean]$Trigger,
+
+            [Parameter(Mandatory)]
+            [string]$Format
+          )
+
+          [string]$result = $Format -f ($Underscore.Name);
+          Write-Debug "Custom function; Test-FileResult: '$result'";
+          @{ Product = $Underscore }
+        }
+
         Mock -ModuleName Elizium.Loopz Test-FileResult -Verifiable {
           param(
             [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', '')]
