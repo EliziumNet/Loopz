@@ -41,8 +41,12 @@ function New-RegularExpression {
       $null;
     }
 
+    if (-not([string]::IsNullOrEmpty($options))) {
+      Write-Debug "New-RegularExpression; created RegEx for pattern: '$adjustedExpression', with options: '$options'";
+    }
+
     if ($Escape.ToBool()) {
-      $adjustedExpression = [regx]::Escape($adjustedExpression);
+      $adjustedExpression = [regex]::Escape($adjustedExpression);
     }
     if ($WholeWord.ToBool()) {
       $adjustedExpression = '\b{0}\b' -f $adjustedExpression;
