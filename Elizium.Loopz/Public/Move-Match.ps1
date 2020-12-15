@@ -91,7 +91,7 @@ function Move-Match {
             -CapturedOnly;
         }
         else {
-          # With doesn't match so abort and return unmodified source
+          # Copy doesn't match so abort and return unmodified source
           #
           $failed = $true;         
         }
@@ -184,5 +184,9 @@ function Move-Match {
     $failed = $true;
   }
 
-  $result;
+  [PSCustomObject]$updateResult = [PSCustomObject]@{
+    Payload = $result;
+  }
+
+  return $updateResult;
 } # Move-Match

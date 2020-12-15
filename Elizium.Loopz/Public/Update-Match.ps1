@@ -28,6 +28,8 @@ function Update-Match {
     Split-Match -Source $Value -PatternRegEx $Pattern `
     -Occurrence ($PSBoundParameters.ContainsKey('PatternOccurrence') ? $PatternOccurrence : 'f');
 
+  [boolean]$failed = $false;
+
   if (-not([string]::IsNullOrEmpty($capturedPattern))) {
     if ($PSBoundParameters.ContainsKey('Copy')) {
       [string]$replaceWith, $null, [System.Text.RegularExpressions.Match]$copyMatch = `
@@ -35,7 +37,8 @@ function Update-Match {
         -Occurrence ($PSBoundParameters.ContainsKey('CopyOccurrence') ? $CopyOccurrence : 'f');
 
         if ([string]::IsNullOrEmpty($replaceWith)) {
-          return $Value;
+          $failed = $true;
+          [string]$result = $Value;
         }
     }
     elseif ($PSBoundParameters.ContainsKey('With')) {
@@ -45,23 +48,29 @@ function Update-Match {
       [string]$replaceWith = [string]::Empty;
     }
 
-    if ($PSBoundParameters.ContainsKey('Paste')) {
-      [string]$format = $Paste.Replace('${_c}', $replaceWith).Replace(
-        '$0', $capturedPattern);
-    }
-    else {
-      # Just do a straight swap of the pattern match for the replaceWith
-      #
-      [string]$format = $replaceWith;
-    }
+    if (-not($failed)) {
+      if ($PSBoundParameters.ContainsKey('Paste')) {
+        [string]$format = $Paste.Replace('${_c}', $replaceWith).Replace(
+          '$0', $capturedPattern);
+      }
+      else {
+        # Just do a straight swap of the pattern match for the replaceWith
+        #
+        [string]$format = $replaceWith;
+      }
 
-    [string]$result = ($PatternOccurrence -eq '*') `
-      ? $Pattern.Replace($Value, $format) `
-      : $Pattern.Replace($Value, $format, 1, $patternMatch.Index);
+      [string]$result = ($PatternOccurrence -eq '*') `
+        ? $Pattern.Replace($Value, $format) `
+        : $Pattern.Replace($Value, $format, 1, $patternMatch.Index);
+    }
   } else {
     [string]$result = $Value;
   }
 
-  return $result;
+  [PSCustomObject]$updateResult = [PSCustomObject]@{
+    Payload = $result;
+  }
+
+  return $updateResult;
 } # Update-Match
 

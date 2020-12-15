@@ -167,7 +167,8 @@ function Rename-Many {
 
       # Perform Rename Action, then post process
       #
-      [string]$newItemName = & $action @actionParameters;
+      [PSCustomObject]$actionResult = & $action @actionParameters;
+      [string]$newItemName = $actionResult.Payload;
       $postResult = invoke-PostProcessing -InputSource $newItemName -Rules $Loopz.Rules.Remy `
         -Signals $signals;
 
