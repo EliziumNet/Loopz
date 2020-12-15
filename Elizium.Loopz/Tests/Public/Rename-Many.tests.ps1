@@ -105,6 +105,19 @@ Describe 'Rename-Many' {
             }
           }
 
+          Context 'and: Source matches Pattern, but differs by case' {
+            It 'should: do rename; move Pattern match before Anchor' {
+              $script:expected = @{
+                'loopz.data.t1.txt' = 'data.loopz.t1.txt';
+                'loopz.data.t2.txt' = 'data.loopz.t2.txt';
+                'loopz.data.t3.txt' = 'data.loopz.t3.txt';
+              }
+
+              Get-ChildItem -File -Path $directoryPath | Rename-Many -File `
+                -Pattern 'DATA\./i' -Anchor 'loopz' -Relation 'before' -WhatIf;
+            }
+          }
+
           Context 'and: Source does not match Anchor' {
             It 'should: NOT do rename' {
               $script:expected = @{

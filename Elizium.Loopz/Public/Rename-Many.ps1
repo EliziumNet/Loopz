@@ -101,7 +101,6 @@ function Rename-Many {
         [boolean]$_trigger
       )
 
-      [string]$replacePattern = $_passThru['LOOPZ.REMY.PATTERN'];
       [boolean]$itemIsDirectory = ($_underscore.Attributes -band
         [System.IO.FileAttributes]::Directory) -eq [System.IO.FileAttributes]::Directory;
 
@@ -112,7 +111,7 @@ function Rename-Many {
 
       [System.Collections.Hashtable]$actionParameters = @{
         'Value'   = $adjustedName;
-        'Pattern' = $replacePattern;
+        'Pattern' = $_passThru['LOOPZ.REMY.PATTERN-REGEX'];
       }
 
       $actionParameters['PatternOccurrence'] = $_passThru.ContainsKey('LOOPZ.REMY.PATTERN-OCC') `
@@ -180,6 +179,7 @@ function Rename-Many {
       }
 
       $newItemName = $endAdapter.GetNameWithExtension($newItemName);
+      Write-Debug "Rename-Many; New Item Name: '$newItemName'";
 
       [boolean]$trigger = $false;
       [boolean]$affirm = $false;
@@ -397,7 +397,7 @@ function Rename-Many {
       'LOOPZ.SUMMARY-BLOCK.MESSAGE'           = $summaryMessage;
       'LOOPZ.HEADER-BLOCK.MESSAGE'            = $title;
 
-      'LOOPZ.REMY.PATTERN'                    = $patternRegEx;
+      'LOOPZ.REMY.PATTERN-REGEX'              = $patternRegEx;
       'LOOPZ.REMY.PATTERN-OCC'                = $patternOccurrence;
       'LOOPZ.REMY.CONTEXT'                    = $Context;
       'LOOPZ.REMY.MAX-ITEM-MESSAGE-SIZE'      = $maxItemMessageSize;
