@@ -137,6 +137,9 @@ function Rename-Many {
         if ($_passThru.ContainsKey('LOOPZ.REMY.ANCHOR')) {
           $actionParameters['Anchor'] = $_passThru['LOOPZ.REMY.ANCHOR'];
         }
+        if ($_passThru.ContainsKey('LOOPZ.REMY.ANCHOR-OCC')) {
+          $actionParameters['AnchorOccurrence'] = $_passThru['LOOPZ.REMY.ANCHOR-OCC'];
+        }
 
         switch ($_passThru['LOOPZ.REMY.ANCHOR-TYPE']) {
           'MATCHED-ITEM' {
