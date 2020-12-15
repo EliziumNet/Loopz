@@ -90,6 +90,21 @@ Describe 'Rename-Many' {
             }
           }
 
+          Context 'and: Source matches Last Anchor' {
+            It 'should: do rename; move Pattern match before Last Anchor' {
+              $script:expected = @{
+                'loopz.application.t1.log' = 'applicloopz.ation.t1.log';
+                'loopz.application.t2.log' = 'applicloopz.ation.t2.log';
+                'loopz.data.t1.txt'        = 'datloopz.a.t1.txt';
+                'loopz.data.t2.txt'        = 'datloopz.a.t2.txt';
+                'loopz.data.t3.txt'        = 'datloopz.a.t3.txt';
+              }
+
+              Get-ChildItem -File -Path $directoryPath | Rename-Many -File `
+                -Pattern 'loopz.' -Anchor 'a', l -Relation 'before' -WhatIf;
+            }
+          }
+
           Context 'and: Source does not match Anchor' {
             It 'should: NOT do rename' {
               $script:expected = @{
@@ -132,6 +147,21 @@ Describe 'Rename-Many' {
               }
             }
           } # and: Source matches Anchor
+
+          Context 'and: Source matches Last Anchor' {
+            It 'should: do rename; move Pattern match after Last Anchor' {
+              $script:expected = @{
+                'loopz.application.t1.log' = 'application.loopz.t1.log';
+                'loopz.application.t2.log' = 'application.loopz.t2.log';
+                'loopz.data.t1.txt'        = 'data.loopz.t1.txt';
+                'loopz.data.t2.txt'        = 'data.loopz.t2.txt';
+                'loopz.data.t3.txt'        = 'data.loopz.t3.txt';
+              }
+
+              Get-ChildItem -File -Path $directoryPath | Rename-Many -File `
+                -Pattern 'loopz.' -Anchor '\.', l -Relation 'after' -WhatIf;
+            }
+          }
 
           Context 'and: Source does not match Anchor' {
             It 'should: NOT do rename' {
@@ -265,6 +295,21 @@ Describe 'Rename-Many' {
               -Pattern 'a', f -Copy 't\d' -Whole c -WhatIf;
           }
         } # and: Whole Copy
+
+        Context 'and: Source matches Last Copy' {
+          It 'should: do rename; replace Pattern match with Last Copy' {
+            $script:expected = @{
+              'loopz.application.t1.log' = 'loopz.(ca)-application.t1.log';
+              'loopz.application.t2.log' = 'loopz.(ca)-application.t2.log';
+              'loopz.data.t1.txt'        = 'loopz.(ta)-data.t1.txt';
+              'loopz.data.t2.txt'        = 'loopz.(ta)-data.t2.txt';
+              'loopz.data.t3.txt'        = 'loopz.(ta)-data.t3.txt';
+            }
+
+            Get-ChildItem -File -Path $directoryPath | Rename-Many -File `
+              -Pattern 'loopz.' -Copy '\wa', l -Paste '$0(${_c})-' -WhatIf;
+          }
+        }
 
         Context 'Copy does NOT match' {
           It 'should: do rename; replace First Pattern for Copy text' {
