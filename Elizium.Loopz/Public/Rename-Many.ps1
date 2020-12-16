@@ -217,51 +217,6 @@ function Rename-Many {
         $normalisedItemMessage;
       }
 
-      if ($performDiagnosis -and $actionResult.Diagnostics.Named -and
-        ($actionResult.Diagnostics.Named.Count -gt 0)) {
-
-        [string[][]]$diagnosticLines = @();
-        [string]$diagnosticEmoji = Get-FormattedSignal -Name 'DIAGNOSTICS' -Signals $signals `
-          -EmojiOnly;
-
-        # Populate diagnosticLines
-        #
-        foreach ($namedItem in $actionResult.Diagnostics.Named) {
-          foreach ($namedKey in $namedItem.Keys) {
-            $groups = $actionResult.Diagnostics.Named[$namedKey];
-            # Write-Host ">>> NAMED-ITEM (name): '$namedKey'";
-            [object[]]$captureLine = @();
-
-            foreach ($captureKey in $groups.Keys) {
-              [string]$captured = $groups[$captureKey];
-              # Write-Host "  === NAMED-ITEM (capture:$($namedKey)): '$captureKey' => '$captured'";
-
-              # [string]$compoundKey = "({0}):{1}" -f $namedKey, $captureKey;
-              # Write-Host "  === NAMED-ITEM capture-$($compoundKey) => '$captured'";
-              # $namedKey, $captureKey, $captured
-              [string]$compoundValue = "({0}):{1}" -f $captureKey, $captured;
-              # Write-Host "  === NAMED-ITEM $($namedKey): => '$compoundValue'";
-              # 
-              $captureLine += , @($namedKey, $compoundValue);
-
-              [string]$namedLabel = Get-PaddedLabel -Label ($diagnosticEmoji + $namedKey) `
-                -Width $maxItemMessageSize;
-
-              $lines += , @($namedLabel, $compoundValue);
-            }
-            # $diagnosticLines += , $captureLine;
-          }
-          # ...
-          # $lines += $diagnosticLines;
-          # Write-Host ">>> Diagnostic lines count: '$($diagnosticLines.Count)'"
-
-          # foreach ($diagnostic in $diagnosticLines) {
-          #   Write-Host "   === DIAGNOSTIC $($diagnostic[0]): => '$($diagnostic[1])'";
-          #   $lines += , @($diagnostic[0], $diagnostic[1]);
-          # }
-        }
-      }
-
       [string]$signalName = $itemIsDirectory ? 'DIRECTORY-A' : 'FILE-A';
       [string]$message = Get-FormattedSignal -Name $signalName `
         -Signals $signals -CustomLabel $messageLabel -Format '   [{1}] {0}';
@@ -285,7 +240,7 @@ function Rename-Many {
         $product = $_underscore;
       }
 
-      if ($trigger) {       
+      if ($trigger) {
         $lines += , @($_passThru['LOOPZ.REMY.FROM-LABEL'], $_underscore.Name);
       }
       else {
@@ -299,6 +254,34 @@ function Rename-Many {
           [string[]]$notActionedSignal = Get-FormattedSignal -Name 'NOT-ACTIONED' `
             -Signals $signals -EmojiAsValue -CustomLabel 'Not Renamed' -EmojiOnlyFormat '{0}';
           $properties += , $notActionedSignal;
+        }
+      }
+
+      # Do diagnostics
+      #
+      if ($performDiagnosis -and $actionResult.Diagnostics.Named -and
+        ($actionResult.Diagnostics.Named.Count -gt 0)) {
+
+        [string]$diagnosticEmoji = Get-FormattedSignal -Name 'DIAGNOSTICS' -Signals $signals `
+          -EmojiOnly;
+
+        [string]$captureEmoji = Get-FormattedSignal -Name 'CAPTURE' -Signals $signals `
+          -EmojiOnly -EmojiOnlyFormat '[{0}]';
+
+        foreach ($namedItem in $actionResult.Diagnostics.Named) {
+          foreach ($namedKey in $namedItem.Keys) {
+            [System.Collections.Hashtable]$groups = $actionResult.Diagnostics.Named[$namedKey];
+            [string[]]$diagnosticLines = @();
+
+            foreach ($groupName in $groups.Keys) {
+              [string]$captured = $groups[$groupName];
+              [string]$compoundValue = "({0} <{1}>)='{2}'" -f $captureEmoji, $groupName, $captured;
+              [string]$namedLabel = Get-PaddedLabel -Label ($diagnosticEmoji + $namedKey);
+
+              $diagnosticLines += $compoundValue;
+            }
+            $lines += , @($namedLabel, $($diagnosticLines -join ', '));
+          }
         }
       }
 
@@ -572,7 +555,7 @@ function Rename-Many {
       $parameters['Directory'] = $true;
     }
 
-    if ($whatIf) {
+    if ($whatIf -or $Diagnose.ToBool()) {
       $passThru['WHAT-IF'] = $true;
     }
 
