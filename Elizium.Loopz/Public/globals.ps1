@@ -147,6 +147,7 @@ $global:Loopz = [PSCustomObject]@{
     'DESTINATION'  = @('Destination', '☀️')
     'TRIM'         = @('Trim', '🌊')
     'MULTI-SPACES' = @('Spaces', '❄️')
+    'DIAGNOSTICS'  = @('Diagnostics', '🧪')
 
     # Outcomes
     #

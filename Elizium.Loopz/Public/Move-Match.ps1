@@ -38,7 +38,10 @@ function Move-Match {
     [switch]$Start,
 
     [Parameter()]
-    [switch]$End
+    [switch]$End,
+
+    [Parameter()]
+    [switch]$Diagnose
   )
 
   # If the move fails, we need to return the reason for the failure so it can be reported back to he user
@@ -48,10 +51,13 @@ function Move-Match {
   # exotic,
   # exotic-formatted
 
-  [string]$result = $Value;
+  [string]$result = [string]::Empty;
+  [string]$failedReason = [string]::Empty;
+  [PSCustomObject]$groups = [PSCustomObject]@{
+    Named = @{}
+  }
 
   [boolean]$isFormatted = $PSBoundParameters.ContainsKey('Paste') -and -not([string]::IsNullOrEmpty($Paste));
-  [boolean]$failed = $false;
 
   # First remove the Pattern match from the source. This makes the With and Anchor match
   # against the remainder ($patternRemoved) of the source. This way, there is no overlap
@@ -70,6 +76,10 @@ function Move-Match {
     [boolean]$isVanilla = -not($PSBoundParameters.ContainsKey('Copy') -or `
       ($PSBoundParameters.ContainsKey('With') -and -not([string]::IsNullOrEmpty($With))));
 
+    if ($Diagnose.ToBool()) {
+      $groups.Named['Pattern'] = get-Captures -MatchObject $patternMatch;
+    }
+
     # Determine the replacement text
     #
     if ($isVanilla) {
@@ -85,15 +95,19 @@ function Move-Match {
           # pattern, so if the Copy contains regex chars, they must pass in the string
           # pre-escaped: -Copy $(esc('some-pattern') + 'other stuff').
           #
-          [string]$replaceWith = Split-Match `
+          [string]$replaceWith, $null, $copyMatch = Split-Match `
             -Source $patternRemoved -PatternRegEx $Copy `
             -Occurrence ($PSBoundParameters.ContainsKey('CopyOccurrence') ? $CopyOccurrence : 'f') `
             -CapturedOnly;
+
+          if ($Diagnose.ToBool()) {
+            $groups.Named['Copy'] = get-Captures -MatchObject $copyMatch;
+          }
         }
         else {
           # Copy doesn't match so abort and return unmodified source
           #
-          $failed = $true;         
+          $failedReason = 'Copy failed Match';
         }
       }
       elseif ($PSBoundParameters.ContainsKey('With')) {
@@ -164,29 +178,48 @@ function Move-Match {
             ? $replaceWith + $capturedAnchor : $capturedAnchor + $replaceWith;
         }
 
+        if ($Diagnose.ToBool()) {
+          $groups.Named['Anchor'] = get-Captures -MatchObject $anchorMatch;
+        }
+
         $result = $Anchor.Replace($patternRemoved, $format, 1, $anchorMatch.Index);
       }
       else {
         # Anchor doesn't match Pattern
         #
-        $failed = $true;
+        $failedReason = 'Anchor failed Match';
       }
     }
     else {
       # This is an error, because there is no place to move the pattern to, as there is no Anchor,
       # Start or End specified. Ideally this would be prevented by parameter set definition;
-      $failed = $true;
+      #
+      $failedReason = 'Missing Anchor';
     }
   }
   else {
     # Source doesn't match Pattern
     #
-    $failed = $true;
+    $failedReason = 'Pattern failed Match';
   }
 
-  [PSCustomObject]$updateResult = [PSCustomObject]@{
+  [boolean]$success = $([string]::IsNullOrEmpty($failedReason));
+  if (-not($success)) {
+    $result = $Value;
+  }
+
+  [PSCustomObject]$moveResult = [PSCustomObject]@{
     Payload = $result;
+    Success = $success;
   }
 
-  return $updateResult;
+  if (-not([string]::IsNullOrEmpty($failedReason))) {
+    $moveResult | Add-Member -MemberType NoteProperty -Name 'FailedReason' -Value $failedReason;
+  }
+
+  if ($Diagnose.ToBool() -and ($groups.Named.Count -gt 0)) {
+    $moveResult | Add-Member -MemberType NoteProperty -Name 'Diagnostics' -Value $groups;
+  }
+
+  return $moveResult;
 } # Move-Match

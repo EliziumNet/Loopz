@@ -21,14 +21,20 @@ function Update-Match {
     [string]$With,
 
     [Parameter()]
-    [string]$Paste
+    [string]$Paste,
+
+    [Parameter()]
+    [switch]$Diagnose
   )
+
+  [string]$failedReason = [string]::Empty;
+  [PSCustomObject]$groups = [PSCustomObject]@{
+    Named = @{}
+  }
 
   [string]$capturedPattern, $null, [System.Text.RegularExpressions.Match]$patternMatch = `
     Split-Match -Source $Value -PatternRegEx $Pattern `
     -Occurrence ($PSBoundParameters.ContainsKey('PatternOccurrence') ? $PatternOccurrence : 'f');
-
-  [boolean]$failed = $false;
 
   if (-not([string]::IsNullOrEmpty($capturedPattern))) {
     if ($PSBoundParameters.ContainsKey('Copy')) {
@@ -36,10 +42,13 @@ function Update-Match {
         Split-Match -Source $Value -PatternRegEx $Copy `
         -Occurrence ($PSBoundParameters.ContainsKey('CopyOccurrence') ? $CopyOccurrence : 'f');
 
-        if ([string]::IsNullOrEmpty($replaceWith)) {
-          $failed = $true;
-          [string]$result = $Value;
-        }
+      if ([string]::IsNullOrEmpty($replaceWith)) {
+        $failedReason = 'Copy failed Match';
+        [string]$result = $Value;
+      }
+      elseif ($Diagnose.ToBool()) {
+        $groups.Named['Copy'] = get-Captures -MatchObject $copyMatch;
+      }
     }
     elseif ($PSBoundParameters.ContainsKey('With')) {
       [string]$replaceWith = $With;
@@ -48,7 +57,7 @@ function Update-Match {
       [string]$replaceWith = [string]::Empty;
     }
 
-    if (-not($failed)) {
+    if ([string]::IsNullOrEmpty($failedReason)) {
       if ($PSBoundParameters.ContainsKey('Paste')) {
         [string]$format = $Paste.Replace('${_c}', $replaceWith).Replace(
           '$0', $capturedPattern);
@@ -62,13 +71,22 @@ function Update-Match {
       [string]$result = ($PatternOccurrence -eq '*') `
         ? $Pattern.Replace($Value, $format) `
         : $Pattern.Replace($Value, $format, 1, $patternMatch.Index);
+
+      if ($Diagnose.ToBool()) {
+        $groups.Named['Pattern'] = get-Captures -MatchObject $patternMatch;
+      }
     }
-  } else {
+  }
+  else {
     [string]$result = $Value;
   }
 
   [PSCustomObject]$updateResult = [PSCustomObject]@{
     Payload = $result;
+  }
+
+  if ($Diagnose.ToBool() -and ($groups.Named.Count -gt 0)) {
+    $updateResult | Add-Member -MemberType NoteProperty -Name 'Diagnostics' -Value $groups;
   }
 
   return $updateResult;

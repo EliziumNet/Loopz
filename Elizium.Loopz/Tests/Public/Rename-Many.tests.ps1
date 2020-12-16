@@ -105,6 +105,73 @@ Describe 'Rename-Many' {
             }
           }
 
+          Context 'and: Source matches with Named Captures and Diagnostics Enabled' {
+            It 'should: do rename; move Pattern match before Last Anchor' -Tag 'Current' {
+              # $script:expected = @{
+              #   #                            'BEGIN-.application-loopz-application-END.t1.log'
+              #   'loopz.application.t1.log' = 'diag-t1-loopz-application-end.t1.log';
+              #   'loopz.application.t2.log' = 'diag-t2-loopz-application-end.t2.log';
+              #   'loopz.data.t1.txt'        = 'diag-t1-loopz-data-end.t1.txt';
+              #   'loopz.data.t2.txt'        = 'diag-t2-loopz-data-end.t2.txt';
+              #   'loopz.data.t3.txt'        = 'diag-t3-loopz-data-end.t3.txt';
+              # }
+
+              [string]$pattern = '^(?<header>[\w]+)\.(?<body>[\w]+)';
+              [string]$copy = '\.(?<tail>[\w]+)'
+              [string]$paste = 'BEGIN-${header}-${body}-END';
+
+              Get-ChildItem -File -Path $directoryPath | Rename-Many -File `
+                -Pattern $pattern -Copy $copy -Paste $paste -WhatIf -Diagnose;
+            }
+
+            It 'How to index into regex groups' -Skip {
+              [string]$source = 'loopz.application.t1.log';
+              [string]$pattern = '^(?<header>[\w]+)\.(?<body>[\w]+)'
+              [object []]$arguments = @($pattern)
+              [RegEx]$patternRegEx = New-Object -TypeName System.Text.RegularExpressions.RegEx -ArgumentList (
+                $arguments);
+
+              if ($patternRegEx.IsMatch($source)) {
+                [System.Text.RegularExpressions.MatchCollection]$mc = $patternRegEx.Matches($source);
+                [System.Text.RegularExpressions.Match]$firstMatch = $mc[0];
+                [System.Text.RegularExpressions.GroupCollection]$gc = $firstMatch.Groups;
+                Write-Host "@@@ IS A MATCH, Count: '$($gc.Count)'"
+                Write-Host "@@@ Keys ...: '$($gc.Keys)'"
+
+                Write-Host "@@@ header: '$($gc['header'])'"
+                Write-Host "@@@ body: '$($gc['body'])'"
+              } else {
+                Write-Host "@@@ NOT A MATCH"
+              }
+            }
+
+            It 'How to iterate into regex groups' -Skip {
+              [string]$source = 'loopz.application.t1.log';
+              [string]$pattern = '^(?<header>[\w]+)\.(?<body>[\w]+)'
+              [object []]$arguments = @($pattern)
+              [RegEx]$patternRegEx = New-Object -TypeName System.Text.RegularExpressions.RegEx -ArgumentList (
+                $arguments);
+
+              if ($patternRegEx.IsMatch($source)) {
+                [System.Text.RegularExpressions.MatchCollection]$mc = $patternRegEx.Matches($source);
+                [System.Text.RegularExpressions.Match]$firstMatch = $mc[0];
+                [System.Text.RegularExpressions.GroupCollection]$gc = $firstMatch.Groups;
+                Write-Host "@@@ IS A MATCH, Count: '$($gc.Count)'"
+
+                foreach ($key in $gc.Keys) {
+                  $val = $gc[$key];
+                  Write-Host ">>> Key: '$key', value: '$val'";
+                }
+
+                Write-Host "@@@ header: '$($gc['header'])'"
+                Write-Host "@@@ body: '$($gc['body'])'"
+              }
+              else {
+                Write-Host "@@@ NOT A MATCH"
+              }
+            }
+          }
+
           Context 'and: Source matches Pattern, but differs by case' {
             It 'should: do rename; move Pattern match before Anchor' {
               $script:expected = @{

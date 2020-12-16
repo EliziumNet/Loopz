@@ -80,7 +80,10 @@ function Rename-Many {
       Title          = $Loopz.Defaults.Remy.Title;
       ItemMessage    = $Loopz.Defaults.Remy.ItemMessage;
       SummaryMessage = $Loopz.Defaults.Remy.SummaryMessage;
-    }
+    },
+
+    [Parameter()]
+    [switch]$Diagnose
   )
 
   begin {
@@ -114,6 +117,9 @@ function Rename-Many {
         'Pattern' = $_passThru['LOOPZ.REMY.PATTERN-REGEX'];
       }
 
+      [boolean]$performDiagnosis = ($_passThru.ContainsKey('LOOPZ.DIAGNOSE') -and
+        $_passThru['LOOPZ.DIAGNOSE']);
+
       $actionParameters['PatternOccurrence'] = $_passThru.ContainsKey('LOOPZ.REMY.PATTERN-OCC') `
         ? $_passThru['LOOPZ.REMY.PATTERN-OCC'] : 'f';
 
@@ -130,6 +136,10 @@ function Rename-Many {
 
       if ($_passThru.ContainsKey('LOOPZ.REMY.PASTE')) {
         $actionParameters['Paste'] = $_passThru['LOOPZ.REMY.PASTE']
+      }
+
+      if ($performDiagnosis) {
+        $actionParameters['Diagnose'] = $_passThru['LOOPZ.DIAGNOSE']
       }
 
       if ($action -eq 'Move-Match') {
@@ -205,6 +215,51 @@ function Rename-Many {
       }
       else {
         $normalisedItemMessage;
+      }
+
+      if ($performDiagnosis -and $actionResult.Diagnostics.Named -and
+        ($actionResult.Diagnostics.Named.Count -gt 0)) {
+
+        [string[][]]$diagnosticLines = @();
+        [string]$diagnosticEmoji = Get-FormattedSignal -Name 'DIAGNOSTICS' -Signals $signals `
+          -EmojiOnly;
+
+        # Populate diagnosticLines
+        #
+        foreach ($namedItem in $actionResult.Diagnostics.Named) {
+          foreach ($namedKey in $namedItem.Keys) {
+            $groups = $actionResult.Diagnostics.Named[$namedKey];
+            # Write-Host ">>> NAMED-ITEM (name): '$namedKey'";
+            [object[]]$captureLine = @();
+
+            foreach ($captureKey in $groups.Keys) {
+              [string]$captured = $groups[$captureKey];
+              # Write-Host "  === NAMED-ITEM (capture:$($namedKey)): '$captureKey' => '$captured'";
+
+              # [string]$compoundKey = "({0}):{1}" -f $namedKey, $captureKey;
+              # Write-Host "  === NAMED-ITEM capture-$($compoundKey) => '$captured'";
+              # $namedKey, $captureKey, $captured
+              [string]$compoundValue = "({0}):{1}" -f $captureKey, $captured;
+              # Write-Host "  === NAMED-ITEM $($namedKey): => '$compoundValue'";
+              # 
+              $captureLine += , @($namedKey, $compoundValue);
+
+              [string]$namedLabel = Get-PaddedLabel -Label ($diagnosticEmoji + $namedKey) `
+                -Width $maxItemMessageSize;
+
+              $lines += , @($namedLabel, $compoundValue);
+            }
+            # $diagnosticLines += , $captureLine;
+          }
+          # ...
+          # $lines += $diagnosticLines;
+          # Write-Host ">>> Diagnostic lines count: '$($diagnosticLines.Count)'"
+
+          # foreach ($diagnostic in $diagnosticLines) {
+          #   Write-Host "   === DIAGNOSTIC $($diagnostic[0]): => '$($diagnostic[1])'";
+          #   $lines += , @($diagnostic[0], $diagnostic[1]);
+          # }
+        }
       }
 
       [string]$signalName = $itemIsDirectory ? 'DIRECTORY-A' : 'FILE-A';
@@ -481,7 +536,7 @@ function Rename-Many {
       param(
         [System.IO.FileSystemInfo]$pipelineItem
       )
-      [boolean]$clientResult = $clientCondition.Invoke($pipelineItem);
+      [boolean]$clientResult = $true; # $clientCondition.Invoke($pipelineItem);
       [boolean]$isAlreadyAnchoredAt = $anchoredRegEx -and $anchoredRegEx.IsMatch($pipelineItem.Name);
 
       return $($clientResult -and -not($isAlreadyAnchoredAt));
@@ -519,6 +574,10 @@ function Rename-Many {
 
     if ($whatIf) {
       $passThru['WHAT-IF'] = $true;
+    }
+
+    if ($Diagnose.ToBool()) {
+      $passThru['LOOPZ.DIAGNOSE'] = $true;
     }
 
     $null = $collection | Invoke-ForeachFsItem @parameters;
