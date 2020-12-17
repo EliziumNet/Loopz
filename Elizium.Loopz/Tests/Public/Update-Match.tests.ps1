@@ -18,7 +18,10 @@ Describe 'Update-Match' {
           [string]$with = 'dandelion';
 
           [PSCustomObject]$updateResult = Update-Match -Value $source -Pattern $pattern -With $with;
+
           $updateResult.Payload | Should -BeExactly $source;
+          $updateResult.Success | Should -BeFalse;
+          $updateResult.FailedReason.Contains('Pattern') | Should -BeTrue;
         }
       }
 
@@ -80,7 +83,7 @@ Describe 'Update-Match' {
         }
       }
 
-      Context 'and: Paste references LiteralWith' {
+      Context 'and: Paste references With' {
         Context 'and: single Pattern match' {
           It 'should: replace the single match' {
             [string]$source = 'We are like the dreamer';
@@ -92,7 +95,7 @@ Describe 'Update-Match' {
             $updateResult.Payload | Should -BeExactly 'We are like the ==heal==er';
           }
         }
-      } # and: Paste references LiteralWith
+      } # and: Paste references With
 
       Context 'and: Paste references Pattern' {
         Context 'and: single Pattern match' {
@@ -130,12 +133,15 @@ Describe 'Update-Match' {
 
             [PSCustomObject]$updateResult = Update-Match -Value $source -Pattern $pattern `
               -Copy $copy -Paste $paste;
+
             $updateResult.Payload | Should -BeExactly $source;
+            $updateResult.Success | Should -BeFalse;
+            $updateResult.FailedReason.Contains('Copy') | Should -BeTrue;
           }          
         }
       } # and: Paste & Copy
 
-      Context 'and: Paste & LiteralWith' {
+      Context 'and: Paste & With' {
         Context 'Copy matches' {
           It 'should: replace the single match' {
             [string]$source = 'We are like the dreamer';
@@ -161,6 +167,8 @@ Describe 'Update-Match' {
 
             [PSCustomObject]$updateResult = Update-Match -Value $source -Pattern $pattern -With $with;
             $updateResult.Payload | Should -BeExactly $source;
+
+            $updateResult.FailedReason.Contains('Pattern') | Should -BeTrue;
           }
         }
 
@@ -232,6 +240,21 @@ Describe 'Update-Match' {
           $updateResult.Payload | Should -BeExactly 'Americanised: 04-21-2000, Party like its Americanised: 12-31-1999, today is Americanised: 09-24-2020';
         }
       }
+
+      Context 'and: Copy does not MATCH' {
+        It 'should: rename accessing Pattern defined capture' {
+          [string]$source = '21-04-2000, Party like its 31-12-1999, today is 24-09-2020';
+          [RegEx]$copy = new-expr('blooper');
+          [RegEx]$pattern = new-expr('(?<day>\d{2})-(?<mon>\d{2})-(?<year>\d{4})');
+
+          [PSCustomObject]$updateResult = Update-Match -Value $source -Pattern $pattern `
+            -Copy $copy -Paste 'Americanised: ${mon}-${day}-${year}';
+
+          $updateResult.Payload | Should -BeExactly $source;
+          $updateResult.Success | Should -BeFalse;
+          $updateResult.FailedReason.Contains('Copy') | Should -BeTrue;
+        }
+      }
     } # given: regex pattern
   } # FIRST
 
@@ -281,7 +304,10 @@ Describe 'Update-Match' {
             [string]$with = 'woods';
 
             [PSCustomObject]$updateResult = Update-Match -Value $source -Pattern $pattern -With $with;
-            $updateResult.Payload | Should -BeExactly 'The sound the wind makes in the pines';
+
+            $updateResult.Payload | Should -BeExactly $source;
+            $updateResult.Success | Should -BeFalse;
+            $updateResult.FailedReason.Contains('Pattern') | Should -BeTrue;
           }
         }
 

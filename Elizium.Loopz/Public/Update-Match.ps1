@@ -43,8 +43,7 @@ function Update-Match {
         -Occurrence ($PSBoundParameters.ContainsKey('CopyOccurrence') ? $CopyOccurrence : 'f');
 
       if ([string]::IsNullOrEmpty($replaceWith)) {
-        $failedReason = 'Copy failed Match';
-        [string]$result = $Value;
+        $failedReason = 'Copy Match';
       }
       elseif ($Diagnose.ToBool()) {
         $groups.Named['Copy'] = get-Captures -MatchObject $copyMatch;
@@ -78,11 +77,21 @@ function Update-Match {
     }
   }
   else {
-    [string]$result = $Value;
+    $failedReason = 'Pattern Match';
+  }
+
+  [boolean]$success = $([string]::IsNullOrEmpty($failedReason));
+  if (-not($success)) {
+    $result = $Value;
   }
 
   [PSCustomObject]$updateResult = [PSCustomObject]@{
     Payload = $result;
+    Success = $success;
+  }
+
+  if (-not([string]::IsNullOrEmpty($failedReason))) {
+    $updateResult | Add-Member -MemberType NoteProperty -Name 'FailedReason' -Value $failedReason;
   }
 
   if ($Diagnose.ToBool() -and ($groups.Named.Count -gt 0)) {

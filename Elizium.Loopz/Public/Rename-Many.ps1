@@ -257,6 +257,12 @@ function Rename-Many {
         }
       }
 
+      if (-not($actionResult.Success)) {
+        [string[]]$failedSignal = Get-FormattedSignal -Name 'FAILED-A' `
+          -Signals $signals -Value $actionResult.FailedReason;
+        $properties += , $failedSignal; 
+      }
+
       # Do diagnostics
       #
       if ($performDiagnosis -and $actionResult.Diagnostics.Named -and
@@ -375,10 +381,19 @@ function Rename-Many {
     }
 
     if ($PSBoundParameters.ContainsKey('Include')) {
-      [string]$includeExpression, [string]$includeOccurrence = Resolve-PatternOccurrence $Include
+      [string]$includeExpression, [string]$includeOccurrence = Resolve-PatternOccurrence $Include;
 
       Select-SignalContainer -Containers $containers -Name 'INCLUDE' `
         -Value $includeExpression -Signals $signals;
+    }
+
+    if ($PSBoundParameters.ContainsKey('Diagnose')) {
+      [string]$switchOnEmoji = $signals['SWITCH-ON'][1];
+
+      $diagnosticsSignal = Get-FormattedSignal -Name 'DIAGNOSTICS' `
+        -Signals $signals -Value $('[{0}]' -f $switchOnEmoji);
+
+      $containers.Props += , $diagnosticsSignal;
     }
 
     [boolean]$doMoveToken = ($PSBoundParameters.ContainsKey('Anchor') -or

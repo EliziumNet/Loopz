@@ -97,8 +97,7 @@ function Move-Match {
           #
           [string]$replaceWith, $null, $copyMatch = Split-Match `
             -Source $patternRemoved -PatternRegEx $Copy `
-            -Occurrence ($PSBoundParameters.ContainsKey('CopyOccurrence') ? $CopyOccurrence : 'f') `
-            -CapturedOnly;
+            -Occurrence ($PSBoundParameters.ContainsKey('CopyOccurrence') ? $CopyOccurrence : 'f');
 
           if ($Diagnose.ToBool()) {
             $groups.Named['Copy'] = get-Captures -MatchObject $copyMatch;
@@ -107,7 +106,7 @@ function Move-Match {
         else {
           # Copy doesn't match so abort and return unmodified source
           #
-          $failedReason = 'Copy failed Match';
+          $failedReason = 'Copy Match';
         }
       }
       elseif ($PSBoundParameters.ContainsKey('With')) {
@@ -187,7 +186,7 @@ function Move-Match {
       else {
         # Anchor doesn't match Pattern
         #
-        $failedReason = 'Anchor failed Match';
+        $failedReason = 'Anchor Match';
       }
     }
     else {
@@ -200,7 +199,7 @@ function Move-Match {
   else {
     # Source doesn't match Pattern
     #
-    $failedReason = 'Pattern failed Match';
+    $failedReason = 'Pattern Match';
   }
 
   [boolean]$success = $([string]::IsNullOrEmpty($failedReason));
