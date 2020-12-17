@@ -428,9 +428,9 @@ Describe 'Rename-Many' {
         Context 'and: Source matches Pattern' {
           It 'should: do rename; replace Last Pattern for Copy text, for Include items only' {
             $script:expected = @{
-                'loopz.data.t1.txt'        = 'loopz.dat@.t1.txt';
-                'loopz.data.t2.txt'        = 'loopz.dat@.t2.txt';
-                'loopz.data.t3.txt'        = 'loopz.dat@.t3.txt';
+              'loopz.data.t1.txt' = 'loopz.dat@.t1.txt';
+              'loopz.data.t2.txt' = 'loopz.dat@.t2.txt';
+              'loopz.data.t3.txt' = 'loopz.dat@.t3.txt';
             }
 
             Get-ChildItem -Path $directoryPath | Rename-Many -File `
@@ -492,6 +492,90 @@ Describe 'Rename-Many' {
       }
     } # and: Source matches Pattern
   } # given: ReplaceWith
+
+  Context 'given: Diagnose enabled' {
+    Context 'MoveToAnchor' {
+      Context 'and: Source matches with Named Captures' {
+        Context 'and: Copy matches' {
+          Context 'and: Anchor matches' {
+            It 'should: do rename; move Pattern match with Copy capture' {
+              $script:expected = @{
+                'loopz.application.t1.log' = 'application.BEGIN-.t1-application.-loopz-END.log';
+                'loopz.application.t2.log' = 'application.BEGIN-.t2-application.-loopz-END.log';
+                'loopz.data.t1.txt'        = 'data.BEGIN-.t1-data.-loopz-END.txt';
+                'loopz.data.t2.txt'        = 'data.BEGIN-.t2-data.-loopz-END.txt';
+                'loopz.data.t3.txt'        = 'data.BEGIN-.t3-data.-loopz-END.txt';
+              }
+
+              [string]$pattern = '^(?<header>[\w]+)\.';
+              [string]$anchor = '\.(?<tail>t\d)';
+              [string]$copy = '(?<body>[\w]+)\.';
+              [string]$paste = '.BEGIN-${_a}-${_c}-${header}-END';
+
+              Get-ChildItem -File -Path $directoryPath | Rename-Many -File `
+                -Pattern $pattern -Copy $copy -Anchor $anchor -Relation 'after' -Paste $paste -WhatIf -Diagnose;
+            }
+          }
+        }
+
+        Context 'and: Copy match does NOT match source' {
+          It 'should: show Copy match failure' {
+            [string]$pattern = '^(?<header>[\w]+)\.';
+            [string]$anchor = '\.(?<tail>t\d)';
+            [string]$copy = 'blooper';
+            [string]$paste = '.BEGIN-${_a}-${_c}-${header}-END';
+
+            Get-ChildItem -File -Path $directoryPath | Rename-Many -File `
+              -Pattern $pattern -Copy $copy -Anchor $anchor -Relation 'after' -Paste $paste -WhatIf -Diagnose;
+          }
+        } # and: Source match does NOT match Pattern
+      } # and: Source matches with Named Captures
+    } # MoveToAnchor
+
+    Context 'ReplaceWith' {
+      Context 'and: Source matches with Named Captures' {
+        Context 'and: Copy matches' {
+          It 'should: do rename; move Pattern match with Copy capture' {
+            $script:expected = @{
+              'loopz.application.t1.log' = 'BEGIN-.t1-loopz-application-END.t1.log';
+              'loopz.application.t2.log' = 'BEGIN-.t2-loopz-application-END.t2.log';
+              'loopz.data.t1.txt'        = 'BEGIN-.t1-loopz-data-END.t1.txt';
+              'loopz.data.t2.txt'        = 'BEGIN-.t2-loopz-data-END.t2.txt';
+              'loopz.data.t3.txt'        = 'BEGIN-.t3-loopz-data-END.t3.txt';
+            }
+
+            [string]$pattern = '^(?<header>[\w]+)\.(?<body>[\w]+)';
+            [string]$copy = '\.(?<tail>t\d)'
+            [string]$paste = 'BEGIN-${_c}-${header}-${body}-END';
+
+            Get-ChildItem -File -Path $directoryPath | Rename-Many -File `
+              -Pattern $pattern -Copy $copy -Paste $paste -WhatIf -Diagnose;
+          }
+
+          It 'should: do rename; move Pattern match with Copy capture' {
+            # This is a valid test, but currently it exposes a bug (to be fixed
+            # by issue #72), then the following expectations can be un-commented.
+            #
+            # $script:expected = @{
+            #   #                            'BEGIN-.application-loopz-application-END.t1.log'
+            #   'loopz.application.t1.log' = 'diag-t1-loopz-application-end.t1.log';
+            #   'loopz.application.t2.log' = 'diag-t2-loopz-application-end.t2.log';
+            #   'loopz.data.t1.txt'        = 'diag-t1-loopz-data-end.t1.txt';
+            #   'loopz.data.t2.txt'        = 'diag-t2-loopz-data-end.t2.txt';
+            #   'loopz.data.t3.txt'        = 'diag-t3-loopz-data-end.t3.txt';
+            # }
+
+            [string]$pattern = '^(?<header>[\w]+)\.(?<body>[\w]+)';
+            [string]$copy = '\.(?<tail>[\w]+)'
+            [string]$paste = 'BEGIN-${_c}-${header}-${body}-END';
+
+            Get-ChildItem -File -Path $directoryPath | Rename-Many -File `
+              -Pattern $pattern -Copy $copy -Paste $paste -WhatIf -Diagnose;
+          }
+        }
+      }
+    } # ReplaceWith
+  } # given: Diagnose enabled
 
   Context 'given: Parameter Set' {
     [string]$script:sourcePath = './Tests/Data/fefsi';

@@ -80,7 +80,10 @@ function Rename-Many {
       Title          = $Loopz.Defaults.Remy.Title;
       ItemMessage    = $Loopz.Defaults.Remy.ItemMessage;
       SummaryMessage = $Loopz.Defaults.Remy.SummaryMessage;
-    }
+    },
+
+    [Parameter()]
+    [switch]$Diagnose
   )
 
   begin {
@@ -114,6 +117,9 @@ function Rename-Many {
         'Pattern' = $_passThru['LOOPZ.REMY.PATTERN-REGEX'];
       }
 
+      [boolean]$performDiagnosis = ($_passThru.ContainsKey('LOOPZ.DIAGNOSE') -and
+        $_passThru['LOOPZ.DIAGNOSE']);
+
       $actionParameters['PatternOccurrence'] = $_passThru.ContainsKey('LOOPZ.REMY.PATTERN-OCC') `
         ? $_passThru['LOOPZ.REMY.PATTERN-OCC'] : 'f';
 
@@ -130,6 +136,10 @@ function Rename-Many {
 
       if ($_passThru.ContainsKey('LOOPZ.REMY.PASTE')) {
         $actionParameters['Paste'] = $_passThru['LOOPZ.REMY.PASTE']
+      }
+
+      if ($performDiagnosis) {
+        $actionParameters['Diagnose'] = $_passThru['LOOPZ.DIAGNOSE']
       }
 
       if ($action -eq 'Move-Match') {
@@ -167,7 +177,8 @@ function Rename-Many {
 
       # Perform Rename Action, then post process
       #
-      [string]$newItemName = & $action @actionParameters;
+      [PSCustomObject]$actionResult = & $action @actionParameters;
+      [string]$newItemName = $actionResult.Payload;
       $postResult = invoke-PostProcessing -InputSource $newItemName -Rules $Loopz.Rules.Remy `
         -Signals $signals;
 
@@ -229,7 +240,7 @@ function Rename-Many {
         $product = $_underscore;
       }
 
-      if ($trigger) {       
+      if ($trigger) {
         $lines += , @($_passThru['LOOPZ.REMY.FROM-LABEL'], $_underscore.Name);
       }
       else {
@@ -243,6 +254,40 @@ function Rename-Many {
           [string[]]$notActionedSignal = Get-FormattedSignal -Name 'NOT-ACTIONED' `
             -Signals $signals -EmojiAsValue -CustomLabel 'Not Renamed' -EmojiOnlyFormat '{0}';
           $properties += , $notActionedSignal;
+        }
+      }
+
+      if (-not($actionResult.Success)) {
+        [string[]]$failedSignal = Get-FormattedSignal -Name 'FAILED-A' `
+          -Signals $signals -Value $actionResult.FailedReason;
+        $properties += , $failedSignal; 
+      }
+
+      # Do diagnostics
+      #
+      if ($performDiagnosis -and $actionResult.Diagnostics.Named -and
+        ($actionResult.Diagnostics.Named.Count -gt 0)) {
+
+        [string]$diagnosticEmoji = Get-FormattedSignal -Name 'DIAGNOSTICS' -Signals $signals `
+          -EmojiOnly;
+
+        [string]$captureEmoji = Get-FormattedSignal -Name 'CAPTURE' -Signals $signals `
+          -EmojiOnly -EmojiOnlyFormat '[{0}]';
+
+        foreach ($namedItem in $actionResult.Diagnostics.Named) {
+          foreach ($namedKey in $namedItem.Keys) {
+            [System.Collections.Hashtable]$groups = $actionResult.Diagnostics.Named[$namedKey];
+            [string[]]$diagnosticLines = @();
+
+            foreach ($groupName in $groups.Keys) {
+              [string]$captured = $groups[$groupName];
+              [string]$compoundValue = "({0} <{1}>)='{2}'" -f $captureEmoji, $groupName, $captured;
+              [string]$namedLabel = Get-PaddedLabel -Label ($diagnosticEmoji + $namedKey);
+
+              $diagnosticLines += $compoundValue;
+            }
+            $lines += , @($namedLabel, $($diagnosticLines -join ', '));
+          }
         }
       }
 
@@ -336,10 +381,19 @@ function Rename-Many {
     }
 
     if ($PSBoundParameters.ContainsKey('Include')) {
-      [string]$includeExpression, [string]$includeOccurrence = Resolve-PatternOccurrence $Include
+      [string]$includeExpression, [string]$includeOccurrence = Resolve-PatternOccurrence $Include;
 
       Select-SignalContainer -Containers $containers -Name 'INCLUDE' `
         -Value $includeExpression -Signals $signals;
+    }
+
+    if ($PSBoundParameters.ContainsKey('Diagnose')) {
+      [string]$switchOnEmoji = $signals['SWITCH-ON'][1];
+
+      $diagnosticsSignal = Get-FormattedSignal -Name 'DIAGNOSTICS' `
+        -Signals $signals -Value $('[{0}]' -f $switchOnEmoji);
+
+      $containers.Props += , $diagnosticsSignal;
     }
 
     [boolean]$doMoveToken = ($PSBoundParameters.ContainsKey('Anchor') -or
@@ -480,7 +534,7 @@ function Rename-Many {
       param(
         [System.IO.FileSystemInfo]$pipelineItem
       )
-      [boolean]$clientResult = $clientCondition.Invoke($pipelineItem);
+      [boolean]$clientResult = $true; # $clientCondition.Invoke($pipelineItem);
       [boolean]$isAlreadyAnchoredAt = $anchoredRegEx -and $anchoredRegEx.IsMatch($pipelineItem.Name);
 
       return $($clientResult -and -not($isAlreadyAnchoredAt));
@@ -516,8 +570,12 @@ function Rename-Many {
       $parameters['Directory'] = $true;
     }
 
-    if ($whatIf) {
+    if ($whatIf -or $Diagnose.ToBool()) {
       $passThru['WHAT-IF'] = $true;
+    }
+
+    if ($Diagnose.ToBool()) {
+      $passThru['LOOPZ.DIAGNOSE'] = $true;
     }
 
     $null = $collection | Invoke-ForeachFsItem @parameters;

@@ -121,6 +121,7 @@ $global:Loopz = [PSCustomObject]@{
     'SUMMARY-A'    = @('Summary', '🔆')
     'SUMMARY-B'    = @('Summary', '✨')
     'MESSAGE'      = @('Message', '🗯️')
+    'CAPTURE'      = @('Capture', '☂️')
 
     # Media
     #
@@ -147,6 +148,7 @@ $global:Loopz = [PSCustomObject]@{
     'DESTINATION'  = @('Destination', '☀️')
     'TRIM'         = @('Trim', '🌊')
     'MULTI-SPACES' = @('Spaces', '❄️')
+    'DIAGNOSTICS'  = @('Diagnostics', '🧪')
 
     # Outcomes
     #

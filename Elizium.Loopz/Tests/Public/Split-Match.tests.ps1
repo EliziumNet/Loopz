@@ -53,4 +53,15 @@ Describe 'Split-Match' {
       }
     } # and: multiple matches
   } # given: Pattern does match
+
+  Context 'given: Pattern does NOT match' {
+    Context 'and: Diagnosis required' {
+      It 'should: ????' -Skip {
+        [string]$badPattern = '(?<d>\d{2})-(?<m>\d{2})-(?<y>2016)';
+
+        Split-Match -Source $source -Pattern $badPattern -Occurrence 'F' -CapturedOnly | `
+          Should -BeExactly '23-05-2017';
+      }
+    }
+  }
 } # Split-Match
