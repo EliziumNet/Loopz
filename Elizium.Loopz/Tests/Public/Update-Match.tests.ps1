@@ -89,7 +89,7 @@ Describe 'Update-Match' {
             [string]$source = 'We are like the dreamer';
             [RegEx]$pattern = new-expr('dream');
             [string]$with = 'heal';
-            [string]$paste = '==${_c}=='
+            [string]$paste = '==${_c}==';
 
             [PSCustomObject]$updateResult = Update-Match -Value $source -Pattern $pattern -With $with -Paste $paste;
             $updateResult.Payload | Should -BeExactly 'We are like the ==heal==er';
@@ -102,7 +102,7 @@ Describe 'Update-Match' {
           It 'should: replace the single match' {
             [string]$source = 'We are like the dreamer';
             [RegEx]$pattern = new-expr('dream');
-            [string]$paste = '==$0=='
+            [string]$paste = '==$0==';
 
             [PSCustomObject]$updateResult = Update-Match -Value $source -Pattern $pattern -Paste $paste;
             $updateResult.Payload | Should -BeExactly 'We are like the ==dream==er';
@@ -111,12 +111,12 @@ Describe 'Update-Match' {
       } # and: Paste references Pattern
 
       Context 'and: Paste & Copy' {
-        Context 'Copy matches' {
+        Context 'and: Copy matches' {
           It 'should: replace the single match' {
             [string]$source = 'We are like the dreamer 1234';
             [RegEx]$pattern = new-expr('dream');
             [string]$copy = '\d{4}';
-            [string]$paste = '==${_c}=='
+            [string]$paste = '==${_c}==';
 
             [PSCustomObject]$updateResult = Update-Match -Value $source -Pattern $pattern `
               -Copy $copy -Paste $paste;
@@ -124,12 +124,12 @@ Describe 'Update-Match' {
           }
         }
 
-        Context 'Copy does NOT match' {
+        Context 'and: Copy does NOT match' {
           It 'should: replace the single match' {
             [string]$source = 'We are like the dreamer';
             [RegEx]$pattern = new-expr('dream');
             [string]$copy = 'blah';
-            [string]$paste = '==${_c}=='
+            [string]$paste = '==${_c}==';
 
             [PSCustomObject]$updateResult = Update-Match -Value $source -Pattern $pattern `
               -Copy $copy -Paste $paste;
@@ -137,7 +137,23 @@ Describe 'Update-Match' {
             $updateResult.Payload | Should -BeExactly $source;
             $updateResult.Success | Should -BeFalse;
             $updateResult.FailedReason.Contains('Copy') | Should -BeTrue;
-          }          
+          }
+
+          Context 'and: Copy does NOT match whats been removed from Pattern match' {
+            It 'should: replace the single match' {
+              [string]$source = 'We are like the dreamer 1234';
+              [RegEx]$pattern = new-expr('dream');
+              [RegEx]$copy = new-expr('dream');
+              [string]$paste = '==${_c}==';
+
+              [PSCustomObject]$updateResult = Update-Match -Value $source -Pattern $pattern `
+                -Copy $copy -Paste $paste;
+  
+              $updateResult.Payload | Should -BeExactly $source;
+              $updateResult.Success | Should -BeFalse;
+              $updateResult.FailedReason.Contains('Copy') | Should -BeTrue;
+            }
+          }
         }
       } # and: Paste & Copy
 
@@ -147,7 +163,7 @@ Describe 'Update-Match' {
             [string]$source = 'We are like the dreamer';
             [RegEx]$pattern = new-expr('dream');
             [string]$with = 'heal';
-            [string]$paste = '==${_c}=='
+            [string]$paste = '==${_c}==';
 
             [PSCustomObject]$updateResult = Update-Match -Value $source -Pattern $pattern `
               -With $with -Paste $paste;

@@ -353,11 +353,11 @@ Describe 'Rename-Many' {
         Context 'and: First Only' {
           It 'should: do rename; replace First Pattern for Copy text' {
             $script:expected = @{
-              'loopz.application.t1.log' = 'loopz..apppplication.t1.log';
-              'loopz.application.t2.log' = 'loopz..apppplication.t2.log';
-              'loopz.data.t1.txt'        = 'loopz.d.datta.t1.txt';
-              'loopz.data.t2.txt'        = 'loopz.d.datta.t2.txt';
-              'loopz.data.t3.txt'        = 'loopz.d.datta.t3.txt';
+              'loopz.application.t1.log' = 'loopz..pplpplication.t1.log';
+              'loopz.application.t2.log' = 'loopz..pplpplication.t2.log';
+              'loopz.data.t1.txt'        = 'loopz.d.dtata.t1.txt';
+              'loopz.data.t2.txt'        = 'loopz.d.dtata.t2.txt';
+              'loopz.data.t3.txt'        = 'loopz.d.dtata.t3.txt';
             }
 
             Get-ChildItem -Path $directoryPath | Rename-Many -File `
@@ -553,17 +553,13 @@ Describe 'Rename-Many' {
           }
 
           It 'should: do rename; move Pattern match with Copy capture' {
-            # This is a valid test, but currently it exposes a bug (to be fixed
-            # by issue #72), then the following expectations can be un-commented.
-            #
-            # $script:expected = @{
-            #   #                            'BEGIN-.application-loopz-application-END.t1.log'
-            #   'loopz.application.t1.log' = 'diag-t1-loopz-application-end.t1.log';
-            #   'loopz.application.t2.log' = 'diag-t2-loopz-application-end.t2.log';
-            #   'loopz.data.t1.txt'        = 'diag-t1-loopz-data-end.t1.txt';
-            #   'loopz.data.t2.txt'        = 'diag-t2-loopz-data-end.t2.txt';
-            #   'loopz.data.t3.txt'        = 'diag-t3-loopz-data-end.t3.txt';
-            # }
+            $script:expected = @{
+              'loopz.application.t1.log' = 'BEGIN-.t1-loopz-application-END.t1.log';
+              'loopz.application.t2.log' = 'BEGIN-.t2-loopz-application-END.t2.log';
+              'loopz.data.t1.txt'        = 'BEGIN-.t1-loopz-data-END.t1.txt';
+              'loopz.data.t2.txt'        = 'BEGIN-.t2-loopz-data-END.t2.txt';
+              'loopz.data.t3.txt'        = 'BEGIN-.t3-loopz-data-END.t3.txt';
+            }
 
             [string]$pattern = '^(?<header>[\w]+)\.(?<body>[\w]+)';
             [string]$copy = '\.(?<tail>[\w]+)'
