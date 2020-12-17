@@ -32,14 +32,14 @@ function Update-Match {
     Named = @{}
   }
 
-  [string]$capturedPattern, $null, [System.Text.RegularExpressions.Match]$patternMatch = `
+  [string]$capturedPattern, $patternRemoved, [System.Text.RegularExpressions.Match]$patternMatch = `
     Split-Match -Source $Value -PatternRegEx $Pattern `
     -Occurrence ($PSBoundParameters.ContainsKey('PatternOccurrence') ? $PatternOccurrence : 'f');
 
   if (-not([string]::IsNullOrEmpty($capturedPattern))) {
     if ($PSBoundParameters.ContainsKey('Copy')) {
       [string]$replaceWith, $null, [System.Text.RegularExpressions.Match]$copyMatch = `
-        Split-Match -Source $Value -PatternRegEx $Copy `
+        Split-Match -Source $patternRemoved -PatternRegEx $Copy `
         -Occurrence ($PSBoundParameters.ContainsKey('CopyOccurrence') ? $CopyOccurrence : 'f');
 
       if ([string]::IsNullOrEmpty($replaceWith)) {
