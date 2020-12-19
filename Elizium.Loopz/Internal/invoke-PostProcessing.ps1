@@ -12,7 +12,7 @@ function invoke-PostProcessing {
   )
   [string]$transformResult = $InputSource;
   [string[]]$appliedSignals = @()
-  [object[]]$iterationRules = $Rules.psobject.Members | where-Object MemberType -like 'NoteProperty';
+  [array]$iterationRules = $Rules.psobject.Members | where-Object MemberType -like 'NoteProperty';
 
   foreach ($_r in $iterationRules) {
     $rule = $_r.Value;

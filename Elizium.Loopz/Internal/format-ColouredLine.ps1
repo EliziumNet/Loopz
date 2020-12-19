@@ -1,6 +1,6 @@
 
 function format-ColouredLine {
-  [OutputType([object[]])]
+  [OutputType([array])]
   param(
     [Parameter(Mandatory)]
     [System.Collections.Hashtable]$PassThru,
@@ -34,8 +34,8 @@ function format-ColouredLine {
     'LOOPZ.KRAYOLA-THEME') `
     ? $PassThru['LOOPZ.KRAYOLA-THEME'] : $(Get-KrayolaTheme);
 
-  [object[]]$metaColours = $theme['META-COLOURS'];
-  [object[]]$messageColours = $theme['MESSAGE-COLOURS'];
+  [array]$metaColours = $theme['META-COLOURS'];
+  [array]$messageColours = $theme['MESSAGE-COLOURS'];
 
   [string]$line = $PassThru.ContainsKey($LineKey) `
     ? $PassThru[$LineKey] : ([string]::new("_", 81));
@@ -59,7 +59,7 @@ function format-ColouredLine {
     $null;
   }
 
-  [object[][]]$colouredLine = if ([string]::IsNullOrEmpty($message) -and [string]::IsNullOrEmpty($crumb)) {
+  [array[]]$colouredLine = if ([string]::IsNullOrEmpty($message) -and [string]::IsNullOrEmpty($crumb)) {
     @(
       @(@($line) + $metaColours),
 

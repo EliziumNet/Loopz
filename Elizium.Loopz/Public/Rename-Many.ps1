@@ -28,12 +28,12 @@ function Rename-Many {
     [Parameter(Mandatory, Position = 0)]
     [ValidateCount(1, 2)]
     [ValidateScript( { -not([string]::IsNullOrEmpty($_[0])) })]
-    [object[]]$Pattern,
+    [array]$Pattern,
 
     [Parameter(ParameterSetName = 'MoveToAnchor', Mandatory)]
     [ValidateCount(1, 2)]
     [ValidateScript( { -not([string]::IsNullOrEmpty($_[0])) })]
-    [object[]]$Anchor,
+    [array]$Anchor,
 
     [Parameter(ParameterSetName = 'MoveToAnchor')]
     [ValidateSet('before', 'after')]
@@ -43,7 +43,7 @@ function Rename-Many {
     [Parameter(ParameterSetName = 'ReplaceWith')]
     [ValidateCount(1, 2)]
     [ValidateScript( { -not([string]::IsNullOrEmpty($_[0])) })]
-    [object[]]$Copy,
+    [array]$Copy,
 
     [Parameter(ParameterSetName = 'ReplaceLiteralWith', Mandatory)]
     [string]$With,

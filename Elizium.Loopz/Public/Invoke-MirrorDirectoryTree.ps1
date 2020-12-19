@@ -442,7 +442,7 @@
       # files to copy over which pass the include/exclude filters. This is
       # required in the case where CreateDirs has not been specified.
       #
-      [object[]]$filesToCopy = Get-ChildItem $sourceDirectoryWithWildCard `
+      [array]$filesToCopy = Get-ChildItem $sourceDirectoryWithWildCard `
           -Include $adjustedFileIncludes -Exclude $adjustedFileExcludes -File;
 
       if ($filesToCopy) {

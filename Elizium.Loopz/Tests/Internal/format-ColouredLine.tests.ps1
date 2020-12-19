@@ -13,7 +13,7 @@ Describe 'format-ColouredLine' {
       function script:show-result {
         param(
           [string]$Ruler,
-          [object[]]$Snippets
+          [array]$Snippets
         )
         Write-Host "$Ruler";
         Write-InColour -TextSnippets $Snippets;
@@ -24,7 +24,7 @@ Describe 'format-ColouredLine' {
   BeforeEach {
     InModuleScope Elizium.Loopz {
       [string]$script:_ruler = $LoopzUI.DotsLine;
-      [object[]]$script:line = @();
+      [array]$script:line = @();
     }
   }
 
