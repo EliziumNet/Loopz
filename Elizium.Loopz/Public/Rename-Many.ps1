@@ -83,7 +83,10 @@ function Rename-Many {
     },
 
     [Parameter()]
-    [switch]$Diagnose
+    [switch]$Diagnose,
+
+    [Parameter()]
+    [string]$Drop
   )
 
   begin {
@@ -148,6 +151,11 @@ function Rename-Many {
         }
         if ($_passThru.ContainsKey('LOOPZ.REMY.ANCHOR-OCC')) {
           $actionParameters['AnchorOccurrence'] = $_passThru['LOOPZ.REMY.ANCHOR-OCC'];
+        }
+
+        if ($_passThru.ContainsKey('LOOPZ.REMY.DROP')) {
+          $actionParameters['Drop'] = $_passThru['LOOPZ.REMY.DROP'];
+          $actionParameters['Marker'] = $_passThru['LOOPZ.REMY.MARKER'];
         }
 
         switch ($_passThru['LOOPZ.REMY.ANCHOR-TYPE']) {
@@ -509,6 +517,14 @@ function Rename-Many {
 
       [System.Text.RegularExpressions.RegEx]$anchoredRegEx = New-RegularExpression `
         -Expression $($patternExpression + '$');
+    }
+
+    if ($PSBoundParameters.ContainsKey('Drop') -and -not([string]::IsNullOrEmpty($Drop))) {
+      Select-SignalContainer -Containers $containers -Name 'REMY.DROP' `
+        -Value $Drop -Signals $signals -Force 'Wide';
+
+      $passThru['LOOPZ.REMY.DROP'] = $Drop;
+      $passThru['LOOPZ.REMY.MARKER'] = $Loopz.Defaults.Remy.Marker;
     }
 
     [boolean]$includeDefined = $PSBoundParameters.ContainsKey('Include');

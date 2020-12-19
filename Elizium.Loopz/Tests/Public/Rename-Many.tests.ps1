@@ -75,6 +75,17 @@ Describe 'Rename-Many' {
               Get-ChildItem -File -Path $directoryPath | Rename-Many -File `
                 -Pattern 'data.' -Anchor 'loopz' -Relation 'before' -WhatIf;
             }
+
+            It 'should: do rename; move Pattern match before Anchor and Drop' {
+              $script:expected = @{
+                'loopz.data.t1.txt' = 'data.loopz.-t1.txt';
+                'loopz.data.t2.txt' = 'data.loopz.-t2.txt';
+                'loopz.data.t3.txt' = 'data.loopz.-t3.txt';
+              }
+
+              Get-ChildItem -File -Path $directoryPath | Rename-Many -File `
+                -Pattern 'data.' -Anchor 'loopz' -Relation 'before' -Drop '-' -WhatIf;
+            }
           } # and: Source matches Anchor
 
           Context 'and: Whole Pattern' {

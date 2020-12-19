@@ -41,7 +41,13 @@ function Move-Match {
     [switch]$End,
 
     [Parameter()]
-    [switch]$Diagnose
+    [switch]$Diagnose,
+
+    [Parameter()]
+    [string]$Drop,
+
+    [Parameter()]
+    [char]$Marker = 0x20DE
   )
 
   # If the move fails, we need to return the reason for the failure so it can be reported back to he user
@@ -58,6 +64,7 @@ function Move-Match {
   }
 
   [boolean]$isFormatted = $PSBoundParameters.ContainsKey('Paste') -and -not([string]::IsNullOrEmpty($Paste));
+  [boolean]$dropped = $PSBoundParameters.ContainsKey('Drop') -and -not([string]::IsNullOrEmpty($Drop));
 
   # First remove the Pattern match from the source. This makes the With and Anchor match
   # against the remainder ($patternRemoved) of the source. This way, there is no overlap
@@ -68,9 +75,18 @@ function Move-Match {
   # referenced inside Paste. Another important point of note is that With et al applies
   # to the anchor not the original Pattern capture.
   #
-  [string]$capturedPattern, [string]$patternRemoved, $patternMatch = Split-Match `
-    -Source $Value -PatternRegEx $Pattern `
-    -Occurrence ($PSBoundParameters.ContainsKey('PatternOccurrence') ? $PatternOccurrence : 'f');
+  [System.Collections.Hashtable]$parameters = @{
+    'Source'       = $Value
+    'PatternRegEx' = $Pattern
+    'Occurrence'   = ($PSBoundParameters.ContainsKey('PatternOccurrence') ? $PatternOccurrence : 'f')
+  }
+
+  if ($dropped) {
+    $parameters['Marker'] = $Marker;
+  }
+
+  [string]$capturedPattern, [string]$patternRemoved, `
+    [System.Text.RegularExpressions.Match]$patternMatch = Split-Match @parameters;
 
   if (-not([string]::IsNullOrEmpty($capturedPattern))) {
     [boolean]$isVanilla = -not($PSBoundParameters.ContainsKey('Copy') -or `
@@ -91,13 +107,21 @@ function Move-Match {
       [string]$replaceWith = [string]::Empty;
       if ($PSBoundParameters.ContainsKey('Copy')) {
         if ($patternRemoved -match $Copy) {
+          [System.Collections.Hashtable]$parameters = @{
+            'Source'       = $patternRemoved
+            'PatternRegEx' = $Copy
+            'Occurrence'   = ($PSBoundParameters.ContainsKey('CopyOccurrence') ? $CopyOccurrence : 'f')
+          }
+
+          if ($dropped) {
+            $parameters['Marker'] = $Marker;
+          }
+
           # With this implementation, it is up to the user to supply a regex proof
           # pattern, so if the Copy contains regex chars, they must pass in the string
           # pre-escaped: -Copy $(esc('some-pattern') + 'other stuff').
           #
-          [string]$replaceWith, $null, $copyMatch = Split-Match `
-            -Source $patternRemoved -PatternRegEx $Copy `
-            -Occurrence ($PSBoundParameters.ContainsKey('CopyOccurrence') ? $CopyOccurrence : 'f');
+          [string]$replaceWith, $null, [System.Text.RegularExpressions.Match]$copyMatch = Split-Match @parameters;
 
           if ($Diagnose.ToBool()) {
             $groups.Named['Copy'] = get-Captures -MatchObject $copyMatch;
@@ -133,14 +157,23 @@ function Move-Match {
       $result = $patternRemoved + $replaceWith;
     }
     elseif ($PSBoundParameters.ContainsKey('Anchor')) {
+      [System.Collections.Hashtable]$parameters = @{
+        'Source'       = $patternRemoved
+        'PatternRegEx' = $Anchor
+        'Occurrence'   = ($PSBoundParameters.ContainsKey('AnchorOccurrence') ? $AnchorOccurrence : 'f')
+      }
+
+      if ($dropped) {
+        $parameters['Marker'] = $Marker;
+      }
+
       # As with the Copy parameter, if the user wants to specify an anchor by a pattern which
       # contains regex chars, then can use -Anchor $(esc('anchor-pattern')). If there are no regex chars,
       # then they can use -Anchor 'pattern'. However, if the user needs to do partial escapes, then they will
       # have to do the escaping themselves: -Anchor $(esc('partial-pattern') + 'remaining-pattern')
       #
       [string]$capturedAnchor, $null, [System.Text.RegularExpressions.Match]$anchorMatch = `
-        Split-Match -Source $patternRemoved -PatternRegEx $Anchor `
-        -Occurrence ($PSBoundParameters.ContainsKey('AnchorOccurrence') ? $AnchorOccurrence : 'f');
+        Split-Match @parameters;
 
       if (-not([string]::IsNullOrEmpty($capturedAnchor))) {
         # Relation and Paste are not compatible, because if the user is defining the
@@ -202,8 +235,12 @@ function Move-Match {
     $failedReason = 'Pattern Match';
   }
 
-  [boolean]$success = $([string]::IsNullOrEmpty($failedReason));
-  if (-not($success)) {
+  if ([boolean]$success = $([string]::IsNullOrEmpty($failedReason))) {
+    if ($dropped -and $result.Contains([string]$Marker)) {
+      $result = $result.Replace([string]$Marker, $Drop);
+    }
+  }
+  else {
     $result = $Value;
   }
 

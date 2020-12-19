@@ -17,16 +17,21 @@ function Split-Match {
     [string]$Occurrence = 'f',
 
     [Parameter()]
-    [switch]$CapturedOnly
+    [switch]$CapturedOnly,
+
+    [Parameter()]
+    [char]$Marker = 0x20DE
   )
 
   [System.Text.RegularExpressions.MatchCollection]$mc = $PatternRegEx.Matches($Source);
 
   if ($mc.Count -gt 0) {
+    # Get the match instance
+    #
     [System.Text.RegularExpressions.Match]$m = if ($Occurrence -eq 'f') {
       $mc[0];
     }
-    elseif ($Occurrence -eq 'L') {
+    elseif ($Occurrence -eq 'l') {
       $mc[$mc.Count - 1];
     }
     else {
@@ -52,10 +57,17 @@ function Split-Match {
       $capturedText;
     }
     else {
-      [string]$remainder = Get-InverseSubString -Source $Source -StartIndex $m.Index -Length $m.Length;
+      # Splatting the arguments fails because the parameter validation in Get-InverseSubString
+      # fails, due to parameters not having been bound yet.
+      # https://github.com/PowerShell/PowerShell/issues/14457
+      #
+      [string]$remainder = $PSBoundParameters.ContainsKey('Marker') `
+        ? $(Get-InverseSubString -Source $Source -StartIndex $m.Index -Length $m.Length -Marker $Marker) `
+        : $(Get-InverseSubString -Source $Source -StartIndex $m.Index -Length $m.Length);
+
       @($capturedText, $remainder, $m);
     }
   }
 
   return $result;
-} # get-DeconstructedMatch
+} # Split-Match
