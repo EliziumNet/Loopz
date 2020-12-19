@@ -10,9 +10,11 @@ function Move-Match {
     [System.Text.RegularExpressions.RegEx]$Pattern,
 
     [Parameter()]
+    [ValidateScript( { $_ -ne '*' })]
     [string]$PatternOccurrence = 'f',
 
     [Parameter()]
+    [ValidateScript( { $_ -ne '*' })]
     [System.Text.RegularExpressions.RegEx]$Anchor,
 
     [Parameter()]
@@ -23,6 +25,7 @@ function Move-Match {
     [string]$Relation = 'after',
 
     [Parameter()]
+    [ValidateScript( { $_ -ne '*' })]
     [System.Text.RegularExpressions.RegEx]$Copy,
 
     [Parameter()]
@@ -50,13 +53,6 @@ function Move-Match {
     [char]$Marker = 0x20DE
   )
 
-  # If the move fails, we need to return the reason for the failure so it can be reported back to he user
-
-  # vanilla,
-  # vanilla-formatted,
-  # exotic,
-  # exotic-formatted
-
   [string]$result = [string]::Empty;
   [string]$failedReason = [string]::Empty;
   [PSCustomObject]$groups = [PSCustomObject]@{
@@ -70,10 +66,9 @@ function Move-Match {
   # against the remainder ($patternRemoved) of the source. This way, there is no overlap
   # between the Pattern match and With/Anchor and it also makes the functionality more
   # understandable for the user. NB: Pattern only tells you what to remove, but it's the
-  # With and/or Anchor that defines what to insert. The user should not be using named
-  # capture groups in Pattern, rather, they should be defined inside Anchor/With and
-  # referenced inside Paste. Another important point of note is that With et al applies
-  # to the anchor not the original Pattern capture.
+  # With, Copy and Paste that defines what to insert, with the Anchor/Start/End defining where
+  # the replacement text should go. The user should not be using named capture groups in Copy,
+  # or Anchor, rather, they should be defined inside Paste and referenced inside Paste.
   #
   [hashtable]$parameters = @{
     'Source'       = $Value
@@ -118,10 +113,11 @@ function Move-Match {
           }
 
           # With this implementation, it is up to the user to supply a regex proof
-          # pattern, so if the Copy contains regex chars, they must pass in the string
-          # pre-escaped: -Copy $(esc('some-pattern') + 'other stuff').
+          # pattern, so if the Copy contains regex chars which must be treated literally, they
+          # must pass in the string pre-escaped: -Copy $(esc('some-pattern') + 'other stuff').
           #
-          [string]$replaceWith, $null, [System.Text.RegularExpressions.Match]$copyMatch = Split-Match @parameters;
+          [string]$replaceWith, $null, `
+            [System.Text.RegularExpressions.Match]$copyMatch = Split-Match @parameters;
 
           if ($Diagnose.ToBool()) {
             $groups.Named['Copy'] = get-Captures -MatchObject $copyMatch;
@@ -172,8 +168,8 @@ function Move-Match {
       # then they can use -Anchor 'pattern'. However, if the user needs to do partial escapes, then they will
       # have to do the escaping themselves: -Anchor $(esc('partial-pattern') + 'remaining-pattern')
       #
-      [string]$capturedAnchor, $null, [System.Text.RegularExpressions.Match]$anchorMatch = `
-        Split-Match @parameters;
+      [string]$capturedAnchor, $null, `
+        [System.Text.RegularExpressions.Match]$anchorMatch = Split-Match @parameters;
 
       if (-not([string]::IsNullOrEmpty($capturedAnchor))) {
         # Relation and Paste are not compatible, because if the user is defining the
@@ -181,8 +177,8 @@ function Move-Match {
         # with the replacement text. So exotic/vanilla-formatted can't use Relation.
         #
 
-        # How do we handle group references in the Anchor? These are done transparently
-        # because any group defined in Anchor can be referenced by Paste as long as
+        # How do we handle group references in Pattern? These are done transparently
+        # because any group defined in Pattern can be referenced by Paste as long as
         # there is a replace operation of the form regEx.Replace($Pattern, Paste). Of course
         # we can't do the replace in this simplistic way, because that form would replace
         # all matches, when we only want to replace the specified Pattern occurrence.
@@ -224,9 +220,10 @@ function Move-Match {
     }
     else {
       # This is an error, because there is no place to move the pattern to, as there is no Anchor,
-      # Start or End specified. Ideally this would be prevented by parameter set definition;
+      # Start or End specified. Actually, we're in the twilight zone here as this scenario can't
+      # happen and has been engineered out of existence!
       #
-      $failedReason = 'Missing Anchor';
+      $failedReason = 'Twilight Zone: Missing Anchor';
     }
   }
   else {

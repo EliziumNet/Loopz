@@ -26,13 +26,11 @@ function Rename-Many {
     [string]$Whole,
 
     [Parameter(Mandatory, Position = 0)]
-    [ValidateCount(1, 2)]
-    [ValidateScript( { -not([string]::IsNullOrEmpty($_[0])) })]
+    [ValidateScript( { { $(test-ValidPatternArrayParam -Arg $_ -AllowWildCard ) } })]
     [array]$Pattern,
 
     [Parameter(ParameterSetName = 'MoveToAnchor', Mandatory)]
-    [ValidateCount(1, 2)]
-    [ValidateScript( { -not([string]::IsNullOrEmpty($_[0])) })]
+    [ValidateScript( { $(test-ValidPatternArrayParam -Arg $_) })]
     [array]$Anchor,
 
     [Parameter(ParameterSetName = 'MoveToAnchor')]
@@ -41,8 +39,7 @@ function Rename-Many {
 
     [Parameter(ParameterSetName = 'MoveToAnchor')]
     [Parameter(ParameterSetName = 'ReplaceWith')]
-    [ValidateCount(1, 2)]
-    [ValidateScript( { -not([string]::IsNullOrEmpty($_[0])) })]
+    [ValidateScript( { { $(test-ValidPatternArrayParam -Arg $_) } })]
     [array]$Copy,
 
     [Parameter(ParameterSetName = 'ReplaceLiteralWith', Mandatory)]
@@ -90,7 +87,7 @@ function Rename-Many {
   )
 
   begin {
-    Write-Debug ">>> Rename-Many [ParamaterSet: '$($PSCmdlet.ParameterSetName)]' >>>";
+    Write-Debug ">>> Rename-Many [ParameterSet: '$($PSCmdlet.ParameterSetName)]' >>>";
 
     [scriptblock]$doRenameFsItems = {
       param(
@@ -406,6 +403,12 @@ function Rename-Many {
 
     [boolean]$doMoveToken = ($PSBoundParameters.ContainsKey('Anchor') -or
       $PSBoundParameters.ContainsKey('Start') -or $PSBoundParameters.ContainsKey('End'));
+
+    if ($doMoveToken -and ($patternOccurrence -eq '*')) {
+      [string]$errorMessage = "'Pattern' wildcard prohibited for move operation (Anchor/Start/End).`r`n";
+      $errorMessage += "Please use a digit, 'f' (first) or 'l' (last) for Pattern Occurrence";
+      Write-Error $errorMessage -ErrorAction Stop;
+    }
 
     [boolean]$doCut = (
       -not($doMoveToken) -and
