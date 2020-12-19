@@ -120,7 +120,7 @@ function Invoke-ForeachFsItem {
       param(
         [System.IO.FileInfo]$FileInfo,
         [int]$Index,
-        [System.Collections.Hashtable]$PassThru,
+        [hashtable]$PassThru,
         [boolean]$Trigger
       )
       ...
@@ -137,14 +137,14 @@ function Invoke-ForeachFsItem {
     param(
       [System.IO.DirectoryInfo]$Underscore,
       [int]$Index,
-      [System.Collections.Hashtable]$PassThru,
+      [hashtable]$PassThru,
       [boolean]$Trigger,
       [string]$Format
     )
     ...
   }
 
-  [System.Collections.Hashtable]$parameters = @{
+  [hashtable]$parameters = @{
     'Format'
   }
   Get-ChildItem './Tests/Data/fefsi' -Recurse -Directory | `
@@ -156,7 +156,7 @@ function Invoke-ForeachFsItem {
       param(
         [System.IO.FileInfo]$FileInfo,
         [int]$Index,
-        [System.Collections.Hashtable]$PassThru,
+        [hashtable]$PassThru,
         [boolean]$Trigger
       )
       ...
@@ -181,7 +181,7 @@ function Invoke-ForeachFsItem {
       param(
         [System.IO.FileInfo]$FileInfo,
         [int]$Index,
-        [System.Collections.Hashtable]$PassThru,
+        [hashtable]$PassThru,
         [boolean]$Trigger
       )
       ...
@@ -207,7 +207,7 @@ function Invoke-ForeachFsItem {
       param(
         [System.IO.FileInfo]$FileInfo,
         [int]$Index,
-        [System.Collections.Hashtable]$PassThru,
+        [hashtable]$PassThru,
         [boolean]$Trigger
       )
       ...
@@ -249,17 +249,17 @@ function Invoke-ForeachFsItem {
     [string]$Functee,
 
     [Parameter(ParameterSetName = 'InvokeFunction')]
-    [System.Collections.Hashtable]$FuncteeParams = @{},
+    [hashtable]$FuncteeParams = @{},
 
     [Parameter(ParameterSetName = 'InvokeScriptBlock')]
     [Parameter(ParameterSetName = 'InvokeFunction')]
-    [System.Collections.Hashtable]$PassThru = @{},
+    [hashtable]$PassThru = @{},
 
     [Parameter(ParameterSetName = 'InvokeScriptBlock')]
     [Parameter(ParameterSetName = 'InvokeFunction')]
     [scriptblock]$Header = ( {
         param(
-          [System.Collections.Hashtable]$_passThru
+          [hashtable]$_passThru
         )
       }),
 
@@ -270,7 +270,7 @@ function Invoke-ForeachFsItem {
           [int]$_count,
           [int]$_skipped,
           [boolean]$_trigger,
-          [System.Collections.Hashtable]$_passThru
+          [hashtable]$_passThru
         )
       }),
 
@@ -320,7 +320,7 @@ function Invoke-ForeachFsItem {
             $result = Invoke-Command -ScriptBlock $Block -ArgumentList $positional;
           }
           elseif ('InvokeFunction' -eq $PSCmdlet.ParameterSetName) {
-            [System.Collections.Hashtable]$parameters = $FuncteeParams.Clone();
+            [hashtable]$parameters = $FuncteeParams.Clone();
 
             $parameters['Underscore'] = $pipelineItem;
             $parameters['Index'] = $index;

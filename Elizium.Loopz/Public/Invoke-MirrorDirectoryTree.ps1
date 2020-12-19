@@ -158,14 +158,14 @@
     param(
       [System.IO.DirectoryInfo]$Underscore,
       [int]$Index,
-      [System.Collections.Hashtable]$PassThru,
+      [hashtable]$PassThru,
       [boolean]$Trigger,
       [string]$Format
     )
     ...
   }
 
-  [System.Collections.Hashtable]$parameters = @{
+  [hashtable]$parameters = @{
     'Format' = '---- {0} ----';
   }
   Invoke-MirrorDirectoryTree -Path './Tests/Data/fefsi' `
@@ -180,7 +180,7 @@
       param(
         [System.IO.DirectoryInfo]$Underscore,
         [int]$Index,
-        [System.Collections.Hashtable]$PassThru,
+        [hashtable]$PassThru,
         [boolean]$Trigger
       )
       ...
@@ -230,7 +230,7 @@
       [int]$_count,
       [int]$_skipped,
       [boolean]$_triggered,
-      [System.Collections.Hashtable]$_passThru
+      [hashtable]$_passThru
     )
     ...
   }
@@ -283,7 +283,7 @@
 
     [Parameter(ParameterSetName = 'InvokeScriptBlock')]
     [Parameter(ParameterSetName = 'InvokeFunction')]
-    [System.Collections.Hashtable]$PassThru = @{},
+    [hashtable]$PassThru = @{},
 
     [Parameter(ParameterSetName = 'InvokeScriptBlock')]
     [scriptblock]$Block = ( {
@@ -291,7 +291,7 @@
         param(
           [System.IO.DirectoryInfo]$underscore,
           [int]$index,
-          [System.Collections.Hashtable]$passThru,
+          [hashtable]$passThru,
           [boolean]$trigger
         )
       } ),
@@ -305,7 +305,7 @@
     [string]$Functee,
 
     [Parameter(ParameterSetName = 'InvokeFunction')]
-    [System.Collections.Hashtable]$FuncteeParams = @{},
+    [hashtable]$FuncteeParams = @{},
 
     [Parameter(ParameterSetName = 'InvokeScriptBlock')]
     [Parameter(ParameterSetName = 'InvokeFunction')]
@@ -323,7 +323,7 @@
     [Parameter(ParameterSetName = 'InvokeFunction')]
     [scriptblock]$Header = ( {
         param(
-          [System.Collections.Hashtable]$_passThru
+          [hashtable]$_passThru
         )
       }),
 
@@ -335,7 +335,7 @@
           [int]$_index,
           [int]$_skipped,
           [boolean]$_trigger,
-          [System.Collections.Hashtable]$_passThru
+          [hashtable]$_passThru
         )
       }),
 
@@ -343,7 +343,7 @@
     [Parameter(ParameterSetName = 'InvokeFunction')]
     [scriptblock]$SessionHeader = ( {
         param(
-          [System.Collections.Hashtable]$_passThru
+          [hashtable]$_passThru
         )
       }),
 
@@ -354,7 +354,7 @@
           [int]$_count,
           [int]$_skipped,
           [boolean]$_trigger,
-          [System.Collections.Hashtable]$_passThru
+          [hashtable]$_passThru
         )
       })
   ) # param
@@ -370,7 +370,7 @@
       [int]$_index,
 
       [Parameter(Mandatory)]
-      [System.Collections.Hashtable]$_passThru,
+      [hashtable]$_passThru,
 
       [Parameter(Mandatory)]
       [boolean]$_trigger
@@ -443,7 +443,7 @@
       # required in the case where CreateDirs has not been specified.
       #
       [array]$filesToCopy = Get-ChildItem $sourceDirectoryWithWildCard `
-          -Include $adjustedFileIncludes -Exclude $adjustedFileExcludes -File;
+        -Include $adjustedFileIncludes -Exclude $adjustedFileExcludes -File;
 
       if ($filesToCopy) {
         if (-not($whatIf)) {
@@ -485,7 +485,7 @@
       $invokee.Invoke($positional);
     }
     elseif ($invokee -is [string]) {
-      [System.Collections.Hashtable]$parameters = $_passThru.ContainsKey('LOOPZ.MIRROR.INVOKEE.PARAMS') `
+      [hashtable]$parameters = $_passThru.ContainsKey('LOOPZ.MIRROR.INVOKEE.PARAMS') `
         ? $_passThru['LOOPZ.MIRROR.INVOKEE.PARAMS'] : @{};
       $parameters['Underscore'] = $_underscore;
       $parameters['Index'] = $_index;

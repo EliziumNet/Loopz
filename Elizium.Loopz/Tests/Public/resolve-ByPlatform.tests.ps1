@@ -4,7 +4,7 @@ Describe 'Resolve-ByPlatform' {
     Import-Module .\Output\Elizium.Loopz\Elizium.Loopz.psm1 `
       -ErrorAction 'stop' -DisableNameChecking;
 
-    [System.Collections.Hashtable]$script:platforms = @{
+    [hashtable]$script:platforms = @{
       'windows' = 'windows-info';
       'linux'   = 'linux-info';
       'mac'     = 'mac-info';
@@ -43,7 +43,7 @@ Describe 'Resolve-ByPlatform' {
       Mock -ModuleName Elizium.Loopz Get-PlatformName { return 'UBUNTU' }
       [string]$expected = 'default-info';
 
-      [System.Collections.Hashtable]$withDefault = $platforms.Clone();
+      [hashtable]$withDefault = $platforms.Clone();
       $withDefault['default'] = 'default-info';
 
       $result = Resolve-ByPlatform -Hash $withDefault;

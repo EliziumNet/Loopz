@@ -9,7 +9,7 @@ Describe 'controller' {
     InModuleScope Elizium.Loopz {
       [scriptblock]$script:_Header = {
         param(
-          [System.Collections.Hashtable]$_passThru
+          [hashtable]$_passThru
         )
       };
 
@@ -18,13 +18,13 @@ Describe 'controller' {
           [int]$_count,
           [int]$_skipped,
           [boolean]$_trigger,
-          [System.Collections.Hashtable]$_passThru
+          [hashtable]$_passThru
         )
       };
 
       [scriptblock]$script:_SessionHeader = {
         param(
-          [System.Collections.Hashtable]$_passThru
+          [hashtable]$_passThru
         )
       };
     }
@@ -43,13 +43,13 @@ Describe 'controller' {
               [int]$_count,
               [int]$_skipped,
               [boolean]$_trigger,
-              [System.Collections.Hashtable]$_passThru
+              [hashtable]$_passThru
             )
             $_count | Should -Be 1;
             $_skipped | Should -Be 0;
           };
 
-          [System.Collections.Hashtable]$passThru = @{}
+          [hashtable]$passThru = @{}
 
           $controller = New-Controller -Type ForeachCtrl -PassThru $passThru -Header $_Header -Summary $summary;
           $controller.ForeachBegin();
@@ -76,12 +76,12 @@ Describe 'controller' {
               [int]$_count,
               [int]$_skipped,
               [boolean]$_trigger,
-              [System.Collections.Hashtable]$_passThru
+              [hashtable]$_passThru
             )
             $_count | Should -Be 2;
             $_skipped | Should -Be 3;
           };
-          [System.Collections.Hashtable]$passThru = @{}
+          [hashtable]$passThru = @{}
 
           $controller = New-Controller -Type ForeachCtrl -PassThru $passThru -Header $_Header -Summary $summary;
           $controller.ForeachBegin();
@@ -112,12 +112,12 @@ Describe 'controller' {
               [int]$_count,
               [int]$_skipped,
               [boolean]$_trigger,
-              [System.Collections.Hashtable]$_passThru
+              [hashtable]$_passThru
             )
             $_count | Should -Be 2;
             $_skipped | Should -Be 3;
           };
-          [System.Collections.Hashtable]$passThru = @{}
+          [hashtable]$passThru = @{}
 
           $controller = New-Controller -Type TraverseCtrl -PassThru $passThru `
             -Header $_Header -Summary $_Summary -SessionHeader $_SessionHeader -SessionSummary $sessionSummary;
@@ -149,12 +149,12 @@ Describe 'controller' {
               [int]$_count,
               [int]$_skipped,
               [boolean]$_trigger,
-              [System.Collections.Hashtable]$_passThru
+              [hashtable]$_passThru
             )
             $_count | Should -Be 12;
             $_skipped | Should -Be 0;
           };
-          [System.Collections.Hashtable]$passThru = @{}
+          [hashtable]$passThru = @{}
 
           $controller = New-Controller -Type TraverseCtrl -PassThru $passThru `
             -Header $_Header -Summary $_Summary -SessionHeader $_SessionHeader -SessionSummary $sessionSummary;

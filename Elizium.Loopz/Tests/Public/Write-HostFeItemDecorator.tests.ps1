@@ -17,7 +17,7 @@ Describe 'Write-HostFeItemDecorator' {
           -Trigger $_trigger
       }
 
-      [System.Collections.Hashtable]$script:_passThru = @{
+      [hashtable]$script:_passThru = @{
         'LOOPZ.WH-FOREACH-DECORATOR.FUNCTION-NAME' = 'get-AnswerAdvancedFn';
         'LOOPZ.WH-FOREACH-DECORATOR.MESSAGE'       = 'Test Advanced Function';
         'LOOPZ.KRAYOLA-THEME'                      = $(Get-KrayolaTheme);
@@ -42,7 +42,7 @@ Describe 'Write-HostFeItemDecorator' {
           [int]$Index,
 
           [Parameter(Mandatory)]
-          [System.Collections.Hashtable]$PassThru,
+          [hashtable]$PassThru,
 
           [Parameter(Mandatory)]
           [boolean]$Trigger
@@ -63,7 +63,7 @@ Describe 'Write-HostFeItemDecorator' {
         Mock Write-ThemedPairsInColour -ModuleName Elizium.Loopz {
           param(
             [string[][]]$Pairs,
-            [System.Collections.Hashtable]$Theme,
+            [hashtable]$Theme,
             [string]$Message
           )
           $first = $Pairs[1];
@@ -86,7 +86,7 @@ Describe 'Write-HostFeItemDecorator' {
           Mock Write-ThemedPairsInColour -ModuleName Elizium.Loopz {
             param(
               [string[][]]$Pairs,
-              [System.Collections.Hashtable]$Theme,
+              [hashtable]$Theme,
               [string]$Message
             )
             $first = $Pairs[1];
@@ -111,7 +111,7 @@ Describe 'Write-HostFeItemDecorator' {
         Mock Write-ThemedPairsInColour -ModuleName Elizium.Loopz {
           param(
             [string[][]]$Pairs,
-            [System.Collections.Hashtable]$Theme,
+            [hashtable]$Theme,
             [string]$Message
           )
           $second = $Pairs[2];
@@ -135,7 +135,7 @@ Describe 'Write-HostFeItemDecorator' {
         Mock Write-ThemedPairsInColour -ModuleName Elizium.Loopz {
           param(
             [string[][]]$Pairs,
-            [System.Collections.Hashtable]$Theme,
+            [hashtable]$Theme,
             [string]$Message
           )
 
@@ -172,7 +172,7 @@ Describe 'Write-HostFeItemDecorator' {
       Mock Write-ThemedPairsInColour -ModuleName Elizium.Loopz {
         param(
           [string[][]]$Pairs,
-          [System.Collections.Hashtable]$Theme,
+          [hashtable]$Theme,
           [string]$Message
         )
         $productValue = $Pairs[1];
@@ -188,7 +188,7 @@ Describe 'Write-HostFeItemDecorator' {
             [Alias('Underscore')]
             [System.IO.FileInfo]$FileInfo,
             [int]$Index,
-            [System.Collections.Hashtable]$PassThru,
+            [hashtable]$PassThru,
             [boolean]$Trigger
           )
 
@@ -222,7 +222,7 @@ Describe 'Write-HostFeItemDecorator' {
               [int]$Index,
 
               [Parameter(Mandatory)]
-              [System.Collections.Hashtable]$PassThru,
+              [hashtable]$PassThru,
 
               [Parameter(Mandatory)]
               [boolean]$Trigger
@@ -233,7 +233,7 @@ Describe 'Write-HostFeItemDecorator' {
             }
           }
 
-          [System.Collections.Hashtable]$passThru = @{
+          [hashtable]$passThru = @{
             'LOOPZ.WH-FOREACH-DECORATOR.FUNCTION-NAME' = 'get-AnswerAdvancedFnWithTrigger';
             'ANSWER'                                   = 'Fourty Two';
             'LOOPZ.WH-FOREACH-DECORATOR.MESSAGE'       = 'Test Advanced Function';
@@ -256,7 +256,7 @@ Describe 'Write-HostFeItemDecorator' {
         Mock Write-ThemedPairsInColour -ModuleName Elizium.Loopz -Verifiable { }
 
         InModuleScope Elizium.Loopz {
-          [System.Collections.Hashtable]$passThru = @{
+          [hashtable]$passThru = @{
             'LOOPZ.WH-FOREACH-DECORATOR.FUNCTION-NAME' = 'get-AnswerAdvancedFn';
             'ANSWER'                                   = 'Fourty Two';
             'LOOPZ.WH-FOREACH-DECORATOR.MESSAGE'       = 'Test Advanced Function';

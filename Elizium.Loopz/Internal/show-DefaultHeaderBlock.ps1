@@ -1,10 +1,10 @@
 ﻿
 function show-DefaultHeaderBlock {
   param(
-    [System.Collections.Hashtable]$PassThru
+    [hashtable]$PassThru
   )
 
-  [System.Collections.Hashtable]$krayolaTheme = $PassThru.ContainsKey(
+  [hashtable]$krayolaTheme = $PassThru.ContainsKey(
     'LOOPZ.KRAYOLA-THEME') `
     ? $PassThru['LOOPZ.KRAYOLA-THEME'] : $(Get-KrayolaTheme);
 
@@ -33,7 +33,7 @@ function show-DefaultHeaderBlock {
 
     # Inner detail
     #
-    [System.Collections.Hashtable]$parameters = @{
+    [hashtable]$parameters = @{
       'Theme' = $krayolaTheme;
       'Pairs' = $properties;
     }

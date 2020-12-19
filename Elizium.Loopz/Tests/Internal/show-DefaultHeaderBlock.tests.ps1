@@ -16,7 +16,7 @@ Describe 'show-DefaultHeaderBlock' {
     Context 'and: message' {
       It 'should: display header with properties and message' {
         InModuleScope Elizium.Loopz {
-          [System.Collections.Hashtable]$passThru = @{
+          [hashtable]$passThru = @{
             'LOOPZ.HEADER-BLOCK.MESSAGE' = 'The sound the wind makes in the pines';
             'LOOPZ.HEADER.PROPERTIES'    = $properties;
             'LOOPZ.HEADER-BLOCK.LINE'    = $LoopzUI.TildeLine;
@@ -28,10 +28,10 @@ Describe 'show-DefaultHeaderBlock' {
 
       It 'should: display header with Signal crumb' {
         InModuleScope Elizium.Loopz {
-          [System.Collections.Hashtable]$signals = @{
+          [hashtable]$signals = @{
             'CRUMB-B' = @('Crumb', '🚀')
           }
-          [System.Collections.Hashtable]$passThru = @{
+          [hashtable]$passThru = @{
             'LOOPZ.SIGNALS'              = $signals;
             'LOOPZ.HEADER-BLOCK.MESSAGE' = 'The sound the wind makes in the pines';
             'LOOPZ.HEADER-BLOCK.LINE'    = $LoopzUI.EqualsLine;
@@ -45,7 +45,7 @@ Describe 'show-DefaultHeaderBlock' {
     Context 'and: no message' {
       It 'should: display header with properties only' {
         InModuleScope Elizium.Loopz {
-          [System.Collections.Hashtable]$passThru = @{
+          [hashtable]$passThru = @{
             'LOOPZ.HEADER.PROPERTIES' = $properties;
             'LOOPZ.HEADER-BLOCK.LINE' = $LoopzUI.TildeLine;
           }
@@ -60,7 +60,7 @@ Describe 'show-DefaultHeaderBlock' {
     Context 'and: small message' {
       It 'should: display header with message' {
         InModuleScope Elizium.Loopz {
-          [System.Collections.Hashtable]$passThru = @{
+          [hashtable]$passThru = @{
             'LOOPZ.HEADER-BLOCK.MESSAGE' = 'What lies in the darkness';
             'LOOPZ.HEADER-BLOCK.LINE'    = $LoopzUI.EqualsLine;
           }
@@ -76,7 +76,7 @@ Describe 'show-DefaultHeaderBlock' {
             $theme['OPEN'] = '*** [';
             $theme['CLOSE'] = '] ***';
 
-            [System.Collections.Hashtable]$passThru = @{
+            [hashtable]$passThru = @{
               'LOOPZ.HEADER-BLOCK.MESSAGE' = 'Without chemicals he points';
               'LOOPZ.HEADER-BLOCK.LINE'    = $LoopzUI.SmallEqualsLine;
             }
@@ -91,7 +91,7 @@ Describe 'show-DefaultHeaderBlock' {
           InModuleScope Elizium.Loopz {
             $withLeadingSpace = ((New-Object String(".", (($_LineLength - 1) / 2))).Replace(".", " .") + " ");
 
-            [System.Collections.Hashtable]$passThru = @{
+            [hashtable]$passThru = @{
               'LOOPZ.HEADER-BLOCK.MESSAGE' = 'A man in a smiling bag';
               'LOOPZ.HEADER-BLOCK.LINE'    = $withLeadingSpace;
             }
@@ -105,10 +105,10 @@ Describe 'show-DefaultHeaderBlock' {
     Context 'and: no message' {
       It 'should: display header with crumb' {
         InModuleScope Elizium.Loopz {
-          [System.Collections.Hashtable]$signals = @{
+          [hashtable]$signals = @{
             'TUNE' = @('Toon', '🎵')
           }
-          [System.Collections.Hashtable]$passThru = @{
+          [hashtable]$passThru = @{
             'LOOPZ.SIGNALS'                   = $signals;
             'LOOPZ.HEADER-BLOCK.CRUMB-SIGNAL' = 'TUNE';
             'LOOPZ.HEADER-BLOCK.LINE'         = $LoopzUI.EqualsLine;
@@ -120,10 +120,10 @@ Describe 'show-DefaultHeaderBlock' {
 
       It 'should: display header with Signal crumb' {
         InModuleScope Elizium.Loopz {
-          [System.Collections.Hashtable]$signals = @{
+          [hashtable]$signals = @{
             'CRUMB-B' = @('Crumb', '🚀')
           }
-          [System.Collections.Hashtable]$passThru = @{
+          [hashtable]$passThru = @{
             'LOOPZ.SIGNALS'           = $signals;
             'LOOPZ.HEADER-BLOCK.LINE' = $LoopzUI.EqualsLine;
           }
@@ -136,7 +136,7 @@ Describe 'show-DefaultHeaderBlock' {
     Context 'and: long message' {
       It 'should: display header with message' {
         InModuleScope Elizium.Loopz {
-          [System.Collections.Hashtable]$passThru = @{
+          [hashtable]$passThru = @{
             'LOOPZ.HEADER-BLOCK.MESSAGE' = (New-Object String('.', 4)).Replace('.', 'The owls are not what they seem ');
             'LOOPZ.HEADER-BLOCK.LINE'    = $LoopzUI.SmallEqualsLine;
           }
@@ -152,7 +152,7 @@ Describe 'show-DefaultHeaderBlock' {
             $theme['OPEN'] = '*** [';
             $theme['CLOSE'] = '] ***';
 
-            [System.Collections.Hashtable]$passThru = @{
+            [hashtable]$passThru = @{
               'LOOPZ.HEADER-BLOCK.MESSAGE' = (New-Object String('.', 4)).Replace('.', 'The monarch will be crowned ');
               'LOOPZ.HEADER-BLOCK.LINE'    = $LoopzUI.SmallEqualsLine;
             }

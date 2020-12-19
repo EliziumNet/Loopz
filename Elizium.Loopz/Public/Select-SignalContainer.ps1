@@ -11,7 +11,7 @@ function Select-SignalContainer {
     [string]$Value,
 
     [Parameter()]
-    [System.Collections.Hashtable]$Signals = $(Get-Signals),
+    [hashtable]$Signals = $(Get-Signals),
 
     [Parameter()]
     [string]$Format = '[{1}] {0}', # 0=Label, 1=Emoji,
@@ -37,7 +37,8 @@ function Select-SignalContainer {
     else {
       $Containers.Props += , $formattedSignal;
     }
-  } else {
+  }
+  else {
     if ($Value.Length -gt $Threshold) {
       $Containers.Wide += , $formattedSignal;
     }

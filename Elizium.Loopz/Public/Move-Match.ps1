@@ -75,7 +75,7 @@ function Move-Match {
   # referenced inside Paste. Another important point of note is that With et al applies
   # to the anchor not the original Pattern capture.
   #
-  [System.Collections.Hashtable]$parameters = @{
+  [hashtable]$parameters = @{
     'Source'       = $Value
     'PatternRegEx' = $Pattern
     'Occurrence'   = ($PSBoundParameters.ContainsKey('PatternOccurrence') ? $PatternOccurrence : 'f')
@@ -107,7 +107,7 @@ function Move-Match {
       [string]$replaceWith = [string]::Empty;
       if ($PSBoundParameters.ContainsKey('Copy')) {
         if ($patternRemoved -match $Copy) {
-          [System.Collections.Hashtable]$parameters = @{
+          [hashtable]$parameters = @{
             'Source'       = $patternRemoved
             'PatternRegEx' = $Copy
             'Occurrence'   = ($PSBoundParameters.ContainsKey('CopyOccurrence') ? $CopyOccurrence : 'f')
@@ -157,7 +157,7 @@ function Move-Match {
       $result = $patternRemoved + $replaceWith;
     }
     elseif ($PSBoundParameters.ContainsKey('Anchor')) {
-      [System.Collections.Hashtable]$parameters = @{
+      [hashtable]$parameters = @{
         'Source'       = $patternRemoved
         'PatternRegEx' = $Anchor
         'Occurrence'   = ($PSBoundParameters.ContainsKey('AnchorOccurrence') ? $AnchorOccurrence : 'f')

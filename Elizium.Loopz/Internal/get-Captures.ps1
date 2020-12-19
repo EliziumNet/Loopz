@@ -1,11 +1,11 @@
 function get-Captures {
-  [OutputType([System.Collections.Hashtable])]
+  [OutputType([hashtable])]
   param(
     [Parameter(Mandatory)]
     [System.Text.RegularExpressions.Match]$MatchObject
   )
 
-  [System.Collections.Hashtable]$captures = @{}
+  [hashtable]$captures = @{}
   [System.Text.RegularExpressions.GroupCollection]$groups = $MatchObject.Groups;
 
   foreach ($key in $groups.Keys) {

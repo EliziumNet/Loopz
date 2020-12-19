@@ -5,7 +5,7 @@ Describe 'Get-FormattedSignal' {
     Import-Module .\Output\Elizium.Loopz\Elizium.Loopz.psm1 `
       -ErrorAction 'stop' -DisableNameChecking;
 
-    [System.Collections.Hashtable]$script:signals = @{
+    [hashtable]$script:signals = @{
       'GO'   = @('Go', '@@');
       'STOP' = @('Stop', '!!');
     }

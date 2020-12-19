@@ -117,7 +117,7 @@ function Invoke-TraverseDirectory {
       param(
         $underscore,
         [int]$index,
-        [System.Collections.Hashtable]$passThru,
+        [hashtable]$passThru,
         [boolean]$trigger
       )
       ...
@@ -132,13 +132,13 @@ function Invoke-TraverseDirectory {
     param(
       [System.IO.DirectoryInfo]$Underscore,
       [int]$Index,
-      [System.Collections.Hashtable]$PassThru,
+      [hashtable]$PassThru,
       [boolean]$Trigger,
       [string]$Format
     )
     ...
   }
-  [System.Collections.Hashtable]$parameters = @{
+  [hashtable]$parameters = @{
     'Format' = "=== {0} ===";
   }
 
@@ -152,7 +152,7 @@ function Invoke-TraverseDirectory {
     param(
       [System.IO.DirectoryInfo]$Underscore,
       [int]$Index,
-      [System.Collections.Hashtable]$PassThru,
+      [hashtable]$PassThru,
       [boolean]$Trigger
     )
     ...
@@ -182,7 +182,7 @@ function Invoke-TraverseDirectory {
     param(
       [System.IO.DirectoryInfo]$Underscore,
       [int]$Index,
-      [System.Collections.Hashtable]$PassThru,
+      [hashtable]$PassThru,
       [boolean]$Trigger
     )
     ...
@@ -237,7 +237,7 @@ function Invoke-TraverseDirectory {
 
     [Parameter(ParameterSetName = 'InvokeScriptBlock')]
     [Parameter(ParameterSetName = 'InvokeFunction')]
-    [System.Collections.Hashtable]$PassThru = @{},
+    [hashtable]$PassThru = @{},
 
     [Parameter(ParameterSetName = 'InvokeScriptBlock')]
     [ValidateScript( { -not($_ -eq $null) })]
@@ -252,13 +252,13 @@ function Invoke-TraverseDirectory {
     [string]$Functee,
 
     [Parameter(ParameterSetName = 'InvokeFunction')]
-    [System.Collections.Hashtable]$FuncteeParams = @{},
+    [hashtable]$FuncteeParams = @{},
 
     [Parameter(ParameterSetName = 'InvokeScriptBlock')]
     [Parameter(ParameterSetName = 'InvokeFunction')]
     [scriptblock]$Header = ( {
         param(
-          [System.Collections.Hashtable]$_passThru
+          [hashtable]$_passThru
         )
       }),
 
@@ -270,7 +270,7 @@ function Invoke-TraverseDirectory {
           [int]$_count,
           [int]$_skipped,
           [boolean]$_triggered,
-          [System.Collections.Hashtable]$_passThru
+          [hashtable]$_passThru
         )
       }),
 
@@ -278,7 +278,7 @@ function Invoke-TraverseDirectory {
     [Parameter(ParameterSetName = 'InvokeFunction')]
     [scriptblock]$SessionHeader = ( {
         param(
-          [System.Collections.Hashtable]$_passThru
+          [hashtable]$_passThru
         )
       }),
 
@@ -289,7 +289,7 @@ function Invoke-TraverseDirectory {
           [int]$_count,
           [int]$_skipped,
           [boolean]$_trigger,
-          [System.Collections.Hashtable]$_passThru
+          [hashtable]$_passThru
         )
       }),
 
@@ -312,7 +312,7 @@ function Invoke-TraverseDirectory {
 
       [Parameter(Position = 2, Mandatory)]
       [ValidateScript( { -not($_ -eq $null) })]
-      [System.Collections.Hashtable]$passThru,
+      [hashtable]$passThru,
 
       [Parameter(Position = 3)]
       [ValidateScript( { ($_ -is [scriptblock]) -or ($_ -is [string]) })]
@@ -339,7 +339,7 @@ function Invoke-TraverseDirectory {
       $result = $invokee.Invoke($positional);
     }
     else {
-      [System.Collections.Hashtable]$parameters = $passThru.ContainsKey('LOOPZ.TRAVERSE.INVOKEE.PARAMS') `
+      [hashtable]$parameters = $passThru.ContainsKey('LOOPZ.TRAVERSE.INVOKEE.PARAMS') `
         ? $passThru['LOOPZ.TRAVERSE.INVOKEE.PARAMS'] : @{};
 
       # These are directory specific overwrites. The custom parameters
@@ -382,7 +382,7 @@ function Invoke-TraverseDirectory {
       [int]$_index,
 
       [Parameter(Mandatory)]
-      [System.Collections.Hashtable]$_passThru,
+      [hashtable]$_passThru,
 
       [Parameter(Mandatory)]
       [boolean]$_trigger
@@ -443,7 +443,7 @@ function Invoke-TraverseDirectory {
       if ('InvokeFunction' -eq $PSCmdlet.ParameterSetName) {
         # set-up custom parameters
         #
-        [System.Collections.Hashtable]$parameters = $FuncteeParams.Clone();
+        [hashtable]$parameters = $FuncteeParams.Clone();
         $parameters['Underscore'] = $directory;
         $parameters['Index'] = $index;
         $parameters['PassThru'] = $PassThru;
@@ -509,7 +509,7 @@ function Invoke-TraverseDirectory {
         # +1, because 0 is for the top level directory which has already been
         # handled.
         #
-        [System.Collections.Hashtable]$parametersFeFsItem = @{
+        [hashtable]$parametersFeFsItem = @{
           'Directory' = $true;
           'PassThru'  = $PassThru;
           'Summary'   = $Summary;

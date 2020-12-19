@@ -2,10 +2,10 @@
 function Show-Signals {
   param(
     [Parameter()]
-    [System.Collections.Hashtable]$SourceSignals = $global:Loopz.Signals,
+    [hashtable]$SourceSignals = $global:Loopz.Signals,
 
     [Parameter()]
-    [System.Collections.Hashtable]$Custom = $global:Loopz.CustomSignals
+    [hashtable]$Custom = $global:Loopz.CustomSignals
   )
   $result = $SourceSignals.Clone();
 
@@ -20,7 +20,7 @@ function Show-Signals {
     }
   }
 
-  [System.Collections.Hashtable]$collection = @{}
+  [hashtable]$collection = @{}
   $result.GetEnumerator() | ForEach-Object {
 
     $collection[$_.Name] = [PSCustomObject]@{

@@ -3,7 +3,7 @@ function Invoke-ByPlatform {
   [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingWriteHost", "")]
   param(
     [Parameter()]
-    [System.Collections.Hashtable]$Hash
+    [hashtable]$Hash
   )
 
   $result = $null;
@@ -31,11 +31,13 @@ function Invoke-ByPlatform {
         Write-Error $("ScriptBlock for function: '$($invokeInfo.FnInfo.Name)', ('$platform': platform) is missing") `
           -ErrorAction Continue;
       }
-    } elseif ($invokeInfo.psobject.properties.match('Named') -and $invokeInfo.Named) {
-      [System.Collections.Hashtable]$named = $invokeInfo.Named;
+    }
+    elseif ($invokeInfo.psobject.properties.match('Named') -and $invokeInfo.Named) {
+      [hashtable]$named = $invokeInfo.Named;
 
       $result = & $invokeInfo.FnInfo.Name @named;
-    } else {
+    }
+    else {
       Write-Error $("Missing Positional/Named: '$($invokeInfo.FnInfo.Name)', ('$platform': platform)") `
         -ErrorAction Continue;
     }

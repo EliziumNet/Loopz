@@ -11,7 +11,7 @@ function Get-FormattedSignal {
     [string]$Value,
 
     [Parameter()]
-    [System.Collections.Hashtable]$Signals = $(Get-Signals),
+    [hashtable]$Signals = $(Get-Signals),
 
     [Parameter()]
     [string]$CustomLabel,

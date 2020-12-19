@@ -33,7 +33,7 @@ Describe 'Invoke-TraverseDirectory' {
             [int]$_index,
 
             [Parameter(Mandatory)]
-            [System.Collections.Hashtable]$_passThru,
+            [hashtable]$_passThru,
 
             [Parameter(Mandatory)]
             [boolean]$_trigger
@@ -48,7 +48,7 @@ Describe 'Invoke-TraverseDirectory' {
             [int]$_count,
             [int]$_skipped,
             [boolean]$_trigger,
-            [System.Collections.Hashtable]$_passThru
+            [hashtable]$_passThru
           )
           $_count | Should -Be 19;
         }
@@ -71,7 +71,7 @@ Describe 'Invoke-TraverseDirectory' {
               [int]$_index,
 
               [Parameter(Mandatory)]
-              [System.Collections.Hashtable]$_passThru,
+              [hashtable]$_passThru,
 
               [Parameter(Mandatory)]
               [boolean]$_trigger
@@ -80,7 +80,7 @@ Describe 'Invoke-TraverseDirectory' {
             @{ Product = $_underscore }
           }
 
-          [System.Collections.Hashtable]$passThru = @{
+          [hashtable]$passThru = @{
             'LOOPZ.SUMMARY-BLOCK.LINE' = $LoopzUI.EqualsLine;
             'LOOPZ.SUMMARY-BLOCK.MESSAGE' = 'Test Summary';
           }
@@ -102,7 +102,7 @@ Describe 'Invoke-TraverseDirectory' {
             [int]$_index,
 
             [Parameter(Mandatory)]
-            [System.Collections.Hashtable]$_passThru,
+            [hashtable]$_passThru,
 
             [Parameter(Mandatory)]
             [boolean]$_trigger
@@ -117,7 +117,7 @@ Describe 'Invoke-TraverseDirectory' {
             [int]$_count,
             [int]$_skipped,
             [boolean]$_trigger,
-            [System.Collections.Hashtable]$_passThru
+            [hashtable]$_passThru
           )
 
           $_count | Should -Be 11;
@@ -141,7 +141,7 @@ Describe 'Invoke-TraverseDirectory' {
               [int]$_index,
 
               [Parameter(Mandatory)]
-              [System.Collections.Hashtable]$_passThru,
+              [hashtable]$_passThru,
 
               [Parameter(Mandatory)]
               [boolean]$_trigger
@@ -157,14 +157,14 @@ Describe 'Invoke-TraverseDirectory' {
               [int]$_count,
               [int]$_skipped,
               [boolean]$_trigger,
-              [System.Collections.Hashtable]$_passThru
+              [hashtable]$_passThru
             )
 
             Write-Debug "  [Summary] Count: $_count, skipped: $_skipped, trigger: $_trigger";
             # $_count | Should -Be 5;
           }
 
-          [System.Collections.Hashtable]$passThruWithSkip = @{}
+          [hashtable]$passThruWithSkip = @{}
           Invoke-TraverseDirectory -Path $resolvedSourcePath -Block $skipBlock `
             -Summary $summaryWithSkip -Condition $filterDirectories -Hoist -PassThru $passThruWithSkip;
           # $passThruWithSkip['LOOPZ.TRAVERSE.SKIPPED'] | Should -Be 5; # this is just the top level invoke
@@ -186,7 +186,7 @@ Describe 'Invoke-TraverseDirectory' {
             [int]$Index,
 
             [Parameter(Mandatory)]
-            [System.Collections.Hashtable]$PassThru,
+            [hashtable]$PassThru,
 
             [Parameter(Mandatory)]
             [boolean]$Trigger,
@@ -205,12 +205,12 @@ Describe 'Invoke-TraverseDirectory' {
             [int]$_count,
             [int]$_skipped,
             [boolean]$_trigger,
-            [System.Collections.Hashtable]$_passThru
+            [hashtable]$_passThru
           )
 
           $_count | Should -Be 11;
         }
-        [System.Collections.Hashtable]$parameters = @{
+        [hashtable]$parameters = @{
           'format' = "=== {0} ===";
         }
 
@@ -231,7 +231,7 @@ Describe 'Invoke-TraverseDirectory' {
             param(
               $_underscore,
               [int]$_index,
-              [System.Collections.Hashtable]$_passThru,
+              [hashtable]$_passThru,
               [boolean]$_trigger
             )
             Write-Debug "  [-] TEST-BLOCK(index: $_index): directory: $($_underscore.Name)";
@@ -243,7 +243,7 @@ Describe 'Invoke-TraverseDirectory' {
               [int]$_count,
               [int]$_skipped,
               [boolean]$_trigger,
-              [System.Collections.Hashtable]$_passThru
+              [hashtable]$_passThru
             )
 
             Write-Debug "--> TEST-SUMMARY(block/trigger/single): Count: $_count, Skipped: $_skipped, Trigger: $_trigger";
@@ -264,7 +264,7 @@ Describe 'Invoke-TraverseDirectory' {
             param(
               $_underscore,
               [int]$_index,
-              [System.Collections.Hashtable]$_passThru,
+              [hashtable]$_passThru,
               [boolean]$_trigger
             )
 
@@ -282,7 +282,7 @@ Describe 'Invoke-TraverseDirectory' {
               [int]$_count,
               [int]$_skipped,
               [boolean]$_trigger,
-              [System.Collections.Hashtable]$_passThru
+              [hashtable]$_passThru
             )
 
             Write-Debug "--> TEST-SUMMARY(block/trigger/multi): Count: $_count, Skipped: $_skipped, Trigger: $_trigger";
@@ -302,7 +302,7 @@ Describe 'Invoke-TraverseDirectory' {
               param(
                 $_underscore,
                 [int]$_index,
-                [System.Collections.Hashtable]$_passThru,
+                [hashtable]$_passThru,
                 [boolean]$_trigger
               )
 
@@ -320,7 +320,7 @@ Describe 'Invoke-TraverseDirectory' {
                 [int]$_count,
                 [int]$_skipped,
                 [boolean]$_trigger,
-                [System.Collections.Hashtable]$_passThru
+                [hashtable]$_passThru
               )
 
               Write-Debug "--> TEST-SUMMARY(block/trigger/multi/hoist): Count: $_count, Skipped: $_skipped, Trigger: $_trigger";
@@ -347,7 +347,7 @@ Describe 'Invoke-TraverseDirectory' {
             param(
               $_underscore,
               [int]$_index,
-              [System.Collections.Hashtable]$_passThru,
+              [hashtable]$_passThru,
               [boolean]$_trigger
             )
             Write-Debug "  [-] TEST-BLOCK(index: $_index): directory: $($_underscore.Name)";
@@ -360,7 +360,7 @@ Describe 'Invoke-TraverseDirectory' {
               [int]$_count,
               [int]$_skipped,
               [boolean]$_trigger,
-              [System.Collections.Hashtable]$_passThru
+              [hashtable]$_passThru
             )
 
             Write-Debug "--> TEST-SUMMARY(block/break/single): Count: $_count, Skipped: $_skipped, Trigger: $_trigger";
@@ -381,7 +381,7 @@ Describe 'Invoke-TraverseDirectory' {
             param(
               $_underscore,
               [int]$_index,
-              [System.Collections.Hashtable]$_passThru,
+              [hashtable]$_passThru,
               [boolean]$_trigger
             )
             Write-Debug "  [-] TEST-BLOCK(index: $_index): directory: $($_underscore.Name)";
@@ -398,7 +398,7 @@ Describe 'Invoke-TraverseDirectory' {
               [int]$_count,
               [int]$_skipped,
               [boolean]$_trigger,
-              [System.Collections.Hashtable]$_passThru
+              [hashtable]$_passThru
             )
 
             Write-Debug "--> TEST-SUMMARY(block/break/multi): Count: $_count, Skipped: $_skipped, Trigger: $_trigger";
@@ -426,7 +426,7 @@ Describe 'Invoke-TraverseDirectory' {
               [int]$Index,
 
               [Parameter(Mandatory)]
-              [System.Collections.Hashtable]$PassThru,
+              [hashtable]$PassThru,
 
               [Parameter(Mandatory)]
               [boolean]$Trigger
@@ -441,7 +441,7 @@ Describe 'Invoke-TraverseDirectory' {
               [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', '')]
               [System.IO.DirectoryInfo]$Underscore,
               [int]$Index,
-              [System.Collections.Hashtable]$PassThru,
+              [hashtable]$PassThru,
               [boolean]$Trigger
             )
             $localTrigger = ('EX' -eq $Underscore.Name);
@@ -461,7 +461,7 @@ Describe 'Invoke-TraverseDirectory' {
               [int]$_count,
               [int]$_skipped,
               [boolean]$_trigger,
-              [System.Collections.Hashtable]$_passThru
+              [hashtable]$_passThru
             )
 
             Write-Debug "--> TEST-SUMMARY(fn/break/multi): Count: $_count, Skipped: $_skipped, Trigger: $_trigger";
@@ -486,7 +486,7 @@ Describe 'Invoke-TraverseDirectory' {
             [int]$Index,
 
             [Parameter(Mandatory)]
-            [System.Collections.Hashtable]$PassThru,
+            [hashtable]$PassThru,
 
             [Parameter(Mandatory)]
             [boolean]$Trigger
@@ -503,7 +503,7 @@ Describe 'Invoke-TraverseDirectory' {
             [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', '')]
             [System.IO.DirectoryInfo]$Underscore,
             [int]$Index,
-            [System.Collections.Hashtable]$PassThru,
+            [hashtable]$PassThru,
             [boolean]$Trigger
           )
           $break = ('EX' -eq $Underscore.Name);
@@ -533,7 +533,7 @@ Describe 'Invoke-TraverseDirectory' {
               [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', '')]
               [System.IO.DirectoryInfo]$Underscore,
               [int]$Index,
-              [System.Collections.Hashtable]$PassThru,
+              [hashtable]$PassThru,
               [boolean]$Trigger
             )
             $break = ('EX' -eq $Underscore.Name);
@@ -545,7 +545,7 @@ Describe 'Invoke-TraverseDirectory' {
           [string]$sourcePath = (Convert-Path '.\Tests\Data\traverse\Audio');
           Write-Debug "[+] === path: $sourcePath";
 
-          [System.Collections.Hashtable]$verifiedCountPassThru = @{}
+          [hashtable]$verifiedCountPassThru = @{}
           Invoke-TraverseDirectory -Path $sourcePath -Functee 'Test-FireBreakOnFirstItem' `
             -Condition $filterDirectories -Hoist -PassThru $verifiedCountPassThru;
           Assert-MockCalled Test-FireBreakOnFirstItem -ModuleName Elizium.Loopz -Times 1;

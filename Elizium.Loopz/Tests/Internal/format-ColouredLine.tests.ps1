@@ -42,7 +42,7 @@ Describe 'format-ColouredLine' {
   Context 'given: Plain Line' {
     It 'should: create coloured line without crumb or message' {
       InModuleScope Elizium.Loopz {
-        [System.Collections.Hashtable]$passThru = @{
+        [hashtable]$passThru = @{
           'LOOPZ.HEADER-BLOCK.LINE' = $LoopzUI.EqualsLine;
         }
 
@@ -56,10 +56,10 @@ Describe 'format-ColouredLine' {
   Context 'given: Message and Crumb' {
     BeforeEach {
       InModuleScope Elizium.Loopz {
-        [System.Collections.Hashtable]$signals = @{
+        [hashtable]$signals = @{
           'CRUMB-B' = @('Crumb', '🚀')
         }
-        [System.Collections.Hashtable]$script:passThru = @{
+        [hashtable]$script:passThru = @{
           'LOOPZ.SIGNALS'                   = $signals;
           'LOOPZ.HEADER-BLOCK.CRUMB-SIGNAL' = 'CRUMB-B';
           'LOOPZ.HEADER-BLOCK.LINE'         = $LoopzUI.EqualsLine;
@@ -174,7 +174,7 @@ Describe 'format-ColouredLine' {
   Context 'given: Message Only' {
     BeforeEach {
       InModuleScope Elizium.Loopz {
-        [System.Collections.Hashtable]$script:passThru = @{
+        [hashtable]$script:passThru = @{
           'LOOPZ.HEADER-BLOCK.LINE' = $LoopzUI.EqualsLine;
         }
       }
@@ -291,10 +291,10 @@ Describe 'format-ColouredLine' {
   Context 'given: Crumb Only' {
     It 'should: Create coloured line' {
       InModuleScope Elizium.Loopz {
-        [System.Collections.Hashtable]$signals = @{
+        [hashtable]$signals = @{
           'CRUMB-B' = @('Crumb', '🔥')
         }
-        [System.Collections.Hashtable]$passThru = @{
+        [hashtable]$passThru = @{
           'LOOPZ.SIGNALS'                   = $signals;
           'LOOPZ.HEADER-BLOCK.CRUMB-SIGNAL' = 'CRUMB-B';
           'LOOPZ.HEADER-BLOCK.LINE'         = $LoopzUI.TildeLine;

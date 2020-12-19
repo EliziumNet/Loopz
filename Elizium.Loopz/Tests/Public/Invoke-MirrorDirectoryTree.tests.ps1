@@ -35,7 +35,7 @@ Describe 'Invoke-MirrorDirectoryTree' {
             [int]$Index,
 
             [Parameter(Mandatory)]
-            [System.Collections.Hashtable]$PassThru,
+            [hashtable]$PassThru,
 
             [Parameter(Mandatory)]
             [boolean]$Trigger,
@@ -49,7 +49,7 @@ Describe 'Invoke-MirrorDirectoryTree' {
           @{ Product = $Underscore }
         }
 
-        [System.Collections.Hashtable]$parameters = @{
+        [hashtable]$parameters = @{
           'Format' = '---- {0} ----';
         }
         Invoke-MirrorDirectoryTree -Path $sourcePath `
@@ -68,7 +68,7 @@ Describe 'Invoke-MirrorDirectoryTree' {
           param(
             [System.IO.DirectoryInfo]$DirInfo,
             [int]$Index,
-            [System.Collections.Hashtable]$PassThru,
+            [hashtable]$PassThru,
             [boolean]$Trigger,
             [string]$Format
           )
@@ -97,7 +97,7 @@ Describe 'Invoke-MirrorDirectoryTree' {
             [int]$Index,
 
             [Parameter(Mandatory)]
-            [System.Collections.Hashtable]$PassThru,
+            [hashtable]$PassThru,
 
             [Parameter(Mandatory)]
             [boolean]$Trigger,
@@ -254,13 +254,13 @@ Describe 'Invoke-MirrorDirectoryTree' {
             [int]$_count,
             [int]$_skipped, 
             [boolean]$_triggered,
-            [System.Collections.Hashtable]$_passThru
+            [hashtable]$_passThru
           )
 
           $_count | Should -Be 11;
         }
 
-        [System.Collections.Hashtable]$verifiedCountPassThru = @{}
+        [hashtable]$verifiedCountPassThru = @{}
 
         Invoke-MirrorDirectoryTree -Path $sourcePath `
           -DestinationPath $destinationPath -CreateDirs -DirectoryIncludes @('*e*') `

@@ -7,7 +7,7 @@ Describe 'invoke-PostProcessing' {
       -ErrorAction 'stop' -DisableNameChecking;
 
     InModuleScope Elizium.Loopz {
-      [System.Collections.Hashtable]$script:_signals = @{
+      [hashtable]$script:_signals = @{
         'REMY.POST'    = @('Post Process', '🐋');
         'TRIM'         = @('Trim', '🍀');
         'MULTI-SPACES' = @('Spaces', '🐠');

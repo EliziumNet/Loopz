@@ -11,7 +11,7 @@ $global:LoopzHelpers = @{
       [int]$_index,
 
       [Parameter(Mandatory)]
-      [System.Collections.Hashtable]$_passThru,
+      [hashtable]$_passThru,
 
       [Parameter(Mandatory)]
       [boolean]$_trigger
@@ -25,7 +25,7 @@ $global:LoopzHelpers = @{
 
   DefaultHeaderBlock   = [scriptblock] {
     param(
-      [System.Collections.Hashtable]$PassThru = @{}
+      [hashtable]$PassThru = @{}
     )
 
     show-DefaultHeaderBlock -PassThru $PassThru;
@@ -36,7 +36,7 @@ $global:LoopzHelpers = @{
       [int]$Count,
       [int]$Skipped,
       [boolean]$Triggered,
-      [System.Collections.Hashtable]$PassThru = @{}
+      [hashtable]$PassThru = @{}
     )
 
     show-SimpleSummaryBlock -Count $Count -Skipped $Skipped -Triggered $Triggered -PassThru $PassThru;
@@ -69,7 +69,7 @@ $global:LoopzUI = [ordered]@{
 }
 
 $global:Loopz = [PSCustomObject]@{
-  InlineCodeToOption    = [System.Collections.Hashtable]@{
+  InlineCodeToOption    = [hashtable]@{
     'm' = 'Multiline';
     'i' = 'IgnoreCase';
     'x' = 'IgnorePatternWhitespace';

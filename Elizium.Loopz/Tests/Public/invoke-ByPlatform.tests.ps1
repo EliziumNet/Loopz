@@ -43,7 +43,7 @@ Describe 'Invoke-ByPlatform' {
 
   Context 'given: Parameters By Position' {
     BeforeAll {
-      [System.Collections.Hashtable]$script:platformsPositional = @{
+      [hashtable]$script:platformsPositional = @{
         'windows' = [PSCustomObject]@{
           FnInfo     = Get-Command -Name invoke-winFn -CommandType Function;
           Positional = @('cherry', 'red');
@@ -96,7 +96,7 @@ Describe 'Invoke-ByPlatform' {
       It 'should: invoke the default function' {
         Mock -ModuleName Elizium.Loopz Get-PlatformName { return 'ubuntu' }
 
-        [System.Collections.Hashtable]$platformsWithDefault = $platformsPositional.Clone();
+        [hashtable]$platformsWithDefault = $platformsPositional.Clone();
         $platformsWithDefault['default'] = [PSCustomObject]@{
           FnInfo     = Get-Command -Name invoke-defaultFn -CommandType Function;
           Positional = @('canary', 'yellow');
@@ -111,7 +111,7 @@ Describe 'Invoke-ByPlatform' {
 
   Context 'given: Named Parameters' -Skip {
     BeforeAll {
-      [System.Collections.Hashtable]$script:platformsNamed = @{
+      [hashtable]$script:platformsNamed = @{
         'windows' = [PSCustomObject]@{
           FnInfo     = Get-Command -Name invoke-winFn -CommandType Function;
           Named = @{ 'name' = 'cherry'; 'colour' = 'red'};
@@ -164,7 +164,7 @@ Describe 'Invoke-ByPlatform' {
       It 'should: invoke the default function' {
         Mock -ModuleName Elizium.Loopz Get-PlatformName { return 'ubuntu' }
 
-        [System.Collections.Hashtable]$namedWithDefault = $platformsNamed.Clone();
+        [hashtable]$namedWithDefault = $platformsNamed.Clone();
         $namedWithDefault['default'] = [PSCustomObject]@{
           FnInfo     = Get-Command -Name invoke-defaultFn -CommandType Function;
           Named      = @{ 'name' = 'canary'; 'colour' = 'yellow' };

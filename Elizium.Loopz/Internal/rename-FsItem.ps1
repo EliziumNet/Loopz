@@ -9,7 +9,7 @@ function rename-FsItem {
     [string]$To,
 
     [Parameter()]
-    [System.Collections.Hashtable]$Undo,
+    [hashtable]$Undo,
 
     [Parameter()]
     $Shell

@@ -10,7 +10,7 @@ Describe 'Invoke-ForeachFsItem' {
         [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', '')]
         [System.IO.FileInfo]$FileInfo,
         [int]$Index,
-        [System.Collections.Hashtable]$PassThru,
+        [hashtable]$PassThru,
         [boolean]$Trigger
       )
 
@@ -30,7 +30,7 @@ Describe 'Invoke-ForeachFsItem' {
             [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', '')]
             [System.IO.FileInfo]$FileInfo,
             [int]$Index,
-            [System.Collections.Hashtable]$PassThru,
+            [hashtable]$PassThru,
             [boolean]$Trigger
           )
           $container.count++;
@@ -53,14 +53,14 @@ Describe 'Invoke-ForeachFsItem' {
             [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', '')]
             [System.IO.FileInfo]$FileInfo,
             [int]$Index,
-            [System.Collections.Hashtable]$PassThru,
+            [hashtable]$PassThru,
             [boolean]$Trigger
           )
           $container.count++;
         }
 
         [string]$directoryPath = './Tests/Data/fefsi/csv';
-        [System.Collections.Hashtable]$verifiedCountPassThru = @{}
+        [hashtable]$verifiedCountPassThru = @{}
         Get-ChildItem $directoryPath -File | Invoke-ForeachFsItem -Block $block -PassThru $verifiedCountPassThru;
         $container.count | Should -Be 3;
         $verifiedCountPassThru['LOOPZ.FOREACH.COUNT'] | Should -Be 3;
@@ -78,14 +78,14 @@ Describe 'Invoke-ForeachFsItem' {
             [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', '')]
             [System.IO.FileInfo]$FileInfo,
             [int]$Index,
-            [System.Collections.Hashtable]$PassThru,
+            [hashtable]$PassThru,
             [boolean]$Trigger
           )
           $container.count++;
         }
 
         [string]$directoryPath = './Tests/Data/fefsi/csv';
-        [System.Collections.Hashtable]$verifiedCountPassThru = @{}
+        [hashtable]$verifiedCountPassThru = @{}
         Get-ChildItem $directoryPath -File -Filter '*.blob' | Invoke-ForeachFsItem -Block $block -PassThru $verifiedCountPassThru;
         $container.count | Should -Be 0;
         $verifiedCountPassThru['LOOPZ.FOREACH.COUNT'] | Should -Be 0;
@@ -103,7 +103,7 @@ Describe 'Invoke-ForeachFsItem' {
             [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', '')]
             [System.IO.FileInfo]$FileInfo,
             [int]$Index,
-            [System.Collections.Hashtable]$PassThru,
+            [hashtable]$PassThru,
             [boolean]$Trigger
           )
           $container.count++;
@@ -127,7 +127,7 @@ Describe 'Invoke-ForeachFsItem' {
           [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', '')]
           [System.IO.FileInfo]$FileInfo,
           [int]$Index,
-          [System.Collections.Hashtable]$PassThru,
+          [hashtable]$PassThru,
           [boolean]$Trigger
         )
         $container.count++;
@@ -158,7 +158,7 @@ Describe 'Invoke-ForeachFsItem' {
             [int]$Count,
             [int]$Skipped,
             [boolean]$Triggered,
-            [System.Collections.Hashtable]$PassThru = @{}
+            [hashtable]$PassThru = @{}
           )
 
           $Count | Should -Be 8;
@@ -181,7 +181,7 @@ Describe 'Invoke-ForeachFsItem' {
               [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', '')]
               [System.IO.FileInfo]$FileInfo,
               [int]$Index,
-              [System.Collections.Hashtable]$PassThru,
+              [hashtable]$PassThru,
               [boolean]$Trigger
             )
 
@@ -199,7 +199,7 @@ Describe 'Invoke-ForeachFsItem' {
               [int]$Count,
               [int]$Skipped,
               [boolean]$Triggered,
-              [System.Collections.Hashtable]$PassThru = @{}
+              [hashtable]$PassThru = @{}
             )
 
             $Count | Should -Be 3;
@@ -220,7 +220,7 @@ Describe 'Invoke-ForeachFsItem' {
               [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', '')]
               [System.IO.FileInfo]$FileInfo,
               [int]$Index,
-              [System.Collections.Hashtable]$PassThru,
+              [hashtable]$PassThru,
               [boolean]$Trigger
             )
 
@@ -235,7 +235,7 @@ Describe 'Invoke-ForeachFsItem' {
               [int]$Count,
               [int]$Skipped,
               [boolean]$Triggered,
-              [System.Collections.Hashtable]$PassThru = @{}
+              [hashtable]$PassThru = @{}
             )
 
             $Triggered | Should -BeTrue;
@@ -254,7 +254,7 @@ Describe 'Invoke-ForeachFsItem' {
               [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', '')]
               [System.IO.FileInfo]$FileInfo,
               [int]$Index,
-              [System.Collections.Hashtable]$PassThru,
+              [hashtable]$PassThru,
               [boolean]$Trigger
             )
 
@@ -268,12 +268,12 @@ Describe 'Invoke-ForeachFsItem' {
               [int]$Count,
               [int]$Skipped,
               [boolean]$Triggered,
-              [System.Collections.Hashtable]$PassThru = @{}
+              [hashtable]$PassThru = @{}
             )
             $PassThru['Answer'] | Should -BeExactly 'Fourty Two';
           }
 
-          [System.Collections.Hashtable]$passThru = @{
+          [hashtable]$passThru = @{
             'Action' = 'Disconnect'
           }
 
@@ -295,7 +295,7 @@ Describe 'Invoke-ForeachFsItem' {
             [Alias('Underscore')]
             [System.IO.FileInfo]$FileInfo,
             [int]$Index,
-            [System.Collections.Hashtable]$PassThru,
+            [hashtable]$PassThru,
             [boolean]$Trigger
           )
           Write-Warning "These aren't the droids you're looking for, ..., move along, move along!";
@@ -309,7 +309,7 @@ Describe 'Invoke-ForeachFsItem' {
             [Alias('Underscore')]
             [System.IO.FileInfo]$FileInfo,
             [int]$Index,
-            [System.Collections.Hashtable]$PassThru,
+            [hashtable]$PassThru,
             [boolean]$Trigger
           )
 
@@ -342,7 +342,7 @@ Describe 'Invoke-ForeachFsItem' {
             [int]$Index,
 
             [Parameter(Mandatory)]
-            [System.Collections.Hashtable]$PassThru,
+            [hashtable]$PassThru,
 
             [Parameter(Mandatory)]
             [boolean]$Trigger,
@@ -361,7 +361,7 @@ Describe 'Invoke-ForeachFsItem' {
             [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', '')]
             [System.IO.FileInfo]$Underscore,
             [int]$Index,
-            [System.Collections.Hashtable]$PassThru,
+            [hashtable]$PassThru,
             [boolean]$Trigger,
             [string]$Format
           )
@@ -372,7 +372,7 @@ Describe 'Invoke-ForeachFsItem' {
         [System.IO.FileInfo[]]$collection = @();
         [string]$directoryPath = './Tests/Data/fefsi';
 
-        [System.Collections.Hashtable]$parameters = @{
+        [hashtable]$parameters = @{
           'Format' = '*** [{0}] ***'
         }
 
@@ -399,7 +399,7 @@ Describe 'Invoke-ForeachFsItem' {
             [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', '')]
             [System.IO.FileInfo]$FileInfo,
             [int]$Index,
-            [System.Collections.Hashtable]$PassThru,
+            [hashtable]$PassThru,
             [boolean]$Trigger
           )
           $container.count++;
@@ -424,7 +424,7 @@ Describe 'Invoke-ForeachFsItem' {
             [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', '')]
             [System.IO.FileInfo]$FileInfo,
             [int]$Index,
-            [System.Collections.Hashtable]$PassThru,
+            [hashtable]$PassThru,
             [boolean]$Trigger
           )
           $container.count++;
@@ -451,7 +451,7 @@ Describe 'Invoke-ForeachFsItem' {
             [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', '')]
             [System.IO.DirectoryInfo]$DirInfo,
             [int]$Index,
-            [System.Collections.Hashtable]$PassThru,
+            [hashtable]$PassThru,
             [boolean]$Trigger
           )
           $container.count++;
@@ -477,7 +477,7 @@ Describe 'Invoke-ForeachFsItem' {
           [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', '')]
           [System.IO.DirectoryInfo]$DirInfo,
           [int]$Index,
-          [System.Collections.Hashtable]$PassThru,
+          [hashtable]$PassThru,
           [boolean]$Trigger,
           [string]$Format
         )

@@ -101,7 +101,7 @@ function Rename-Many {
         [int]$_index,
 
         [Parameter(Mandatory)]
-        [System.Collections.Hashtable]$_passThru,
+        [hashtable]$_passThru,
 
         [Parameter(Mandatory)]
         [boolean]$_trigger
@@ -115,7 +115,7 @@ function Rename-Many {
 
       [string]$action = $_passThru['LOOPZ.REMY.ACTION'];
 
-      [System.Collections.Hashtable]$actionParameters = @{
+      [hashtable]$actionParameters = @{
         'Value'   = $adjustedName;
         'Pattern' = $_passThru['LOOPZ.REMY.PATTERN-REGEX'];
       }
@@ -181,7 +181,7 @@ function Rename-Many {
 
       [string[][]]$properties = @();
       [string[][]]$lines = @();
-      [System.Collections.Hashtable]$signals = $_passThru['LOOPZ.SIGNALS'];
+      [hashtable]$signals = $_passThru['LOOPZ.SIGNALS'];
 
       # Perform Rename Action, then post process
       #
@@ -284,7 +284,7 @@ function Rename-Many {
 
         foreach ($namedItem in $actionResult.Diagnostics.Named) {
           foreach ($namedKey in $namedItem.Keys) {
-            [System.Collections.Hashtable]$groups = $actionResult.Diagnostics.Named[$namedKey];
+            [hashtable]$groups = $actionResult.Diagnostics.Named[$namedKey];
             [string[]]$diagnosticLines = @();
 
             foreach ($groupName in $groups.Keys) {
@@ -353,7 +353,7 @@ function Rename-Many {
       [string]::Empty;
     }
 
-    [System.Collections.Hashtable]$signals = Get-Signals;
+    [hashtable]$signals = Get-Signals;
 
     # RegEx/Occurrence parameters
     #
@@ -448,7 +448,7 @@ function Rename-Many {
 
     $summaryMessage = Get-FormattedSignal -Name 'SUMMARY-A' -Signals $signals -CustomLabel $summaryMessage;
 
-    [System.Collections.Hashtable]$passThru = @{
+    [hashtable]$passThru = @{
       'LOOPZ.WH-FOREACH-DECORATOR.BLOCK'      = $doRenameFsItems;
       'LOOPZ.WH-FOREACH-DECORATOR.GET-RESULT' = $getResult;
 
@@ -571,7 +571,7 @@ function Rename-Many {
         $compoundCondition.Invoke($pipelineItem);
     }
 
-    [System.Collections.Hashtable]$parameters = @{
+    [hashtable]$parameters = @{
       'Condition' = $matchesPattern;
       'PassThru'  = $passThru;
       'Header'    = $LoopzHelpers.DefaultHeaderBlock;

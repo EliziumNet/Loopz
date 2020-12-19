@@ -2,7 +2,7 @@
 function Resolve-ByPlatform {
   param(
     [Parameter()]
-    [System.Collections.Hashtable]$Hash
+    [hashtable]$Hash
   )
 
   $result = $null;
@@ -10,7 +10,8 @@ function Resolve-ByPlatform {
 
   if ($Hash.ContainsKey($platform)) {
     $result = $Hash[$platform];
-  } elseif ($Hash.ContainsKey('default')) {
+  }
+  elseif ($Hash.ContainsKey('default')) {
     $result = $Hash['default'];
   }
 

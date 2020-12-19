@@ -42,12 +42,12 @@ class Counter {
 class BaseController {
   [scriptblock]$_header;
   [scriptblock]$_summary;
-  [System.Collections.Hashtable]hidden $_passThru;
+  [hashtable]hidden $_passThru;
   [int]hidden $_index = 0;
   [boolean]$_trigger = $false;
   [boolean]hidden $_broken = $false;
 
-  BaseController([System.Collections.Hashtable]$passThru,
+  BaseController([hashtable]$passThru,
     [scriptblock]$header,
     [scriptblock]$summary) {
     $this._passThru = $passThru;
@@ -135,7 +135,7 @@ class ForeachController : BaseController {
   [int]hidden $_skipped = 0;
   [int]hidden $_errors = 0;
 
-  ForeachController([System.Collections.Hashtable]$passThru,
+  ForeachController([hashtable]$passThru,
     [scriptblock]$header,
     [scriptblock]$summary
   ): base($passThru, $header, $summary) {
@@ -177,7 +177,7 @@ class TraverseController : BaseController {
     Summary = $null;
   }
 
-  TraverseController([System.Collections.Hashtable]$passThru,
+  TraverseController([hashtable]$passThru,
     [scriptblock]$header,
     [scriptblock]$summary,
     [scriptblock]$sessionHeader,
@@ -242,7 +242,8 @@ class TraverseController : BaseController {
 
     if ($stack.Count -eq 0) {
       $this._passThru.Remove('LOOPZ.CONTROLLER.STACK');
-    } else {
+    }
+    else {
       Write-Warning "!!!!!! END-SESSION; stack contains $($stack.Count) excess items";
     }
 
@@ -265,7 +266,7 @@ function New-Controller {
 
     [Parameter(ParameterSetName = 'Iterating')]
     [Parameter(ParameterSetName = 'Traversing')]
-    [System.Collections.Hashtable]$PassThru,
+    [hashtable]$PassThru,
 
     [Parameter(ParameterSetName = 'Iterating')]
     [Parameter(ParameterSetName = 'Traversing')]

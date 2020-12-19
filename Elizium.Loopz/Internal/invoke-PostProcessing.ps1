@@ -8,7 +8,7 @@ function invoke-PostProcessing {
     [PSCustomObject]$Rules,
 
     [Parameter()]
-    [System.Collections.Hashtable]$signals
+    [hashtable]$signals
   )
   [string]$transformResult = $InputSource;
   [string[]]$appliedSignals = @()
@@ -44,7 +44,7 @@ function invoke-PostProcessing {
   else {
     [PSCustomObject]@{
       TransformResult = $InputSource;
-      Modified = $false;
+      Modified        = $false;
     }
   }
 

@@ -1,16 +1,16 @@
 
 function initialize-Signals {
-  [OutputType([System.Collections.Hashtable])]
+  [OutputType([hashtable])]
   param(
     [Parameter()]
-    [System.Collections.Hashtable]$Signals = $global:Loopz.DefaultSignals,
+    [hashtable]$Signals = $global:Loopz.DefaultSignals,
 
     [Parameter()]
-    [System.Collections.Hashtable]$Overrides = $global:Loopz.OverrideSignals
+    [hashtable]$Overrides = $global:Loopz.OverrideSignals
   )
 
-  [System.Collections.Hashtable]$result = $Signals.Clone();
-  [System.Collections.Hashtable]$withOverrides = Resolve-ByPlatform -Hash $Overrides;
+  [hashtable]$result = $Signals.Clone();
+  [hashtable]$withOverrides = Resolve-ByPlatform -Hash $Overrides;
 
   $withOverrides.GetEnumerator() | ForEach-Object {
     try {

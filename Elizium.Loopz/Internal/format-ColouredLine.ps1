@@ -3,7 +3,7 @@ function format-ColouredLine {
   [OutputType([array])]
   param(
     [Parameter(Mandatory)]
-    [System.Collections.Hashtable]$PassThru,
+    [hashtable]$PassThru,
 
     [Parameter(Mandatory)]
     [string]$LineKey,
@@ -30,7 +30,7 @@ function format-ColouredLine {
   [string]$ellipses = Get-PsObjectField $Options 'Ellipses' ' ...';
   [boolean]$withLead = Get-PsObjectField $Options 'WithLead' $false;
 
-  [System.Collections.Hashtable]$theme = $PassThru.ContainsKey(
+  [hashtable]$theme = $PassThru.ContainsKey(
     'LOOPZ.KRAYOLA-THEME') `
     ? $PassThru['LOOPZ.KRAYOLA-THEME'] : $(Get-KrayolaTheme);
 
@@ -47,7 +47,7 @@ function format-ColouredLine {
 
   [string]$crumb = if (-not([string]::IsNullOrEmpty($CrumbKey)) -and ($PassThru.ContainsKey($CrumbKey))) {
     if ($PassThru.ContainsKey('LOOPZ.SIGNALS')) {
-      [System.Collections.Hashtable]$signals = $PassThru['LOOPZ.SIGNALS'];
+      [hashtable]$signals = $PassThru['LOOPZ.SIGNALS'];
       [string]$crumbName = $PassThru[$CrumbKey];
       $signals[$crumbName][1];
     }

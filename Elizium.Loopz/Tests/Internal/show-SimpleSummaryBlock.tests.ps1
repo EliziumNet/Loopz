@@ -9,7 +9,7 @@ Describe 'show-SimpleSummaryBlock' {
   Context 'given: block line specified' {
     It 'should: display summary' {
       InModuleScope Elizium.Loopz {
-        [System.Collections.Hashtable]$passThru = @{
+        [hashtable]$passThru = @{
           'LOOPZ.SUMMARY-BLOCK.LINE' = $LoopzUI.DashLine;
         }
         show-SimpleSummaryBlock -Count 999 -Skipped 0 -Triggered $false -PassThru $passThru;
@@ -20,7 +20,7 @@ Describe 'show-SimpleSummaryBlock' {
   Context 'given: no block line specified' {
     It 'should: display summary' {
       InModuleScope Elizium.Loopz {
-        [System.Collections.Hashtable]$passThru = @{}
+        [hashtable]$passThru = @{}
         show-SimpleSummaryBlock -Count 101 -Skipped 0 -Triggered $true -PassThru $passThru;
       }
     }
@@ -29,7 +29,7 @@ Describe 'show-SimpleSummaryBlock' {
   Context 'given: wide items specified' {
     It 'should: display summary with wide items' {
       InModuleScope Elizium.Loopz {
-        [System.Collections.Hashtable]$passThru = @{
+        [hashtable]$passThru = @{
           'LOOPZ.SUMMARY-BLOCK.LINE'       = $LoopzUI.DashLine;
           'LOOPZ.SUMMARY-BLOCK.WIDE-ITEMS' = @(@('From', '/source/'), @('To', '/destination/'));
         }
@@ -39,7 +39,7 @@ Describe 'show-SimpleSummaryBlock' {
 
     It 'should: display summary with wide items grouped together' {
       InModuleScope Elizium.Loopz {
-        [System.Collections.Hashtable]$passThru = @{
+        [hashtable]$passThru = @{
           'LOOPZ.SUMMARY-BLOCK.LINE'             = $LoopzUI.DashLine;
           'LOOPZ.SUMMARY-BLOCK.WIDE-ITEMS'       = @(@('From', '/source/'), @('To', '/destination/'));
           'LOOPZ.SUMMARY-BLOCK.GROUP-WIDE-ITEMS' = $true
@@ -52,7 +52,7 @@ Describe 'show-SimpleSummaryBlock' {
   Context 'given: summary properties specified' {
     It 'should: display summary with summary properties' {
       InModuleScope Elizium.Loopz {
-        [System.Collections.Hashtable]$passThru = @{
+        [hashtable]$passThru = @{
           'LOOPZ.SUMMARY-BLOCK.LINE'       = $LoopzUI.DashLine;
           'LOOPZ.SUMMARY-BLOCK.PROPERTIES' = @(@('A', 'One'), @('B', 'Two'));
         }

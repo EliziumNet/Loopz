@@ -4,10 +4,10 @@ function show-SimpleSummaryBlock {
     [int]$Count,
     [int]$Skipped,
     [boolean]$Triggered,
-    [System.Collections.Hashtable]$PassThru = @{}
+    [hashtable]$PassThru = @{}
   )
 
-  [System.Collections.Hashtable]$krayolaTheme = $PassThru.ContainsKey(
+  [hashtable]$krayolaTheme = $PassThru.ContainsKey(
     'LOOPZ.KRAYOLA-THEME') `
     ? $PassThru['LOOPZ.KRAYOLA-THEME'] : $(Get-KrayolaTheme);
 

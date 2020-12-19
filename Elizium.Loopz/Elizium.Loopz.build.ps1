@@ -105,7 +105,7 @@ task Compile @compileParams {
     }
   }
 
-  [System.Collections.Hashtable]$sourceDefinition = Import-PowerShellDataFile -Path $script:SourcePsdPath
+  [hashtable]$sourceDefinition = Import-PowerShellDataFile -Path $script:SourcePsdPath
 
   if ($sourceDefinition) {
     if ($sourceDefinition.ContainsKey('VariablesToExport')) {
@@ -186,7 +186,7 @@ task UpdatePublicFunctionsToExport -if (Test-Path -Path $script:PublicFolder) {
     Set-Content -Path $script:PsdPath
   }
 
-  [System.Collections.Hashtable]$sourceDefinition = Import-PowerShellDataFile -Path $script:PsdPath
+  [hashtable]$sourceDefinition = Import-PowerShellDataFile -Path $script:PsdPath
   if ($sourceDefinition.ContainsKey('AliasesToExport')) {
     [string[]]$aliases = Get-PublicFunctionAliasesToExport;
 

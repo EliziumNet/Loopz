@@ -76,7 +76,7 @@
     param(
       [System.IO.DirectoryInfo]$Underscore,
       [int]$Index,
-      [System.Collections.Hashtable]$PassThru,
+      [hashtable]$PassThru,
       [boolean]$Trigger,
     )
 
@@ -128,7 +128,7 @@
         return ($_.ContainsKey('LOOPZ.WH-FOREACH-DECORATOR.FUNCTION-NAME') -xor
           $_.ContainsKey('LOOPZ.WH-FOREACH-DECORATOR.BLOCK'))
       })]
-    [System.Collections.Hashtable]
+    [hashtable]
     $PassThru,
 
     [Parameter()]
@@ -146,7 +146,7 @@
     if ($_passthru.Contains('LOOPZ.WH-FOREACH-DECORATOR.FUNCTION-NAME')) {
       [string]$functee = $_passthru['LOOPZ.WH-FOREACH-DECORATOR.FUNCTION-NAME'];
 
-      [System.Collections.Hashtable]$parameters = @{
+      [hashtable]$parameters = @{
         'Underscore' = $_underscore;
         'Index'      = $_index;
         'PassThru'   = $_passthru;
@@ -204,11 +204,11 @@
 
     # Write with a Krayola Theme
     #
-    [System.Collections.Hashtable]$krayolaTheme = `
+    [hashtable]$krayolaTheme = `
       $PassThru.ContainsKey('LOOPZ.KRAYOLA-THEME') `
       ? $PassThru['LOOPZ.KRAYOLA-THEME'] : (Get-KrayolaTheme);
 
-    [System.Collections.Hashtable]$parameters = @{}
+    [hashtable]$parameters = @{}
     $parameters['Pairs'] = $themedPairs;
     $parameters['Theme'] = $krayolaTheme;
 
@@ -227,7 +227,7 @@
         ? $PassThru['LOOPZ.WH-FOREACH-DECORATOR.INDENT'] : 3;
       $parameters['Message'] = [string]::new(' ', $indent);
 
-      [System.Collections.Hashtable]$adjustedTheme = $krayolaTheme.Clone();
+      [hashtable]$adjustedTheme = $krayolaTheme.Clone();
       $adjustedTheme['MESSAGE-SUFFIX'] = [string]::Empty;
       $adjustedTheme['OPEN'] = [string]::Empty;
       $adjustedTheme['CLOSE'] = [string]::Empty;
