@@ -112,6 +112,35 @@ Describe 'Move-Match' {
                 -Relation $relation -Anchor $escapedAnchor -AnchorOccurrence 'L';
               $moveResult.Payload | Should -BeExactly '*fight +fire with +fire*fight ';
             }
+
+            Context 'and: Drop' {
+              It 'should: move the first match before the first anchor' {
+                [string]$source = 'fight +fire with +fire';
+                [RegEx]$escapedPattern = new-expr([regex]::Escape('+fire'));
+                [RegEx]$anchor = new-expr('fight');
+                [string]$relation = 'before'
+                [string]$expectedPayload = '+firefight ^ with +fire';
+
+                [PSCustomObject]$moveResult = Move-Match -Value $source -Pattern $escapedPattern `
+                  -Relation $relation -Anchor $anchor -Drop '^';
+
+                $moveResult.Payload | Should -BeExactly $expectedPayload;
+              }
+
+              It 'should: move the last match before the last escaped anchor' {
+                [string]$source = 'Judgement+ Day: [06-06-2626], Judgement+ Day: [28-02-2727], take your pick!';
+                [RegEx]$pattern = new-expr('\d{2}-\d{2}-\d{4}');
+                [RegEx]$escapedAnchor = new-expr([regex]::Escape('Judgement+'));
+                [string]$relation = 'before';
+                [string]$expectedPayload = 'Judgement+ Day: [06-06-2626], 28-02-2727Judgement+ Day: [^], take your pick!';
+
+                [PSCustomObject]$moveResult = Move-Match -Value $source -Pattern $pattern `
+                  -PatternOccurrence 'L' `
+                  -Relation $relation -Anchor $escapedAnchor  -AnchorOccurrence 'L' -Drop '^';
+
+                $moveResult.Payload | Should -BeExactly $expectedPayload;
+              }
+            }
           } # and: before
 
           Context 'and: after' {
@@ -156,6 +185,21 @@ Describe 'Move-Match' {
               [PSCustomObject]$moveResult = Move-Match -Value $source -Pattern $escapedPattern -PatternOccurrence 'L' `
                 -Relation $relation -Anchor $escapedAnchor -AnchorOccurrence 'L';
               $moveResult.Payload | Should -BeExactly '*fight +fire with *fight+fire bump ';
+            }
+
+            Context 'and: Drop' {
+              It 'should: move the first match after the first anchor' {
+                [string]$source = 'so fight the +fire with +fire';
+                [RegEx]$escapedPattern = new-expr([regex]::Escape('+fire'));
+                [RegEx]$anchor = new-expr('fight ');
+                [string]$relation = 'after'
+
+                [string]$expectedPayload = 'so fight +firethe ^ with +fire';
+                [PSCustomObject]$moveResult = Move-Match -Value $source -Pattern $escapedPattern `
+                  -Relation $relation -Anchor $anchor -Drop '^';
+
+                $moveResult.Payload | Should -BeExactly $expectedPayload;
+              }
             }
           } # and: after
         } # and: Anchor matches
@@ -371,6 +415,22 @@ Describe 'Move-Match' {
               -With $with -CopyOccurrence 'L' -Paste $paste;
             $moveResult.Payload | Should -BeExactly 'There is$ where +fire your is$(ice^) going';
           }
+
+          Context 'and: Drop' {
+            It 'should: cut the first match and paste after the first anchor' {
+              [string]$source = 'There is where +fire your +fire is going';
+              [RegEx]$escapedPattern = new-expr([regex]::Escape('+fire') + '\s');
+              [RegEx]$anchor = new-expr('is ');
+              [string]$with = 'ice^';
+              [string]$paste = '${_a}(${_c}) ';
+              [string]$expectedPayload = 'There is (ice^) where @your +fire is going'
+
+              [PSCustomObject]$moveResult = Move-Match -Value $source -Pattern $escapedPattern -Anchor $anchor `
+                -With $with -Paste $paste -Drop '@';
+
+              $moveResult.Payload | Should -BeExactly $expectedPayload;
+            }
+          }
         } # and: With
 
         Context 'and: Copy does NOT match' {
@@ -468,6 +528,20 @@ Describe 'Move-Match' {
               [PSCustomObject]$moveResult = Move-Match -Value $source -Pattern $pattern -Anchor $anchor `
                 -Paste ' Americanised ${_a} ${mon}-${day}-${year}' -Relation 'after';
               $moveResult.Payload | Should -BeExactly ', Party like its 31-12-1999,  Americanised target: 04-21-2000 today is 24-09-2020';
+            }
+
+            Context 'and: Drop' {
+              It 'should: rename accessing Pattern defined capture' {
+                [string]$source = '21-04-2000, Party like its 31-12-1999, target: today is 24-09-2020';
+                [RegEx]$pattern = new-expr('(?<day>\d{2})-(?<mon>\d{2})-(?<year>\d{4})');
+                [RegEx]$anchor = new-expr('target:');
+                [string]$expectedPayload = '^, Party like its 31-12-1999,  Americanised target: 04-21-2000 today is 24-09-2020';
+
+                [PSCustomObject]$moveResult = Move-Match -Value $source -Pattern $pattern -Anchor $anchor `
+                  -Paste ' Americanised ${_a} ${mon}-${day}-${year}' -Relation 'after' -Drop '^';
+
+                $moveResult.Payload | Should -BeExactly $expectedPayload;
+              }
             }
           }
         } # and: Anchor matches

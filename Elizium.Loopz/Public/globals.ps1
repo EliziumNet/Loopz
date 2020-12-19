@@ -165,6 +165,7 @@ $global:Loopz = [PSCustomObject]@{
     #
     'REMY.ANCHOR'  = @('Anchor', '⚓')
     'REMY.POST'    = @('Post Process', '🌈')
+    'REMY.DROP'    = @('Drop', '💧')
   }
 
   OverrideSignals       = @{ # Label, Emoji
@@ -194,6 +195,7 @@ $global:Loopz = [PSCustomObject]@{
       Title          = 'Rename'
       ItemMessage    = 'Rename Item'
       SummaryMessage = 'Rename Summary'
+      Marker         = [char]0x2BC1
     }
   }
 
