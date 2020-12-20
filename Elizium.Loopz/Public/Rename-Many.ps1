@@ -553,7 +553,8 @@ function Rename-Many {
       param(
         [System.IO.FileSystemInfo]$pipelineItem
       )
-      [boolean]$clientResult = $true; # $clientCondition.Invoke($pipelineItem);
+
+      [boolean]$clientResult = $clientCondition.InvokeReturnAsIs($pipelineItem);
       [boolean]$isAlreadyAnchoredAt = $anchoredRegEx -and $anchoredRegEx.IsMatch($pipelineItem.Name);
 
       return $($clientResult -and -not($isAlreadyAnchoredAt));
@@ -571,7 +572,7 @@ function Rename-Many {
       [boolean]$isIncluded = $includeDefined ? $includeRegEx.IsMatch($pipelineItem.Name) : $true;
       return ($patternRegEx.IsMatch($pipelineItem.Name)) -and $isIncluded -and `
       (($Except -eq [string]::Empty) -or -not($pipelineItem.Name -match $Except)) -and `
-        $compoundCondition.Invoke($pipelineItem);
+        $compoundCondition.InvokeReturnAsIs($pipelineItem);
     }
 
     [hashtable]$parameters = @{

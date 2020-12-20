@@ -17,8 +17,8 @@ function invoke-PostProcessing {
   foreach ($_r in $iterationRules) {
     $rule = $_r.Value;
 
-    if ($rule['IsApplicable'].Invoke($transformResult)) {
-      $transformResult = $rule['Transform'].Invoke($transformResult);
+    if ($rule['IsApplicable'].InvokeReturnAsIs($transformResult)) {
+      $transformResult = $rule['Transform'].InvokeReturnAsIs($transformResult);
       $appliedSignals += $rule['Signal'];
     }
   }

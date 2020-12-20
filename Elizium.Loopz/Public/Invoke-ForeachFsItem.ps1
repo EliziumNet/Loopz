@@ -303,7 +303,7 @@ function Invoke-ForeachFsItem {
     if (-not($controller.IsBroken())) {
       if ( $acceptAll -or ($Directory.ToBool() -and $itemIsDirectory) -or
         ($File.ToBool() -and -not($itemIsDirectory)) ) {
-        if ($Condition.Invoke($pipelineItem)) {
+        if ($Condition.InvokeReturnAsIs($pipelineItem)) {
           [PSCustomObject]$result = $null;
           [int]$index = $controller.RequestIndex();
           [boolean]$trigger = $controller.GetTrigger();

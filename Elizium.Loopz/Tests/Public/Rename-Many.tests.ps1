@@ -65,7 +65,7 @@ Describe 'Rename-Many' {
       Context 'and Relation is Before' {
         Context 'and: Source matches Pattern' {
           Context 'and: Source matches Anchor' {
-            It 'should: do rename; move Pattern match before Anchor' {
+            It 'should: do rename; move Pattern match before Anchor' -Tag 'Current' {
               $script:expected = @{
                 'loopz.data.t1.txt' = 'data.loopz.t1.txt';
                 'loopz.data.t2.txt' = 'data.loopz.t2.txt';

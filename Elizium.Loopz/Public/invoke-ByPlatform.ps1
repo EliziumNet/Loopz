@@ -25,7 +25,7 @@ function Invoke-ByPlatform {
       [array]$positional = $invokeInfo.Positional;
 
       if ([scriptblock]$block = $invokeInfo.FnInfo.ScriptBlock) {
-        $result = $block.Invoke($positional);
+        $result = $block.InvokeReturnAsIs($positional);
       }
       else {
         Write-Error $("ScriptBlock for function: '$($invokeInfo.FnInfo.Name)', ('$platform': platform) is missing") `

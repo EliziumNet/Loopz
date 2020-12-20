@@ -482,7 +482,7 @@
         }
       }
 
-      $invokee.Invoke($positional);
+      $invokee.InvokeReturnAsIs($positional);
     }
     elseif ($invokee -is [string]) {
       [hashtable]$parameters = $_passThru.ContainsKey('LOOPZ.MIRROR.INVOKEE.PARAMS') `

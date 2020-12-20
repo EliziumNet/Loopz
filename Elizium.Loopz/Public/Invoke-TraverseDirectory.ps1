@@ -336,7 +336,7 @@ function Invoke-TraverseDirectory {
           $positional += $_;
         }
       }
-      $result = $invokee.Invoke($positional);
+      $result = $invokee.InvokeReturnAsIs($positional);
     }
     else {
       [hashtable]$parameters = $passThru.ContainsKey('LOOPZ.TRAVERSE.INVOKEE.PARAMS') `
@@ -355,7 +355,7 @@ function Invoke-TraverseDirectory {
 
     [string]$fullName = $directoryInfo.FullName;
     [System.IO.DirectoryInfo[]]$directoryInfos = Get-ChildItem -Path $fullName `
-      -Directory | Where-Object { $condition.Invoke($_) };
+      -Directory | Where-Object { $condition.InvokeReturnAsIs($_) };
 
     [scriptblock]$adapter = $PassThru['LOOPZ.TRAVERSE.ADAPTOR'];
 
@@ -392,7 +392,7 @@ function Invoke-TraverseDirectory {
     $controller = $_passThru['LOOPZ.CONTROLLER'];
 
     try {
-      $adapted.Invoke(
+      $adapted.InvokeReturnAsIs(
         $_underscore,
         $_passThru['LOOPZ.TRAVERSE.CONDITION'],
         $_passThru,
@@ -433,7 +433,7 @@ function Invoke-TraverseDirectory {
     [System.IO.FileAttributes]::Directory) -eq [System.IO.FileAttributes]::Directory;
 
   if ($itemIsDirectory) {
-    if ($Condition.Invoke($directory)) {
+    if ($Condition.InvokeReturnAsIs($directory)) {
       [boolean]$trigger = $controller.GetTrigger();
 
       # The index of the top level directory is always 0
@@ -476,7 +476,7 @@ function Invoke-TraverseDirectory {
       #
       try {
         if ('InvokeScriptBlock' -eq $PSCmdlet.ParameterSetName) {
-          $result = $Block.Invoke($positional);
+          $result = $Block.InvokeReturnAsIs($positional);
         }
         elseif ('InvokeFunction' -eq $PSCmdlet.ParameterSetName) {
           $result = & $Functee @parameters;
@@ -499,7 +499,7 @@ function Invoke-TraverseDirectory {
       # Perform non-recursive retrieval of descendant directories
       #
       [System.IO.DirectoryInfo[]]$directoryInfos = Get-ChildItem -Path $Path `
-        -Directory -Recurse | Where-Object { $Condition.Invoke($_) }
+        -Directory -Recurse | Where-Object { $Condition.InvokeReturnAsIs($_) }
 
       Write-Debug "  [o] Invoke-TraverseDirectory (Hoist); Count: $($directoryInfos.Count)";
 
@@ -547,7 +547,7 @@ function Invoke-TraverseDirectory {
       # Now perform start of recursive traversal
       #
       [System.IO.DirectoryInfo[]]$directoryInfos = Get-ChildItem -Path $Path `
-        -Directory | Where-Object { $Condition.Invoke($_) }
+        -Directory | Where-Object { $Condition.InvokeReturnAsIs($_) }
 
       if ($directoryInfos) {
         $directoryInfos | Invoke-ForeachFsItem -Directory -Block $adapter `

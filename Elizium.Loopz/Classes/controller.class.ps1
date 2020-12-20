@@ -99,7 +99,7 @@ class BaseController {
 
     $stack.Push([Counter]::new());
     $this._passThru['LOOPZ.CONTROLLER.DEPTH'] = $stack.Count;
-    $this._header.Invoke($this._passThru);
+    $this._header.InvokeReturnAsIs($this._passThru);
   }
 
   [void] ForeachEnd () {
@@ -162,7 +162,7 @@ class ForeachController : BaseController {
     $this._passThru['LOOPZ.FOREACH.TRIGGER'] = $this._trigger;
     $this._passThru['LOOPZ.FOREACH.COUNT'] = $this._index;
 
-    $this._summary.Invoke($this._index, $this._skipped, $this._trigger, $this._passThru);
+    $this._summary.InvokeReturnAsIs($this._index, $this._skipped, $this._trigger, $this._passThru);
   }
 }
 
@@ -217,7 +217,7 @@ class TraverseController : BaseController {
       $this._session.Trigger = $true;
     }
 
-    $this._summary.Invoke($counter.Value(), $counter.Skipped(), $this._trigger, $this._passThru);
+    $this._summary.InvokeReturnAsIs($counter.Value(), $counter.Skipped(), $this._trigger, $this._passThru);
   }
 
   [void] BeginSession () {
@@ -228,7 +228,7 @@ class TraverseController : BaseController {
     $stack.Push([Counter]::new());
     $this._passThru['LOOPZ.CONTROLLER.STACK'] = $stack;
     $this._passThru['LOOPZ.CONTROLLER.DEPTH'] = $stack.Count;
-    $this._session.Header.Invoke($this._passThru);
+    $this._session.Header.InvokeReturnAsIs($this._passThru);
   }
 
   [void] EndSession () {
@@ -248,7 +248,7 @@ class TraverseController : BaseController {
     }
 
     $this._session.Count += $counter.Value();
-    $this._session.Summary.Invoke($this._session.Count,
+    $this._session.Summary.InvokeReturnAsIs($this._session.Count,
       $this._session.Skipped,
       $this._session.Trigger,
       $this._passThru
