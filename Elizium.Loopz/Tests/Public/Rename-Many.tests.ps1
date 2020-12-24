@@ -65,7 +65,7 @@ Describe 'Rename-Many' {
       Context 'and Relation is Before' {
         Context 'and: Source matches Pattern' {
           Context 'and: Source matches Anchor' {
-            It 'should: do rename; move Pattern match before Anchor' -Tag 'Current' {
+            It 'should: do rename; move Pattern match before Anchor' {
               $script:expected = @{
                 'loopz.data.t1.txt' = 'data.loopz.t1.txt';
                 'loopz.data.t2.txt' = 'data.loopz.t2.txt';
@@ -584,6 +584,61 @@ Describe 'Rename-Many' {
     } # ReplaceWith
   } # given: Diagnose enabled
 
+  Context 'given: invalid Pattern expression' {
+    It 'should: throw' {
+      {
+        [string]$badPattern = '(((';
+        Get-ChildItem -File -Path $directoryPath | Rename-Many -File `
+          -Pattern $badPattern -Anchor 'loopz' -Relation 'before' -WhatIf;
+      } | Should -Throw;
+    }
+  } # given: invalid Pattern expression
+
+  Context 'given: invalid Copy expression' {
+    It 'should: throw' {
+      {
+        [string]$badWith = '(((';
+        Get-ChildItem -Path $directoryPath | Rename-Many -File `
+          -Pattern 'o', 3 -Copy $badWith -WhatIf;
+      } | Should -Throw;
+    }
+  } # given: invalid Copy expression
+
+  Context 'given: invalid Anchor expression' {
+    It 'should: throw' {
+      {
+        [string]$badAnchor = '(((';
+        Get-ChildItem -File -Path $directoryPath | Rename-Many -File `
+          -Pattern 'data.' -Anchor $badAnchor -Relation 'before' -WhatIf;
+
+      } | Should -Throw;
+    }
+  } # given: invalid Anchor expression
+} # Rename-Many
+
+Describe 'Rename-Many' {
+  BeforeAll {
+    Get-Module Elizium.Loopz | Remove-Module
+    Import-Module .\Output\Elizium.Loopz\Elizium.Loopz.psm1 `
+      -ErrorAction 'stop' -DisableNameChecking
+
+    Import-Module Assert;
+    [boolean]$script:whatIf = $false;
+
+    [string]$script:directoryPath = './Tests/Data/fefsi/';
+
+    Mock -ModuleName Elizium.Loopz rename-FsItem {
+      param(
+        [FileSystemInfo]$From,
+        [string]$To,
+        [HashTable]$Undo,
+        $Shell,
+        [switch]$WhatIf
+      )
+      return $To;
+    }
+  }
+
   Context 'given: Parameter Set' {
     [string]$script:sourcePath = './Tests/Data/fefsi';
     [string]$script:filter = 'bling.*';
@@ -718,35 +773,4 @@ Describe 'Rename-Many' {
       }
     }
   } # given: Parameter Set
-
-  Context 'given: invalid Pattern expression' {
-    It 'should: throw' {
-      {
-        [string]$badPattern = '(((';
-        Get-ChildItem -File -Path $directoryPath | Rename-Many -File `
-          -Pattern $badPattern -Anchor 'loopz' -Relation 'before' -WhatIf;
-      } | Should -Throw;
-    }
-  } # given: invalid Pattern expression
-
-  Context 'given: invalid Copy expression' {
-    It 'should: throw' {
-      {
-        [string]$badWith = '(((';
-        Get-ChildItem -Path $directoryPath | Rename-Many -File `
-          -Pattern 'o', 3 -Copy $badWith -WhatIf;
-      } | Should -Throw;
-    }
-  } # given: invalid Copy expression
-
-  Context 'given: invalid Anchor expression' {
-    It 'should: throw' {
-      {
-        [string]$badAnchor = '(((';
-        Get-ChildItem -File -Path $directoryPath | Rename-Many -File `
-          -Pattern 'data.' -Anchor $badAnchor -Relation 'before' -WhatIf;
-
-      } | Should -Throw;
-    }
-  } # given: invalid Anchor expression
-} # Rename-Many
+}
