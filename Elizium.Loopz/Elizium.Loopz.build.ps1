@@ -88,7 +88,19 @@ task Compile @compileParams {
   }
   New-Item -Path $script:PsmPath -Force > $null
 
+  # Insert custom module using statements (./Init/using.ps1)
+  #
+  $initFolder = Join-Path -Path $script:ModuleRoot -ChildPath 'Init'
+  if (Test-Path -Path $initFolder) {
+    Write-Verbose "Injecting module using statements";
+
+    $usingPath = Join-Path -Path $initFolder -ChildPath 'using.ps1';
+    $moduleUsingContent = Get-Content -LiteralPath $usingPath;
+    $moduleUsingContent >> $script:PsmPath;
+  }
+
   "Set-StrictMode -Version 1.0" >> $script:PsmPath
+
   # !!!BUG: This should be using whatever is yielded by @compileParams
   #
   foreach ($folder in $script:ImportFolders) {
