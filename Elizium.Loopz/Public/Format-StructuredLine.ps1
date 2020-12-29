@@ -35,9 +35,7 @@ function Format-StructuredLine {
   [boolean]$withLead = Get-PsObjectField $Options 'WithLead' $false;
   [string]$formatWithArg = $Writer.ApiFormatWithArg;
 
-  [hashtable]$theme = $PassThru.ContainsKey(
-    'LOOPZ.KRAYOLA-THEME') `
-    ? $PassThru['LOOPZ.KRAYOLA-THEME'] : $(Get-KrayolaTheme);
+  [hashtable]$theme = $Writer.Theme;
 
   [string]$line = $PassThru.ContainsKey($LineKey) `
     ? $PassThru[$LineKey] : ([string]::new("_", 81));

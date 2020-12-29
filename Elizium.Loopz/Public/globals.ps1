@@ -23,15 +23,16 @@ $global:LoopzHelpers = @{
       -Trigger $_trigger
   } # WhItemDecoratorBlock
 
-  DefaultHeaderBlock   = [scriptblock] {
+  HeaderBlock          = [scriptblock] {
     param(
-      [hashtable]$PassThru = @{}
+      [hashtable]$PassThru = @{},
+      [writer]$Writer
     )
 
-    show-DefaultHeaderBlock -PassThru $PassThru;
-  } # SimpleHeaderBlock
+    Show-Header -PassThru $PassThru;
+  } # HeaderBlock
 
-  SimpleSummaryBlock   = [scriptblock] {
+  SummaryBlock         = [scriptblock] {
     param(
       [int]$Count,
       [int]$Skipped,
@@ -39,8 +40,9 @@ $global:LoopzHelpers = @{
       [hashtable]$PassThru = @{}
     )
 
-    show-SimpleSummaryBlock -Count $Count -Skipped $Skipped -Triggered $Triggered -PassThru $PassThru;
-  } # SimpleSummaryBlock
+    Show-Summary -Count $Count -Skipped $Skipped `
+      -Triggered $Triggered -PassThru $PassThru;
+  } # SummaryBlock
 }
 
 # Session UI state
@@ -83,9 +85,9 @@ $global:Loopz = [PSCustomObject]@{
   SignalEmoji           = 1;
 
   MissingSignal         = @{
-    'windows' = @('???', '🔻');
-    'linux'   = @('???', '🔴');
-    'mac'     = @('???', '🔺');
+    'windows' = (kp(@('???', '🔻')));
+    'linux'   = (kp(@('???', '🔴')));
+    'mac'     = (kp(@('???', '🔺')));
   }
 
   # TODO:
@@ -96,76 +98,76 @@ $global:Loopz = [PSCustomObject]@{
   DefaultSignals        = [ordered]@{
     # Operations
     #
-    'CUT-A'        = @('Cut', '✂️')
-    'CUT-B'        = @('Cut', '🔪')
-    'COPY-A'       = @('Copy', '🍒')
-    'COPY-B'       = @('Copy', '🥒')
-    'MOVE-A'       = @('Move', '🍺')
-    'MOVE-B'       = @('Move', '🍻')
-    'PASTE-A'      = @('Paste', '🌶️')
-    'PASTE-B'      = @('Paste', '🥜')
-    'OVERWRITE-A'  = @('Overwrite', '♻️')
-    'OVERWRITE-B'  = @('Overwrite', '❗')
+    'CUT-A'        = (kp(@('Cut', '✂️')));
+    'CUT-B'        = (kp(@('Cut', '🔪')));
+    'COPY-A'       = (kp(@('Copy', '🍒')));
+    'COPY-B'       = (kp(@('Copy', '🥒')));
+    'MOVE-A'       = (kp(@('Move', '🍺')));
+    'MOVE-B'       = (kp(@('Move', '🍻')));
+    'PASTE-A'      = (kp(@('Paste', '🌶️')));
+    'PASTE-B'      = (kp(@('Paste', '🥜')));
+    'OVERWRITE-A'  = (kp(@('Overwrite', '♻️')));
+    'OVERWRITE-B'  = (kp(@('Overwrite', '❗')));
 
     # Thingies
     #
-    'DIRECTORY-A'  = @('Directory', '📁')
-    'DIRECTORY-B'  = @('Directory', '🗂️')
-    'FILE-A'       = @('File', '🏷️')
-    'FILE-B'       = @('File', '📝')
-    'PATTERN'      = @('Pattern', '🔍')
-    'WITH'         = @('With', '🍑')
-    'CRUMB-A'      = @('Crumb', '🎯')
-    'CRUMB-B'      = @('Crumb', '🧿')
-    'CRUMB-C'      = @('Crumb', '💎')
-    'SUMMARY-A'    = @('Summary', '🔆')
-    'SUMMARY-B'    = @('Summary', '✨')
-    'MESSAGE'      = @('Message', '🗯️')
-    'CAPTURE'      = @('Capture', '☂️')
+    'DIRECTORY-A'  = (kp(@('Directory', '📁')));
+    'DIRECTORY-B'  = (kp(@('Directory', '🗂️')));
+    'FILE-A'       = (kp(@('File', '🏷️')));
+    'FILE-B'       = (kp(@('File', '📝')));
+    'PATTERN'      = (kp(@('Pattern', '🔍')));
+    'WITH'         = (kp(@('With', '🍑')));
+    'CRUMB-A'      = (kp(@('Crumb', '🎯')));
+    'CRUMB-B'      = (kp(@('Crumb', '🧿')));
+    'CRUMB-C'      = (kp(@('Crumb', '💎')));
+    'SUMMARY-A'    = (kp(@('Summary', '🔆')));
+    'SUMMARY-B'    = (kp(@('Summary', '✨')));
+    'MESSAGE'      = (kp(@('Message', '🗯️')));
+    'CAPTURE'      = (kp(@('Capture', '☂️')));
 
     # Media
     #
-    'AUDIO'        = @('Audio', '🎶')
-    'TEXT'         = @('Text', '🆎')
-    'DOCUMENT'     = @('Document', '📜')
-    'IMAGE'        = @('Image', '🖼️')
-    'MOVIE'        = @('Movie', '🎬')
+    'AUDIO'        = (kp(@('Audio', '🎶')));
+    'TEXT'         = (kp(@('Text', '🆎')));
+    'DOCUMENT'     = (kp(@('Document', '📜')));
+    'IMAGE'        = (kp(@('Image', '🖼️')));
+    'MOVIE'        = (kp(@('Movie', '🎬')));
 
     # Indicators
     #
-    'WHAT-IF'      = @('WhatIf', '☑️')
-    'WARNING-A'    = @('Warning', '⚠️')
-    'WARNING-B'    = @('Warning', '👻')
-    'SWITCH-ON'    = @('On', '✔️')
-    'SWITCH-OFF'   = @('Off', '❌')
-    'OK-A'         = @('🆗', '🚀')
-    'OK-B'         = @('🆗', '🌟')
-    'BAD-A'        = @('Bad', '💥')
-    'BAD-B'        = @('Bad', '💢')
-    'PROHIBITED'   = @('Prohibited', '🚫')
-    'INCLUDE'      = @('Include', '💠')
-    'SOURCE'       = @('Source', '🎀')
-    'DESTINATION'  = @('Destination', '☀️')
-    'TRIM'         = @('Trim', '🌊')
-    'MULTI-SPACES' = @('Spaces', '❄️')
-    'DIAGNOSTICS'  = @('Diagnostics', '🧪')
+    'WHAT-IF'      = (kp(@('WhatIf', '☑️')));
+    'WARNING-A'    = (kp(@('Warning', '⚠️')));
+    'WARNING-B'    = (kp(@('Warning', '👻')));
+    'SWITCH-ON'    = (kp(@('On', '✔️')));
+    'SWITCH-OFF'   = (kp(@('Off', '❌')));
+    'OK-A'         = (kp(@('🆗', '🚀')));
+    'OK-B'         = (kp(@('🆗', '🌟')));
+    'BAD-A'        = (kp(@('Bad', '💥')));
+    'BAD-B'        = (kp(@('Bad', '💢')));
+    'PROHIBITED'   = (kp(@('Prohibited', '🚫')));
+    'INCLUDE'      = (kp(@('Include', '💠')));
+    'SOURCE'       = (kp(@('Source', '🎀')));
+    'DESTINATION'  = (kp(@('Destination', '☀️')));
+    'TRIM'         = (kp(@('Trim', '🌊')));
+    'MULTI-SPACES' = (kp(@('Spaces', '❄️')));
+    'DIAGNOSTICS'  = (kp(@('Diagnostics', '🧪')));
 
     # Outcomes
     #
-    'FAILED-A'     = @('Failed', '☢️')
-    'FAILED-B'     = @('Failed', '💩')
-    'SKIPPED-A'    = @('Skipped', '💤')
-    'SKIPPED-B'    = @('Skipped', '👾')
-    'ABORTED-A'    = @('Aborted', '✖️')
-    'ABORTED-B'    = @('Aborted', '👽')
-    'CLASH'        = @('Clash', '📛')
-    'NOT-ACTIONED' = @('Not Actioned', '⛔')
+    'FAILED-A'     = (kp(@('Failed', '☢️')));
+    'FAILED-B'     = (kp(@('Failed', '💩')));
+    'SKIPPED-A'    = (kp(@('Skipped', '💤')));
+    'SKIPPED-B'    = (kp(@('Skipped', '👾')));
+    'ABORTED-A'    = (kp(@('Aborted', '✖️')));
+    'ABORTED-B'    = (kp(@('Aborted', '👽')));
+    'CLASH'        = (kp(@('Clash', '📛')));
+    'NOT-ACTIONED' = (kp(@('Not Actioned', '⛔')));
 
     # Command Specific
     #
-    'REMY.ANCHOR'  = @('Anchor', '⚓')
-    'REMY.POST'    = @('Post Process', '🌈')
-    'REMY.DROP'    = @('Drop', '💧')
+    'REMY.ANCHOR'  = (kp(@('Anchor', '⚓')));
+    'REMY.POST'    = (kp(@('Post Process', '🌈')));
+    'REMY.DROP'    = (kp(@('Drop', '💧')));
   }
 
   OverrideSignals       = @{ # Label, Emoji

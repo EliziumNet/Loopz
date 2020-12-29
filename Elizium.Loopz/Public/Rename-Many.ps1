@@ -176,8 +176,8 @@ function Rename-Many {
         }
       } # $action
 
-      [string[][]]$properties = @();
-      [string[][]]$lines = @();
+      [line]$properties = [line]::new(@());
+      [line[]]$lines = @();
       [hashtable]$signals = $_passThru['LOOPZ.SIGNALS'];
 
       # Perform Rename Action, then post process
@@ -188,9 +188,9 @@ function Rename-Many {
         -Signals $signals;
 
       if ($postResult.Modified) {
-        [string[]]$postSignal = Get-FormattedSignal -Name 'REMY.POST' `
+        [couplet]$postSignal = Get-FormattedSignal -Name 'REMY.POST' `
           -Signals $signals -Value $postResult.Indication -CustomLabel $postResult.Label;
-        $properties += , $postSignal;
+        $properties.append($postSignal);
         $newItemName = $postResult.TransformResult;
       }
 
@@ -225,8 +225,7 @@ function Rename-Many {
       [string]$signalName = $itemIsDirectory ? 'DIRECTORY-A' : 'FILE-A';
       [string]$message = Get-FormattedSignal -Name $signalName `
         -Signals $signals -CustomLabel $messageLabel -Format '   [{1}] {0}';
-
-      [int]$signalLength = $signals[$signalName][1].Length;
+      [int]$signalLength = $signals[$signalName].Value.Length;
 
       # TODO: Strictly speaking the 28 needs to be adjusted according to some of the
       # entries in the krayola scheme like MESSAGE-SUFFIX, FORMAT.
@@ -246,26 +245,28 @@ function Rename-Many {
       }
 
       if ($trigger) {
-        $lines += , @($_passThru['LOOPZ.REMY.FROM-LABEL'], $_underscore.Name);
+        $lines += (kl(
+            kp(@($_passThru['LOOPZ.REMY.FROM-LABEL'], $_underscore.Name))
+          ));
       }
       else {
         if ($clash) {
           Write-Debug "!!! doRenameFsItems; path: '$newItemFullPath' already exists, rename skipped";
-          [string[]]$clashSignal = Get-FormattedSignal -Name 'CLASH' `
+          [couplet]$clashSignal = Get-FormattedSignal -Name 'CLASH' `
             -Signals $signals -EmojiAsValue -EmojiOnlyFormat '{0}';
-          $properties += , $clashSignal;
+          $properties.append($clashSignal);
         }
         else {
-          [string[]]$notActionedSignal = Get-FormattedSignal -Name 'NOT-ACTIONED' `
+          [couplet]$notActionedSignal = Get-FormattedSignal -Name 'NOT-ACTIONED' `
             -Signals $signals -EmojiAsValue -CustomLabel 'Not Renamed' -EmojiOnlyFormat '{0}';
-          $properties += , $notActionedSignal;
+          $properties.append($notActionedSignal);
         }
       }
 
       if (-not($actionResult.Success)) {
-        [string[]]$failedSignal = Get-FormattedSignal -Name 'FAILED-A' `
+        [couplet]$failedSignal = Get-FormattedSignal -Name 'FAILED-A' `
           -Signals $signals -Value $actionResult.FailedReason;
-        $properties += , $failedSignal; 
+        $properties.append($failedSignal); 
       }
 
       # Do diagnostics
@@ -291,25 +292,27 @@ function Rename-Many {
 
               $diagnosticLines += $compoundValue;
             }
-            $lines += , @($namedLabel, $($diagnosticLines -join ', '));
+            $lines += (kl(
+                kp(@($namedLabel, $($diagnosticLines -join ', ')))
+              ));
           }
         }
       }
 
       if ($whatIf) {
-        [string[]]$whatIfSignal = Get-FormattedSignal -Name 'WHAT-IF' `
+        [couplet]$whatIfSignal = Get-FormattedSignal -Name 'WHAT-IF' `
           -Signals $signals -EmojiAsValue -EmojiOnlyFormat '{0}';
-        $properties += , $whatIfSignal;
+        $properties.append($whatIfSignal);
       }
 
       [PSCustomObject]$result = [PSCustomObject]@{
         Product = $product;
       }
 
-      $result | Add-Member -MemberType NoteProperty -Name 'Pairs' -Value (, $properties);
+      $result | Add-Member -MemberType NoteProperty -Name 'Pairs' -Value $properties;
 
       if ($lines.Length -gt 0) {
-        $result | Add-Member -MemberType NoteProperty -Name 'Lines' -Value (, $lines);
+        $result | Add-Member -MemberType NoteProperty -Name 'Lines' -Value $lines;
       }
 
       if ($trigger) {
@@ -339,8 +342,8 @@ function Rename-Many {
 
     [boolean]$whatIf = $PSBoundParameters.ContainsKey('WhatIf');
     [PSCustomObject]$containers = @{
-      Wide  = [string[][]]@();
-      Props = [string[][]]@();
+      Wide  = [line]::new(@());
+      Props = [line]::new(@());
     }
 
     [string]$adjustedWhole = if ($PSBoundParameters.ContainsKey('Whole')) {
@@ -393,12 +396,12 @@ function Rename-Many {
     }
 
     if ($PSBoundParameters.ContainsKey('Diagnose')) {
-      [string]$switchOnEmoji = $signals['SWITCH-ON'][1];
+      [string]$switchOnEmoji = $signals['SWITCH-ON'].Value;
 
-      $diagnosticsSignal = Get-FormattedSignal -Name 'DIAGNOSTICS' `
+      [couplet]$diagnosticsSignal = Get-FormattedSignal -Name 'DIAGNOSTICS' `
         -Signals $signals -Value $('[{0}]' -f $switchOnEmoji);
 
-      $containers.Props += , $diagnosticsSignal;
+      $containers.Props.Line += $diagnosticsSignal;
     }
 
     [boolean]$doMoveToken = ($PSBoundParameters.ContainsKey('Anchor') -or
@@ -451,6 +454,9 @@ function Rename-Many {
 
     $summaryMessage = Get-FormattedSignal -Name 'SUMMARY-A' -Signals $signals -CustomLabel $summaryMessage;
 
+    [hashtable]$theme = $(Get-KrayolaTheme);
+    [writer]$writer = New-Writer -Theme $theme;
+
     [hashtable]$passThru = @{
       'LOOPZ.WH-FOREACH-DECORATOR.BLOCK'      = $doRenameFsItems;
       'LOOPZ.WH-FOREACH-DECORATOR.GET-RESULT' = $getResult;
@@ -469,6 +475,8 @@ function Rename-Many {
 
       'LOOPZ.REMY.FROM-LABEL'                 = Get-PaddedLabel -Label 'From' -Width 9;
       'LOOPZ.SIGNALS'                         = $signals;
+
+      'LOOPZ.WRITER'                          = $writer;
     }
     $passThru['LOOPZ.REMY.ACTION'] = $doMoveToken ? 'Move-Match' : 'Update-Match';
 
@@ -540,11 +548,11 @@ function Rename-Many {
       $passThru['LOOPZ.REMY.PASTE'] = $Paste;
     }
 
-    if ($containers.Wide.Length -gt 0) {
+    if ($containers.Wide.Line.Length -gt 0) {
       $passThru['LOOPZ.SUMMARY-BLOCK.WIDE-ITEMS'] = $containers.Wide;
     }
 
-    if ($containers.Props.Length -gt 0) {
+    if ($containers.Props.Line.Length -gt 0) {
       $passThru['LOOPZ.SUMMARY-BLOCK.PROPERTIES'] = $containers.Props;
     }
        
@@ -578,8 +586,8 @@ function Rename-Many {
     [hashtable]$parameters = @{
       'Condition' = $matchesPattern;
       'PassThru'  = $passThru;
-      'Header'    = $LoopzHelpers.DefaultHeaderBlock;
-      'Summary'   = $LoopzHelpers.SimpleSummaryBlock;
+      'Header'    = $LoopzHelpers.HeaderBlock;
+      'Summary'   = $LoopzHelpers.SummaryBlock;
       'Block'     = $LoopzHelpers.WhItemDecoratorBlock;
     }
 

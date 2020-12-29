@@ -19,8 +19,9 @@ Describe 'Show-Summary' {
       InModuleScope Elizium.Loopz {
         [hashtable]$passThru = @{
           'LOOPZ.SUMMARY-BLOCK.LINE' = $LoopzUI.DashLine;
+          'LOOPZ.WRITER'             = $_writer;
         }
-        Show-Summary -Count 999 -Skipped 0 -Triggered $false -PassThru $passThru -Writer $_writer;
+        Show-Summary -Count 999 -Skipped 0 -Triggered $false -PassThru $passThru;
       }
     }
   }
@@ -28,8 +29,10 @@ Describe 'Show-Summary' {
   Context 'given: no block line specified' {
     It 'should: display summary' {
       InModuleScope Elizium.Loopz {
-        [hashtable]$passThru = @{}
-        Show-Summary -Count 101 -Skipped 0 -Triggered $true -PassThru $passThru -Writer $_writer;
+        [hashtable]$passThru = @{
+          'LOOPZ.WRITER' = $_writer;
+        }
+        Show-Summary -Count 101 -Skipped 0 -Triggered $true -PassThru $passThru;
       }
     }
   }
@@ -41,8 +44,9 @@ Describe 'Show-Summary' {
         [hashtable]$passThru = @{
           'LOOPZ.SUMMARY-BLOCK.LINE'       = $LoopzUI.DashLine;
           'LOOPZ.SUMMARY-BLOCK.WIDE-ITEMS' = $wideItems;
+          'LOOPZ.WRITER'                   = $_writer;
         }
-        Show-Summary -Count 999 -Skipped 0 -Triggered $false -PassThru $passThru -Writer $_writer;
+        Show-Summary -Count 999 -Skipped 0 -Triggered $false -PassThru $passThru;
       }
     }
 
@@ -52,9 +56,10 @@ Describe 'Show-Summary' {
         [hashtable]$passThru = @{
           'LOOPZ.SUMMARY-BLOCK.LINE'             = $LoopzUI.DashLine;
           'LOOPZ.SUMMARY-BLOCK.WIDE-ITEMS'       = $wideItems;
-          'LOOPZ.SUMMARY-BLOCK.GROUP-WIDE-ITEMS' = $true
+          'LOOPZ.SUMMARY-BLOCK.GROUP-WIDE-ITEMS' = $true;
+          'LOOPZ.WRITER'                         = $_writer;
         }
-        Show-Summary -Count 999 -Skipped 0 -Triggered $false -PassThru $passThru -Writer $_writer;
+        Show-Summary -Count 999 -Skipped 0 -Triggered $false -PassThru $passThru;
       }
     }
   }
@@ -65,9 +70,10 @@ Describe 'Show-Summary' {
         [line]$wideItems = $(kl($(kp('A', 'one')), $(kp('B', 'two'))));
         [hashtable]$passThru = @{
           'LOOPZ.SUMMARY-BLOCK.LINE'       = $LoopzUI.DashLine;
-          'LOOPZ.SUMMARY-BLOCK.PROPERTIES' = $wideItems;;
+          'LOOPZ.SUMMARY-BLOCK.PROPERTIES' = $wideItems;
+          'LOOPZ.WRITER'                   = $_writer;
         }
-        Show-Summary -Count 999 -Skipped 0 -Triggered $false -PassThru $passThru -Writer $_writer;
+        Show-Summary -Count 999 -Skipped 0 -Triggered $false -PassThru $passThru;
       }
     }
   }

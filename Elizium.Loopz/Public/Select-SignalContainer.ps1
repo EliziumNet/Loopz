@@ -27,23 +27,23 @@ function Select-SignalContainer {
     [string]$Force
   )
 
-  $formattedSignal = Get-FormattedSignal -Name $Name -Format $Format -Value $Value `
+  [couplet]$formattedSignal = Get-FormattedSignal -Name $Name -Format $Format -Value $Value `
     -Signals $Signals -CustomLabel $CustomLabel;
 
   if ($PSBoundParameters.ContainsKey('Force')) {
     if ($Force -eq 'Wide') {
-      $Containers.Wide += , $formattedSignal;
+      $Containers.Wide.append($formattedSignal);
     }
     else {
-      $Containers.Props += , $formattedSignal;
+      $Containers.Props.append($formattedSignal);
     }
   }
   else {
     if ($Value.Length -gt $Threshold) {
-      $Containers.Wide += , $formattedSignal;
+      $Containers.Wide.append($formattedSignal);
     }
     else {
-      $Containers.Props += , $formattedSignal;
+      $Containers.Props.append($formattedSignal);
     }
   }
 }
