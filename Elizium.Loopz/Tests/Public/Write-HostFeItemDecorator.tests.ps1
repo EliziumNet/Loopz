@@ -21,7 +21,6 @@ Describe 'Write-HostFeItemDecorator' {
       [hashtable]$script:_passThru = @{
         'LOOPZ.WH-FOREACH-DECORATOR.FUNCTION-NAME' = 'get-AnswerAdvancedFn';
         'LOOPZ.WH-FOREACH-DECORATOR.MESSAGE'       = 'Test Advanced Function';
-        'LOOPZ.KRAYOLA-THEME'                      = $(Get-KrayolaTheme);
         'LOOPZ.WH-FOREACH-DECORATOR.PRODUCT-LABEL' = 'Test product';
         'WHAT-IF'                                  = $false;
       }
@@ -150,7 +149,7 @@ Describe 'Write-HostFeItemDecorator' {
 
   Context 'given: IF-TRIGGERED is set' {
     Context 'and: an item sets the Trigger' {
-      It 'should: invoke Write-ThemedPairsInColour' {
+      It 'should: invoke writer' {
         InModuleScope Elizium.Loopz {
           function get-AnswerAdvancedFnWithTrigger {
             [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSShouldProcess', '')]
@@ -180,7 +179,6 @@ Describe 'Write-HostFeItemDecorator' {
             'LOOPZ.WH-FOREACH-DECORATOR.FUNCTION-NAME' = 'get-AnswerAdvancedFnWithTrigger';
             'ANSWER'                                   = 'Fourty Two';
             'LOOPZ.WH-FOREACH-DECORATOR.MESSAGE'       = 'Test Advanced Function';
-            'LOOPZ.KRAYOLA-THEME'                      = $theme;
             'LOOPZ.WH-FOREACH-DECORATOR.PRODUCT-LABEL' = 'Test product';
             'WHAT-IF'                                  = $false;
             'LOOPZ.WH-FOREACH-DECORATOR.IF-TRIGGERED'  = $true;
@@ -190,26 +188,27 @@ Describe 'Write-HostFeItemDecorator' {
           $underscore = 'What is the answer to life, love and unity';
           $decorator.Invoke($underscore, 0, $passThru, $false);
         }
-      } # should: invoke Write-ThemedPairsInColour
+      } # should: invoke writer
     } # and: IF-TRIGGERED is set
 
     Context 'and: an item does not sets the Trigger' {
-      It 'should: NOT invoke Write-ThemedPairsInColour' {
+      It 'should: NOT invoke writer' {
         InModuleScope Elizium.Loopz {
+          [hashtable]$theme = $(Get-KrayolaTheme);
           [hashtable]$passThru = @{
             'LOOPZ.WH-FOREACH-DECORATOR.FUNCTION-NAME' = 'get-AnswerAdvancedFn';
             'ANSWER'                                   = 'Fourty Two';
             'LOOPZ.WH-FOREACH-DECORATOR.MESSAGE'       = 'Test Advanced Function';
-            'LOOPZ.KRAYOLA-THEME'                      = $(Get-KrayolaTheme);
             'LOOPZ.WH-FOREACH-DECORATOR.PRODUCT-LABEL' = 'Test product';
             'WHAT-IF'                                  = $false;
             'LOOPZ.WH-FOREACH-DECORATOR.IF-TRIGGERED'  = $true;
+            'LOOPZ.WRITER'                             = New-Writer -Theme $theme;
           }
 
           $underscore = 'What is the answer to the universe';
           $decorator.Invoke($underscore, 0, $passThru, $false);
         }
-      } # should: NOT invoke Write-ThemedPairsInColour
+      } # should: NOT invoke writer
     } # and: IF-TRIGGERED is set
   } # given: IF-TRIGGERED is set
 } # Write-HostFeItemDecorator

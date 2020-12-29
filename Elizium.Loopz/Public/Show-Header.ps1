@@ -6,6 +6,10 @@ function Show-Header {
   )
 
   [writer]$writer = $PassThru['LOOPZ.WRITER'];
+
+  if (-not($writer)) {
+    throw "Writer missing from PassThru under key 'LOOPZ.WRITER'"
+  }
   $writer.Reset();
   [string]$writerFormatWithArg = $writer.ApiFormatWithArg;
   [string]$message = $PassThru.ContainsKey(

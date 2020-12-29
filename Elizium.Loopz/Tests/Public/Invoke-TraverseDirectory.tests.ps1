@@ -1,3 +1,5 @@
+using module Elizium.Krayola;
+
 Describe 'Invoke-TraverseDirectory' {
   BeforeAll {
     Get-Module Elizium.Loopz | Remove-Module
@@ -57,11 +59,8 @@ Describe 'Invoke-TraverseDirectory' {
           -Block $traverseBlock -SessionSummary $sessionSummary;
       }
 
-      Context 'and: SimpleSummaryBlock provided' {
+      Context 'and: SummaryBlock provided' {
         It 'should: write summary' {
-          Mock Write-InColour -ModuleName Elizium.Loopz { }
-          Mock Write-ThemedPairsInColour -ModuleName Elizium.Loopz { }
-
           [scriptblock]$traverseBlock = {
             param(
               [Parameter(Mandatory)]
@@ -80,13 +79,16 @@ Describe 'Invoke-TraverseDirectory' {
             @{ Product = $_underscore }
           }
 
+          [hashtable]$theme = $(Get-KrayolaTheme);
+          [writer]$writer = New-Writer -Theme $theme;
           [hashtable]$passThru = @{
             'LOOPZ.SUMMARY-BLOCK.LINE' = $LoopzUI.EqualsLine;
             'LOOPZ.SUMMARY-BLOCK.MESSAGE' = 'Test Summary';
+            'LOOPZ.WRITER' = $writer;
           }
 
           Invoke-TraverseDirectory -Path $resolvedSourcePath -PassThru $passThru `
-            -Block $traverseBlock -Summary $LoopzHelpers.SimpleSummaryBlock;
+            -Block $traverseBlock -Summary $LoopzHelpers.SummaryBlock;
         }
       }
     } # and: directory tree

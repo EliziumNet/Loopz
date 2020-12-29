@@ -96,9 +96,7 @@ Describe 'Show-Header' {
               'LOOPZ.HEADER-BLOCK.LINE'    = $LoopzUI.SmallEqualsLine;
               'LOOPZ.WRITER'               = $_writer;
             }
-            $passThru['LOOPZ.KRAYOLA-THEME'] = $theme;
             Show-Header -PassThru $passThru;
-
           }
         }
       }
@@ -172,13 +170,13 @@ Describe 'Show-Header' {
             $theme = (Get-KrayolaTheme).Clone();
             $theme['OPEN'] = '*** [';
             $theme['CLOSE'] = '] ***';
+            [writer]$writer = New-Writer($theme);
 
             [hashtable]$passThru = @{
               'LOOPZ.HEADER-BLOCK.MESSAGE' = (New-Object String('.', 4)).Replace('.', 'The monarch will be crowned ');
               'LOOPZ.HEADER-BLOCK.LINE'    = $LoopzUI.SmallEqualsLine;
-              'LOOPZ.WRITER'               = $_writer;
+              'LOOPZ.WRITER'               = $writer;
             }
-            $passThru['LOOPZ.KRAYOLA-THEME'] = $theme;
             Show-Header -PassThru $passThru;
           }
         }

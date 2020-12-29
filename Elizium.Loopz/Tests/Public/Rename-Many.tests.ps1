@@ -644,11 +644,6 @@ Describe 'Rename-Many' {
     [string]$script:filter = 'bling.*';
     [scriptblock]$script:successCondition = ( { return $true; })
 
-    BeforeAll {
-      Mock -ModuleName Elizium.Loopz Write-ThemedPairsInColour { }
-      Mock -ModuleName Elizium.Loopz Write-InColour { }
-    }
-
     Context 'is: valid' {
       Context 'MoveToAnchor' {
         It 'should: not throw ParameterBindingException' {

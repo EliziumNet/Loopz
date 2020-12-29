@@ -15,6 +15,10 @@ function Show-Summary {
   )
 
   [writer]$writer = $PassThru['LOOPZ.WRITER'];
+  if (-not($writer)) {
+    throw "Writer missing from PassThru under key 'LOOPZ.WRITER'"
+  }
+
   [string]$writerFormatWithArg = $writer.ApiFormatWithArg;
 
   # First line

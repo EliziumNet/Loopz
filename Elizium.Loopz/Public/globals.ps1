@@ -23,14 +23,6 @@ $global:LoopzHelpers = @{
       -Trigger $_trigger
   } # WhItemDecoratorBlock
 
-  DefaultHeaderBlock   = [scriptblock] {
-    param(
-      [hashtable]$PassThru = @{}
-    )
-
-    show-DefaultHeaderBlock -PassThru $PassThru;
-  } # SimpleHeaderBlock
-
   HeaderBlock          = [scriptblock] {
     param(
       [hashtable]$PassThru = @{},
@@ -39,18 +31,6 @@ $global:LoopzHelpers = @{
 
     Show-Header -PassThru $PassThru;
   } # HeaderBlock
-
-  SimpleSummaryBlock   = [scriptblock] {
-    param(
-      [int]$Count,
-      [int]$Skipped,
-      [boolean]$Triggered,
-      [hashtable]$PassThru = @{}
-    )
-
-    show-SimpleSummaryBlock -Count $Count -Skipped $Skipped `
-      -Triggered $Triggered -PassThru $PassThru;
-  } # SimpleSummaryBlock
 
   SummaryBlock         = [scriptblock] {
     param(
