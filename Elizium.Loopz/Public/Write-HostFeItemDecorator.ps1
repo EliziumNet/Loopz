@@ -140,6 +140,8 @@
     $result.ToString();
   }
 
+  [writer]$writer = $_passthru['LOOPZ.WRITER'];
+
   [scriptblock]$decorator = {
     param ($_underscore, $_index, $_passthru, $_trigger)
 
@@ -179,7 +181,7 @@
     $getResult = $PassThru.Contains('LOOPZ.WH-FOREACH-DECORATOR.GET-RESULT') `
       ? $PassThru['LOOPZ.WH-FOREACH-DECORATOR.GET-RESULT'] : $defaultGetResult;
 
-    [string[][]]$themedPairs = @(, @('No', $("{0,3}" -f ($Index + 1))));
+    [line]$themedPairs = $( kl( $(kp('No', $("{0,3}" -f ($Index + 1)))) ) );
 
     # Get Product if it exists
     #
@@ -191,51 +193,49 @@
         ? $PassThru['LOOPZ.WH-FOREACH-DECORATOR.PRODUCT-LABEL'] : 'Product';
 
       if (-not([string]::IsNullOrWhiteSpace($productLabel))) {
-        $themedPairs += , @($productLabel, $productValue, $affirm);
+        $themedPairs.append($(kp(@($productLabel, $productValue, $affirm))));
       }
     }
 
     # Get Key/Value Pairs
     #
     if ($invokeResult -and $invokeResult.psobject.properties.match('Pairs') -and
-      $invokeResult.Pairs -and ($invokeResult.Pairs -is [Array]) -and ($invokeResult.Pairs.Count -gt 0)) {
-      $themedPairs += $invokeResult.Pairs;
+      $invokeResult.Pairs -and ($invokeResult.Pairs -is [line]) -and ($invokeResult.Pairs.Line.Count -gt 0)) {
+      $themedPairs.append($invokeResult.Pairs);
     }
 
     # Write with a Krayola Theme
     #
-    [hashtable]$krayolaTheme = `
-      $PassThru.ContainsKey('LOOPZ.KRAYOLA-THEME') `
-      ? $PassThru['LOOPZ.KRAYOLA-THEME'] : (Get-KrayolaTheme);
+    [hashtable]$krayolaTheme = $writer.Theme;
 
-    [hashtable]$parameters = @{}
-    $parameters['Pairs'] = $themedPairs;
-    $parameters['Theme'] = $krayolaTheme;
-
-    if (-not([string]::IsNullOrWhiteSpace($message))) {
-      $parameters['Message'] = $message;
-    }
-
-    # Write the primary line
+    # Write the primary line => use the writer
     #
-    Write-ThemedPairsInColour @parameters;
+    if (-not([string]::IsNullOrEmpty($message))) {
+      $writer.Message($message);
+    }
+    $writer.Line($themedPairs);
 
     # Write additional lines
     #
     if ($invokeResult -and $invokeResult.psobject.properties.match('Lines') -and $invokeResult.Lines) {
       [int]$indent = $PassThru.ContainsKey('LOOPZ.WH-FOREACH-DECORATOR.INDENT') `
         ? $PassThru['LOOPZ.WH-FOREACH-DECORATOR.INDENT'] : 3;
-      $parameters['Message'] = [string]::new(' ', $indent);
+      [string]$blank = [string]::new(' ', $indent);
 
-      [hashtable]$adjustedTheme = $krayolaTheme.Clone();
-      $adjustedTheme['MESSAGE-SUFFIX'] = [string]::Empty;
-      $adjustedTheme['OPEN'] = [string]::Empty;
-      $adjustedTheme['CLOSE'] = [string]::Empty;
-      $parameters['Theme'] = $adjustedTheme;
+      [writer]$adjustedWriter = if ($PassThru.ContainsKey('LOOPZ.WH-FOREACH-DECORATOR.WRITER')) {
+        $PassThru['LOOPZ.WH-FOREACH-DECORATOR.WRITER'];
+      } else {
+        [hashtable]$adjustedTheme = $krayolaTheme.Clone();
+        $adjustedTheme['MESSAGE-SUFFIX'] = [string]::Empty;
+        $adjustedTheme['OPEN'] = [string]::Empty;
+        $adjustedTheme['CLOSE'] = [string]::Empty;
+        $PassThru['LOOPZ.WH-FOREACH-DECORATOR.WRITER'] = New-Writer -Theme $adjustedTheme;
+
+        $PassThru['LOOPZ.WH-FOREACH-DECORATOR.WRITER'];
+      }
 
       foreach ($line in $invokeResult.Lines) {
-        $parameters['Pairs'] = @(, $line);
-        Write-ThemedPairsInColour @parameters;
+        $adjustedWriter.Message($blank).Line($line);
       }
     }
   }

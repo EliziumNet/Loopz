@@ -1,4 +1,4 @@
-
+using module Elizium.Krayola;
 Describe 'Select-SignalContainer' {
   BeforeAll {
     Get-Module Elizium.Loopz | Remove-Module
@@ -6,17 +6,17 @@ Describe 'Select-SignalContainer' {
       -ErrorAction 'stop' -DisableNameChecking;
 
     [hashtable]$script:signals = @{
-      'GO'    = @('Go', '@@');
-      'STOP'  = @('Stop', '!!');
-      'ALERT' = @('Alert', '$$');
-      'ERROR' = @('Error', '^^');
+      'GO'    = $(kp(@('Go', '@@')));
+      'STOP'  = $(kp(@('Stop', '!!')));
+      'ALERT' = $(kp(@('Alert', '$$')));
+      'ERROR' = $(kp(@('Error', '^^')));
     }
   }
 
   BeforeEach {
     [hashtable]$script:containers = @{
-      Wide  = @();
-      Props = @();
+      Wide  = [line]::new(@());
+      Props = [line]::new(@());
     }
   }
 
@@ -24,8 +24,8 @@ Describe 'Select-SignalContainer' {
     It 'should: Select signal into Wide' {
       Select-SignalContainer -Containers $containers -Name 'GO' -Value 'getter' `
         -Signals $signals -Threshold 4;
-      $containers.Wide.Count | Should -Be 1;
-      $containers.Wide[0] | Should -BeExactly @('[@@] Go', 'getter');
+      $containers.Wide.Line.Count | Should -Be 1;
+      $containers.Wide.Line[0].cequal($(kp(@('[@@] Go', 'getter')))) | Should -BeTrue;
     }
 
     Context 'and: Multiple Signals' {
@@ -36,9 +36,9 @@ Describe 'Select-SignalContainer' {
         Select-SignalContainer -Containers $containers -Name 'STOP' -Value 'no soup for you' `
           -Signals $signals -Threshold 4;
 
-        $containers.Wide.Count | Should -Be 2;
-        $containers.Wide[0] | Should -BeExactly @('[@@] Go', 'getter');
-        $containers.Wide[1] | Should -BeExactly @('[!!] Stop', 'no soup for you');
+        $containers.Wide.Line.Count | Should -Be 2;
+        $containers.Wide.Line[0].cequal($(kp(@('[@@] Go', 'getter')))) | Should -BeTrue;
+        $containers.Wide.Line[1].cequal($(kp(@('[!!] Stop', 'no soup for you')))) | Should -BeTrue;
       }
     }
 
@@ -47,8 +47,8 @@ Describe 'Select-SignalContainer' {
         Select-SignalContainer -Containers $containers -Name 'GO' -Value 'getter' `
           -Signals $signals -Threshold 8;
 
-        $containers.Props.Count | Should -Be 1;
-        $containers.Props[0] | Should -BeExactly @('[@@] Go', 'getter');
+        $containers.Props.Line.Count | Should -Be 1;
+        $containers.Props.Line[0].cequal($(kp(@('[@@] Go', 'getter')))) | Should -BeTrue;
       }
     }
 
@@ -66,13 +66,13 @@ Describe 'Select-SignalContainer' {
         Select-SignalContainer -Containers $containers -Name 'ERROR' -Value 'computer says no' `
           -Signals $signals -Threshold 20;
 
-        $containers.Wide.Count | Should -Be 2;
-        $containers.Wide[0] | Should -BeExactly @('[@@] Go', 'getter');
-        $containers.Wide[1] | Should -BeExactly @('[!!] Stop', 'no soup for you');
+        $containers.Wide.Line.Count | Should -Be 2;
+        $containers.Wide.Line[0].cequal($(kp(@('[@@] Go', 'getter')))) | Should -BeTrue;
+        $containers.Wide.Line[1].cequal($(kp(@('[!!] Stop', 'no soup for you')))) | Should -BeTrue;
 
-        $containers.Props.Count | Should -Be 2;
-        $containers.Props[0] | Should -BeExactly @('[$$] Alert', 'watch it');
-        $containers.Props[1] | Should -BeExactly @('[^^] Error', 'computer says no');
+        $containers.Props.Line.Count | Should -Be 2;
+        $containers.Props.Line[0].cequal($(kp(@('[$$] Alert', 'watch it')))) | Should -BeTrue;
+        $containers.Props.Line[1].cequal($(kp(@('[^^] Error', 'computer says no')))) | Should -BeTrue;
       }
     }
 
@@ -80,9 +80,10 @@ Describe 'Select-SignalContainer' {
       It 'should: Ignore Threshold and Select signal into Props' {
         Select-SignalContainer -Containers $containers -Name 'GO' -Value 'getter' `
           -Signals $signals -Threshold 4 -Force 'Props';
-        $containers.Wide.Count | Should -Be 0;
-        $containers.Props.Count | Should -Be 1;
-        $containers.Props[0] | Should -BeExactly @('[@@] Go', 'getter');
+
+        $containers.Wide.Line.Count | Should -Be 0;
+        $containers.Props.Line.Count | Should -Be 1;
+        $containers.Props.Line[0].cequal($(kp(@('[@@] Go', 'getter')))) | Should -BeTrue;
       }
     }
   }

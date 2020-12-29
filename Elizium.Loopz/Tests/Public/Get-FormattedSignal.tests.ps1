@@ -1,3 +1,4 @@
+using module Elizium.Krayola;
 
 Describe 'Get-FormattedSignal' {
   BeforeAll {
@@ -6,28 +7,31 @@ Describe 'Get-FormattedSignal' {
       -ErrorAction 'stop' -DisableNameChecking;
 
     [hashtable]$script:signals = @{
-      'GO'   = @('Go', '@@');
-      'STOP' = @('Stop', '!!');
+      'GO'   = (kp(@('Go', '@@')));
+      'STOP' = (kp(@('Stop', '!!')));
     }
   }
 
   Context 'given: Valid Signal Name' {
     It 'should: Get Formatted Signal' {
-      Get-FormattedSignal -Name 'GO' -Value 'getter' -Signals $signals | `
-        Should -BeExactly @('[@@] Go', 'getter');
+      [couplet]$formattedSignal = Get-FormattedSignal -Name 'GO' -Value 'getter' `
+        -Signals $signals;
+      $formattedSignal.cequal($(kp(@('[@@] Go', 'getter')))) | Should -BeTrue;
     }
 
     Context 'and: Custom Label' {
       It 'should: Get Formatted Signal' {
-        Get-FormattedSignal -Name 'GO' -Value 'getter' -Signals $signals -CustomLabel 'Gone' | `
-          Should -BeExactly @('[@@] Gone', 'getter');
+        [couplet]$formattedSignal = Get-FormattedSignal -Name 'GO' -Value 'getter' `
+          -Signals $signals -CustomLabel 'Gone';
+        $formattedSignal.cequal($(kp(@('[@@] Gone', 'getter')))) | Should -BeTrue;
       }
     }
 
     Context 'and: Format' {
       It 'should: Get Formatted Signal' {
-        Get-FormattedSignal -Name 'GO' -Value 'getter' -Signals $signals -Format '{0} => [{1}]' | `
-          Should -BeExactly @('Go => [@@]', 'getter');
+        [couplet]$formattedSignal = Get-FormattedSignal -Name 'GO' -Value 'getter' `
+          -Signals $signals -Format '{0} => [{1}]'
+        $formattedSignal.cequal($(kp(@('Go => [@@]', 'getter')))) | Should -BeTrue;
       }
     }
 
@@ -40,25 +44,27 @@ Describe 'Get-FormattedSignal' {
 
     Context 'and: Emoji Only' {
       It 'should: Get un-labelled Formatted Signal' {
-        Get-FormattedSignal -Name 'GO' -Value 'getter' -Signals $signals `
-          -EmojiOnlyFormat '[{0}] ' -EmojiOnly | `
-          Should -BeExactly @('[@@] ', 'getter');
+        [couplet]$formattedSignal = Get-FormattedSignal -Name 'GO' -Value 'getter' `
+          -Signals $signals -EmojiOnlyFormat '[{0}] ' -EmojiOnly;
+        $formattedSignal.cequal($(kp(@('[@@] ', 'getter')))) | Should -BeTrue;
       }
     }
 
     Context 'and: Emoji As Value' {
       It 'should: Get Formatted Signal With Emoji As Value' {
-        Get-FormattedSignal -Name 'GO' -Signals $signals -EmojiAsValue -EmojiOnlyFormat '=({0})=' | `
-          Should -BeExactly @('Go', '=(@@)=');
+        [couplet]$formattedSignal = Get-FormattedSignal -Name 'GO' `
+          -Signals $signals -EmojiAsValue -EmojiOnlyFormat '=({0})=';
+        $formattedSignal.cequal($(kp(@('Go', '=(@@)=')))) | Should -BeTrue;
       }
     }
   }
 
   Context 'given: Missing Signal Name' {
     It 'should: Get the Missing Signal' {
-      Mock -ModuleName Elizium.Loopz Resolve-ByPlatform { return @('Missing', '**') }
-      Get-FormattedSignal -Name 'ABORT' -Value 'aborted' -Signals $signals | `
-        Should -BeExactly @('[**] ??? (ABORT)', 'aborted');
+      Mock -ModuleName Elizium.Loopz Resolve-ByPlatform { return $(kp(@('Missing', '**'))) }
+      [couplet]$formattedSignal = Get-FormattedSignal -Name 'ABORT' -Value 'aborted' `
+        -Signals $signals;
+      $formattedSignal.cequal($(kp(@('[**] ??? (ABORT)', 'aborted')))) | Should -BeTrue;
     }
   }
 }

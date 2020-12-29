@@ -33,8 +33,9 @@ Describe 'Show-Header' {
             'LOOPZ.HEADER-BLOCK.MESSAGE' = 'The sound the wind makes in the pines';
             'LOOPZ.HEADER.PROPERTIES'    = $_properties;
             'LOOPZ.HEADER-BLOCK.LINE'    = $LoopzUI.TildeLine;
+            'LOOPZ.WRITER'               = $_writer;
           }
-          Show-Header -PassThru $passThru -Writer $_writer;
+          Show-Header -PassThru $passThru;
         }
       }
 
@@ -47,8 +48,9 @@ Describe 'Show-Header' {
             'LOOPZ.SIGNALS'              = $signals;
             'LOOPZ.HEADER-BLOCK.MESSAGE' = 'The sound the wind makes in the pines';
             'LOOPZ.HEADER-BLOCK.LINE'    = $LoopzUI.EqualsLine;
+            'LOOPZ.WRITER'               = $_writer;
           }
-          Show-Header -PassThru $passThru -Writer $_writer;
+          Show-Header -PassThru $passThru;
         }
       }
     } # and: message
@@ -59,9 +61,10 @@ Describe 'Show-Header' {
           [hashtable]$passThru = @{
             'LOOPZ.HEADER.PROPERTIES' = $_properties;
             'LOOPZ.HEADER-BLOCK.LINE' = $LoopzUI.TildeLine;
+            'LOOPZ.WRITER'            = $_writer;
           }
 
-          Show-Header -PassThru $passThru -Writer $_writer;
+          Show-Header -PassThru $passThru;
         }
       }
     } # and: no message
@@ -74,9 +77,10 @@ Describe 'Show-Header' {
           [hashtable]$passThru = @{
             'LOOPZ.HEADER-BLOCK.MESSAGE' = 'What lies in the darkness';
             'LOOPZ.HEADER-BLOCK.LINE'    = $LoopzUI.EqualsLine;
+            'LOOPZ.WRITER'               = $_writer;
           }
 
-          Show-Header -PassThru $passThru -Writer $_writer;
+          Show-Header -PassThru $passThru;
         }
       }
 
@@ -90,9 +94,10 @@ Describe 'Show-Header' {
             [hashtable]$passThru = @{
               'LOOPZ.HEADER-BLOCK.MESSAGE' = 'Without chemicals he points';
               'LOOPZ.HEADER-BLOCK.LINE'    = $LoopzUI.SmallEqualsLine;
+              'LOOPZ.WRITER'               = $_writer;
             }
             $passThru['LOOPZ.KRAYOLA-THEME'] = $theme;
-            Show-Header -PassThru $passThru -Writer $_writer;
+            Show-Header -PassThru $passThru;
 
           }
         }
@@ -106,9 +111,10 @@ Describe 'Show-Header' {
             [hashtable]$passThru = @{
               'LOOPZ.HEADER-BLOCK.MESSAGE' = 'A man in a smiling bag';
               'LOOPZ.HEADER-BLOCK.LINE'    = $withLeadingSpace;
+              'LOOPZ.WRITER'               = $_writer;
             }
 
-            Show-Header -PassThru $passThru -Writer $_writer;
+            Show-Header -PassThru $passThru;
           }
         }
       }
@@ -124,9 +130,10 @@ Describe 'Show-Header' {
             'LOOPZ.SIGNALS'                   = $signals;
             'LOOPZ.HEADER-BLOCK.CRUMB-SIGNAL' = 'TUNE';
             'LOOPZ.HEADER-BLOCK.LINE'         = $LoopzUI.EqualsLine;
+            'LOOPZ.WRITER'                    = $_writer;
           }
 
-          Show-Header -PassThru $passThru -Writer $_writer;
+          Show-Header -PassThru $passThru;
         }
       }
 
@@ -138,9 +145,10 @@ Describe 'Show-Header' {
           [hashtable]$passThru = @{
             'LOOPZ.SIGNALS'           = $signals;
             'LOOPZ.HEADER-BLOCK.LINE' = $LoopzUI.EqualsLine;
+            'LOOPZ.WRITER'            = $_writer;
           }
 
-          Show-Header -PassThru $passThru -Writer $_writer;
+          Show-Header -PassThru $passThru;
         }
       }
     }
@@ -151,9 +159,10 @@ Describe 'Show-Header' {
           [hashtable]$passThru = @{
             'LOOPZ.HEADER-BLOCK.MESSAGE' = (New-Object String('.', 4)).Replace('.', 'The owls are not what they seem ');
             'LOOPZ.HEADER-BLOCK.LINE'    = $LoopzUI.SmallEqualsLine;
+            'LOOPZ.WRITER'               = $_writer;
           }
 
-          Show-Header -PassThru $passThru -Writer $_writer;
+          Show-Header -PassThru $passThru;
         }
       }
 
@@ -167,9 +176,10 @@ Describe 'Show-Header' {
             [hashtable]$passThru = @{
               'LOOPZ.HEADER-BLOCK.MESSAGE' = (New-Object String('.', 4)).Replace('.', 'The monarch will be crowned ');
               'LOOPZ.HEADER-BLOCK.LINE'    = $LoopzUI.SmallEqualsLine;
+              'LOOPZ.WRITER'               = $_writer;
             }
             $passThru['LOOPZ.KRAYOLA-THEME'] = $theme;
-            Show-Header -PassThru $passThru -Writer $_writer;
+            Show-Header -PassThru $passThru;
           }
         }
       }

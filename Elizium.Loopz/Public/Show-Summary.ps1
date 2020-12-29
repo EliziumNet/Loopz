@@ -11,13 +11,11 @@ function Show-Summary {
     [boolean]$Triggered,
 
     [Parameter()]
-    [hashtable]$PassThru = @{},
-
-    [Parameter()]
-    [writer]$Writer
+    [hashtable]$PassThru = @{}
   )
 
-  [string]$writerFormatWithArg = $Writer.ApiFormatWithArg;
+  [writer]$writer = $PassThru['LOOPZ.WRITER'];
+  [string]$writerFormatWithArg = $writer.ApiFormatWithArg;
 
   # First line
   #
@@ -29,7 +27,7 @@ function Show-Summary {
     # colours to the krayola theme's 'META-COLOURS'
     #
     [string]$structuredBorderLine = $($writerFormatWithArg -f 'ThemeColour', 'meta') + $line;
-    $Writer.ScribbleLn($structuredBorderLine);
+    $writer.ScribbleLn($structuredBorderLine);
   }
   else {
     $structuredBorderLine = [string]::Empty;
@@ -53,7 +51,7 @@ function Show-Summary {
   [string]$message = $PassThru.ContainsKey('LOOPZ.SUMMARY-BLOCK.MESSAGE') `
     ? $PassThru['LOOPZ.SUMMARY-BLOCK.MESSAGE'] : 'Summary';
 
-  $Writer.Line($message, $properties);
+  $writer.Line($message, $properties);
 
   # Wide items
   #
@@ -65,12 +63,12 @@ function Show-Summary {
     [string]$blank = [string]::new(' ', $message.Length);
 
     if ($group) {
-      $Writer.Line($blank, $wideItems);
+      $writer.Line($blank, $wideItems);
     }
     else {
       foreach ($couplet in $wideItems.Line) {
         [line]$syntheticLine = kl($couplet);
-        $Writer.Line($blank, $syntheticLine);
+        $writer.Line($blank, $syntheticLine);
       }
     }
   }
@@ -78,6 +76,6 @@ function Show-Summary {
   # Second line
   #
   if (-not([string]::IsNullOrEmpty($structuredBorderLine))) {
-    $Writer.ScribbleLn($structuredBorderLine);
+    $writer.ScribbleLn($structuredBorderLine);
   }
 }

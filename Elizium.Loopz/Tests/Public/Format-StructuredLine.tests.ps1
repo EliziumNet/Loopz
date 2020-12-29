@@ -46,7 +46,7 @@ Describe 'Format-StructuredLine' {
         $_structuredLine = Format-StructuredLine -PassThru $passThru `
           -LineKey $LineKey -CrumbKey $CrumbKey -Writer $_writer;
 
-        $_structuredLine | Should -BeExactly $('&[ThemeColour,meta]' + $LoopzUI.EqualsLine);
+        # $_structuredLine | Should -BeExactly $('&[ThemeColour,meta]' + $LoopzUI.EqualsLine);
         show-result -Ruler $_ruler -StructuredLine $_structuredLine;
       }
     }
