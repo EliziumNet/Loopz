@@ -115,7 +115,7 @@ $global:Loopz = [PSCustomObject]@{
     'DIRECTORY-B'  = (kp(@('Directory', '🗂️')));
     'FILE-A'       = (kp(@('File', '🏷️')));
     'FILE-B'       = (kp(@('File', '📝')));
-    'PATTERN'      = (kp(@('Pattern', '🔍')));
+    'PATTERN'      = (kp(@('Pattern', '🛡️')));
     'WITH'         = (kp(@('With', '🍑')));
     'CRUMB-A'      = (kp(@('Crumb', '🎯')));
     'CRUMB-B'      = (kp(@('Crumb', '🧿')));
@@ -168,6 +168,7 @@ $global:Loopz = [PSCustomObject]@{
     'REMY.ANCHOR'  = (kp(@('Anchor', '⚓')));
     'REMY.POST'    = (kp(@('Post Process', '🌈')));
     'REMY.DROP'    = (kp(@('Drop', '💧')));
+    'GREPS'        = (kp(@('greps', '🔍')));
   }
 
   OverrideSignals       = @{ # Label, Emoji
