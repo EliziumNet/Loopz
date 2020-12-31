@@ -176,7 +176,7 @@ function Rename-Many {
         }
       } # $action
 
-      [line]$properties = [line]::new(@());
+      [line]$properties = [line]::new();
       [line[]]$lines = @();
       [hashtable]$signals = $_passThru['LOOPZ.SIGNALS'];
 
@@ -342,8 +342,8 @@ function Rename-Many {
 
     [boolean]$whatIf = $PSBoundParameters.ContainsKey('WhatIf');
     [PSCustomObject]$containers = @{
-      Wide  = [line]::new(@());
-      Props = [line]::new(@());
+      Wide  = [line]::new();
+      Props = [line]::new();
     }
 
     [string]$adjustedWhole = if ($PSBoundParameters.ContainsKey('Whole')) {
@@ -353,7 +353,7 @@ function Rename-Many {
       [string]::Empty;
     }
 
-    [hashtable]$signals = Get-Signals;
+    [hashtable]$signals = $(Get-Signals);
 
     # RegEx/Occurrence parameters
     #
@@ -438,7 +438,7 @@ function Rename-Many {
       $result.GetType() -in @([System.IO.FileInfo], [System.IO.DirectoryInfo]) ? $result.Name : $result;
     }
 
-    [System.Text.RegularExpressions.RegEx]$patternRegEx = New-RegularExpression -Expression $patternExpression `
+    [regex]$patternRegEx = New-RegularExpression -Expression $patternExpression `
       -WholeWord:$(-not([string]::IsNullOrEmpty($adjustedWhole)) -and ($adjustedWhole -in @('*', 'p')));
 
     [string]$title = $Context.psobject.properties.match('Title') -and `
@@ -481,7 +481,7 @@ function Rename-Many {
     $passThru['LOOPZ.REMY.ACTION'] = $doMoveToken ? 'Move-Match' : 'Update-Match';
 
     if ($PSBoundParameters.ContainsKey('Copy')) {
-      [System.Text.RegularExpressions.RegEx]$copyRegEx = New-RegularExpression -Expression $copyExpression `
+      [regex]$copyRegEx = New-RegularExpression -Expression $copyExpression `
         -WholeWord:$(-not([string]::IsNullOrEmpty($adjustedWhole)) -and ($adjustedWhole -in @('*', 'c')));
 
       $passThru['LOOPZ.REMY.COPY-OCC'] = $copyOccurrence;
@@ -498,11 +498,11 @@ function Rename-Many {
     # NB: anchoredRegEx refers to whether -Start or -End anchors have been specified,
     # NOT the -Anchor pattern (when ANCHOR-TYPE = 'MATCHED-ITEM') itself.
     #
-    [System.Text.RegularExpressions.RegEx]$anchoredRegEx = $null;
+    [regex]$anchoredRegEx = $null;
 
     if ($PSBoundParameters.ContainsKey('Anchor')) {
 
-      [System.Text.RegularExpressions.RegEx]$anchorRegEx = New-RegularExpression -Expression $anchorExpression `
+      [regex]$anchorRegEx = New-RegularExpression -Expression $anchorExpression `
         -WholeWord:$(-not([string]::IsNullOrEmpty($adjustedWhole)) -and ($adjustedWhole -in @('*', 'a')));
 
       $passThru['LOOPZ.REMY.ANCHOR-OCC'] = $anchorOccurrence;
@@ -516,7 +516,7 @@ function Rename-Many {
 
       $passThru['LOOPZ.REMY.ANCHOR-TYPE'] = 'START';
 
-      [System.Text.RegularExpressions.RegEx]$anchoredRegEx = New-RegularExpression `
+      [regex]$anchoredRegEx = New-RegularExpression `
         -Expression $('^' + $patternExpression);
     }
     elseif ($PSBoundParameters.ContainsKey('End')) {
@@ -526,7 +526,7 @@ function Rename-Many {
 
       $passThru['LOOPZ.REMY.ANCHOR-TYPE'] = 'END';
 
-      [System.Text.RegularExpressions.RegEx]$anchoredRegEx = New-RegularExpression `
+      [regex]$anchoredRegEx = New-RegularExpression `
         -Expression $($patternExpression + '$');
     }
 
@@ -539,7 +539,7 @@ function Rename-Many {
     }
 
     [boolean]$includeDefined = $PSBoundParameters.ContainsKey('Include');
-    [System.Text.RegularExpressions.RegEx]$includeRegEx = $includeDefined `
+    [regex]$includeRegEx = $includeDefined `
       ? (New-RegularExpression -Expression $includeExpression `
         -WholeWord:$(-not([string]::IsNullOrEmpty($adjustedWhole)) -and ($adjustedWhole -in @('*', 'i')))) `
       : $null;

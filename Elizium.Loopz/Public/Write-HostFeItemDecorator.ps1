@@ -163,11 +163,11 @@
     elseif ($_passthru.Contains('LOOPZ.WH-FOREACH-DECORATOR.BLOCK')) {
       [scriptblock]$block = $_passthru['LOOPZ.WH-FOREACH-DECORATOR.BLOCK'];
 
-      return $block.Invoke($_underscore, $_index, $_passthru, $_trigger);
+      return $block.InvokeReturnAsIs($_underscore, $_index, $_passthru, $_trigger);
     }
   }
 
-  $invokeResult = $decorator.Invoke($Underscore, $Index, $PassThru, $Trigger);
+  $invokeResult = $decorator.InvokeReturnAsIs($Underscore, $Index, $PassThru, $Trigger);
 
   [string]$message = $PassThru['LOOPZ.WH-FOREACH-DECORATOR.MESSAGE'];
   [string]$productValue = [string]::Empty;
@@ -188,7 +188,7 @@
     [string]$productLabel = [string]::Empty;
     if ($invokeResult -and $invokeResult.psobject.properties.match('Product') -and $invokeResult.Product) {
       [boolean]$affirm = $invokeResult.psobject.properties.match('Affirm') -and $invokeResult.Affirm;
-      $productValue = $getResult.Invoke($invokeResult.Product);
+      $productValue = $getResult.InvokeReturnAsIs($invokeResult.Product);
       $productLabel = $PassThru.ContainsKey('LOOPZ.WH-FOREACH-DECORATOR.PRODUCT-LABEL') `
         ? $PassThru['LOOPZ.WH-FOREACH-DECORATOR.PRODUCT-LABEL'] : 'Product';
 
@@ -204,16 +204,14 @@
       $themedPairs.append($invokeResult.Pairs);
     }
 
-    # Write with a Krayola Theme
-    #
     [hashtable]$krayolaTheme = $writer.Theme;
 
-    # Write the primary line => use the writer
+    # Write the primary line
     #
     if (-not([string]::IsNullOrEmpty($message))) {
-      $writer.Message($message);
+      $null = $writer.Message($message);
     }
-    $writer.Line($themedPairs);
+    $null = $writer.Line($themedPairs);
 
     # Write additional lines
     #
@@ -235,7 +233,7 @@
       }
 
       foreach ($line in $invokeResult.Lines) {
-        $adjustedWriter.Message($blank).Line($line);
+        $null = $adjustedWriter.Message($blank).Line($line);
       }
     }
   }

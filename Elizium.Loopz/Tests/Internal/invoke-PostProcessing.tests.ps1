@@ -8,9 +8,9 @@ Describe 'invoke-PostProcessing' {
 
     InModuleScope Elizium.Loopz {
       [hashtable]$script:_signals = @{
-        'REMY.POST'    = @('Post Process', '🐋');
-        'TRIM'         = @('Trim', '🍀');
-        'MULTI-SPACES' = @('Spaces', '🐠');
+        'REMY.POST'    = kp(@('Post Process', '🐋'));
+        'TRIM'         = kp(@('Trim', '🍀'));
+        'MULTI-SPACES' = kp(@('Spaces', '🐠'));
       }
     }
   }

@@ -30,10 +30,10 @@ Describe 'Show-Header' {
       It 'should: display header with properties and message' {
         InModuleScope Elizium.Loopz {
           [hashtable]$passThru = @{
-            'LOOPZ.HEADER-BLOCK.MESSAGE' = 'The sound the wind makes in the pines';
-            'LOOPZ.HEADER.PROPERTIES'    = $_properties;
-            'LOOPZ.HEADER-BLOCK.LINE'    = $LoopzUI.TildeLine;
-            'LOOPZ.WRITER'               = $_writer;
+            'LOOPZ.HEADER-BLOCK.MESSAGE'      = 'The sound the wind makes in the pines';
+            'LOOPZ.HEADER.PROPERTIES'         = $_properties;
+            'LOOPZ.HEADER-BLOCK.LINE'         = $LoopzUI.TildeLine;
+            'LOOPZ.WRITER'                    = $_writer;
           }
           Show-Header -PassThru $passThru;
         }
@@ -42,13 +42,14 @@ Describe 'Show-Header' {
       It 'should: display header with Signal crumb' {
         InModuleScope Elizium.Loopz {
           [hashtable]$signals = @{
-            'CRUMB-B' = @('Crumb', '🚀')
+            'CRUMB-B' = @('Crumb', '👽')
           }
           [hashtable]$passThru = @{
-            'LOOPZ.SIGNALS'              = $signals;
-            'LOOPZ.HEADER-BLOCK.MESSAGE' = 'The sound the wind makes in the pines';
-            'LOOPZ.HEADER-BLOCK.LINE'    = $LoopzUI.EqualsLine;
-            'LOOPZ.WRITER'               = $_writer;
+            'LOOPZ.SIGNALS'                   = $signals;
+            'LOOPZ.HEADER-BLOCK.CRUMB-SIGNAL' = 'CRUMB-B';
+            'LOOPZ.HEADER-BLOCK.MESSAGE'      = 'The sound the wind makes in the pines';
+            'LOOPZ.HEADER-BLOCK.LINE'         = $LoopzUI.EqualsLine;
+            'LOOPZ.WRITER'                    = $_writer;
           }
           Show-Header -PassThru $passThru;
         }
@@ -104,7 +105,7 @@ Describe 'Show-Header' {
       Context 'and: line with leading space' {
         It 'should: display header with message' {
           InModuleScope Elizium.Loopz {
-            $withLeadingSpace = ((New-Object String(".", (($_LineLength - 1) / 2))).Replace(".", " .") + " ");
+            $withLeadingSpace = (([string]::new(".", (($_LineLength - 1) / 2))).Replace(".", " .") + " ");
 
             [hashtable]$passThru = @{
               'LOOPZ.HEADER-BLOCK.MESSAGE' = 'A man in a smiling bag';
@@ -155,7 +156,7 @@ Describe 'Show-Header' {
       It 'should: display header with message' {
         InModuleScope Elizium.Loopz {
           [hashtable]$passThru = @{
-            'LOOPZ.HEADER-BLOCK.MESSAGE' = (New-Object String('.', 4)).Replace('.', 'The owls are not what they seem ');
+            'LOOPZ.HEADER-BLOCK.MESSAGE' = ([string]::new('.', 4)).Replace('.', 'The owls are not what they seem ');
             'LOOPZ.HEADER-BLOCK.LINE'    = $LoopzUI.SmallEqualsLine;
             'LOOPZ.WRITER'               = $_writer;
           }
@@ -173,7 +174,7 @@ Describe 'Show-Header' {
             [writer]$writer = New-Writer($theme);
 
             [hashtable]$passThru = @{
-              'LOOPZ.HEADER-BLOCK.MESSAGE' = (New-Object String('.', 4)).Replace('.', 'The monarch will be crowned ');
+              'LOOPZ.HEADER-BLOCK.MESSAGE' = ([string]::new('.', 4)).Replace('.', 'The monarch will be crowned ');
               'LOOPZ.HEADER-BLOCK.LINE'    = $LoopzUI.SmallEqualsLine;
               'LOOPZ.WRITER'               = $writer;
             }
