@@ -11,7 +11,7 @@ function invoke-PostProcessing {
     [hashtable]$signals
   )
   [string]$transformResult = $InputSource;
-  [string[]]$appliedSignals = @()
+  [string[]]$appliedSignals = @();
   [array]$iterationRules = $Rules.psobject.Members | where-Object MemberType -like 'NoteProperty';
 
   foreach ($_r in $iterationRules) {
@@ -25,11 +25,11 @@ function invoke-PostProcessing {
 
   [PSCustomObject]$result = if ($appliedSignals.Count -gt 0) {
     [string]$indication = [string]::Empty;
-    [string]$labels = @();
+    [string[]]$labels = @();
 
     foreach ($name in $appliedSignals) {
-      $indication += $signals[$name][1];
-      $labels += $signals[$name][0];
+      $indication += $signals[$name].Value;
+      $labels += $signals[$name].Key;
     }
     $indication = "[{0}]" -f $indication;
 

@@ -29,7 +29,7 @@ Describe 'Format-StructuredLine' {
     InModuleScope Elizium.Loopz {
       [string]$script:_ruler = $LoopzUI.DotsLine;
       [string]$script:_structuredLine = [string]::Empty;
-      [writer]$script:_writer = new-Writer($_theme);
+      [writer]$script:_writer = New-Writer($_theme);
     }
   }
 
@@ -46,7 +46,6 @@ Describe 'Format-StructuredLine' {
         $_structuredLine = Format-StructuredLine -PassThru $passThru `
           -LineKey $LineKey -CrumbKey $CrumbKey -Writer $_writer;
 
-        # $_structuredLine | Should -BeExactly $('&[ThemeColour,meta]' + $LoopzUI.EqualsLine);
         show-result -Ruler $_ruler -StructuredLine $_structuredLine;
       }
     }
@@ -56,7 +55,7 @@ Describe 'Format-StructuredLine' {
     BeforeEach {
       InModuleScope Elizium.Loopz {
         [hashtable]$signals = @{
-          'CRUMB-B' = @('Crumb', '🚀')
+          'CRUMB-B' = kp(@('Crumb', '🚀'))
         }
         [hashtable]$script:passThru = @{
           'LOOPZ.SIGNALS'                   = $signals;
@@ -265,9 +264,6 @@ Describe 'Format-StructuredLine' {
               -LineKey $LineKey -CrumbKey $CrumbKey -MessageKey $MessageKey -Truncate `
               -Options @{ MinimumFlexSize = 9 } -Writer $_writer;
 
-            # $_structuredLine[0][0] | Should -BeExactly '========= [ ';
-            # $_structuredLine[1][0] | Should -BeExactly 'Heaven Can Wait Heaven Can Wait Heaven Can Wait Heaven Can  ...';
-
             $script:_ruler = $LoopzUI.SmallDotsLine;
             show-result -Ruler $_ruler -StructuredLine $_structuredLine;
             [string]$expected = '&[ThemeColour,meta]========= [ ' + `
@@ -305,7 +301,7 @@ Describe 'Format-StructuredLine' {
     It 'should: Create coloured line' {
       InModuleScope Elizium.Loopz {
         [hashtable]$signals = @{
-          'CRUMB-B' = @('Crumb', '🔥')
+          'CRUMB-B' = kp(@('Crumb', '🔥'))
         }
         [hashtable]$passThru = @{
           'LOOPZ.SIGNALS'                   = $signals;

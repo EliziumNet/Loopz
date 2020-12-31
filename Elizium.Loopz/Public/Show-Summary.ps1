@@ -31,7 +31,7 @@ function Show-Summary {
     # colours to the krayola theme's 'META-COLOURS'
     #
     [string]$structuredBorderLine = $($writerFormatWithArg -f 'ThemeColour', 'meta') + $line;
-    $writer.ScribbleLn($structuredBorderLine);
+    $null = $writer.ScribbleLn($structuredBorderLine);
   }
   else {
     $structuredBorderLine = [string]::Empty;
@@ -55,7 +55,7 @@ function Show-Summary {
   [string]$message = $PassThru.ContainsKey('LOOPZ.SUMMARY-BLOCK.MESSAGE') `
     ? $PassThru['LOOPZ.SUMMARY-BLOCK.MESSAGE'] : 'Summary';
 
-  $writer.Line($message, $properties);
+  $null = $writer.Line($message, $properties);
 
   # Wide items
   #
@@ -67,12 +67,12 @@ function Show-Summary {
     [string]$blank = [string]::new(' ', $message.Length);
 
     if ($group) {
-      $writer.Line($blank, $wideItems);
+      $null = $writer.Line($blank, $wideItems);
     }
     else {
       foreach ($couplet in $wideItems.Line) {
         [line]$syntheticLine = kl($couplet);
-        $writer.Line($blank, $syntheticLine);
+        $null = $writer.Line($blank, $syntheticLine);
       }
     }
   }
@@ -80,6 +80,6 @@ function Show-Summary {
   # Second line
   #
   if (-not([string]::IsNullOrEmpty($structuredBorderLine))) {
-    $writer.ScribbleLn($structuredBorderLine);
+    $null = $writer.ScribbleLn($structuredBorderLine);
   }
 }

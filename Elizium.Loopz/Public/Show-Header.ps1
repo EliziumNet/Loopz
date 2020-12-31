@@ -10,7 +10,7 @@ function Show-Header {
   if (-not($writer)) {
     throw "Writer missing from PassThru under key 'LOOPZ.WRITER'"
   }
-  $writer.Reset();
+  $null = $writer.Reset();
   [string]$writerFormatWithArg = $writer.ApiFormatWithArg;
   [string]$message = $PassThru.ContainsKey(
     'LOOPZ.HEADER-BLOCK.MESSAGE') ? $PassThru['LOOPZ.HEADER-BLOCK.MESSAGE'] : [string]::Empty;
@@ -23,7 +23,7 @@ function Show-Header {
   # method on the writer, unless they want it to actually represent a line.
   #
   [line]$properties = $PassThru.ContainsKey(
-    'LOOPZ.HEADER.PROPERTIES') ? $PassThru['LOOPZ.HEADER.PROPERTIES'] : [line]::new(@());
+    'LOOPZ.HEADER.PROPERTIES') ? $PassThru['LOOPZ.HEADER.PROPERTIES'] : [line]::new();
 
   if ($properties.Line.Length -gt 0) {
     # First line
@@ -33,19 +33,19 @@ function Show-Header {
 
     [string]$structuredLine = $($writerFormatWithArg -f 'ThemeColour', 'meta') + $line;
 
-    $writer.ScribbleLn($structuredLine);
+    $null = $writer.ScribbleLn($structuredLine);
 
     # Inner detail
     #
     if (-not([string]::IsNullOrEmpty($message))) {
-      $writer.Message($message);
+      $null = $writer.Message($message);
     }
-    $writer.Line($properties);
+    $null = $writer.Line($properties);
 
     # Second line
     #
     [string]$structuredLine = $($writerFormatWithArg -f 'ThemeColour', 'meta') + $line;
-    $writer.ScribbleLn($structuredLine);
+    $null = $writer.ScribbleLn($structuredLine);
   }
   else {
     # Alternative line
@@ -56,6 +56,6 @@ function Show-Header {
 
     [string]$structuredLine = Format-StructuredLine -PassThru $passThru `
       -LineKey $LineKey -CrumbKey $CrumbKey -MessageKey $messageKey -Writer $writer;
-    $writer.ScribbleLn($structuredLine);
+    $null = $writer.ScribbleLn($structuredLine);
   }
 }

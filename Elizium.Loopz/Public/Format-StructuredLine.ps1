@@ -49,7 +49,7 @@ function Format-StructuredLine {
     if ($PassThru.ContainsKey('LOOPZ.SIGNALS')) {
       [hashtable]$signals = $PassThru['LOOPZ.SIGNALS'];
       [string]$crumbName = $PassThru[$CrumbKey];
-      $signals[$crumbName][1];
+      $signals[$crumbName].Value;
     }
     else {
       '+';

@@ -15,8 +15,8 @@ Describe 'Select-SignalContainer' {
 
   BeforeEach {
     [hashtable]$script:containers = @{
-      Wide  = [line]::new(@());
-      Props = [line]::new(@());
+      Wide  = [line]::new();
+      Props = [line]::new();
     }
   }
 
