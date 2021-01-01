@@ -43,7 +43,7 @@ Describe 'Format-StructuredLine' {
           'LOOPZ.HEADER-BLOCK.LINE' = $LoopzUI.EqualsLine;
         }
 
-        $_structuredLine = Format-StructuredLine -PassThru $passThru `
+        $_structuredLine = Format-StructuredLine -Exchange $passThru `
           -LineKey $LineKey -CrumbKey $CrumbKey -Writer $_writer;
 
         show-result -Ruler $_ruler -StructuredLine $_structuredLine;
@@ -69,7 +69,7 @@ Describe 'Format-StructuredLine' {
       InModuleScope Elizium.Loopz {
         $passThru['LOOPZ.HEADER-BLOCK.MESSAGE'] = 'Children of the Damned';
 
-        $_structuredLine = Format-StructuredLine -PassThru $passThru `
+        $_structuredLine = Format-StructuredLine -Exchange $passThru `
           -LineKey $LineKey -CrumbKey $CrumbKey -MessageKey $MessageKey -Writer $_writer;
 
         show-result -Ruler $_ruler -StructuredLine $_structuredLine;
@@ -86,7 +86,7 @@ Describe 'Format-StructuredLine' {
             '.', 'The Number of the Beast (No Truncation) ') + '!';
           $passThru['LOOPZ.HEADER-BLOCK.MESSAGE'] = $longMessage;
 
-          $_structuredLine = Format-StructuredLine -PassThru $passThru `
+          $_structuredLine = Format-StructuredLine -Exchange $passThru `
             -LineKey $LineKey -CrumbKey $CrumbKey -MessageKey $MessageKey -Writer $_writer;
       
           show-result -Ruler $_ruler -StructuredLine $_structuredLine;
@@ -108,7 +108,7 @@ Describe 'Format-StructuredLine' {
         Context 'and: Custom Ellipses' {
           It 'should: Create coloured line with Truncated message' {
             InModuleScope Elizium.Loopz {
-              $_structuredLine = Format-StructuredLine -PassThru $passThru `
+              $_structuredLine = Format-StructuredLine -Exchange $passThru `
                 -LineKey $LineKey -CrumbKey $CrumbKey -MessageKey $MessageKey -Truncate `
                 -Options @{ Ellipses = ' ***' } -Writer $_writer;
 
@@ -124,7 +124,7 @@ Describe 'Format-StructuredLine' {
         Context 'and: Custom MinimumFlexSize' {
           It 'should: Create coloured line with Truncated message' {
             InModuleScope Elizium.Loopz {
-              $_structuredLine = Format-StructuredLine -PassThru $passThru `
+              $_structuredLine = Format-StructuredLine -Exchange $passThru `
                 -LineKey $LineKey -CrumbKey $CrumbKey -MessageKey $MessageKey -Truncate `
                 -Options @{ MinimumFlexSize = 12 } -Writer $_writer;
 
@@ -138,7 +138,7 @@ Describe 'Format-StructuredLine' {
 
           It 'should: Create coloured line with Truncated message' {
             InModuleScope Elizium.Loopz {
-              $_structuredLine = Format-StructuredLine -PassThru $passThru `
+              $_structuredLine = Format-StructuredLine -Exchange $passThru `
                 -LineKey $LineKey -CrumbKey $CrumbKey -MessageKey $MessageKey -Truncate `
                 -Options @{ MinimumFlexSize = 3 } -Writer $_writer;
 
@@ -159,7 +159,7 @@ Describe 'Format-StructuredLine' {
               [string]$longMessage = ([string]::new('.', 6)).Replace('.', 'Hallowed by thy Fame ') + '!';
               $passThru['LOOPZ.HEADER-BLOCK.MESSAGE'] = $longMessage;
 
-              $_structuredLine = Format-StructuredLine -PassThru $passThru `
+              $_structuredLine = Format-StructuredLine -Exchange $passThru `
                 -LineKey $LineKey -CrumbKey $CrumbKey -MessageKey $MessageKey -Truncate -Writer $_writer;
 
               show-result -Ruler $_ruler -StructuredLine $_structuredLine;
@@ -187,7 +187,7 @@ Describe 'Format-StructuredLine' {
       InModuleScope Elizium.Loopz {
         $passThru['LOOPZ.HEADER-BLOCK.MESSAGE'] = '22 Acacia Avenue';
 
-        $_structuredLine = Format-StructuredLine -PassThru $passThru `
+        $_structuredLine = Format-StructuredLine -Exchange $passThru `
           -LineKey $LineKey -CrumbKey $CrumbKey -MessageKey $MessageKey -Writer $_writer;
 
         show-result -Ruler $_ruler -StructuredLine $_structuredLine;
@@ -205,7 +205,7 @@ Describe 'Format-StructuredLine' {
 
           $passThru['LOOPZ.HEADER-BLOCK.MESSAGE'] = $longMessage;
 
-          $_structuredLine = Format-StructuredLine -PassThru $passThru `
+          $_structuredLine = Format-StructuredLine -Exchange $passThru `
             -LineKey $LineKey -CrumbKey $CrumbKey -MessageKey $MessageKey -Writer $_writer;
 
           show-result -Ruler $_ruler -StructuredLine $_structuredLine;
@@ -230,7 +230,7 @@ Describe 'Format-StructuredLine' {
 
       It 'should: Create coloured line with Truncated message' {
         InModuleScope Elizium.Loopz {
-          $_structuredLine = Format-StructuredLine -PassThru $passThru `
+          $_structuredLine = Format-StructuredLine -Exchange $passThru `
             -LineKey $LineKey -CrumbKey $CrumbKey -MessageKey $MessageKey -Truncate -Writer $_writer;
 
           $script:_ruler = $LoopzUI.SmallDotsLine;
@@ -245,7 +245,7 @@ Describe 'Format-StructuredLine' {
       Context 'and: Custom MinimumFlexSize' {
         It 'should: Create coloured line with Truncated message' {
           InModuleScope Elizium.Loopz {
-            $_structuredLine = Format-StructuredLine -PassThru $passThru `
+            $_structuredLine = Format-StructuredLine -Exchange $passThru `
               -LineKey $LineKey -CrumbKey $CrumbKey -MessageKey $MessageKey -Truncate `
               -Options @{ MinimumFlexSize = 3 } -Writer $_writer;
 
@@ -260,7 +260,7 @@ Describe 'Format-StructuredLine' {
 
         It 'should: Create coloured line with Truncated message' {
           InModuleScope Elizium.Loopz {
-            $_structuredLine = Format-StructuredLine -PassThru $passThru `
+            $_structuredLine = Format-StructuredLine -Exchange $passThru `
               -LineKey $LineKey -CrumbKey $CrumbKey -MessageKey $MessageKey -Truncate `
               -Options @{ MinimumFlexSize = 9 } -Writer $_writer;
 
@@ -282,7 +282,7 @@ Describe 'Format-StructuredLine' {
             [string]$longMessage = ([string]::new('.', 8)).Replace('.', 'Heaven Can Bait ') + '!';
             $passThru['LOOPZ.HEADER-BLOCK.MESSAGE'] = $longMessage;
 
-            $_structuredLine = Format-StructuredLine -PassThru $passThru `
+            $_structuredLine = Format-StructuredLine -Exchange $passThru `
               -LineKey $LineKey -CrumbKey $CrumbKey -MessageKey $MessageKey -Truncate -Writer $_writer;
 
             $script:_ruler = $LoopzUI.SmallDotsLine;
@@ -309,7 +309,7 @@ Describe 'Format-StructuredLine' {
           'LOOPZ.HEADER-BLOCK.LINE'         = $LoopzUI.TildeLine;
         }
 
-        $_structuredLine = Format-StructuredLine -PassThru $passThru `
+        $_structuredLine = Format-StructuredLine -Exchange $passThru `
           -LineKey $LineKey -CrumbKey $CrumbKey -Writer $_writer;
 
         show-result -Ruler $_ruler -StructuredLine $_structuredLine;

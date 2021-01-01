@@ -21,7 +21,7 @@ Describe 'Show-Summary' {
           'LOOPZ.SUMMARY-BLOCK.LINE' = $LoopzUI.DashLine;
           'LOOPZ.WRITER'             = $_writer;
         }
-        Show-Summary -Count 999 -Skipped 0 -Triggered $false -PassThru $passThru;
+        Show-Summary -Count 999 -Skipped 0 -Triggered $false -Exchange $passThru;
       }
     }
   }
@@ -32,7 +32,7 @@ Describe 'Show-Summary' {
         [hashtable]$passThru = @{
           'LOOPZ.WRITER' = $_writer;
         }
-        Show-Summary -Count 101 -Skipped 0 -Triggered $true -PassThru $passThru;
+        Show-Summary -Count 101 -Skipped 0 -Triggered $true -Exchange $passThru;
       }
     }
   }
@@ -46,7 +46,7 @@ Describe 'Show-Summary' {
           'LOOPZ.SUMMARY-BLOCK.WIDE-ITEMS' = $wideItems;
           'LOOPZ.WRITER'                   = $_writer;
         }
-        Show-Summary -Count 999 -Skipped 0 -Triggered $false -PassThru $passThru;
+        Show-Summary -Count 999 -Skipped 0 -Triggered $false -Exchange $passThru;
       }
     }
 
@@ -59,7 +59,7 @@ Describe 'Show-Summary' {
           'LOOPZ.SUMMARY-BLOCK.GROUP-WIDE-ITEMS' = $true;
           'LOOPZ.WRITER'                         = $_writer;
         }
-        Show-Summary -Count 999 -Skipped 0 -Triggered $false -PassThru $passThru;
+        Show-Summary -Count 999 -Skipped 0 -Triggered $false -Exchange $passThru;
       }
     }
   }
@@ -73,7 +73,7 @@ Describe 'Show-Summary' {
           'LOOPZ.SUMMARY-BLOCK.PROPERTIES' = $wideItems;
           'LOOPZ.WRITER'                   = $_writer;
         }
-        Show-Summary -Count 999 -Skipped 0 -Triggered $false -PassThru $passThru;
+        Show-Summary -Count 999 -Skipped 0 -Triggered $false -Exchange $passThru;
       }
     }
   }

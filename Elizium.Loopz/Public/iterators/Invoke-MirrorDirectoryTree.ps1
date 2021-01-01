@@ -49,7 +49,7 @@
   mirrored in the destination tree. Any match in the FileExcludes overrides a match in
   FileIncludes, so a file that is matched in Include, can be excluded by the Exclude.
 
-  .PARAMETER PassThru
+  .PARAMETER Exchange
     A hash table containing miscellaneous information gathered internally
   throughout the pipeline batch. This can be of use to the user, because it is the way
   the user can perform bi-directional communication between the invoked custom script block
@@ -61,7 +61,7 @@
   the following positional parameters:
     * underscore: the DirectoryInfo object representing the directory in the source tree
     * index: the 0 based index representing current directory in the source tree
-    * PassThru object: a hash table containing miscellaneous information gathered internally
+    * Exchange object: a hash table containing miscellaneous information gathered internally
     throughout the mirroring batch. This can be of use to the user, because it is the way
     the user can perform bi-directional communication between the invoked custom script block
     and client side logic.
@@ -77,7 +77,7 @@
   defined as the same type and in the same order as the additional parameters in the
   script-block.
 
-  The destination DirectoryInfo object can be accessed via the PassThru denoted by
+  The destination DirectoryInfo object can be accessed via the Exchange denoted by
   the 'LOOPZ.MIRROR.DESTINATION' entry.
 
   .PARAMETER BlockParams
@@ -88,10 +88,10 @@
   for script-blocks. The Function's base signature is as follows:
     "Underscore": (See underscore described above)
     "Index": (See index described above)
-    "PassThru": (See PathThru described above)
+    "Exchange": (See PathThru described above)
     "Trigger": (See trigger described above)
 
-  The destination DirectoryInfo object can be accessed via the PassThru denoted by
+  The destination DirectoryInfo object can be accessed via the Exchange denoted by
   the 'LOOPZ.MIRROR.DESTINATION' entry.
 
   .PARAMETER FuncteeParams
@@ -116,9 +116,9 @@
   .PARAMETER Header
     A script-block that is invoked for each directory that also contains child directories.
   The script-block is invoked with the following positional parameters:
-    * PassThru: (see PassThru previously described)
+    * Exchange: (see Exchange previously described)
 
-    The Header can be customised with the following PassThru entries:
+    The Header can be customised with the following Exchange entries:
     - 'LOOPZ.KRAYOLA-THEME': Krayola Theme generally in use
     - 'LOOPZ.HEADER-BLOCK.MESSAGE': message displayed as part of the header
     - 'LOOPZ.HEADER-BLOCK.CRUMB-SIGNAL': Lead text displayed in header, default: '[+] '
@@ -138,7 +138,7 @@
     indicate whether any of the items processed were actively updated/written in this batch.
     This helps in written idempotent operations that can be re-run without adverse
     consequences.
-    * PassThru: (see PassThru previously described)
+    * Exchange: (see Exchange previously described)
 
   .PARAMETER SessionHeader
     A script-block that is invoked at the start of the mirroring batch. The script-block has
@@ -158,7 +158,7 @@
     param(
       [System.IO.DirectoryInfo]$Underscore,
       [int]$Index,
-      [hashtable]$PassThru,
+      [hashtable]$Exchange,
       [boolean]$Trigger,
       [string]$Format
     )
@@ -180,7 +180,7 @@
       param(
         [System.IO.DirectoryInfo]$Underscore,
         [int]$Index,
-        [hashtable]$PassThru,
+        [hashtable]$Exchange,
         [boolean]$Trigger
       )
       ...
@@ -230,7 +230,7 @@
       [int]$_count,
       [int]$_skipped,
       [boolean]$_triggered,
-      [hashtable]$_passThru
+      [hashtable]$_exchange
     )
     ...
   }
@@ -283,7 +283,7 @@
 
     [Parameter(ParameterSetName = 'InvokeScriptBlock')]
     [Parameter(ParameterSetName = 'InvokeFunction')]
-    [hashtable]$PassThru = @{},
+    [hashtable]$Exchange = @{},
 
     [Parameter(ParameterSetName = 'InvokeScriptBlock')]
     [scriptblock]$Block = ( {
@@ -323,7 +323,7 @@
     [Parameter(ParameterSetName = 'InvokeFunction')]
     [scriptblock]$Header = ( {
         param(
-          [hashtable]$_passThru
+          [hashtable]$_exchange
         )
       }),
 
@@ -335,7 +335,7 @@
           [int]$_index,
           [int]$_skipped,
           [boolean]$_trigger,
-          [hashtable]$_passThru
+          [hashtable]$_exchange
         )
       }),
 
@@ -343,7 +343,7 @@
     [Parameter(ParameterSetName = 'InvokeFunction')]
     [scriptblock]$SessionHeader = ( {
         param(
-          [hashtable]$_passThru
+          [hashtable]$_exchange
         )
       }),
 
@@ -354,7 +354,7 @@
           [int]$_count,
           [int]$_skipped,
           [boolean]$_trigger,
-          [hashtable]$_passThru
+          [hashtable]$_exchange
         )
       })
   ) # param
@@ -370,7 +370,7 @@
       [int]$_index,
 
       [Parameter(Mandatory)]
-      [hashtable]$_passThru,
+      [hashtable]$_exchange,
 
       [Parameter(Mandatory)]
       [boolean]$_trigger
@@ -378,8 +378,8 @@
 
     # Write-Host "[+] >>> doMirrorBlock: $($_underscore.Name)";
 
-    [string]$rootSource = $_passThru['LOOPZ.MIRROR.ROOT-SOURCE'];
-    [string]$rootDestination = $_passThru['LOOPZ.MIRROR.ROOT-DESTINATION'];
+    [string]$rootSource = $_exchange['LOOPZ.MIRROR.ROOT-SOURCE'];
+    [string]$rootDestination = $_exchange['LOOPZ.MIRROR.ROOT-DESTINATION'];
 
     $sourceDirectoryFullName = $_underscore.FullName;
 
@@ -392,9 +392,9 @@
     $destinationBranch = edit-RemoveSingleSubString -Target $sourceDirectoryFullName -Subtract $rootSource;
 
     $destinationDirectory = Join-Path -Path $rootDestination -ChildPath $destinationBranch;
-    $_passThru['LOOPZ.MIRROR.BRANCH-DESTINATION'] = $destinationBranch;
+    $_exchange['LOOPZ.MIRROR.BRANCH-DESTINATION'] = $destinationBranch;
 
-    [boolean]$whatIf = $_passThru.ContainsKey('WHAT-IF') -and ($_passThru['WHAT-IF']);
+    [boolean]$whatIf = $_exchange.ContainsKey('WHAT-IF') -and ($_exchange['WHAT-IF']);
     Write-Debug "[+] >>> doMirrorBlock: destinationDirectory: '$destinationDirectory'";
 
     if ($whatIf) {
@@ -455,29 +455,29 @@
             -Include $adjustedFileIncludes -Exclude $adjustedFileExcludes `
             -Destination $destinationDirectory;
         }
-        $_passThru['LOOPZ.MIRROR.COPIED-FILES.COUNT'] = $filesToCopy.Count;
+        $_exchange['LOOPZ.MIRROR.COPIED-FILES.COUNT'] = $filesToCopy.Count;
 
         Write-Debug "    [-] No of files copied: '$($filesToCopy.Count)'";
       }
       else {
-        $_passThru.Remove('LOOPZ.MIRROR.COPIED-FILES.COUNT');
-        $_passThru.Remove('LOOPZ.MIRROR.COPIED-FILES.INCLUDES');
+        $_exchange.Remove('LOOPZ.MIRROR.COPIED-FILES.COUNT');
+        $_exchange.Remove('LOOPZ.MIRROR.COPIED-FILES.INCLUDES');
       }
     }
 
     # To be consistent with Invoke-ForeachFsItem, the user function/block is invoked
     # with the source directory info. The destination for this mirror operation is
-    # returned via 'LOOPZ.MIRROR.DESTINATION' within the PassThru.
+    # returned via 'LOOPZ.MIRROR.DESTINATION' within the Exchange.
     #
-    $_passThru['LOOPZ.MIRROR.DESTINATION'] = $destinationInfo;
+    $_exchange['LOOPZ.MIRROR.DESTINATION'] = $destinationInfo;
 
-    $invokee = $_passThru['LOOPZ.MIRROR.INVOKEE'];
+    $invokee = $_exchange['LOOPZ.MIRROR.INVOKEE'];
 
     if ($invokee -is [scriptblock]) {
-      $positional = @($_underscore, $_index, $_passThru, $_trigger);
+      $positional = @($_underscore, $_index, $_exchange, $_trigger);
 
-      if ($_passThru.ContainsKey('LOOPZ.MIRROR.INVOKEE.PARAMS')) {
-        $_passThru['LOOPZ.MIRROR.INVOKEE.PARAMS'] | ForEach-Object {
+      if ($_exchange.ContainsKey('LOOPZ.MIRROR.INVOKEE.PARAMS')) {
+        $_exchange['LOOPZ.MIRROR.INVOKEE.PARAMS'] | ForEach-Object {
           $positional += $_;
         }
       }
@@ -485,11 +485,11 @@
       $invokee.InvokeReturnAsIs($positional);
     }
     elseif ($invokee -is [string]) {
-      [hashtable]$parameters = $_passThru.ContainsKey('LOOPZ.MIRROR.INVOKEE.PARAMS') `
-        ? $_passThru['LOOPZ.MIRROR.INVOKEE.PARAMS'] : @{};
+      [hashtable]$parameters = $_exchange.ContainsKey('LOOPZ.MIRROR.INVOKEE.PARAMS') `
+        ? $_exchange['LOOPZ.MIRROR.INVOKEE.PARAMS'] : @{};
       $parameters['Underscore'] = $_underscore;
       $parameters['Index'] = $_index;
-      $parameters['PassThru'] = $_passThru;
+      $parameters['Exchange'] = $_exchange;
       $parameters['Trigger'] = $_trigger;
 
       & $invokee @parameters;
@@ -506,30 +506,30 @@
   [string]$resolvedSourcePath = Convert-Path $Path;
   [string]$resolvedDestinationPath = Convert-Path $DestinationPath;
 
-  $PassThru['LOOPZ.MIRROR.ROOT-SOURCE'] = $resolvedSourcePath;
-  $PassThru['LOOPZ.MIRROR.ROOT-DESTINATION'] = $resolvedDestinationPath;
+  $Exchange['LOOPZ.MIRROR.ROOT-SOURCE'] = $resolvedSourcePath;
+  $Exchange['LOOPZ.MIRROR.ROOT-DESTINATION'] = $resolvedDestinationPath;
 
   if ('InvokeScriptBlock' -eq $PSCmdlet.ParameterSetName) {
-    $PassThru['LOOPZ.MIRROR.INVOKEE'] = $Block;
+    $Exchange['LOOPZ.MIRROR.INVOKEE'] = $Block;
 
     if ($BlockParams.Count -gt 0) {
-      $PassThru['LOOPZ.MIRROR.INVOKEE.PARAMS'] = $BlockParams;
+      $Exchange['LOOPZ.MIRROR.INVOKEE.PARAMS'] = $BlockParams;
     }
   }
   else {
-    $PassThru['LOOPZ.MIRROR.INVOKEE'] = $Functee;
+    $Exchange['LOOPZ.MIRROR.INVOKEE'] = $Functee;
 
     if ($FuncteeParams.Count -gt 0) {
-      $PassThru['LOOPZ.MIRROR.INVOKEE.PARAMS'] = $FuncteeParams.Clone();
+      $Exchange['LOOPZ.MIRROR.INVOKEE.PARAMS'] = $FuncteeParams.Clone();
     }
   }
 
   if ($PSBoundParameters.ContainsKey('WhatIf') -and ($true -eq $PSBoundParameters['WhatIf'])) {
-    $PassThru['WHAT-IF'] = $true;
+    $Exchange['WHAT-IF'] = $true;
   }
 
   if ($CopyFiles.ToBool()) {
-    $PassThru['LOOPZ.MIRROR.COPIED-FILES.INCLUDES'] = $FileIncludes -join ', ';
+    $Exchange['LOOPZ.MIRROR.COPIED-FILES.INCLUDES'] = $FileIncludes -join ', ';
   }
 
   [scriptblock]$filterDirectories = {
@@ -542,6 +542,6 @@
   }
 
   $null = Invoke-TraverseDirectory -Path $resolvedSourcePath `
-    -Block $doMirrorBlock -PassThru $PassThru -Header $Header -Summary $Summary `
+    -Block $doMirrorBlock -Exchange $Exchange -Header $Header -Summary $Summary `
     -SessionHeader $SessionHeader -SessionSummary $SessionSummary -Condition $filterDirectories -Hoist:$Hoist;
 } # Invoke-MirrorDirectoryTree

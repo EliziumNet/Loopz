@@ -35,7 +35,7 @@ Describe 'Invoke-MirrorDirectoryTree' {
             [int]$Index,
 
             [Parameter(Mandatory)]
-            [hashtable]$PassThru,
+            [hashtable]$Exchange,
 
             [Parameter(Mandatory)]
             [boolean]$Trigger,
@@ -68,7 +68,7 @@ Describe 'Invoke-MirrorDirectoryTree' {
           param(
             [System.IO.DirectoryInfo]$DirInfo,
             [int]$Index,
-            [hashtable]$PassThru,
+            [hashtable]$Exchange,
             [boolean]$Trigger,
             [string]$Format
           )
@@ -97,7 +97,7 @@ Describe 'Invoke-MirrorDirectoryTree' {
             [int]$Index,
 
             [Parameter(Mandatory)]
-            [hashtable]$PassThru,
+            [hashtable]$Exchange,
 
             [Parameter(Mandatory)]
             [boolean]$Trigger,
@@ -254,7 +254,7 @@ Describe 'Invoke-MirrorDirectoryTree' {
             [int]$_count,
             [int]$_skipped, 
             [boolean]$_triggered,
-            [hashtable]$_passThru
+            [hashtable]$_exchange
           )
 
           $_count | Should -Be 11;
@@ -264,7 +264,7 @@ Describe 'Invoke-MirrorDirectoryTree' {
 
         Invoke-MirrorDirectoryTree -Path $sourcePath `
           -DestinationPath $destinationPath -CreateDirs -DirectoryIncludes @('*e*') `
-          -Hoist -SessionSummary $sessionSummary -PassThru $verifiedCountPassThru -WhatIf:$whatIf;
+          -Hoist -SessionSummary $sessionSummary -Exchange $verifiedCountPassThru -WhatIf:$whatIf;
       }
     }
   } # given: HoistDescendent specified

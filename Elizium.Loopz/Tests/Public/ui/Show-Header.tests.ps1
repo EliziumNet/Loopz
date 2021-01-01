@@ -35,7 +35,7 @@ Describe 'Show-Header' {
             'LOOPZ.HEADER-BLOCK.LINE'         = $LoopzUI.TildeLine;
             'LOOPZ.WRITER'                    = $_writer;
           }
-          Show-Header -PassThru $passThru;
+          Show-Header -Exchange $passThru;
         }
       }
 
@@ -51,7 +51,7 @@ Describe 'Show-Header' {
             'LOOPZ.HEADER-BLOCK.LINE'         = $LoopzUI.EqualsLine;
             'LOOPZ.WRITER'                    = $_writer;
           }
-          Show-Header -PassThru $passThru;
+          Show-Header -Exchange $passThru;
         }
       }
     } # and: message
@@ -65,7 +65,7 @@ Describe 'Show-Header' {
             'LOOPZ.WRITER'            = $_writer;
           }
 
-          Show-Header -PassThru $passThru;
+          Show-Header -Exchange $passThru;
         }
       }
     } # and: no message
@@ -81,7 +81,7 @@ Describe 'Show-Header' {
             'LOOPZ.WRITER'               = $_writer;
           }
 
-          Show-Header -PassThru $passThru;
+          Show-Header -Exchange $passThru;
         }
       }
 
@@ -97,7 +97,7 @@ Describe 'Show-Header' {
               'LOOPZ.HEADER-BLOCK.LINE'    = $LoopzUI.SmallEqualsLine;
               'LOOPZ.WRITER'               = $_writer;
             }
-            Show-Header -PassThru $passThru;
+            Show-Header -Exchange $passThru;
           }
         }
       }
@@ -113,7 +113,7 @@ Describe 'Show-Header' {
               'LOOPZ.WRITER'               = $_writer;
             }
 
-            Show-Header -PassThru $passThru;
+            Show-Header -Exchange $passThru;
           }
         }
       }
@@ -132,7 +132,7 @@ Describe 'Show-Header' {
             'LOOPZ.WRITER'                    = $_writer;
           }
 
-          Show-Header -PassThru $passThru;
+          Show-Header -Exchange $passThru;
         }
       }
 
@@ -147,7 +147,7 @@ Describe 'Show-Header' {
             'LOOPZ.WRITER'            = $_writer;
           }
 
-          Show-Header -PassThru $passThru;
+          Show-Header -Exchange $passThru;
         }
       }
     }
@@ -161,7 +161,7 @@ Describe 'Show-Header' {
             'LOOPZ.WRITER'               = $_writer;
           }
 
-          Show-Header -PassThru $passThru;
+          Show-Header -Exchange $passThru;
         }
       }
 
@@ -178,7 +178,7 @@ Describe 'Show-Header' {
               'LOOPZ.HEADER-BLOCK.LINE'    = $LoopzUI.SmallEqualsLine;
               'LOOPZ.WRITER'               = $writer;
             }
-            Show-Header -PassThru $passThru;
+            Show-Header -Exchange $passThru;
           }
         }
       }

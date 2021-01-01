@@ -4,7 +4,7 @@ function Format-StructuredLine {
   [OutputType([string])]
   param(
     [Parameter(Mandatory)]
-    [hashtable]$PassThru,
+    [hashtable]$Exchange,
 
     [Parameter(Mandatory)]
     [string]$LineKey,
@@ -37,18 +37,18 @@ function Format-StructuredLine {
 
   [hashtable]$theme = $Writer.Theme;
 
-  [string]$line = $PassThru.ContainsKey($LineKey) `
-    ? $PassThru[$LineKey] : ([string]::new("_", 81));
+  [string]$line = $Exchange.ContainsKey($LineKey) `
+    ? $Exchange[$LineKey] : ([string]::new("_", 81));
   [string]$char = ($line -match '[^\s]') ? $matches[0] : ' ';
   [string]$wing = [string]::new($char, $wingLength);
 
-  [string]$message = -not([string]::IsNullOrEmpty($MessageKey)) -and ($PassThru.ContainsKey($MessageKey)) `
-    ? $PassThru[$MessageKey] : $null;
+  [string]$message = -not([string]::IsNullOrEmpty($MessageKey)) -and ($Exchange.ContainsKey($MessageKey)) `
+    ? $Exchange[$MessageKey] : $null;
 
-  [string]$crumb = if (-not([string]::IsNullOrEmpty($CrumbKey)) -and ($PassThru.ContainsKey($CrumbKey))) {
-    if ($PassThru.ContainsKey('LOOPZ.SIGNALS')) {
-      [hashtable]$signals = $PassThru['LOOPZ.SIGNALS'];
-      [string]$crumbName = $PassThru[$CrumbKey];
+  [string]$crumb = if (-not([string]::IsNullOrEmpty($CrumbKey)) -and ($Exchange.ContainsKey($CrumbKey))) {
+    if ($Exchange.ContainsKey('LOOPZ.SIGNALS')) {
+      [hashtable]$signals = $Exchange['LOOPZ.SIGNALS'];
+      [string]$crumbName = $Exchange[$CrumbKey];
       $signals[$crumbName].Value;
     }
     else {

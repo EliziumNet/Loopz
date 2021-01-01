@@ -34,7 +34,7 @@ function Invoke-ForeachFsItem {
   pipeline that satisfy the Condition with the following positional parameters:
     * pipelineItem: the item from the pipeline
     * index: the 0 based index representing current pipeline item
-    * PassThru: a hash table containing miscellaneous information gathered internally
+    * Exchange: a hash table containing miscellaneous information gathered internally
   throughout the pipeline batch. This can be of use to the user, because it is the way
   the user can perform bi-directional communication between the invoked custom script block
   and client side logic.
@@ -59,14 +59,14 @@ function Invoke-ForeachFsItem {
   for script-blocks. The Function's base signature is as follows:
     * Underscore: (See pipelineItem described above)
     * Index: (See index described above)
-    * PassThru: (See PathThru described above)
+    * Exchange: (See PathThru described above)
     *Trigger: (See trigger described above)
 
   .PARAMETER FuncteeParams
     Optional hash-table containing the named parameters which are splatted into the Functee
   function invoke. As it's a hash table, order is not significant.
 
-  .PARAMETER PassThru
+  .PARAMETER Exchange
     A hash table containing miscellaneous information gathered internally throughout the
   pipeline batch. This can be of use to the user, because it is the way the user can perform
   bi-directional communication between the invoked custom script block and client side logic.
@@ -74,9 +74,9 @@ function Invoke-ForeachFsItem {
   .PARAMETER Header
     A script-block that is invoked at the start of the pipeline batch. The script-block is
   invoked with the following positional parameters:
-    * PassThru: (see PassThru previously described)
+    * Exchange: (see Exchange previously described)
 
-    The Header can be customised with the following PassThru entries:
+    The Header can be customised with the following Exchange entries:
     - 'LOOPZ.KRAYOLA-THEME': Krayola Theme generally in use
     - 'LOOPZ.HEADER-BLOCK.MESSAGE': message displayed as part of the header
     - 'LOOPZ.HEADER-BLOCK.CRUMB-SIGNAL': Lead text displayed in header, default: '[+] '
@@ -97,7 +97,7 @@ function Invoke-ForeachFsItem {
     indicate whether any of the items processed were actively updated/written in this batch.
     This helps in written idempotent operations that can be re-run without adverse
     consequences.
-    * PassThru: (see PassThru previously described)
+    * Exchange: (see Exchange previously described)
 
   .PARAMETER File
     Switch to indicate that the invoked function/script-block (invokee) is to handle FileInfo
@@ -120,7 +120,7 @@ function Invoke-ForeachFsItem {
       param(
         [System.IO.FileInfo]$FileInfo,
         [int]$Index,
-        [hashtable]$PassThru,
+        [hashtable]$Exchange,
         [boolean]$Trigger
       )
       ...
@@ -137,7 +137,7 @@ function Invoke-ForeachFsItem {
     param(
       [System.IO.DirectoryInfo]$Underscore,
       [int]$Index,
-      [hashtable]$PassThru,
+      [hashtable]$Exchange,
       [boolean]$Trigger,
       [string]$Format
     )
@@ -156,7 +156,7 @@ function Invoke-ForeachFsItem {
       param(
         [System.IO.FileInfo]$FileInfo,
         [int]$Index,
-        [hashtable]$PassThru,
+        [hashtable]$Exchange,
         [boolean]$Trigger
       )
       ...
@@ -181,7 +181,7 @@ function Invoke-ForeachFsItem {
       param(
         [System.IO.FileInfo]$FileInfo,
         [int]$Index,
-        [hashtable]$PassThru,
+        [hashtable]$Exchange,
         [boolean]$Trigger
       )
       ...
@@ -207,7 +207,7 @@ function Invoke-ForeachFsItem {
       param(
         [System.IO.FileInfo]$FileInfo,
         [int]$Index,
-        [hashtable]$PassThru,
+        [hashtable]$Exchange,
         [boolean]$Trigger
       )
       ...
@@ -222,7 +222,7 @@ function Invoke-ForeachFsItem {
     }
 
     Get-ChildItem './Tests/Data/fefsi' -Recurse -Filter '*.txt' -File | `
-      Invoke-ForeachFsItem -File -Block $block -PassThru $passThru `
+      Invoke-ForeachFsItem -File -Block $block -Exchange $passThru `
         -Header $LoopzHelpers.DefaultHeaderBlock -Summary $LoopzHelpers.SimpleSummaryBlock;
   #>
   [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', '')]
@@ -253,13 +253,13 @@ function Invoke-ForeachFsItem {
 
     [Parameter(ParameterSetName = 'InvokeScriptBlock')]
     [Parameter(ParameterSetName = 'InvokeFunction')]
-    [hashtable]$PassThru = @{},
+    [hashtable]$Exchange = @{},
 
     [Parameter(ParameterSetName = 'InvokeScriptBlock')]
     [Parameter(ParameterSetName = 'InvokeFunction')]
     [scriptblock]$Header = ( {
         param(
-          [hashtable]$_passThru
+          [hashtable]$_exchange
         )
       }),
 
@@ -270,7 +270,7 @@ function Invoke-ForeachFsItem {
           [int]$_count,
           [int]$_skipped,
           [boolean]$_trigger,
-          [hashtable]$_passThru
+          [hashtable]$_exchange
         )
       }),
 
@@ -286,11 +286,11 @@ function Invoke-ForeachFsItem {
   ) # param
 
   begin {
-    if (-not($PassThru.ContainsKey('LOOPZ.CONTROLLER'))) {
-      $PassThru['LOOPZ.CONTROLLER'] = New-Controller -Type ForeachCtrl -PassThru $PassThru `
+    if (-not($Exchange.ContainsKey('LOOPZ.CONTROLLER'))) {
+      $Exchange['LOOPZ.CONTROLLER'] = New-Controller -Type ForeachCtrl -Exchange $Exchange `
         -Header $Header -Summary $Summary;
     }
-    $controller = $PassThru['LOOPZ.CONTROLLER'];
+    $controller = $Exchange['LOOPZ.CONTROLLER'];
     $controller.ForeachBegin();
   }
 
@@ -309,7 +309,7 @@ function Invoke-ForeachFsItem {
           [boolean]$trigger = $controller.GetTrigger();
 
           if ('InvokeScriptBlock' -eq $PSCmdlet.ParameterSetName) {
-            $positional = @($pipelineItem, $index, $PassThru, $trigger);
+            $positional = @($pipelineItem, $index, $Exchange, $trigger);
 
             if ($BlockParams.Length -gt 0) {
               $BlockParams | ForEach-Object {
@@ -324,7 +324,7 @@ function Invoke-ForeachFsItem {
 
             $parameters['Underscore'] = $pipelineItem;
             $parameters['Index'] = $index;
-            $parameters['PassThru'] = $PassThru;
+            $parameters['Exchange'] = $Exchange;
             $parameters['Trigger'] = $trigger;
 
             $result = & $Functee @parameters;
