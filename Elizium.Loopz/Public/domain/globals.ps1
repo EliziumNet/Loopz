@@ -11,7 +11,7 @@ $global:LoopzHelpers = @{
       [int]$_index,
 
       [Parameter(Mandatory)]
-      [hashtable]$_passThru,
+      [hashtable]$_exchange,
 
       [Parameter(Mandatory)]
       [boolean]$_trigger
@@ -19,17 +19,17 @@ $global:LoopzHelpers = @{
 
     return Write-HostFeItemDecorator -Underscore $_underscore `
       -Index $_index `
-      -PassThru $_passThru `
+      -Exchange $_exchange `
       -Trigger $_trigger
   } # WhItemDecoratorBlock
 
   HeaderBlock          = [scriptblock] {
     param(
-      [hashtable]$PassThru = @{},
+      [hashtable]$Exchange = @{},
       [writer]$Writer
     )
 
-    Show-Header -PassThru $PassThru;
+    Show-Header -Exchange $Exchange;
   } # HeaderBlock
 
   SummaryBlock         = [scriptblock] {
@@ -37,11 +37,11 @@ $global:LoopzHelpers = @{
       [int]$Count,
       [int]$Skipped,
       [boolean]$Triggered,
-      [hashtable]$PassThru = @{}
+      [hashtable]$Exchange = @{}
     )
 
     Show-Summary -Count $Count -Skipped $Skipped `
-      -Triggered $Triggered -PassThru $PassThru;
+      -Triggered $Triggered -Exchange $Exchange;
   } # SummaryBlock
 }
 

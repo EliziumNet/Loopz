@@ -42,7 +42,7 @@ class Counter {
 class BaseController {
   [scriptblock]$_header;
   [scriptblock]$_summary;
-  [hashtable]hidden $_passThru;
+  [hashtable]hidden $_exchange;
   [int]hidden $_index = 0;
   [boolean]$_trigger = $false;
   [boolean]hidden $_broken = $false;
@@ -50,16 +50,16 @@ class BaseController {
   BaseController([hashtable]$passThru,
     [scriptblock]$header,
     [scriptblock]$summary) {
-    $this._passThru = $passThru;
+    $this._exchange = $passThru;
     $this._header = $header;
     $this._summary = $summary;
   }
 
   [int] RequestIndex() {
-    if ($this._passThru.ContainsKey('LOOPZ.CONTROLLER.STACK')) {
-      $this._passThru['LOOPZ.CONTROLLER.STACK'].Peek().Increment();
+    if ($this._exchange.ContainsKey('LOOPZ.CONTROLLER.STACK')) {
+      $this._exchange['LOOPZ.CONTROLLER.STACK'].Peek().Increment();
     }
-    return $this._passThru['LOOPZ.FOREACH.INDEX'] = $this._index++;
+    return $this._exchange['LOOPZ.FOREACH.INDEX'] = $this._index++;
   }
 
   [boolean] IsBroken () {
@@ -94,12 +94,12 @@ class BaseController {
   }
 
   [void] ForeachBegin () {
-    [System.Collections.Stack]$stack = $this._passThru.ContainsKey('LOOPZ.CONTROLLER.STACK') `
-      ? ($this._passThru['LOOPZ.CONTROLLER.STACK']) : ([System.Collections.Stack]::new());
+    [System.Collections.Stack]$stack = $this._exchange.ContainsKey('LOOPZ.CONTROLLER.STACK') `
+      ? ($this._exchange['LOOPZ.CONTROLLER.STACK']) : ([System.Collections.Stack]::new());
 
     $stack.Push([Counter]::new());
-    $this._passThru['LOOPZ.CONTROLLER.DEPTH'] = $stack.Count;
-    $this._header.InvokeReturnAsIs($this._passThru);
+    $this._exchange['LOOPZ.CONTROLLER.DEPTH'] = $stack.Count;
+    $this._header.InvokeReturnAsIs($this._exchange);
   }
 
   [void] ForeachEnd () {
@@ -116,7 +116,7 @@ class BaseController {
     #
     if ($invokeResult) {
       if ($invokeResult.psobject.properties.match('Trigger') -and $invokeResult.Trigger) {
-        $this._passThru['LOOPZ.FOREACH.TRIGGER'] = $true;
+        $this._exchange['LOOPZ.FOREACH.TRIGGER'] = $true;
         $this._trigger = $true;
       }
 
@@ -159,10 +159,10 @@ class ForeachController : BaseController {
   }
 
   [void] ForeachEnd () {
-    $this._passThru['LOOPZ.FOREACH.TRIGGER'] = $this._trigger;
-    $this._passThru['LOOPZ.FOREACH.COUNT'] = $this._index;
+    $this._exchange['LOOPZ.FOREACH.TRIGGER'] = $this._trigger;
+    $this._exchange['LOOPZ.FOREACH.COUNT'] = $this._index;
 
-    $this._summary.InvokeReturnAsIs($this._index, $this._skipped, $this._trigger, $this._passThru);
+    $this._summary.InvokeReturnAsIs($this._index, $this._skipped, $this._trigger, $this._exchange);
   }
 }
 
@@ -188,7 +188,7 @@ class TraverseController : BaseController {
   }
 
   [void] SkipItem() {
-    $this._passThru['LOOPZ.CONTROLLER.STACK'].Peek().IncrementSkipped();
+    $this._exchange['LOOPZ.CONTROLLER.STACK'].Peek().IncrementSkipped();
   }
 
   [int] Skipped() {
@@ -196,7 +196,7 @@ class TraverseController : BaseController {
   }
 
   [void] ErrorItem() {
-    $this._passThru['LOOPZ.CONTROLLER.STACK'].Peek().IncrementError();
+    $this._exchange['LOOPZ.CONTROLLER.STACK'].Peek().IncrementError();
   }
 
   [int] Errors() {
@@ -204,12 +204,12 @@ class TraverseController : BaseController {
   }
 
   [void] ForeachEnd () {
-    $this._passThru['LOOPZ.FOREACH.TRIGGER'] = $this._trigger;
-    $this._passThru['LOOPZ.FOREACH.COUNT'] = $this._index;
+    $this._exchange['LOOPZ.FOREACH.TRIGGER'] = $this._trigger;
+    $this._exchange['LOOPZ.FOREACH.COUNT'] = $this._index;
 
-    [System.Collections.Stack]$stack = $this._passThru['LOOPZ.CONTROLLER.STACK'];
+    [System.Collections.Stack]$stack = $this._exchange['LOOPZ.CONTROLLER.STACK'];
     [Counter]$counter = $stack.Pop();
-    $this._passThru['LOOPZ.CONTROLLER.DEPTH'] = $stack.Count;
+    $this._exchange['LOOPZ.CONTROLLER.DEPTH'] = $stack.Count;
     $this._session.Count += $counter.Value();
     $this._session.Errors += $counter.Errors();
     $this._session.Skipped += $counter.Skipped();
@@ -217,7 +217,7 @@ class TraverseController : BaseController {
       $this._session.Trigger = $true;
     }
 
-    $this._summary.InvokeReturnAsIs($counter.Value(), $counter.Skipped(), $this._trigger, $this._passThru);
+    $this._summary.InvokeReturnAsIs($counter.Value(), $counter.Skipped(), $this._trigger, $this._exchange);
   }
 
   [void] BeginSession () {
@@ -226,22 +226,22 @@ class TraverseController : BaseController {
     # The Counter for the session represents the top-level invoke
     #
     $stack.Push([Counter]::new());
-    $this._passThru['LOOPZ.CONTROLLER.STACK'] = $stack;
-    $this._passThru['LOOPZ.CONTROLLER.DEPTH'] = $stack.Count;
-    $this._session.Header.InvokeReturnAsIs($this._passThru);
+    $this._exchange['LOOPZ.CONTROLLER.STACK'] = $stack;
+    $this._exchange['LOOPZ.CONTROLLER.DEPTH'] = $stack.Count;
+    $this._session.Header.InvokeReturnAsIs($this._exchange);
   }
 
   [void] EndSession () {
-    [System.Collections.Stack]$stack = $this._passThru['LOOPZ.CONTROLLER.STACK'];
+    [System.Collections.Stack]$stack = $this._exchange['LOOPZ.CONTROLLER.STACK'];
 
     # This counter value represents the top-level invoke which is not included in
     # a foreach sequence.
     #
     [Counter]$counter = $stack.Pop();
-    $this._passThru['LOOPZ.CONTROLLER.DEPTH'] = $stack.Count;
+    $this._exchange['LOOPZ.CONTROLLER.DEPTH'] = $stack.Count;
 
     if ($stack.Count -eq 0) {
-      $this._passThru.Remove('LOOPZ.CONTROLLER.STACK');
+      $this._exchange.Remove('LOOPZ.CONTROLLER.STACK');
     }
     else {
       Write-Warning "!!!!!! END-SESSION; stack contains $($stack.Count) excess items";
@@ -251,7 +251,7 @@ class TraverseController : BaseController {
     $this._session.Summary.InvokeReturnAsIs($this._session.Count,
       $this._session.Skipped,
       $this._session.Trigger,
-      $this._passThru
+      $this._exchange
     );
   }
 }
@@ -266,7 +266,7 @@ function New-Controller {
 
     [Parameter(ParameterSetName = 'Iterating')]
     [Parameter(ParameterSetName = 'Traversing')]
-    [hashtable]$PassThru,
+    [hashtable]$Exchange,
 
     [Parameter(ParameterSetName = 'Iterating')]
     [Parameter(ParameterSetName = 'Traversing')]
@@ -287,12 +287,12 @@ function New-Controller {
 
   switch ($Type) {
     ForeachCtrl {
-      $instance = [ForeachController]::new($PassThru, $Header, $Summary);
+      $instance = [ForeachController]::new($Exchange, $Header, $Summary);
       break;
     }
 
     TraverseCtrl {
-      $instance = [TraverseController]::new($PassThru, $Header, $Summary,
+      $instance = [TraverseController]::new($Exchange, $Header, $Summary,
         $SessionHeader, $SessionSummary);
       break;
     }

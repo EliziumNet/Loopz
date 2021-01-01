@@ -9,7 +9,7 @@ Describe 'controller' {
     InModuleScope Elizium.Loopz {
       [scriptblock]$script:_Header = {
         param(
-          [hashtable]$_passThru
+          [hashtable]$_exchange
         )
       };
 
@@ -18,13 +18,13 @@ Describe 'controller' {
           [int]$_count,
           [int]$_skipped,
           [boolean]$_trigger,
-          [hashtable]$_passThru
+          [hashtable]$_exchange
         )
       };
 
       [scriptblock]$script:_SessionHeader = {
         param(
-          [hashtable]$_passThru
+          [hashtable]$_exchange
         )
       };
     }
@@ -43,7 +43,7 @@ Describe 'controller' {
               [int]$_count,
               [int]$_skipped,
               [boolean]$_trigger,
-              [hashtable]$_passThru
+              [hashtable]$_exchange
             )
             $_count | Should -Be 1;
             $_skipped | Should -Be 0;
@@ -51,7 +51,7 @@ Describe 'controller' {
 
           [hashtable]$passThru = @{}
 
-          $controller = New-Controller -Type ForeachCtrl -PassThru $passThru -Header $_Header -Summary $summary;
+          $controller = New-Controller -Type ForeachCtrl -Exchange $passThru -Header $_Header -Summary $summary;
           $controller.ForeachBegin();
           $controller.RequestIndex();
           $controller.HandleResult(@{
@@ -76,14 +76,14 @@ Describe 'controller' {
               [int]$_count,
               [int]$_skipped,
               [boolean]$_trigger,
-              [hashtable]$_passThru
+              [hashtable]$_exchange
             )
             $_count | Should -Be 2;
             $_skipped | Should -Be 3;
           };
           [hashtable]$passThru = @{}
 
-          $controller = New-Controller -Type ForeachCtrl -PassThru $passThru -Header $_Header -Summary $summary;
+          $controller = New-Controller -Type ForeachCtrl -Exchange $passThru -Header $_Header -Summary $summary;
           $controller.ForeachBegin();
           0..4 | Foreach-Object {
             if ($_ -gt 2 ) {
@@ -112,14 +112,14 @@ Describe 'controller' {
               [int]$_count,
               [int]$_skipped,
               [boolean]$_trigger,
-              [hashtable]$_passThru
+              [hashtable]$_exchange
             )
             $_count | Should -Be 2;
             $_skipped | Should -Be 3;
           };
           [hashtable]$passThru = @{}
 
-          $controller = New-Controller -Type TraverseCtrl -PassThru $passThru `
+          $controller = New-Controller -Type TraverseCtrl -Exchange $passThru `
             -Header $_Header -Summary $_Summary -SessionHeader $_SessionHeader -SessionSummary $sessionSummary;
           $controller.BeginSession();
           $controller.ForeachBegin();
@@ -149,14 +149,14 @@ Describe 'controller' {
               [int]$_count,
               [int]$_skipped,
               [boolean]$_trigger,
-              [hashtable]$_passThru
+              [hashtable]$_exchange
             )
             $_count | Should -Be 12;
             $_skipped | Should -Be 0;
           };
           [hashtable]$passThru = @{}
 
-          $controller = New-Controller -Type TraverseCtrl -PassThru $passThru `
+          $controller = New-Controller -Type TraverseCtrl -Exchange $passThru `
             -Header $_Header -Summary $_Summary -SessionHeader $_SessionHeader -SessionSummary $sessionSummary;
 
           $controller.BeginSession();

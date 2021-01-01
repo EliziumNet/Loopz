@@ -13,7 +13,7 @@
     value of WhatIf; or more accurately the existence of 'WhatIf' in PSBoundParameters. Or another
     way of putting it is, the presence of WHAT-IF indicates SupportsShouldProcess, and the value of
     'WHAT-IF' dictates the value of WhatIf. This way, we only need a single
-    value in the PassThru, rather than having to represent SupportShouldProcess explicitly with
+    value in the Exchange, rather than having to represent SupportShouldProcess explicitly with
     another value.
       The PastThru must contain either a 'LOOPZ.WH-FOREACH-DECORATOR.FUNCTION-NAME' entry meaning
     a named function is being decorated or 'LOOPZ.WH-FOREACH-DECORATOR.BLOCK' meaning a script
@@ -28,13 +28,13 @@
     ToString() method, in this case (you will see an error indicating ToString method not being
     available), the user should provide a custom script-block to determine how the value is
     constructed. This can be done by assigning a custom script-block to the
-    'LOOPZ.WH-FOREACH-DECORATOR.GET-RESULT' entry in PassThru. eg:
+    'LOOPZ.WH-FOREACH-DECORATOR.GET-RESULT' entry in Exchange. eg:
 
       [scriptblock]$customGetResult = {
         param($result)
         $result.SomeCustomPropertyOfRelevanceThatIsAString;
       }
-      $PassThru['LOOPZ.WH-FOREACH-DECORATOR.GET-RESULT'] = $customGetResult;
+      $Exchange['LOOPZ.WH-FOREACH-DECORATOR.GET-RESULT'] = $customGetResult;
       ...
 
       Note also, the user can provide a custom 'GET-RESULT' in order to control what is displayed
@@ -42,7 +42,7 @@
 
       This function is designed to be used with Invoke-ForeachFsItem and as such, it's signature
     needs to match that required by Invoke-ForeachFsItem. Any additional parameters can be
-    passed in via the PassThru.
+    passed in via the Exchange.
       The rationale behind Write-HostFeItemDecorator is to maintain separation of concerns
     that allows development of functions that could be used with Invoke-ForeachFsItem which do
     not contain any UI related code. This strategy also helps for the development of different
@@ -54,7 +54,7 @@
   .PARAMETER $Index
     The 0 based index representing current item in the pipeline.
 
-  .PARAMETER $PassThru
+  .PARAMETER $Exchange
     A hash table containing miscellaneous information gathered internally
     throughout the iteration batch. This can be of use to the user, because it is the way
     the user can perform bi-directional communication between the invoked custom script block
@@ -76,11 +76,11 @@
     param(
       [System.IO.DirectoryInfo]$Underscore,
       [int]$Index,
-      [hashtable]$PassThru,
+      [hashtable]$Exchange,
       [boolean]$Trigger,
     )
 
-    $format = $PassThru['CLIENT.FORMAT'];
+    $format = $Exchange['CLIENT.FORMAT'];
     @{ Product = $format -f $Underscore.Name, $Underscore.Exists }
     ...
   }
@@ -90,7 +90,7 @@
     'CLIENT.FORMAT' = '=== [{0}] -- [{1}] ==='
   }
 
-  Get-ChildItem ... | Invoke-ForeachFsItem -Path <path> -PassThru $passThru
+  Get-ChildItem ... | Invoke-ForeachFsItem -Path <path> -Exchange $passThru
     -Functee 'Write-HostFeItemDecorator'
 
     So, Test-FN is not concerned about writing any output to the console, it simply does
@@ -101,7 +101,7 @@
   Krayola Theme.
 
   Note, Write-HostFeItemDecorator does not forward additional parameters to the decorated
-  function (Test-FN), but this can be circumvented via the PassThru as illustrated by
+  function (Test-FN), but this can be circumvented via the Exchange as illustrated by
   the 'CLIENT.FORMAT' parameter in this example.
 
   #>
@@ -129,7 +129,7 @@
           $_.ContainsKey('LOOPZ.WH-FOREACH-DECORATOR.BLOCK'))
       })]
     [hashtable]
-    $PassThru,
+    $Exchange,
 
     [Parameter()]
     [boolean]$Trigger
@@ -140,46 +140,46 @@
     $result.ToString();
   }
 
-  [writer]$writer = $_passthru['LOOPZ.WRITER'];
+  [writer]$writer = $_exchange['LOOPZ.WRITER'];
 
   [scriptblock]$decorator = {
-    param ($_underscore, $_index, $_passthru, $_trigger)
+    param ($_underscore, $_index, $_exchange, $_trigger)
 
-    if ($_passthru.Contains('LOOPZ.WH-FOREACH-DECORATOR.FUNCTION-NAME')) {
-      [string]$functee = $_passthru['LOOPZ.WH-FOREACH-DECORATOR.FUNCTION-NAME'];
+    if ($_exchange.Contains('LOOPZ.WH-FOREACH-DECORATOR.FUNCTION-NAME')) {
+      [string]$functee = $_exchange['LOOPZ.WH-FOREACH-DECORATOR.FUNCTION-NAME'];
 
       [hashtable]$parameters = @{
         'Underscore' = $_underscore;
         'Index'      = $_index;
-        'PassThru'   = $_passthru;
+        'Exchange'   = $_exchange;
         'Trigger'    = $_trigger;
       }
-      if ($_passthru.Contains('WHAT-IF')) {
-        $parameters['WhatIf'] = $_passthru['WHAT-IF'];
+      if ($_exchange.Contains('WHAT-IF')) {
+        $parameters['WhatIf'] = $_exchange['WHAT-IF'];
       }
 
       return & $functee @parameters;
     }
-    elseif ($_passthru.Contains('LOOPZ.WH-FOREACH-DECORATOR.BLOCK')) {
-      [scriptblock]$block = $_passthru['LOOPZ.WH-FOREACH-DECORATOR.BLOCK'];
+    elseif ($_exchange.Contains('LOOPZ.WH-FOREACH-DECORATOR.BLOCK')) {
+      [scriptblock]$block = $_exchange['LOOPZ.WH-FOREACH-DECORATOR.BLOCK'];
 
-      return $block.InvokeReturnAsIs($_underscore, $_index, $_passthru, $_trigger);
+      return $block.InvokeReturnAsIs($_underscore, $_index, $_exchange, $_trigger);
     }
   }
 
-  $invokeResult = $decorator.InvokeReturnAsIs($Underscore, $Index, $PassThru, $Trigger);
+  $invokeResult = $decorator.InvokeReturnAsIs($Underscore, $Index, $Exchange, $Trigger);
 
-  [string]$message = $PassThru['LOOPZ.WH-FOREACH-DECORATOR.MESSAGE'];
+  [string]$message = $Exchange['LOOPZ.WH-FOREACH-DECORATOR.MESSAGE'];
   [string]$productValue = [string]::Empty;
-  [boolean]$ifTriggered = $PassThru.ContainsKey('LOOPZ.WH-FOREACH-DECORATOR.IF-TRIGGERED');
+  [boolean]$ifTriggered = $Exchange.ContainsKey('LOOPZ.WH-FOREACH-DECORATOR.IF-TRIGGERED');
   [boolean]$resultIsTriggered = $invokeResult.psobject.properties.match('Trigger') -and $invokeResult.Trigger;
 
   # Suppress the write if client has set IF-TRIGGERED and the result is not triggered.
   # This makes re-runs of a state changing operation less verbose if that's  required.
   #
   if (-not($ifTriggered) -or ($resultIsTriggered)) {
-    $getResult = $PassThru.Contains('LOOPZ.WH-FOREACH-DECORATOR.GET-RESULT') `
-      ? $PassThru['LOOPZ.WH-FOREACH-DECORATOR.GET-RESULT'] : $defaultGetResult;
+    $getResult = $Exchange.Contains('LOOPZ.WH-FOREACH-DECORATOR.GET-RESULT') `
+      ? $Exchange['LOOPZ.WH-FOREACH-DECORATOR.GET-RESULT'] : $defaultGetResult;
 
     [line]$themedPairs = $( kl( $(kp('No', $("{0,3}" -f ($Index + 1)))) ) );
 
@@ -189,8 +189,8 @@
     if ($invokeResult -and $invokeResult.psobject.properties.match('Product') -and $invokeResult.Product) {
       [boolean]$affirm = $invokeResult.psobject.properties.match('Affirm') -and $invokeResult.Affirm;
       $productValue = $getResult.InvokeReturnAsIs($invokeResult.Product);
-      $productLabel = $PassThru.ContainsKey('LOOPZ.WH-FOREACH-DECORATOR.PRODUCT-LABEL') `
-        ? $PassThru['LOOPZ.WH-FOREACH-DECORATOR.PRODUCT-LABEL'] : 'Product';
+      $productLabel = $Exchange.ContainsKey('LOOPZ.WH-FOREACH-DECORATOR.PRODUCT-LABEL') `
+        ? $Exchange['LOOPZ.WH-FOREACH-DECORATOR.PRODUCT-LABEL'] : 'Product';
 
       if (-not([string]::IsNullOrWhiteSpace($productLabel))) {
         $themedPairs.append($(kp(@($productLabel, $productValue, $affirm))));
@@ -216,20 +216,20 @@
     # Write additional lines
     #
     if ($invokeResult -and $invokeResult.psobject.properties.match('Lines') -and $invokeResult.Lines) {
-      [int]$indent = $PassThru.ContainsKey('LOOPZ.WH-FOREACH-DECORATOR.INDENT') `
-        ? $PassThru['LOOPZ.WH-FOREACH-DECORATOR.INDENT'] : 3;
+      [int]$indent = $Exchange.ContainsKey('LOOPZ.WH-FOREACH-DECORATOR.INDENT') `
+        ? $Exchange['LOOPZ.WH-FOREACH-DECORATOR.INDENT'] : 3;
       [string]$blank = [string]::new(' ', $indent);
 
-      [writer]$adjustedWriter = if ($PassThru.ContainsKey('LOOPZ.WH-FOREACH-DECORATOR.WRITER')) {
-        $PassThru['LOOPZ.WH-FOREACH-DECORATOR.WRITER'];
+      [writer]$adjustedWriter = if ($Exchange.ContainsKey('LOOPZ.WH-FOREACH-DECORATOR.WRITER')) {
+        $Exchange['LOOPZ.WH-FOREACH-DECORATOR.WRITER'];
       } else {
         [hashtable]$adjustedTheme = $krayolaTheme.Clone();
         $adjustedTheme['MESSAGE-SUFFIX'] = [string]::Empty;
         $adjustedTheme['OPEN'] = [string]::Empty;
         $adjustedTheme['CLOSE'] = [string]::Empty;
-        $PassThru['LOOPZ.WH-FOREACH-DECORATOR.WRITER'] = New-Writer -Theme $adjustedTheme;
+        $Exchange['LOOPZ.WH-FOREACH-DECORATOR.WRITER'] = New-Writer -Theme $adjustedTheme;
 
-        $PassThru['LOOPZ.WH-FOREACH-DECORATOR.WRITER'];
+        $Exchange['LOOPZ.WH-FOREACH-DECORATOR.WRITER'];
       }
 
       foreach ($line in $invokeResult.Lines) {

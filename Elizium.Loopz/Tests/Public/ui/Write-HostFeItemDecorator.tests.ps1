@@ -9,16 +9,16 @@ Describe 'Write-HostFeItemDecorator' {
     InModuleScope Elizium.Loopz {
       [scriptblock]$script:decorator = {
         param(
-          $_underscore, $_index, $_passthru, $_trigger
+          $_underscore, $_index, $_exchange, $_trigger
         )
 
         return Write-HostFeItemDecorator -Underscore $_underscore `
           -Index $_index `
-          -PassThru $_passthru `
+          -Exchange $_exchange `
           -Trigger $_trigger
       }
 
-      [hashtable]$script:_passThru = @{
+      [hashtable]$script:_exchange = @{
         'LOOPZ.WH-FOREACH-DECORATOR.FUNCTION-NAME' = 'get-AnswerAdvancedFn';
         'LOOPZ.WH-FOREACH-DECORATOR.MESSAGE'       = 'Test Advanced Function';
         'LOOPZ.WH-FOREACH-DECORATOR.PRODUCT-LABEL' = 'Test product';
@@ -37,13 +37,13 @@ Describe 'Write-HostFeItemDecorator' {
           [int]$Index,
 
           [Parameter(Mandatory)]
-          [hashtable]$PassThru,
+          [hashtable]$Exchange,
 
           [Parameter(Mandatory)]
           [boolean]$Trigger
         )
 
-        [PSCustomObject]@{ Product = "{0}: {1}" -f $Underscore, $PassThru['ANSWER'] }
+        [PSCustomObject]@{ Product = "{0}: {1}" -f $Underscore, $Exchange['ANSWER'] }
       }
     } # InModuleScope Elizium.Loopz
   } # BeforeAll
@@ -52,7 +52,7 @@ Describe 'Write-HostFeItemDecorator' {
     InModuleScope Elizium.Loopz {
       [hashtable]$theme = $(Get-KrayolaTheme);
       [writer]$writer = New-Writer -Theme $theme;
-      $_passThru['LOOPZ.WRITER'] = $writer;
+      $_exchange['LOOPZ.WRITER'] = $writer;
     }
   }
 
@@ -65,7 +65,7 @@ Describe 'Write-HostFeItemDecorator' {
 
         InModuleScope ELizium.Loopz {
           $underscore = 'What is the answer to the universe';
-          $decorator.Invoke($underscore, 0, $_passThru, $false);
+          $decorator.Invoke($underscore, 0, $_exchange, $false);
         }
       }
 
@@ -77,7 +77,7 @@ Describe 'Write-HostFeItemDecorator' {
 
           InModuleScope ELizium.Loopz {
             $underscore = 'What is the answer to the universe';
-            $LoopzHelpers.WhItemDecoratorBlock.Invoke($underscore, 0, $_passThru, $false);
+            $LoopzHelpers.WhItemDecoratorBlock.Invoke($underscore, 0, $_exchange, $false);
           }
         }
       }
@@ -93,7 +93,7 @@ Describe 'Write-HostFeItemDecorator' {
 
         InModuleScope ELizium.Loopz {
           $underscore = 'What is the answer to the universe';
-          $decorator.Invoke($underscore, 0, $_passThru, $false);
+          $decorator.Invoke($underscore, 0, $_exchange, $false);
         }
       }
     } # and: contains 2 items
@@ -115,7 +115,7 @@ Describe 'Write-HostFeItemDecorator' {
 
         InModuleScope ELizium.Loopz {
           $underscore = 'What is the answer to the universe';
-          $decorator.Invoke($underscore, 0, $_passThru, $false);
+          $decorator.Invoke($underscore, 0, $_exchange, $false);
         }
       } # should: invoke and write
     } # and: contains many items
@@ -131,14 +131,14 @@ Describe 'Write-HostFeItemDecorator' {
             [Alias('Underscore')]
             [System.IO.FileInfo]$FileInfo,
             [int]$Index,
-            [hashtable]$PassThru,
+            [hashtable]$Exchange,
             [boolean]$Trigger
           )
 
           [PSCustomObject]@{ Product = $FileInfo; Affirm = $true }
         }
 
-        $myPassThru = $_passThru.Clone();
+        $myPassThru = $_exchange.Clone();
         $myPassThru['LOOPZ.WH-FOREACH-DECORATOR.FUNCTION-NAME'] = 'get-AffirmedProduct';
 
         $underscore = 'The owls are not what they seem';
@@ -163,13 +163,13 @@ Describe 'Write-HostFeItemDecorator' {
               [int]$Index,
 
               [Parameter(Mandatory)]
-              [hashtable]$PassThru,
+              [hashtable]$Exchange,
 
               [Parameter(Mandatory)]
               [boolean]$Trigger
             )
 
-            [PSCustomObject]@{ Product = ("{0}: {1}" -f $Underscore, $PassThru['ANSWER']);
+            [PSCustomObject]@{ Product = ("{0}: {1}" -f $Underscore, $Exchange['ANSWER']);
               Trigger                  = $true 
             }
           }

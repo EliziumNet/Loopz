@@ -11,20 +11,20 @@ function Show-Summary {
     [boolean]$Triggered,
 
     [Parameter()]
-    [hashtable]$PassThru = @{}
+    [hashtable]$Exchange = @{}
   )
 
-  [writer]$writer = $PassThru['LOOPZ.WRITER'];
+  [writer]$writer = $Exchange['LOOPZ.WRITER'];
   if (-not($writer)) {
-    throw "Writer missing from PassThru under key 'LOOPZ.WRITER'"
+    throw "Writer missing from Exchange under key 'LOOPZ.WRITER'"
   }
 
   [string]$writerFormatWithArg = $writer.ApiFormatWithArg;
 
   # First line
   #
-  if ($PassThru.ContainsKey('LOOPZ.SUMMARY-BLOCK.LINE')) {
-    [string]$line = $PassThru['LOOPZ.SUMMARY-BLOCK.LINE'];
+  if ($Exchange.ContainsKey('LOOPZ.SUMMARY-BLOCK.LINE')) {
+    [string]$line = $Exchange['LOOPZ.SUMMARY-BLOCK.LINE'];
 
     # Assuming writerFormatWithArg is &[{0},{1}]
     # => generates &[ThemeColour,meta] which is an instruction to set the
@@ -45,25 +45,25 @@ function Show-Summary {
       $(kp('Triggered', $Triggered))
     ));
 
-  [line]$summaryProperties = $PassThru.ContainsKey(
-    'LOOPZ.SUMMARY-BLOCK.PROPERTIES') ? $PassThru['LOOPZ.SUMMARY-BLOCK.PROPERTIES'] : [line]::new(@());
+  [line]$summaryProperties = $Exchange.ContainsKey(
+    'LOOPZ.SUMMARY-BLOCK.PROPERTIES') ? $Exchange['LOOPZ.SUMMARY-BLOCK.PROPERTIES'] : [line]::new(@());
 
   if ($summaryProperties.Line.Length -gt 0) {
     $properties.append($summaryProperties);
   }
 
-  [string]$message = $PassThru.ContainsKey('LOOPZ.SUMMARY-BLOCK.MESSAGE') `
-    ? $PassThru['LOOPZ.SUMMARY-BLOCK.MESSAGE'] : 'Summary';
+  [string]$message = $Exchange.ContainsKey('LOOPZ.SUMMARY-BLOCK.MESSAGE') `
+    ? $Exchange['LOOPZ.SUMMARY-BLOCK.MESSAGE'] : 'Summary';
 
   $null = $writer.Line($message, $properties);
 
   # Wide items
   #
-  if ($PassThru.ContainsKey('LOOPZ.SUMMARY-BLOCK.WIDE-ITEMS')) {
-    [line]$wideItems = $PassThru['LOOPZ.SUMMARY-BLOCK.WIDE-ITEMS'];
+  if ($Exchange.ContainsKey('LOOPZ.SUMMARY-BLOCK.WIDE-ITEMS')) {
+    [line]$wideItems = $Exchange['LOOPZ.SUMMARY-BLOCK.WIDE-ITEMS'];
 
-    [boolean]$group = ($PassThru.ContainsKey('LOOPZ.SUMMARY-BLOCK.GROUP-WIDE-ITEMS') -and
-      $PassThru['LOOPZ.SUMMARY-BLOCK.GROUP-WIDE-ITEMS']);
+    [boolean]$group = ($Exchange.ContainsKey('LOOPZ.SUMMARY-BLOCK.GROUP-WIDE-ITEMS') -and
+      $Exchange['LOOPZ.SUMMARY-BLOCK.GROUP-WIDE-ITEMS']);
     [string]$blank = [string]::new(' ', $message.Length);
 
     if ($group) {

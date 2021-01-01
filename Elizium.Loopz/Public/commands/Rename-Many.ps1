@@ -1,7 +1,7 @@
 
 function Rename-Many {
   [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSShouldProcess', '',
-    Justification = 'WhatIf IS accessed and passed into PassThru')]
+    Justification = 'WhatIf IS accessed and passed into Exchange')]
   [CmdletBinding(SupportsShouldProcess, DefaultParameterSetName = 'ReplaceWith')]
   [Alias('remy')]
   param
@@ -98,7 +98,7 @@ function Rename-Many {
         [int]$_index,
 
         [Parameter(Mandatory)]
-        [hashtable]$_passThru,
+        [hashtable]$_exchange,
 
         [Parameter(Mandatory)]
         [boolean]$_trigger
@@ -110,55 +110,55 @@ function Rename-Many {
       $endAdapter = New-EndAdapter($_underscore);
       [string]$adjustedName = $endAdapter.GetAdjustedName();
 
-      [string]$action = $_passThru['LOOPZ.REMY.ACTION'];
+      [string]$action = $_exchange['LOOPZ.REMY.ACTION'];
 
       [hashtable]$actionParameters = @{
         'Value'   = $adjustedName;
-        'Pattern' = $_passThru['LOOPZ.REMY.PATTERN-REGEX'];
+        'Pattern' = $_exchange['LOOPZ.REMY.PATTERN-REGEX'];
       }
 
-      [boolean]$performDiagnosis = ($_passThru.ContainsKey('LOOPZ.DIAGNOSE') -and
-        $_passThru['LOOPZ.DIAGNOSE']);
+      [boolean]$performDiagnosis = ($_exchange.ContainsKey('LOOPZ.DIAGNOSE') -and
+        $_exchange['LOOPZ.DIAGNOSE']);
 
-      $actionParameters['PatternOccurrence'] = $_passThru.ContainsKey('LOOPZ.REMY.PATTERN-OCC') `
-        ? $_passThru['LOOPZ.REMY.PATTERN-OCC'] : 'f';
+      $actionParameters['PatternOccurrence'] = $_exchange.ContainsKey('LOOPZ.REMY.PATTERN-OCC') `
+        ? $_exchange['LOOPZ.REMY.PATTERN-OCC'] : 'f';
 
-      if ($_passThru.ContainsKey('LOOPZ.REMY.COPY')) {
-        $actionParameters['Copy'] = $_passThru['LOOPZ.REMY.COPY'];
+      if ($_exchange.ContainsKey('LOOPZ.REMY.COPY')) {
+        $actionParameters['Copy'] = $_exchange['LOOPZ.REMY.COPY'];
 
-        if ($_passThru.ContainsKey('LOOPZ.REMY.COPY-OCC')) {
-          $actionParameters['CopyOccurrence'] = $_passThru['LOOPZ.REMY.COPY-OCC'];
+        if ($_exchange.ContainsKey('LOOPZ.REMY.COPY-OCC')) {
+          $actionParameters['CopyOccurrence'] = $_exchange['LOOPZ.REMY.COPY-OCC'];
         }
       }
-      elseif ($_passThru.ContainsKey('LOOPZ.REMY.WITH')) {
-        $actionParameters['With'] = $_passThru['LOOPZ.REMY.WITH'];
+      elseif ($_exchange.ContainsKey('LOOPZ.REMY.WITH')) {
+        $actionParameters['With'] = $_exchange['LOOPZ.REMY.WITH'];
       }
 
-      if ($_passThru.ContainsKey('LOOPZ.REMY.PASTE')) {
-        $actionParameters['Paste'] = $_passThru['LOOPZ.REMY.PASTE']
+      if ($_exchange.ContainsKey('LOOPZ.REMY.PASTE')) {
+        $actionParameters['Paste'] = $_exchange['LOOPZ.REMY.PASTE']
       }
 
       if ($performDiagnosis) {
-        $actionParameters['Diagnose'] = $_passThru['LOOPZ.DIAGNOSE']
+        $actionParameters['Diagnose'] = $_exchange['LOOPZ.DIAGNOSE']
       }
 
       if ($action -eq 'Move-Match') {
-        if ($_passThru.ContainsKey('LOOPZ.REMY.ANCHOR')) {
-          $actionParameters['Anchor'] = $_passThru['LOOPZ.REMY.ANCHOR'];
+        if ($_exchange.ContainsKey('LOOPZ.REMY.ANCHOR')) {
+          $actionParameters['Anchor'] = $_exchange['LOOPZ.REMY.ANCHOR'];
         }
-        if ($_passThru.ContainsKey('LOOPZ.REMY.ANCHOR-OCC')) {
-          $actionParameters['AnchorOccurrence'] = $_passThru['LOOPZ.REMY.ANCHOR-OCC'];
-        }
-
-        if ($_passThru.ContainsKey('LOOPZ.REMY.DROP')) {
-          $actionParameters['Drop'] = $_passThru['LOOPZ.REMY.DROP'];
-          $actionParameters['Marker'] = $_passThru['LOOPZ.REMY.MARKER'];
+        if ($_exchange.ContainsKey('LOOPZ.REMY.ANCHOR-OCC')) {
+          $actionParameters['AnchorOccurrence'] = $_exchange['LOOPZ.REMY.ANCHOR-OCC'];
         }
 
-        switch ($_passThru['LOOPZ.REMY.ANCHOR-TYPE']) {
+        if ($_exchange.ContainsKey('LOOPZ.REMY.DROP')) {
+          $actionParameters['Drop'] = $_exchange['LOOPZ.REMY.DROP'];
+          $actionParameters['Marker'] = $_exchange['LOOPZ.REMY.MARKER'];
+        }
+
+        switch ($_exchange['LOOPZ.REMY.ANCHOR-TYPE']) {
           'MATCHED-ITEM' {
-            if ($_passThru.ContainsKey('LOOPZ.REMY.RELATION')) {
-              $actionParameters['Relation'] = $_passThru['LOOPZ.REMY.RELATION'];
+            if ($_exchange.ContainsKey('LOOPZ.REMY.RELATION')) {
+              $actionParameters['Relation'] = $_exchange['LOOPZ.REMY.RELATION'];
             }
             break;
           }
@@ -178,7 +178,7 @@ function Rename-Many {
 
       [line]$properties = [line]::new();
       [line[]]$lines = @();
-      [hashtable]$signals = $_passThru['LOOPZ.SIGNALS'];
+      [hashtable]$signals = $_exchange['LOOPZ.SIGNALS'];
 
       # Perform Rename Action, then post process
       #
@@ -199,7 +199,7 @@ function Rename-Many {
 
       [boolean]$trigger = $false;
       [boolean]$affirm = $false;
-      [boolean]$whatIf = $_passThru.ContainsKey('WHAT-IF') -and ($_passThru['WHAT-IF']);
+      [boolean]$whatIf = $_exchange.ContainsKey('WHAT-IF') -and ($_exchange['WHAT-IF']);
 
       [string]$parent = $itemIsDirectory ? $_underscore.Parent.FullName : $_underscore.Directory.FullName;
       [boolean]$nameHasChanged = -not($_underscore.Name -ceq $newItemName);
@@ -207,8 +207,8 @@ function Rename-Many {
       [boolean]$clash = (Test-Path -LiteralPath $newItemFullPath) -and $nameHasChanged;
       [string]$fileSystemItemType = $itemIsDirectory ? 'Directory' : 'File';
 
-      [PSCustomObject]$context = $_passThru['LOOPZ.REMY.CONTEXT'];
-      [int]$maxItemMessageSize = $_passThru['LOOPZ.REMY.MAX-ITEM-MESSAGE-SIZE'];
+      [PSCustomObject]$context = $_exchange['LOOPZ.REMY.CONTEXT'];
+      [int]$maxItemMessageSize = $_exchange['LOOPZ.REMY.MAX-ITEM-MESSAGE-SIZE'];
       [string]$normalisedItemMessage = $Context.ItemMessage.replace(
         $Loopz.FsItemTypePlaceholder, $fileSystemItemType);
 
@@ -231,9 +231,9 @@ function Rename-Many {
       # entries in the krayola scheme like MESSAGE-SUFFIX, FORMAT.
       #
       [int]$indent = 28 + $maxItemMessageSize + $($signalLength - 2);
-      $_passThru['LOOPZ.WH-FOREACH-DECORATOR.INDENT'] = $indent;
-      $_passThru['LOOPZ.WH-FOREACH-DECORATOR.MESSAGE'] = $message;
-      $_passThru['LOOPZ.WH-FOREACH-DECORATOR.PRODUCT-LABEL'] = $(Get-PaddedLabel -Label $(
+      $_exchange['LOOPZ.WH-FOREACH-DECORATOR.INDENT'] = $indent;
+      $_exchange['LOOPZ.WH-FOREACH-DECORATOR.MESSAGE'] = $message;
+      $_exchange['LOOPZ.WH-FOREACH-DECORATOR.PRODUCT-LABEL'] = $(Get-PaddedLabel -Label $(
           $fileSystemItemType) -Width 9);
 
       if ($nameHasChanged -and -not($clash)) {
@@ -246,7 +246,7 @@ function Rename-Many {
 
       if ($trigger) {
         $lines += (kl(
-            kp(@($_passThru['LOOPZ.REMY.FROM-LABEL'], $_underscore.Name))
+            kp(@($_exchange['LOOPZ.REMY.FROM-LABEL'], $_underscore.Name))
           ));
       }
       else {
@@ -585,7 +585,7 @@ function Rename-Many {
 
     [hashtable]$parameters = @{
       'Condition' = $matchesPattern;
-      'PassThru'  = $passThru;
+      'Exchange'  = $passThru;
       'Header'    = $LoopzHelpers.HeaderBlock;
       'Summary'   = $LoopzHelpers.SummaryBlock;
       'Block'     = $LoopzHelpers.WhItemDecoratorBlock;

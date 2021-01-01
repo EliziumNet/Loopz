@@ -23,7 +23,7 @@ function Invoke-TraverseDirectory {
   as a result of invoking Get-ChildItem. It provides a filtering mechanism that is defined
   by the user to define which directories are selected for function/scriptblock invocation.
 
-  .PARAMETER PassThru
+  .PARAMETER Exchange
     A hash table containing miscellaneous information gathered internally throughout the
   traversal batch. This can be of use to the user, because it is the way the user can perform
   bi-directional communication between the invoked custom script block and client side logic.
@@ -34,7 +34,7 @@ function Invoke-TraverseDirectory {
   the following positional parameters:
     * underscore: the DirectoryInfo object representing the directory in the source tree
     * index: the 0 based index representing current directory in the source tree
-    * PassThru object: a hash table containing miscellaneous information gathered internally
+    * Exchange object: a hash table containing miscellaneous information gathered internally
     throughout the mirroring batch. This can be of use to the user, because it is the way
     the user can perform bi-directional communication between the invoked custom script block
     and client side logic.
@@ -58,10 +58,10 @@ function Invoke-TraverseDirectory {
   for script-blocks. The Function's base signature is as follows:
     "Underscore": (See underscore described above)
     "Index": (See index described above)
-    "PassThru": (See PathThru described above)
+    "Exchange": (See PathThru described above)
     "Trigger": (See trigger described above)
 
-  The destination DirectoryInfo object can be accessed via the PassThru denoted by
+  The destination DirectoryInfo object can be accessed via the Exchange denoted by
   the 'LOOPZ.MIRROR.DESTINATION' entry.
 
   .PARAMETER FuncteeParams
@@ -71,9 +71,9 @@ function Invoke-TraverseDirectory {
   .PARAMETER Header
     A script-block that is invoked for each directory that also contains child directories.
   The script-block is invoked with the following positional parameters:
-    * PassThru: (see PassThru previously described)
+    * Exchange: (see Exchange previously described)
 
-    The Header can be customised with the following PassThru entries:
+    The Header can be customised with the following Exchange entries:
     - 'LOOPZ.KRAYOLA-THEME': Krayola Theme generally in use
     - 'LOOPZ.HEADER-BLOCK.MESSAGE': message displayed as part of the header
     - 'LOOPZ.HEADER-BLOCK.CRUMB-SIGNAL': Lead text displayed in header, default: '[+] '
@@ -93,7 +93,7 @@ function Invoke-TraverseDirectory {
     indicate whether any of the items processed were actively updated/written in this batch.
     This helps in written idempotent operations that can be re-run without adverse
     consequences.
-    * PassThru: (see PassThru previously described)
+    * Exchange: (see Exchange previously described)
 
   .PARAMETER SessionHeader
     A script-block that is invoked at the start of the traversal batch. The script-block has
@@ -132,7 +132,7 @@ function Invoke-TraverseDirectory {
     param(
       [System.IO.DirectoryInfo]$Underscore,
       [int]$Index,
-      [hashtable]$PassThru,
+      [hashtable]$Exchange,
       [boolean]$Trigger,
       [string]$Format
     )
@@ -152,7 +152,7 @@ function Invoke-TraverseDirectory {
     param(
       [System.IO.DirectoryInfo]$Underscore,
       [int]$Index,
-      [hashtable]$PassThru,
+      [hashtable]$Exchange,
       [boolean]$Trigger
     )
     ...
@@ -182,7 +182,7 @@ function Invoke-TraverseDirectory {
     param(
       [System.IO.DirectoryInfo]$Underscore,
       [int]$Index,
-      [hashtable]$PassThru,
+      [hashtable]$Exchange,
       [boolean]$Trigger
     )
     ...
@@ -237,7 +237,7 @@ function Invoke-TraverseDirectory {
 
     [Parameter(ParameterSetName = 'InvokeScriptBlock')]
     [Parameter(ParameterSetName = 'InvokeFunction')]
-    [hashtable]$PassThru = @{},
+    [hashtable]$Exchange = @{},
 
     [Parameter(ParameterSetName = 'InvokeScriptBlock')]
     [ValidateScript( { -not($_ -eq $null) })]
@@ -258,7 +258,7 @@ function Invoke-TraverseDirectory {
     [Parameter(ParameterSetName = 'InvokeFunction')]
     [scriptblock]$Header = ( {
         param(
-          [hashtable]$_passThru
+          [hashtable]$_exchange
         )
       }),
 
@@ -270,7 +270,7 @@ function Invoke-TraverseDirectory {
           [int]$_count,
           [int]$_skipped,
           [boolean]$_triggered,
-          [hashtable]$_passThru
+          [hashtable]$_exchange
         )
       }),
 
@@ -278,7 +278,7 @@ function Invoke-TraverseDirectory {
     [Parameter(ParameterSetName = 'InvokeFunction')]
     [scriptblock]$SessionHeader = ( {
         param(
-          [hashtable]$_passThru
+          [hashtable]$_exchange
         )
       }),
 
@@ -289,7 +289,7 @@ function Invoke-TraverseDirectory {
           [int]$_count,
           [int]$_skipped,
           [boolean]$_trigger,
-          [hashtable]$_passThru
+          [hashtable]$_exchange
         )
       }),
 
@@ -347,7 +347,7 @@ function Invoke-TraverseDirectory {
       #
       $parameters['Underscore'] = $directoryInfo;
       $parameters['Index'] = $index;
-      $parameters['PassThru'] = $passThru;
+      $parameters['Exchange'] = $passThru;
       $parameters['Trigger'] = $trigger;
 
       $result = & $invokee @parameters;
@@ -357,14 +357,14 @@ function Invoke-TraverseDirectory {
     [System.IO.DirectoryInfo[]]$directoryInfos = Get-ChildItem -Path $fullName `
       -Directory | Where-Object { $condition.InvokeReturnAsIs($_) };
 
-    [scriptblock]$adapter = $PassThru['LOOPZ.TRAVERSE.ADAPTOR'];
+    [scriptblock]$adapter = $Exchange['LOOPZ.TRAVERSE.ADAPTOR'];
 
     if ($directoryInfos) {
       # adapter is always a script block, this has nothing to do with the invokee,
       # which may be a script block or a named function(functee)
       #
       $directoryInfos | Invoke-ForeachFsItem -Directory -Block $adapter `
-        -PassThru $PassThru -Condition $condition -Summary $Summary;
+        -Exchange $Exchange -Condition $condition -Summary $Summary;
     }
 
     return $result;
@@ -382,21 +382,21 @@ function Invoke-TraverseDirectory {
       [int]$_index,
 
       [Parameter(Mandatory)]
-      [hashtable]$_passThru,
+      [hashtable]$_exchange,
 
       [Parameter(Mandatory)]
       [boolean]$_trigger
     )
 
-    [scriptblock]$adapted = $_passThru['LOOPZ.TRAVERSE.ADAPTED'];
-    $controller = $_passThru['LOOPZ.CONTROLLER'];
+    [scriptblock]$adapted = $_exchange['LOOPZ.TRAVERSE.ADAPTED'];
+    $controller = $_exchange['LOOPZ.CONTROLLER'];
 
     try {
       $adapted.InvokeReturnAsIs(
         $_underscore,
-        $_passThru['LOOPZ.TRAVERSE.CONDITION'],
-        $_passThru,
-        $PassThru['LOOPZ.TRAVERSE.INVOKEE'],
+        $_exchange['LOOPZ.TRAVERSE.CONDITION'],
+        $_exchange,
+        $Exchange['LOOPZ.TRAVERSE.INVOKEE'],
         $_trigger
       );
     }
@@ -419,9 +419,9 @@ function Invoke-TraverseDirectory {
 
   # ======================================================= [Invoke-TraverseDirectory] ===
 
-  $controller = New-Controller -Type TraverseCtrl -PassThru $PassThru `
+  $controller = New-Controller -Type TraverseCtrl -Exchange $Exchange `
     -Header $Header -Summary $Summary -SessionHeader $SessionHeader -SessionSummary $SessionSummary;
-  $PassThru['LOOPZ.CONTROLLER'] = $controller;
+  $Exchange['LOOPZ.CONTROLLER'] = $controller;
 
   $controller.BeginSession();
 
@@ -446,12 +446,12 @@ function Invoke-TraverseDirectory {
         [hashtable]$parameters = $FuncteeParams.Clone();
         $parameters['Underscore'] = $directory;
         $parameters['Index'] = $index;
-        $parameters['PassThru'] = $PassThru;
+        $parameters['Exchange'] = $Exchange;
         $parameters['Trigger'] = $trigger;
-        $PassThru['LOOPZ.TRAVERSE.INVOKEE.PARAMS'] = $parameters;
+        $Exchange['LOOPZ.TRAVERSE.INVOKEE.PARAMS'] = $parameters;
       }
       elseif ('InvokeScriptBlock' -eq $PSCmdlet.ParameterSetName) {
-        $positional = @($directory, $index, $PassThru, $trigger);
+        $positional = @($directory, $index, $Exchange, $trigger);
 
         if ($BlockParams.Count -gt 0) {
           $BlockParams | Foreach-Object {
@@ -460,14 +460,14 @@ function Invoke-TraverseDirectory {
         }
 
         # Note, for the positional parameters, we can only pass in the additional
-        # custom parameters provided by the client here via the PassThru otherwise
+        # custom parameters provided by the client here via the Exchange otherwise
         # we could accidentally build up the array of positional parameters with
         # duplicated entries. This is in contrast to splatted arguments for function
         # invokes where parameter names are paired with parameter values in a
         # hashtable and naturally prevent duplicated entries. This is why we set
         # 'LOOPZ.TRAVERSE.INVOKEE.PARAMS' to $BlockParams and not $positional.
         #
-        $PassThru['LOOPZ.TRAVERSE.INVOKEE.PARAMS'] = $BlockParams;
+        $Exchange['LOOPZ.TRAVERSE.INVOKEE.PARAMS'] = $BlockParams;
       }
 
       $result = $null;
@@ -511,7 +511,7 @@ function Invoke-TraverseDirectory {
         #
         [hashtable]$parametersFeFsItem = @{
           'Directory' = $true;
-          'PassThru'  = $PassThru;
+          'Exchange'  = $Exchange;
           'Summary'   = $Summary;
         }
 
@@ -533,15 +533,15 @@ function Invoke-TraverseDirectory {
       # Set up the adapter. (NB, can't use splatting because we're invoking a script block
       # as opposed to a named function.)
       #
-      $PassThru['LOOPZ.TRAVERSE.CONDITION'] = $Condition;
-      $PassThru['LOOPZ.TRAVERSE.ADAPTED'] = $recurseTraverseDirectory;
-      $PassThru['LOOPZ.TRAVERSE.ADAPTOR'] = $adapter;
+      $Exchange['LOOPZ.TRAVERSE.CONDITION'] = $Condition;
+      $Exchange['LOOPZ.TRAVERSE.ADAPTED'] = $recurseTraverseDirectory;
+      $Exchange['LOOPZ.TRAVERSE.ADAPTOR'] = $adapter;
 
       if ('InvokeScriptBlock' -eq $PSCmdlet.ParameterSetName) {
-        $PassThru['LOOPZ.TRAVERSE.INVOKEE'] = $Block;
+        $Exchange['LOOPZ.TRAVERSE.INVOKEE'] = $Block;
       }
       elseif ('InvokeFunction' -eq $PSCmdlet.ParameterSetName) {
-        $PassThru['LOOPZ.TRAVERSE.INVOKEE'] = $Functee;
+        $Exchange['LOOPZ.TRAVERSE.INVOKEE'] = $Functee;
       }
 
       # Now perform start of recursive traversal
@@ -551,7 +551,7 @@ function Invoke-TraverseDirectory {
 
       if ($directoryInfos) {
         $directoryInfos | Invoke-ForeachFsItem -Directory -Block $adapter `
-          -PassThru $PassThru -Condition $Condition -Summary $Summary;
+          -Exchange $Exchange -Condition $Condition -Summary $Summary;
       }
     }
   }
