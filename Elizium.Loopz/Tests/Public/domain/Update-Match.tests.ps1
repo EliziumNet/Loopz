@@ -2,13 +2,13 @@ using namespace System.Text.RegularExpressions;
 
 Describe 'Update-Match' {
   BeforeAll {
-    . .\Public\Update-Match.ps1;
-    . .\Public\Split-Match.ps1;
+    Get-Module Elizium.Loopz | Remove-Module
+    Import-Module .\Output\Elizium.Loopz\Elizium.Loopz.psm1 `
+      -ErrorAction 'stop' -DisableNameChecking
+
     . .\Tests\Helpers\new-expr.ps1;
   }
-
-  # Need Literal and Paste tests
-  
+ 
   Context 'FIRST' {
     Context 'given: plain pattern' {
       Context 'and: no matches' {

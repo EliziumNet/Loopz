@@ -1,7 +1,9 @@
 
-Describe 'Format-Escape' {
+Describe 'Format-Escape' -Tag 'Current' {
   BeforeAll {
-    . .\Public\Format-Escape.ps1;
+    Get-Module Elizium.Loopz | Remove-Module
+    Import-Module .\Output\Elizium.Loopz\Elizium.Loopz.psm1 `
+      -ErrorAction 'stop' -DisableNameChecking
   }
 
   Context 'Format-Escape' {
