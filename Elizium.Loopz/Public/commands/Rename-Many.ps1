@@ -90,6 +90,30 @@ function Rename-Many {
   begin {
     Write-Debug ">>> Rename-Many [ParameterSet: '$($PSCmdlet.ParameterSetName)]' >>>";
 
+    function get-fixedIndent {
+      [OutputType([int])]
+      param(
+        [Parameter()]
+        [hashtable]$Theme,
+
+        [Parameter()]
+        [string]$Message = [string]::Empty
+      )
+      [int]$indent = $Message.Length;
+
+      #          1         2         3         4
+      # 1234567890123456789012345678901234567890
+      #    [🏷️] Rename Item  // ["No" => "  1",
+      #                      |<-- fixed bit -->|
+      #
+      $indent += $Theme['MESSAGE-SUFFIX'].Length;
+      $indent += $Theme['OPEN'].Length;
+      $indent += $Theme['FORMAT'].Replace($Theme['KEY-PLACE-HOLDER'], "No").Replace(
+        $Theme['VALUE-PLACE-HOLDER'], '999').Length;
+      $indent += $Theme['SEPARATOR'].Length;
+      return $indent;
+    }
+
     [scriptblock]$doRenameFsItems = {
       param(
         [Parameter(Mandatory)]
@@ -226,12 +250,8 @@ function Rename-Many {
       [string]$signalName = $itemIsDirectory ? 'DIRECTORY-A' : 'FILE-A';
       [string]$message = Get-FormattedSignal -Name $signalName `
         -Signals $signals -CustomLabel $messageLabel -Format '   [{1}] {0}';
-      [int]$signalLength = $signals[$signalName].Value.Length;
 
-      # TODO: Strictly speaking the 28 needs to be adjusted according to some of the
-      # entries in the krayola scheme like MESSAGE-SUFFIX, FORMAT.
-      #
-      [int]$indent = 28 + $maxItemMessageSize + $($signalLength - 2);
+      [int]$indent = $_exchange['LOOPZ.REMY.FIXED-INDENT'] + $message.Length;
       $_exchange['LOOPZ.WH-FOREACH-DECORATOR.INDENT'] = $indent;
       $_exchange['LOOPZ.WH-FOREACH-DECORATOR.MESSAGE'] = $message;
       $_exchange['LOOPZ.WH-FOREACH-DECORATOR.PRODUCT-LABEL'] = $(Get-PaddedLabel -Label $(
@@ -481,6 +501,7 @@ function Rename-Many {
       'LOOPZ.REMY.PATTERN-OCC'                = $patternOccurrence;
       'LOOPZ.REMY.CONTEXT'                    = $Context;
       'LOOPZ.REMY.MAX-ITEM-MESSAGE-SIZE'      = $maxItemMessageSize;
+      'LOOPZ.REMY.FIXED-INDENT'               = $(get-fixedIndent -Theme $theme);
 
       'LOOPZ.REMY.FROM-LABEL'                 = Get-PaddedLabel -Label 'From' -Width 9;
       'LOOPZ.SIGNALS'                         = $signals;
