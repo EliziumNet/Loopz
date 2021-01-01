@@ -175,7 +175,7 @@ Describe 'Write-HostFeItemDecorator' {
           }
 
           [hashtable]$theme = $(Get-KrayolaTheme);
-          [hashtable]$passThru = @{
+          [hashtable]$exchange = @{
             'LOOPZ.WH-FOREACH-DECORATOR.FUNCTION-NAME' = 'get-AnswerAdvancedFnWithTrigger';
             'ANSWER'                                   = 'Fourty Two';
             'LOOPZ.WH-FOREACH-DECORATOR.MESSAGE'       = 'Test Advanced Function';
@@ -186,7 +186,7 @@ Describe 'Write-HostFeItemDecorator' {
           }
 
           $underscore = 'What is the answer to life, love and unity';
-          $decorator.Invoke($underscore, 0, $passThru, $false);
+          $decorator.Invoke($underscore, 0, $exchange, $false);
         }
       } # should: invoke writer
     } # and: IF-TRIGGERED is set
@@ -195,7 +195,7 @@ Describe 'Write-HostFeItemDecorator' {
       It 'should: NOT invoke writer' {
         InModuleScope Elizium.Loopz {
           [hashtable]$theme = $(Get-KrayolaTheme);
-          [hashtable]$passThru = @{
+          [hashtable]$exchange = @{
             'LOOPZ.WH-FOREACH-DECORATOR.FUNCTION-NAME' = 'get-AnswerAdvancedFn';
             'ANSWER'                                   = 'Fourty Two';
             'LOOPZ.WH-FOREACH-DECORATOR.MESSAGE'       = 'Test Advanced Function';
@@ -206,7 +206,7 @@ Describe 'Write-HostFeItemDecorator' {
           }
 
           $underscore = 'What is the answer to the universe';
-          $decorator.Invoke($underscore, 0, $passThru, $false);
+          $decorator.Invoke($underscore, 0, $exchange, $false);
         }
       } # should: NOT invoke writer
     } # and: IF-TRIGGERED is set

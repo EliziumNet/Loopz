@@ -117,7 +117,7 @@ function Invoke-TraverseDirectory {
       param(
         $underscore,
         [int]$index,
-        [hashtable]$passThru,
+        [hashtable]$exchange,
         [boolean]$trigger
       )
       ...
@@ -312,7 +312,7 @@ function Invoke-TraverseDirectory {
 
       [Parameter(Position = 2, Mandatory)]
       [ValidateScript( { -not($_ -eq $null) })]
-      [hashtable]$passThru,
+      [hashtable]$exchange,
 
       [Parameter(Position = 3)]
       [ValidateScript( { ($_ -is [scriptblock]) -or ($_ -is [string]) })]
@@ -323,31 +323,31 @@ function Invoke-TraverseDirectory {
     )
 
     $result = $null;
-    $index = $passThru['LOOPZ.FOREACH.INDEX'];
+    $index = $exchange['LOOPZ.FOREACH.INDEX'];
 
     # This is the invoke, for the current directory
     #
     if ($invokee -is [scriptblock]) {
-      $positional = @($directoryInfo, $index, $passThru, $trigger);
+      $positional = @($directoryInfo, $index, $exchange, $trigger);
 
-      if ($passThru.ContainsKey('LOOPZ.TRAVERSE.INVOKEE.PARAMS') -and
-        ($passThru['LOOPZ.TRAVERSE.INVOKEE.PARAMS'].Count -gt 0)) {
-        $passThru['LOOPZ.TRAVERSE.INVOKEE.PARAMS'] | ForEach-Object {
+      if ($exchange.ContainsKey('LOOPZ.TRAVERSE.INVOKEE.PARAMS') -and
+        ($exchange['LOOPZ.TRAVERSE.INVOKEE.PARAMS'].Count -gt 0)) {
+        $exchange['LOOPZ.TRAVERSE.INVOKEE.PARAMS'] | ForEach-Object {
           $positional += $_;
         }
       }
       $result = $invokee.InvokeReturnAsIs($positional);
     }
     else {
-      [hashtable]$parameters = $passThru.ContainsKey('LOOPZ.TRAVERSE.INVOKEE.PARAMS') `
-        ? $passThru['LOOPZ.TRAVERSE.INVOKEE.PARAMS'] : @{};
+      [hashtable]$parameters = $exchange.ContainsKey('LOOPZ.TRAVERSE.INVOKEE.PARAMS') `
+        ? $exchange['LOOPZ.TRAVERSE.INVOKEE.PARAMS'] : @{};
 
       # These are directory specific overwrites. The custom parameters
       # will still be present
       #
       $parameters['Underscore'] = $directoryInfo;
       $parameters['Index'] = $index;
-      $parameters['Exchange'] = $passThru;
+      $parameters['Exchange'] = $exchange;
       $parameters['Trigger'] = $trigger;
 
       $result = & $invokee @parameters;

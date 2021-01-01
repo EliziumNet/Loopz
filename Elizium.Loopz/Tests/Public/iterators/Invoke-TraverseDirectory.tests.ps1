@@ -81,13 +81,13 @@ Describe 'Invoke-TraverseDirectory' {
 
           [hashtable]$theme = $(Get-KrayolaTheme);
           [writer]$writer = New-Writer -Theme $theme;
-          [hashtable]$passThru = @{
+          [hashtable]$exchange = @{
             'LOOPZ.SUMMARY-BLOCK.LINE' = $LoopzUI.EqualsLine;
             'LOOPZ.SUMMARY-BLOCK.MESSAGE' = 'Test Summary';
             'LOOPZ.WRITER' = $writer;
           }
 
-          Invoke-TraverseDirectory -Path $resolvedSourcePath -Exchange $passThru `
+          Invoke-TraverseDirectory -Path $resolvedSourcePath -Exchange $exchange `
             -Block $traverseBlock -Summary $LoopzHelpers.SummaryBlock;
         }
       }

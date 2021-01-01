@@ -213,7 +213,7 @@ function Invoke-ForeachFsItem {
       ...
     }
 
-    $passThru = @{
+    $exchange = @{
       'LOOPZ.KRAYOLA-THEME' = $(Get-KrayolaTheme);
       'LOOPZ.HEADER-BLOCK.MESSAGE' = 'The owls are not what they seem';
       'LOOPZ.HEADER-BLOCK.PROPERTIES' = @(@('A', 'One'), @('B', 'Two'), @('C', 'Three'));
@@ -222,7 +222,7 @@ function Invoke-ForeachFsItem {
     }
 
     Get-ChildItem './Tests/Data/fefsi' -Recurse -Filter '*.txt' -File | `
-      Invoke-ForeachFsItem -File -Block $block -Exchange $passThru `
+      Invoke-ForeachFsItem -File -Block $block -Exchange $exchange `
         -Header $LoopzHelpers.DefaultHeaderBlock -Summary $LoopzHelpers.SimpleSummaryBlock;
   #>
   [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', '')]

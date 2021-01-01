@@ -17,11 +17,11 @@ Describe 'Show-Summary' {
   Context 'given: block line specified' {
     It 'should: display summary' {
       InModuleScope Elizium.Loopz {
-        [hashtable]$passThru = @{
+        [hashtable]$exchange = @{
           'LOOPZ.SUMMARY-BLOCK.LINE' = $LoopzUI.DashLine;
           'LOOPZ.WRITER'             = $_writer;
         }
-        Show-Summary -Count 999 -Skipped 0 -Triggered $false -Exchange $passThru;
+        Show-Summary -Count 999 -Skipped 0 -Triggered $false -Exchange $exchange;
       }
     }
   }
@@ -29,10 +29,10 @@ Describe 'Show-Summary' {
   Context 'given: no block line specified' {
     It 'should: display summary' {
       InModuleScope Elizium.Loopz {
-        [hashtable]$passThru = @{
+        [hashtable]$exchange = @{
           'LOOPZ.WRITER' = $_writer;
         }
-        Show-Summary -Count 101 -Skipped 0 -Triggered $true -Exchange $passThru;
+        Show-Summary -Count 101 -Skipped 0 -Triggered $true -Exchange $exchange;
       }
     }
   }
@@ -41,25 +41,25 @@ Describe 'Show-Summary' {
     It 'should: display summary with wide items' {
       InModuleScope Elizium.Loopz {
         [line]$wideItems = $(kl($(kp('From', '/source/')), $(kp('To', '/destination/'))));
-        [hashtable]$passThru = @{
+        [hashtable]$exchange = @{
           'LOOPZ.SUMMARY-BLOCK.LINE'       = $LoopzUI.DashLine;
           'LOOPZ.SUMMARY-BLOCK.WIDE-ITEMS' = $wideItems;
           'LOOPZ.WRITER'                   = $_writer;
         }
-        Show-Summary -Count 999 -Skipped 0 -Triggered $false -Exchange $passThru;
+        Show-Summary -Count 999 -Skipped 0 -Triggered $false -Exchange $exchange;
       }
     }
 
     It 'should: display summary with wide items grouped together' {
       InModuleScope Elizium.Loopz {
         [line]$wideItems = $(kl($(kp('From', '/source/')), $(kp('To', '/destination/'))));
-        [hashtable]$passThru = @{
+        [hashtable]$exchange = @{
           'LOOPZ.SUMMARY-BLOCK.LINE'             = $LoopzUI.DashLine;
           'LOOPZ.SUMMARY-BLOCK.WIDE-ITEMS'       = $wideItems;
           'LOOPZ.SUMMARY-BLOCK.GROUP-WIDE-ITEMS' = $true;
           'LOOPZ.WRITER'                         = $_writer;
         }
-        Show-Summary -Count 999 -Skipped 0 -Triggered $false -Exchange $passThru;
+        Show-Summary -Count 999 -Skipped 0 -Triggered $false -Exchange $exchange;
       }
     }
   }
@@ -68,12 +68,12 @@ Describe 'Show-Summary' {
     It 'should: display summary with summary properties' {
       InModuleScope Elizium.Loopz {
         [line]$wideItems = $(kl($(kp('A', 'one')), $(kp('B', 'two'))));
-        [hashtable]$passThru = @{
+        [hashtable]$exchange = @{
           'LOOPZ.SUMMARY-BLOCK.LINE'       = $LoopzUI.DashLine;
           'LOOPZ.SUMMARY-BLOCK.PROPERTIES' = $wideItems;
           'LOOPZ.WRITER'                   = $_writer;
         }
-        Show-Summary -Count 999 -Skipped 0 -Triggered $false -Exchange $passThru;
+        Show-Summary -Count 999 -Skipped 0 -Triggered $false -Exchange $exchange;
       }
     }
   }

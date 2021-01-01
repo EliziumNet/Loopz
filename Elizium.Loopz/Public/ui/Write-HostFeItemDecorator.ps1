@@ -85,12 +85,12 @@
     ...
   }
 
-  [Systems.Collection.Hashtable]$passThru = @{
+  [Systems.Collection.Hashtable]$exchange = @{
     'LOOPZ.WH-FOREACH-DECORATOR.FUNCTION-NAME' = 'Test-FN';
     'CLIENT.FORMAT' = '=== [{0}] -- [{1}] ==='
   }
 
-  Get-ChildItem ... | Invoke-ForeachFsItem -Path <path> -Exchange $passThru
+  Get-ChildItem ... | Invoke-ForeachFsItem -Path <path> -Exchange $exchange
     -Functee 'Write-HostFeItemDecorator'
 
     So, Test-FN is not concerned about writing any output to the console, it simply does

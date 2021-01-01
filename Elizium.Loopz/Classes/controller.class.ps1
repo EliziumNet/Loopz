@@ -47,10 +47,10 @@ class BaseController {
   [boolean]$_trigger = $false;
   [boolean]hidden $_broken = $false;
 
-  BaseController([hashtable]$passThru,
+  BaseController([hashtable]$exchange,
     [scriptblock]$header,
     [scriptblock]$summary) {
-    $this._exchange = $passThru;
+    $this._exchange = $exchange;
     $this._header = $header;
     $this._summary = $summary;
   }
@@ -135,10 +135,10 @@ class ForeachController : BaseController {
   [int]hidden $_skipped = 0;
   [int]hidden $_errors = 0;
 
-  ForeachController([hashtable]$passThru,
+  ForeachController([hashtable]$exchange,
     [scriptblock]$header,
     [scriptblock]$summary
-  ): base($passThru, $header, $summary) {
+  ): base($exchange, $header, $summary) {
 
   }
 
@@ -177,12 +177,12 @@ class TraverseController : BaseController {
     Summary = $null;
   }
 
-  TraverseController([hashtable]$passThru,
+  TraverseController([hashtable]$exchange,
     [scriptblock]$header,
     [scriptblock]$summary,
     [scriptblock]$sessionHeader,
     [scriptblock]$sessionSummary
-  ): base($passThru, $header, $summary) {
+  ): base($exchange, $header, $summary) {
     $this._session.Header = $sessionHeader;
     $this._session.Summary = $sessionSummary;
   }

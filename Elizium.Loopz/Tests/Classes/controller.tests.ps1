@@ -49,9 +49,9 @@ Describe 'controller' {
             $_skipped | Should -Be 0;
           };
 
-          [hashtable]$passThru = @{}
+          [hashtable]$exchange = @{}
 
-          $controller = New-Controller -Type ForeachCtrl -Exchange $passThru -Header $_Header -Summary $summary;
+          $controller = New-Controller -Type ForeachCtrl -Exchange $exchange -Header $_Header -Summary $summary;
           $controller.ForeachBegin();
           $controller.RequestIndex();
           $controller.HandleResult(@{
@@ -81,9 +81,9 @@ Describe 'controller' {
             $_count | Should -Be 2;
             $_skipped | Should -Be 3;
           };
-          [hashtable]$passThru = @{}
+          [hashtable]$exchange = @{}
 
-          $controller = New-Controller -Type ForeachCtrl -Exchange $passThru -Header $_Header -Summary $summary;
+          $controller = New-Controller -Type ForeachCtrl -Exchange $exchange -Header $_Header -Summary $summary;
           $controller.ForeachBegin();
           0..4 | Foreach-Object {
             if ($_ -gt 2 ) {
@@ -117,9 +117,9 @@ Describe 'controller' {
             $_count | Should -Be 2;
             $_skipped | Should -Be 3;
           };
-          [hashtable]$passThru = @{}
+          [hashtable]$exchange = @{}
 
-          $controller = New-Controller -Type TraverseCtrl -Exchange $passThru `
+          $controller = New-Controller -Type TraverseCtrl -Exchange $exchange `
             -Header $_Header -Summary $_Summary -SessionHeader $_SessionHeader -SessionSummary $sessionSummary;
           $controller.BeginSession();
           $controller.ForeachBegin();
@@ -154,9 +154,9 @@ Describe 'controller' {
             $_count | Should -Be 12;
             $_skipped | Should -Be 0;
           };
-          [hashtable]$passThru = @{}
+          [hashtable]$exchange = @{}
 
-          $controller = New-Controller -Type TraverseCtrl -Exchange $passThru `
+          $controller = New-Controller -Type TraverseCtrl -Exchange $exchange `
             -Header $_Header -Summary $_Summary -SessionHeader $_SessionHeader -SessionSummary $sessionSummary;
 
           $controller.BeginSession();
@@ -177,8 +177,8 @@ Describe 'controller' {
                         Product = "$_ Deeper Widget(s)"
                       });
                   }
-                  $passThru['LOOPZ.CONTROLLER.STACK'].Peek().Value() | Should -Be 3;
-                  $passThru['LOOPZ.CONTROLLER.DEPTH'] | Should -Be 4;
+                  $exchange['LOOPZ.CONTROLLER.STACK'].Peek().Value() | Should -Be 3;
+                  $exchange['LOOPZ.CONTROLLER.DEPTH'] | Should -Be 4;
 
                   $controller.ForeachEnd();
                 }
@@ -187,8 +187,8 @@ Describe 'controller' {
                     Product = "$_ Inner Widget(s)"
                   });
               }
-              $passThru['LOOPZ.CONTROLLER.STACK'].Peek().Value() | should -Be 4;
-              $passThru['LOOPZ.CONTROLLER.DEPTH'] | Should -Be 3;
+              $exchange['LOOPZ.CONTROLLER.STACK'].Peek().Value() | should -Be 4;
+              $exchange['LOOPZ.CONTROLLER.DEPTH'] | Should -Be 3;
 
               $controller.ForeachEnd();
             }
@@ -197,16 +197,16 @@ Describe 'controller' {
                 Product = "$_ Widget(s)"
               });
           }
-          $passThru['LOOPZ.CONTROLLER.STACK'].Peek().Value() | Should -Be 5;
-          $passThru['LOOPZ.CONTROLLER.DEPTH'] | Should -Be 2;
+          $exchange['LOOPZ.CONTROLLER.STACK'].Peek().Value() | Should -Be 5;
+          $exchange['LOOPZ.CONTROLLER.DEPTH'] | Should -Be 2;
 
           $controller.ForeachEnd();
 
-          $passThru['LOOPZ.CONTROLLER.DEPTH'] | Should -Be 1;
+          $exchange['LOOPZ.CONTROLLER.DEPTH'] | Should -Be 1;
           $controller.EndSession();
 
-          $passThru['LOOPZ.CONTROLLER.DEPTH'] | Should -Be 0;
-          $passThru['LOOPZ.CONTROLLER.STACK'] | Should -BeNullOrEmpty;
+          $exchange['LOOPZ.CONTROLLER.DEPTH'] | Should -Be 0;
+          $exchange['LOOPZ.CONTROLLER.STACK'] | Should -BeNullOrEmpty;
         }
       } # should: traverse multiple depths
     } # and: multiple depth iteration
