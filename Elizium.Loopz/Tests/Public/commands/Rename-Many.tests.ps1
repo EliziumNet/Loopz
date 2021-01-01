@@ -35,6 +35,10 @@ Describe 'Rename-Many' {
       return $To;
     }
 
+    Mock -ModuleName Elizium.Loopz Get-IsLocked {
+      return $true;
+    }
+
     function test-expect {
       param(
         [Parameter(Position = 0)][HashTable]$Expects,
