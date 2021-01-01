@@ -273,13 +273,13 @@ Describe 'Invoke-ForeachFsItem' {
             $Exchange['Answer'] | Should -BeExactly 'Fourty Two';
           }
 
-          [hashtable]$passThru = @{
+          [hashtable]$exchange = @{
             'Action' = 'Disconnect'
           }
 
           [string]$directoryPath = './Tests/Data/fefsi';
           Get-ChildItem $directoryPath -Recurse -File | Invoke-ForeachFsItem `
-            -Block $block -Summary $summary -Exchange $passThru;
+            -Block $block -Summary $summary -Exchange $exchange;
         }
       } # With Exchange
     } # and: files piped from different directories

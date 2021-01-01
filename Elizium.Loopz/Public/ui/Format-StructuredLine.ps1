@@ -1,6 +1,6 @@
 
 function Format-StructuredLine {
-  # We need to replace the passThru key parameters with direct parameters
+  # We need to replace the exchange key parameters with direct parameters
   [OutputType([string])]
   param(
     [Parameter(Mandatory)]

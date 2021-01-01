@@ -54,7 +54,7 @@ function Show-Header {
     [string]$crumbKey = 'LOOPZ.HEADER-BLOCK.CRUMB-SIGNAL';
     [string]$messageKey = 'LOOPZ.HEADER-BLOCK.MESSAGE';
 
-    [string]$structuredLine = Format-StructuredLine -Exchange $passThru `
+    [string]$structuredLine = Format-StructuredLine -Exchange $exchange `
       -LineKey $LineKey -CrumbKey $CrumbKey -MessageKey $messageKey -Writer $writer;
     $null = $writer.ScribbleLn($structuredLine);
   }

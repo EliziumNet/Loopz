@@ -457,7 +457,7 @@ function Rename-Many {
     [hashtable]$theme = $(Get-KrayolaTheme);
     [writer]$writer = New-Writer -Theme $theme;
 
-    [hashtable]$passThru = @{
+    [hashtable]$exchange = @{
       'LOOPZ.WH-FOREACH-DECORATOR.BLOCK'      = $doRenameFsItems;
       'LOOPZ.WH-FOREACH-DECORATOR.GET-RESULT' = $getResult;
 
@@ -478,21 +478,21 @@ function Rename-Many {
 
       'LOOPZ.WRITER'                          = $writer;
     }
-    $passThru['LOOPZ.REMY.ACTION'] = $doMoveToken ? 'Move-Match' : 'Update-Match';
+    $exchange['LOOPZ.REMY.ACTION'] = $doMoveToken ? 'Move-Match' : 'Update-Match';
 
     if ($PSBoundParameters.ContainsKey('Copy')) {
       [regex]$copyRegEx = New-RegularExpression -Expression $copyExpression `
         -WholeWord:$(-not([string]::IsNullOrEmpty($adjustedWhole)) -and ($adjustedWhole -in @('*', 'c')));
 
-      $passThru['LOOPZ.REMY.COPY-OCC'] = $copyOccurrence;
-      $passThru['LOOPZ.REMY.COPY'] = $copyRegEx;
+      $exchange['LOOPZ.REMY.COPY-OCC'] = $copyOccurrence;
+      $exchange['LOOPZ.REMY.COPY'] = $copyRegEx;
     }
     elseif ($PSBoundParameters.ContainsKey('With')) {
-      $passThru['LOOPZ.REMY.WITH'] = $With;
+      $exchange['LOOPZ.REMY.WITH'] = $With;
     }
 
     if ($PSBoundParameters.ContainsKey('Relation')) {
-      $passThru['LOOPZ.REMY.RELATION'] = $Relation;
+      $exchange['LOOPZ.REMY.RELATION'] = $Relation;
     }
 
     # NB: anchoredRegEx refers to whether -Start or -End anchors have been specified,
@@ -505,16 +505,16 @@ function Rename-Many {
       [regex]$anchorRegEx = New-RegularExpression -Expression $anchorExpression `
         -WholeWord:$(-not([string]::IsNullOrEmpty($adjustedWhole)) -and ($adjustedWhole -in @('*', 'a')));
 
-      $passThru['LOOPZ.REMY.ANCHOR-OCC'] = $anchorOccurrence;
-      $passThru['LOOPZ.REMY.ANCHOR-TYPE'] = 'MATCHED-ITEM';
-      $passThru['LOOPZ.REMY.ANCHOR'] = $anchorRegEx;
+      $exchange['LOOPZ.REMY.ANCHOR-OCC'] = $anchorOccurrence;
+      $exchange['LOOPZ.REMY.ANCHOR-TYPE'] = 'MATCHED-ITEM';
+      $exchange['LOOPZ.REMY.ANCHOR'] = $anchorRegEx;
     }
     elseif ($PSBoundParameters.ContainsKey('Start')) {
 
       Select-SignalContainer -Containers $containers -Name 'SWITCH-ON' `
         -Value $patternExpression -Signals $signals -CustomLabel 'Start' -Force 'Props';
 
-      $passThru['LOOPZ.REMY.ANCHOR-TYPE'] = 'START';
+      $exchange['LOOPZ.REMY.ANCHOR-TYPE'] = 'START';
 
       [regex]$anchoredRegEx = New-RegularExpression `
         -Expression $('^' + $patternExpression);
@@ -524,7 +524,7 @@ function Rename-Many {
       Select-SignalContainer -Containers $containers -Name 'SWITCH-ON' `
         -Value $patternExpression -Signals $signals -CustomLabel 'End' -Force 'Props';
 
-      $passThru['LOOPZ.REMY.ANCHOR-TYPE'] = 'END';
+      $exchange['LOOPZ.REMY.ANCHOR-TYPE'] = 'END';
 
       [regex]$anchoredRegEx = New-RegularExpression `
         -Expression $($patternExpression + '$');
@@ -534,8 +534,8 @@ function Rename-Many {
       Select-SignalContainer -Containers $containers -Name 'REMY.DROP' `
         -Value $Drop -Signals $signals -Force 'Wide';
 
-      $passThru['LOOPZ.REMY.DROP'] = $Drop;
-      $passThru['LOOPZ.REMY.MARKER'] = $Loopz.Defaults.Remy.Marker;
+      $exchange['LOOPZ.REMY.DROP'] = $Drop;
+      $exchange['LOOPZ.REMY.MARKER'] = $Loopz.Defaults.Remy.Marker;
     }
 
     [boolean]$includeDefined = $PSBoundParameters.ContainsKey('Include');
@@ -545,15 +545,15 @@ function Rename-Many {
       : $null;
 
     if ($PSBoundParameters.ContainsKey('Paste')) {
-      $passThru['LOOPZ.REMY.PASTE'] = $Paste;
+      $exchange['LOOPZ.REMY.PASTE'] = $Paste;
     }
 
     if ($containers.Wide.Line.Length -gt 0) {
-      $passThru['LOOPZ.SUMMARY-BLOCK.WIDE-ITEMS'] = $containers.Wide;
+      $exchange['LOOPZ.SUMMARY-BLOCK.WIDE-ITEMS'] = $containers.Wide;
     }
 
     if ($containers.Props.Line.Length -gt 0) {
-      $passThru['LOOPZ.SUMMARY-BLOCK.PROPERTIES'] = $containers.Props;
+      $exchange['LOOPZ.SUMMARY-BLOCK.PROPERTIES'] = $containers.Props;
     }
        
     [scriptblock]$clientCondition = $Condition;
@@ -585,7 +585,7 @@ function Rename-Many {
 
     [hashtable]$parameters = @{
       'Condition' = $matchesPattern;
-      'Exchange'  = $passThru;
+      'Exchange'  = $exchange;
       'Header'    = $LoopzHelpers.HeaderBlock;
       'Summary'   = $LoopzHelpers.SummaryBlock;
       'Block'     = $LoopzHelpers.WhItemDecoratorBlock;
@@ -599,11 +599,11 @@ function Rename-Many {
     }
 
     if ($whatIf -or $Diagnose.ToBool()) {
-      $passThru['WHAT-IF'] = $true;
+      $exchange['WHAT-IF'] = $true;
     }
 
     if ($Diagnose.ToBool()) {
-      $passThru['LOOPZ.DIAGNOSE'] = $true;
+      $exchange['LOOPZ.DIAGNOSE'] = $true;
     }
 
     $null = $collection | Invoke-ForeachFsItem @parameters;

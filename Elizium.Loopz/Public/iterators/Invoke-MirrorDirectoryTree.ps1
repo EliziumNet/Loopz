@@ -291,7 +291,7 @@
         param(
           [System.IO.DirectoryInfo]$underscore,
           [int]$index,
-          [hashtable]$passThru,
+          [hashtable]$exchange,
           [boolean]$trigger
         )
       } ),
