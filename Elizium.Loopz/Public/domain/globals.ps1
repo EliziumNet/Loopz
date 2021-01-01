@@ -151,6 +151,8 @@ $global:Loopz = [PSCustomObject]@{
     'TRIM'         = (kp(@('Trim', '🌊')));
     'MULTI-SPACES' = (kp(@('Spaces', '❄️')));
     'DIAGNOSTICS'  = (kp(@('Diagnostics', '🧪')));
+    'LOCKED'       = (kp(@('Locked', '🔐')));
+    'NOVICE'       = (kp(@('Novice', '🔰')));
 
     # Outcomes
     #

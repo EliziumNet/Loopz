@@ -77,6 +77,7 @@ function Rename-Many {
       Title          = $Loopz.Defaults.Remy.Title;
       ItemMessage    = $Loopz.Defaults.Remy.ItemMessage;
       SummaryMessage = $Loopz.Defaults.Remy.SummaryMessage;
+      Locked         = 'LOOPZ_REMY_LOCKED';
     },
 
     [Parameter()]
@@ -340,7 +341,10 @@ function Rename-Many {
   end {
     Write-Debug '<<< Rename-Many <<<';
 
-    [boolean]$whatIf = $PSBoundParameters.ContainsKey('WhatIf');
+    [boolean]$locked = Get-IsLocked -Variable $(
+      [string]::IsNullOrEmpty($Context.Locked) ? 'LOOPZ_REMY_LOCKED' : $Context.Locked
+    );
+    [boolean]$whatIf = $PSBoundParameters.ContainsKey('WhatIf') -or $locked;
     [PSCustomObject]$containers = @{
       Wide  = [line]::new();
       Props = [line]::new();
@@ -445,6 +449,11 @@ function Rename-Many {
       -not([string]::IsNullOrEmpty($Context.Title)) `
       ? $Context.Title : 'Rename';
 
+    if ($locked) {
+      $title = Get-FormattedSignal -Name 'LOCKED' -Signals $signals `
+        -Format '{1} {0} {1}' -CustomLabel $('Locked: ' + $title);
+    }
+
     [int]$maxItemMessageSize = $Context.ItemMessage.replace(
       $Loopz.FsItemTypePlaceholder, 'Directory').Length;
 
@@ -536,6 +545,11 @@ function Rename-Many {
 
       $exchange['LOOPZ.REMY.DROP'] = $Drop;
       $exchange['LOOPZ.REMY.MARKER'] = $Loopz.Defaults.Remy.Marker;
+    }
+
+    if ($locked) {
+      Select-SignalContainer -Containers $containers -Name 'NOVICE' `
+        -Value $signals['SWITCH-ON'].Value -Signals $signals -Force 'Wide';
     }
 
     [boolean]$includeDefined = $PSBoundParameters.ContainsKey('Include');

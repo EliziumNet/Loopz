@@ -11,7 +11,7 @@ function Select-Text {
   
     [parameter(Position = 1)]
     [ValidateNotNullOrEmpty()]
-    [String]$filter = $(Get-EnvironmentVariable 'GREPS_FILTER')
+    [String]$filter = $(Get-EnvironmentVariable 'LOOPZ_GREPS_FILTER')
   )
 
   function build-command {
