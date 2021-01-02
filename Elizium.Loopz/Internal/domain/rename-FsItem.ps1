@@ -36,7 +36,7 @@ function rename-FsItem {
           ? (Join-Path $From.Parent.FullName $tempName) `
           : (Join-Path $From.Directory.FullName $tempName);
   
-        Move-Item -LiteralPath $From.FullName -Destination $tempDestinationPath -Exchange | `
+        Move-Item -LiteralPath $From.FullName -Destination $tempDestinationPath -PassThru | `
           Move-Item -Destination $destinationPath;
 
         if ($PSBoundParameters.ContainsKey('Undo')) {
