@@ -58,14 +58,14 @@ function Select-Text {
   [string]$command = [string]::Empty;
   [int]$count = 0;
 
-  foreach ($pattern in $patterns) {
+  foreach ($pat in $patterns) {
     $count++;
 
     if ($count -eq 1) {
       $command = build-command -Pattern $patterns[0] -Filter $filter;
     }
     else {
-      $segment = build-command -Pipe -Pattern $pattern;
+      $segment = build-command -Pipe -Pattern $pat;
       $command += $segment;
     }
   }
