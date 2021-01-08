@@ -9,47 +9,40 @@ function rename-FsItem {
     [string]$To,
 
     [Parameter()]
-    [hashtable]$Undo,
-
-    [Parameter()]
-    $Shell
+    [AllowNull()]
+    [UndoRename]$UndoOperant
   )
   [boolean]$itemIsDirectory = ($From.Attributes -band
     [System.IO.FileAttributes]::Directory) -eq [System.IO.FileAttributes]::Directory;
 
-  [string]$destinationPath = $itemIsDirectory `
-    ? (Join-Path -Path $From.Parent.FullName -ChildPath $To) `
-    : (Join-Path -Path $From.Directory.FullName -ChildPath $To);
+  [string]$parentPath = $itemIsDirectory ? $From.Parent.FullName : $From.Directory.FullName;
+  [string]$destinationPath = Join-Path -Path $parentPath -ChildPath $To;
 
   if (-not($PSBoundParameters.ContainsKey('WhatIf') -and $PSBoundParameters['WhatIf'])) {
     try {
-      [boolean]$createUndoEntry = $false;
       [boolean]$differByCaseOnly = $From.Name.ToLower() -eq $To.ToLower();
 
       if ($differByCaseOnly) {
-        # Just doing a double move to get around the problem of not being able to rename
+        # Just doing a double rename to get around the problem of not being able to rename
         # an item unless the case is different
         #
         [string]$tempName = $From.Name + "_";
 
-        $tempDestinationPath = $itemIsDirectory `
-          ? (Join-Path $From.Parent.FullName $tempName) `
-          : (Join-Path $From.Directory.FullName $tempName);
-  
-        Move-Item -LiteralPath $From.FullName -Destination $tempDestinationPath -PassThru | `
-          Move-Item -Destination $destinationPath;
-
-        if ($PSBoundParameters.ContainsKey('Undo')) {
-          $createUndoEntry = $true;
-        }
+        Rename-Item -LiteralPath $From.FullName -NewName $tempName -PassThru | `
+          Rename-Item -NewName $To;
       }
       else {
-        Move-Item -LiteralPath $From.FullName -Destination $destinationPath;
+        Rename-Item -LiteralPath $From.FullName -NewName $To;
       }
 
-      if ($createUndoEntry) {
-        # TODO: Invoke the Shell instance to formulate the correct commands
-        #
+      if ($UndoOperant) {
+        [PSCustomObject]$operation = [PSCustomObject]@{
+          Directory = $parentPath;
+          From      = $From.Name;
+          To        = $To;
+        }
+        Write-Debug "rename-FsItem (Undo Rename) => alert: From: '$($operation.From.Name)', To: '$($operation.To)'";
+        $UndoOperant.alert($operation);
       }
 
       $result = Get-Item -LiteralPath $destinationPath;

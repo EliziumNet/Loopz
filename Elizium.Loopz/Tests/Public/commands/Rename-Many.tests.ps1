@@ -1,6 +1,7 @@
 using namespace System.Management.Automation;
 using namespace System.Collections;
 using namespace System.IO;
+using module Elizium.Klassy;
 
 Describe 'Rename-Many' {
   BeforeAll {
@@ -17,10 +18,9 @@ Describe 'Rename-Many' {
       param(
         [FileSystemInfo]$From,
         [string]$To,
-        [HashTable]$Undo,
-        $Shell,
-        [switch]$WhatIf
+        [UndoRename]$UndoOperant
       )
+
       #
       # This mock result works only because the actual returned FileSystemInfo returned
       # does not drive any control logic.

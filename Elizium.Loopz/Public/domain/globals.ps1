@@ -170,6 +170,7 @@ $global:Loopz = [PSCustomObject]@{
     'REMY.ANCHOR'  = (kp(@('Anchor', '⚓')));
     'REMY.POST'    = (kp(@('Post Process', '🌈')));
     'REMY.DROP'    = (kp(@('Drop', '💧')));
+    'REMY.UNDO'    = (kp(@('Undo Rename', '❎')));
     'GREPS'        = (kp(@('greps', '🔍')));
   }
 

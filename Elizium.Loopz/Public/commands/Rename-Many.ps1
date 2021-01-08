@@ -259,14 +259,18 @@ function Rename-Many {
 
       if ($nameHasChanged -and -not($clash)) {
         $trigger = $true;
-        $product = rename-FsItem -From $_underscore -To $newItemName -WhatIf:$whatIf;
+
+        [UndoRename]$operant = $_exchange.ContainsKey('LOOPZ.REMY.UNDO') `
+          ? $_exchange['LOOPZ.REMY.UNDO'] : $null;
+
+        $product = rename-FsItem -From $_underscore -To $newItemName -WhatIf:$whatIf -UndoOperant $operant;
       }
       else {
         $product = $_underscore;
       }
 
       if ($trigger) {
-        $lines += (kl(
+        $null = $lines += (kl(
             kp(@($_exchange['LOOPZ.REMY.FROM-LABEL'], $_underscore.Name))
           ));
       }
@@ -313,7 +317,7 @@ function Rename-Many {
 
               $diagnosticLines += $compoundValue;
             }
-            $lines += (kl(
+            $null = $lines += (kl(
                 kp(@($namedLabel, $($diagnosticLines -join ', ')))
               ));
           }
@@ -492,20 +496,19 @@ function Rename-Many {
 
       'LOOPZ.HEADER-BLOCK.CRUMB-SIGNAL'       = 'CRUMB-A';
       'LOOPZ.HEADER-BLOCK.LINE'               = $LoopzUI.DashLine;
+      'LOOPZ.HEADER-BLOCK.MESSAGE'            = $title;
 
       'LOOPZ.SUMMARY-BLOCK.LINE'              = $LoopzUI.EqualsLine;
       'LOOPZ.SUMMARY-BLOCK.MESSAGE'           = $summaryMessage;
-      'LOOPZ.HEADER-BLOCK.MESSAGE'            = $title;
 
       'LOOPZ.REMY.PATTERN-REGEX'              = $patternRegEx;
       'LOOPZ.REMY.PATTERN-OCC'                = $patternOccurrence;
       'LOOPZ.REMY.CONTEXT'                    = $Context;
       'LOOPZ.REMY.MAX-ITEM-MESSAGE-SIZE'      = $maxItemMessageSize;
       'LOOPZ.REMY.FIXED-INDENT'               = $(get-fixedIndent -Theme $theme);
-
       'LOOPZ.REMY.FROM-LABEL'                 = Get-PaddedLabel -Label 'From' -Width 9;
-      'LOOPZ.SIGNALS'                         = $signals;
 
+      'LOOPZ.SIGNALS'                         = $signals;
       'LOOPZ.WRITER'                          = $writer;
     }
     $exchange['LOOPZ.REMY.ACTION'] = $doMoveToken ? 'Move-Match' : 'Update-Match';
@@ -583,6 +586,25 @@ function Rename-Many {
       $exchange['LOOPZ.REMY.PASTE'] = $Paste;
     }
 
+    [PSCustomObject]$operantOptions = [PSCustomObject]@{
+      ShortCode    = 'remy';
+      OperantName  = 'UndoRename';
+      Shell        = 'PoShShell';
+      BaseFilename = 'undo-rename';
+      DisabledKey  = 'LOOPZ_REMY_UNDO_DISABLED';
+    }
+    [UndoRename]$operant = Initialize-ShellOperant -Options $operantOptions -DryRun:$whatIf;
+
+    if ($operant) {
+      $exchange['LOOPZ.REMY.UNDO'] = $operant;
+
+      Select-SignalContainer -Containers $containers -Name 'REMY.UNDO' `
+        -Value $operant.Shell.FullPath -Signals $signals -Force 'Wide';
+    } else {
+      Select-SignalContainer -Containers $containers -Name 'REMY.UNDO' `
+        -Value $signals['SWITCH-OFF'].Value -Signals $signals -Force 'Wide';
+    }
+
     if ($containers.Wide.Line.Length -gt 0) {
       $exchange['LOOPZ.SUMMARY-BLOCK.WIDE-ITEMS'] = $containers.Wide;
     }
@@ -590,7 +612,7 @@ function Rename-Many {
     if ($containers.Props.Line.Length -gt 0) {
       $exchange['LOOPZ.SUMMARY-BLOCK.PROPERTIES'] = $containers.Props;
     }
-       
+
     [scriptblock]$clientCondition = $Condition;
     [scriptblock]$compoundCondition = {
       param(
@@ -641,6 +663,14 @@ function Rename-Many {
       $exchange['LOOPZ.DIAGNOSE'] = $true;
     }
 
-    $null = $collection | Invoke-ForeachFsItem @parameters;
+    try {
+      $null = $collection | Invoke-ForeachFsItem @parameters;
+    } catch {
+
+    } finally { # catch ctrl-c
+      if ($operant -and -not($whatIf)) {
+        $operant.finalise();
+      }
+    }
   } # end
 } # Rename-Many
