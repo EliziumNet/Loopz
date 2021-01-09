@@ -14,12 +14,12 @@ function Show-Summary {
     [hashtable]$Exchange = @{}
   )
 
-  [writer]$writer = $Exchange['LOOPZ.WRITER'];
-  if (-not($writer)) {
-    throw "Writer missing from Exchange under key 'LOOPZ.WRITER'"
+  [Krayon]$krayon = $Exchange['LOOP.KRAYON'];
+  if (-not($krayon)) {
+    throw "Writer missing from Exchange under key 'LOOP.KRAYON'"
   }
 
-  [string]$writerFormatWithArg = $writer.ApiFormatWithArg;
+  [string]$writerFormatWithArg = $krayon.ApiFormatWithArg;
 
   # First line
   #
@@ -31,7 +31,7 @@ function Show-Summary {
     # colours to the krayola theme's 'META-COLOURS'
     #
     [string]$structuredBorderLine = $($writerFormatWithArg -f 'ThemeColour', 'meta') + $line;
-    $null = $writer.ScribbleLn($structuredBorderLine);
+    $null = $krayon.ScribbleLn($structuredBorderLine);
   }
   else {
     $structuredBorderLine = [string]::Empty;
@@ -55,7 +55,7 @@ function Show-Summary {
   [string]$message = $Exchange.ContainsKey('LOOPZ.SUMMARY-BLOCK.MESSAGE') `
     ? $Exchange['LOOPZ.SUMMARY-BLOCK.MESSAGE'] : 'Summary';
 
-  $null = $writer.Line($message, $properties);
+  $null = $krayon.Line($message, $properties);
 
   # Wide items
   #
@@ -67,12 +67,12 @@ function Show-Summary {
     [string]$blank = [string]::new(' ', $message.Length);
 
     if ($group) {
-      $null = $writer.Line($blank, $wideItems);
+      $null = $krayon.Line($blank, $wideItems);
     }
     else {
       foreach ($couplet in $wideItems.Line) {
         [line]$syntheticLine = kl($couplet);
-        $null = $writer.Line($blank, $syntheticLine);
+        $null = $krayon.Line($blank, $syntheticLine);
       }
     }
   }
@@ -80,6 +80,6 @@ function Show-Summary {
   # Second line
   #
   if (-not([string]::IsNullOrEmpty($structuredBorderLine))) {
-    $null = $writer.ScribbleLn($structuredBorderLine);
+    $null = $krayon.ScribbleLn($structuredBorderLine);
   }
 }

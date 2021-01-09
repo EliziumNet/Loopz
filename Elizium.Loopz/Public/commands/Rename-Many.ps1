@@ -488,7 +488,7 @@ function Rename-Many {
     $summaryMessage = Get-FormattedSignal -Name 'SUMMARY-A' -Signals $signals -CustomLabel $summaryMessage;
 
     [hashtable]$theme = $(Get-KrayolaTheme);
-    [writer]$writer = New-Writer -Theme $theme;
+    [Krayon]$krayon = New-Krayon -Theme $theme;
 
     [hashtable]$exchange = @{
       'LOOPZ.WH-FOREACH-DECORATOR.BLOCK'      = $doRenameFsItems;
@@ -509,7 +509,7 @@ function Rename-Many {
       'LOOPZ.REMY.FROM-LABEL'                 = Get-PaddedLabel -Label 'From' -Width 9;
 
       'LOOPZ.SIGNALS'                         = $signals;
-      'LOOPZ.WRITER'                          = $writer;
+      'LOOP.KRAYON'                           = $krayon;
     }
     $exchange['LOOPZ.REMY.ACTION'] = $doMoveToken ? 'Move-Match' : 'Update-Match';
 
@@ -600,7 +600,8 @@ function Rename-Many {
 
       Select-SignalContainer -Containers $containers -Name 'REMY.UNDO' `
         -Value $operant.Shell.FullPath -Signals $signals -Force 'Wide';
-    } else {
+    }
+    else {
       Select-SignalContainer -Containers $containers -Name 'REMY.UNDO' `
         -Value $signals['SWITCH-OFF'].Value -Signals $signals -Force 'Wide';
     }
@@ -665,9 +666,12 @@ function Rename-Many {
 
     try {
       $null = $collection | Invoke-ForeachFsItem @parameters;
-    } catch {
+    }
+    catch {
 
-    } finally { # catch ctrl-c
+    }
+    finally {
+      # catch ctrl-c
       if ($operant -and -not($whatIf)) {
         $operant.finalise();
       }

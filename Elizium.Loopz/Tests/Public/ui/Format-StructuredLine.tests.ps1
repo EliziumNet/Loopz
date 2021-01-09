@@ -20,7 +20,7 @@ Describe 'Format-StructuredLine' {
           [string]$StructuredLine
         )
         Write-Host "$Ruler";
-        $_writer.ScribbleLn($StructuredLine);
+        $_krayon.ScribbleLn($StructuredLine);
       }
     }
   }
@@ -29,7 +29,7 @@ Describe 'Format-StructuredLine' {
     InModuleScope Elizium.Loopz {
       [string]$script:_ruler = $LoopzUI.DotsLine;
       [string]$script:_structuredLine = [string]::Empty;
-      [writer]$script:_writer = New-Writer($_theme);
+      [Krayon]$script:_krayon = New-Krayon($_theme);
     }
   }
 
@@ -44,7 +44,7 @@ Describe 'Format-StructuredLine' {
         }
 
         $_structuredLine = Format-StructuredLine -Exchange $exchange `
-          -LineKey $LineKey -CrumbKey $CrumbKey -Writer $_writer;
+          -LineKey $LineKey -CrumbKey $CrumbKey -Krayon $_krayon;
 
         show-result -Ruler $_ruler -StructuredLine $_structuredLine;
       }
@@ -70,7 +70,7 @@ Describe 'Format-StructuredLine' {
         $exchange['LOOPZ.HEADER-BLOCK.MESSAGE'] = 'Children of the Damned';
 
         $_structuredLine = Format-StructuredLine -Exchange $exchange `
-          -LineKey $LineKey -CrumbKey $CrumbKey -MessageKey $MessageKey -Writer $_writer;
+          -LineKey $LineKey -CrumbKey $CrumbKey -MessageKey $MessageKey -Krayon $_krayon;
 
         show-result -Ruler $_ruler -StructuredLine $_structuredLine;
         [string]$expected = '&[ThemeColour,meta][🚀] ===================================================================================== [ ' + `
@@ -87,7 +87,7 @@ Describe 'Format-StructuredLine' {
           $exchange['LOOPZ.HEADER-BLOCK.MESSAGE'] = $longMessage;
 
           $_structuredLine = Format-StructuredLine -Exchange $exchange `
-            -LineKey $LineKey -CrumbKey $CrumbKey -MessageKey $MessageKey -Writer $_writer;
+            -LineKey $LineKey -CrumbKey $CrumbKey -MessageKey $MessageKey -Krayon $_krayon;
       
           show-result -Ruler $_ruler -StructuredLine $_structuredLine;
           [string]$expected = '&[ThemeColour,meta][🚀] ====== [ ' + `
@@ -110,7 +110,7 @@ Describe 'Format-StructuredLine' {
             InModuleScope Elizium.Loopz {
               $_structuredLine = Format-StructuredLine -Exchange $exchange `
                 -LineKey $LineKey -CrumbKey $CrumbKey -MessageKey $MessageKey -Truncate `
-                -Options @{ Ellipses = ' ***' } -Writer $_writer;
+                -Options @{ Ellipses = ' ***' } -Krayon $_krayon;
 
               show-result -Ruler $_ruler -StructuredLine $_structuredLine;
               [string]$expected = '&[ThemeColour,meta][🚀] ====== [ ' + `
@@ -126,7 +126,7 @@ Describe 'Format-StructuredLine' {
             InModuleScope Elizium.Loopz {
               $_structuredLine = Format-StructuredLine -Exchange $exchange `
                 -LineKey $LineKey -CrumbKey $CrumbKey -MessageKey $MessageKey -Truncate `
-                -Options @{ MinimumFlexSize = 12 } -Writer $_writer;
+                -Options @{ MinimumFlexSize = 12 } -Krayon $_krayon;
 
               show-result -Ruler $_ruler -StructuredLine $_structuredLine;
               [string]$expected = '&[ThemeColour,meta][🚀] ============ [ ' + `
@@ -140,7 +140,7 @@ Describe 'Format-StructuredLine' {
             InModuleScope Elizium.Loopz {
               $_structuredLine = Format-StructuredLine -Exchange $exchange `
                 -LineKey $LineKey -CrumbKey $CrumbKey -MessageKey $MessageKey -Truncate `
-                -Options @{ MinimumFlexSize = 3 } -Writer $_writer;
+                -Options @{ MinimumFlexSize = 3 } -Krayon $_krayon;
 
               show-result -Ruler $_ruler -StructuredLine $_structuredLine;
               [string]$expected = '&[ThemeColour,meta][🚀] === [ ' + `
@@ -160,7 +160,7 @@ Describe 'Format-StructuredLine' {
               $exchange['LOOPZ.HEADER-BLOCK.MESSAGE'] = $longMessage;
 
               $_structuredLine = Format-StructuredLine -Exchange $exchange `
-                -LineKey $LineKey -CrumbKey $CrumbKey -MessageKey $MessageKey -Truncate -Writer $_writer;
+                -LineKey $LineKey -CrumbKey $CrumbKey -MessageKey $MessageKey -Truncate -Krayon $_krayon;
 
               show-result -Ruler $_ruler -StructuredLine $_structuredLine;
               [string]$expected = '&[ThemeColour,meta][🚀] ______ [ ' `
@@ -188,7 +188,7 @@ Describe 'Format-StructuredLine' {
         $exchange['LOOPZ.HEADER-BLOCK.MESSAGE'] = '22 Acacia Avenue';
 
         $_structuredLine = Format-StructuredLine -Exchange $exchange `
-          -LineKey $LineKey -CrumbKey $CrumbKey -MessageKey $MessageKey -Writer $_writer;
+          -LineKey $LineKey -CrumbKey $CrumbKey -MessageKey $MessageKey -Krayon $_krayon;
 
         show-result -Ruler $_ruler -StructuredLine $_structuredLine;
         [string]$expected = '&[ThemeColour,meta]================================================================================================ [ ' + `
@@ -206,7 +206,7 @@ Describe 'Format-StructuredLine' {
           $exchange['LOOPZ.HEADER-BLOCK.MESSAGE'] = $longMessage;
 
           $_structuredLine = Format-StructuredLine -Exchange $exchange `
-            -LineKey $LineKey -CrumbKey $CrumbKey -MessageKey $MessageKey -Writer $_writer;
+            -LineKey $LineKey -CrumbKey $CrumbKey -MessageKey $MessageKey -Krayon $_krayon;
 
           show-result -Ruler $_ruler -StructuredLine $_structuredLine;
           [string]$expected = '&[ThemeColour,meta]====== [ ' + `
@@ -231,7 +231,7 @@ Describe 'Format-StructuredLine' {
       It 'should: Create coloured line with Truncated message' {
         InModuleScope Elizium.Loopz {
           $_structuredLine = Format-StructuredLine -Exchange $exchange `
-            -LineKey $LineKey -CrumbKey $CrumbKey -MessageKey $MessageKey -Truncate -Writer $_writer;
+            -LineKey $LineKey -CrumbKey $CrumbKey -MessageKey $MessageKey -Truncate -Krayon $_krayon;
 
           $script:_ruler = $LoopzUI.SmallDotsLine;
           show-result -Ruler $_ruler -StructuredLine $_structuredLine;
@@ -247,7 +247,7 @@ Describe 'Format-StructuredLine' {
           InModuleScope Elizium.Loopz {
             $_structuredLine = Format-StructuredLine -Exchange $exchange `
               -LineKey $LineKey -CrumbKey $CrumbKey -MessageKey $MessageKey -Truncate `
-              -Options @{ MinimumFlexSize = 3 } -Writer $_writer;
+              -Options @{ MinimumFlexSize = 3 } -Krayon $_krayon;
 
             $script:_ruler = $LoopzUI.SmallDotsLine;
             show-result -Ruler $_ruler -StructuredLine $_structuredLine;
@@ -262,7 +262,7 @@ Describe 'Format-StructuredLine' {
           InModuleScope Elizium.Loopz {
             $_structuredLine = Format-StructuredLine -Exchange $exchange `
               -LineKey $LineKey -CrumbKey $CrumbKey -MessageKey $MessageKey -Truncate `
-              -Options @{ MinimumFlexSize = 9 } -Writer $_writer;
+              -Options @{ MinimumFlexSize = 9 } -Krayon $_krayon;
 
             $script:_ruler = $LoopzUI.SmallDotsLine;
             show-result -Ruler $_ruler -StructuredLine $_structuredLine;
@@ -283,7 +283,7 @@ Describe 'Format-StructuredLine' {
             $exchange['LOOPZ.HEADER-BLOCK.MESSAGE'] = $longMessage;
 
             $_structuredLine = Format-StructuredLine -Exchange $exchange `
-              -LineKey $LineKey -CrumbKey $CrumbKey -MessageKey $MessageKey -Truncate -Writer $_writer;
+              -LineKey $LineKey -CrumbKey $CrumbKey -MessageKey $MessageKey -Truncate -Krayon $_krayon;
 
             $script:_ruler = $LoopzUI.SmallDotsLine;
             show-result -Ruler $_ruler -StructuredLine $_structuredLine;
@@ -310,7 +310,7 @@ Describe 'Format-StructuredLine' {
         }
 
         $_structuredLine = Format-StructuredLine -Exchange $exchange `
-          -LineKey $LineKey -CrumbKey $CrumbKey -Writer $_writer;
+          -LineKey $LineKey -CrumbKey $CrumbKey -Krayon $_krayon;
 
         show-result -Ruler $_ruler -StructuredLine $_structuredLine;
         [string]$expected = '&[ThemeColour,meta][🔥] ' + `

@@ -10,7 +10,7 @@ Describe 'Show-Summary' {
   BeforeEach {
     InModuleScope Elizium.Loopz {
       [hashtable]$theme = $(Get-KrayolaTheme);
-      [writer]$script:_writer = New-Writer($theme);
+      [Krayon]$script:_krayon = New-Krayon($theme);
     }
   }
 
@@ -19,7 +19,7 @@ Describe 'Show-Summary' {
       InModuleScope Elizium.Loopz {
         [hashtable]$exchange = @{
           'LOOPZ.SUMMARY-BLOCK.LINE' = $LoopzUI.DashLine;
-          'LOOPZ.WRITER'             = $_writer;
+          'LOOP.KRAYON'              = $_krayon;
         }
         Show-Summary -Count 999 -Skipped 0 -Triggered $false -Exchange $exchange;
       }
@@ -30,7 +30,7 @@ Describe 'Show-Summary' {
     It 'should: display summary' {
       InModuleScope Elizium.Loopz {
         [hashtable]$exchange = @{
-          'LOOPZ.WRITER' = $_writer;
+          'LOOP.KRAYON' = $_krayon;
         }
         Show-Summary -Count 101 -Skipped 0 -Triggered $true -Exchange $exchange;
       }
@@ -44,7 +44,7 @@ Describe 'Show-Summary' {
         [hashtable]$exchange = @{
           'LOOPZ.SUMMARY-BLOCK.LINE'       = $LoopzUI.DashLine;
           'LOOPZ.SUMMARY-BLOCK.WIDE-ITEMS' = $wideItems;
-          'LOOPZ.WRITER'                   = $_writer;
+          'LOOP.KRAYON'                    = $_krayon;
         }
         Show-Summary -Count 999 -Skipped 0 -Triggered $false -Exchange $exchange;
       }
@@ -57,7 +57,7 @@ Describe 'Show-Summary' {
           'LOOPZ.SUMMARY-BLOCK.LINE'             = $LoopzUI.DashLine;
           'LOOPZ.SUMMARY-BLOCK.WIDE-ITEMS'       = $wideItems;
           'LOOPZ.SUMMARY-BLOCK.GROUP-WIDE-ITEMS' = $true;
-          'LOOPZ.WRITER'                         = $_writer;
+          'LOOP.KRAYON'                          = $_krayon;
         }
         Show-Summary -Count 999 -Skipped 0 -Triggered $false -Exchange $exchange;
       }
@@ -71,7 +71,7 @@ Describe 'Show-Summary' {
         [hashtable]$exchange = @{
           'LOOPZ.SUMMARY-BLOCK.LINE'       = $LoopzUI.DashLine;
           'LOOPZ.SUMMARY-BLOCK.PROPERTIES' = $wideItems;
-          'LOOPZ.WRITER'                   = $_writer;
+          'LOOP.KRAYON'                    = $_krayon;
         }
         Show-Summary -Count 999 -Skipped 0 -Triggered $false -Exchange $exchange;
       }

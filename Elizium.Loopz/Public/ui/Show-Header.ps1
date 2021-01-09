@@ -5,13 +5,13 @@ function Show-Header {
     [hashtable]$Exchange
   )
 
-  [writer]$writer = $Exchange['LOOPZ.WRITER'];
+  [Krayon]$krayon = $Exchange['LOOP.KRAYON'];
 
-  if (-not($writer)) {
-    throw "Writer missing from Exchange under key 'LOOPZ.WRITER'"
+  if (-not($krayon)) {
+    throw "Writer missing from Exchange under key 'LOOP.KRAYON'"
   }
-  $null = $writer.Reset();
-  [string]$writerFormatWithArg = $writer.ApiFormatWithArg;
+  $null = $krayon.Reset();
+  [string]$writerFormatWithArg = $krayon.ApiFormatWithArg;
   [string]$message = $Exchange.ContainsKey(
     'LOOPZ.HEADER-BLOCK.MESSAGE') ? $Exchange['LOOPZ.HEADER-BLOCK.MESSAGE'] : [string]::Empty;
 
@@ -33,19 +33,19 @@ function Show-Header {
 
     [string]$structuredLine = $($writerFormatWithArg -f 'ThemeColour', 'meta') + $line;
 
-    $null = $writer.ScribbleLn($structuredLine);
+    $null = $krayon.ScribbleLn($structuredLine);
 
     # Inner detail
     #
     if (-not([string]::IsNullOrEmpty($message))) {
-      $null = $writer.Message($message);
+      $null = $krayon.Message($message);
     }
-    $null = $writer.Line($properties);
+    $null = $krayon.Line($properties);
 
     # Second line
     #
     [string]$structuredLine = $($writerFormatWithArg -f 'ThemeColour', 'meta') + $line;
-    $null = $writer.ScribbleLn($structuredLine);
+    $null = $krayon.ScribbleLn($structuredLine);
   }
   else {
     # Alternative line
@@ -55,7 +55,7 @@ function Show-Header {
     [string]$messageKey = 'LOOPZ.HEADER-BLOCK.MESSAGE';
 
     [string]$structuredLine = Format-StructuredLine -Exchange $exchange `
-      -LineKey $LineKey -CrumbKey $CrumbKey -MessageKey $messageKey -Writer $writer;
-    $null = $writer.ScribbleLn($structuredLine);
+      -LineKey $LineKey -CrumbKey $CrumbKey -MessageKey $messageKey -Krayon $krayon;
+    $null = $krayon.ScribbleLn($structuredLine);
   }
 }

@@ -72,11 +72,11 @@ function Select-Text {
 
   [hashtable]$signals = $(Get-Signals);
   [hashtable]$theme = $(Get-KrayolaTheme);
-  [writer]$writer = New-Writer -Theme $theme;
+  [Krayon]$krayon = New-Krayon -Theme $theme;
   [couplet]$formattedSignal = Get-FormattedSignal -Name 'GREPS' -Value $command -Signals $signals;
   Invoke-Expression $command;
 
-  $null = $writer.blue().Text($formattedSignal.Key). `
+  $null = $krayon.blue().Text($formattedSignal.Key). `
     red().Text(' --> '). `
     green().Text($formattedSignal.Value);
 }

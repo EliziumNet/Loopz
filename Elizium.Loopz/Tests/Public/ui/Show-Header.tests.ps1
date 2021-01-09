@@ -11,7 +11,7 @@ Describe 'Show-Header' {
   BeforeEach {
     InModuleScope Elizium.Loopz {
       [hashtable]$theme = $(Get-KrayolaTheme);
-      [writer]$script:_writer = New-Writer($theme);
+      [Krayon]$script:_krayon = New-Krayon($theme);
     }
   }
 
@@ -30,10 +30,10 @@ Describe 'Show-Header' {
       It 'should: display header with properties and message' {
         InModuleScope Elizium.Loopz {
           [hashtable]$exchange = @{
-            'LOOPZ.HEADER-BLOCK.MESSAGE'      = 'The sound the wind makes in the pines';
-            'LOOPZ.HEADER.PROPERTIES'         = $_properties;
-            'LOOPZ.HEADER-BLOCK.LINE'         = $LoopzUI.TildeLine;
-            'LOOPZ.WRITER'                    = $_writer;
+            'LOOPZ.HEADER-BLOCK.MESSAGE' = 'The sound the wind makes in the pines';
+            'LOOPZ.HEADER.PROPERTIES'    = $_properties;
+            'LOOPZ.HEADER-BLOCK.LINE'    = $LoopzUI.TildeLine;
+            'LOOP.KRAYON'                = $_krayon;
           }
           Show-Header -Exchange $exchange;
         }
@@ -49,7 +49,7 @@ Describe 'Show-Header' {
             'LOOPZ.HEADER-BLOCK.CRUMB-SIGNAL' = 'CRUMB-B';
             'LOOPZ.HEADER-BLOCK.MESSAGE'      = 'The sound the wind makes in the pines';
             'LOOPZ.HEADER-BLOCK.LINE'         = $LoopzUI.EqualsLine;
-            'LOOPZ.WRITER'                    = $_writer;
+            'LOOP.KRAYON'                     = $_krayon;
           }
           Show-Header -Exchange $exchange;
         }
@@ -62,7 +62,7 @@ Describe 'Show-Header' {
           [hashtable]$exchange = @{
             'LOOPZ.HEADER.PROPERTIES' = $_properties;
             'LOOPZ.HEADER-BLOCK.LINE' = $LoopzUI.TildeLine;
-            'LOOPZ.WRITER'            = $_writer;
+            'LOOP.KRAYON'             = $_krayon;
           }
 
           Show-Header -Exchange $exchange;
@@ -78,7 +78,7 @@ Describe 'Show-Header' {
           [hashtable]$exchange = @{
             'LOOPZ.HEADER-BLOCK.MESSAGE' = 'What lies in the darkness';
             'LOOPZ.HEADER-BLOCK.LINE'    = $LoopzUI.EqualsLine;
-            'LOOPZ.WRITER'               = $_writer;
+            'LOOP.KRAYON'                = $_krayon;
           }
 
           Show-Header -Exchange $exchange;
@@ -95,7 +95,7 @@ Describe 'Show-Header' {
             [hashtable]$exchange = @{
               'LOOPZ.HEADER-BLOCK.MESSAGE' = 'Without chemicals he points';
               'LOOPZ.HEADER-BLOCK.LINE'    = $LoopzUI.SmallEqualsLine;
-              'LOOPZ.WRITER'               = $_writer;
+              'LOOP.KRAYON'                = $_krayon;
             }
             Show-Header -Exchange $exchange;
           }
@@ -110,7 +110,7 @@ Describe 'Show-Header' {
             [hashtable]$exchange = @{
               'LOOPZ.HEADER-BLOCK.MESSAGE' = 'A man in a smiling bag';
               'LOOPZ.HEADER-BLOCK.LINE'    = $withLeadingSpace;
-              'LOOPZ.WRITER'               = $_writer;
+              'LOOP.KRAYON'                = $_krayon;
             }
 
             Show-Header -Exchange $exchange;
@@ -129,7 +129,7 @@ Describe 'Show-Header' {
             'LOOPZ.SIGNALS'                   = $signals;
             'LOOPZ.HEADER-BLOCK.CRUMB-SIGNAL' = 'TUNE';
             'LOOPZ.HEADER-BLOCK.LINE'         = $LoopzUI.EqualsLine;
-            'LOOPZ.WRITER'                    = $_writer;
+            'LOOP.KRAYON'                     = $_krayon;
           }
 
           Show-Header -Exchange $exchange;
@@ -144,7 +144,7 @@ Describe 'Show-Header' {
           [hashtable]$exchange = @{
             'LOOPZ.SIGNALS'           = $signals;
             'LOOPZ.HEADER-BLOCK.LINE' = $LoopzUI.EqualsLine;
-            'LOOPZ.WRITER'            = $_writer;
+            'LOOP.KRAYON'             = $_krayon;
           }
 
           Show-Header -Exchange $exchange;
@@ -158,7 +158,7 @@ Describe 'Show-Header' {
           [hashtable]$exchange = @{
             'LOOPZ.HEADER-BLOCK.MESSAGE' = ([string]::new('.', 4)).Replace('.', 'The owls are not what they seem ');
             'LOOPZ.HEADER-BLOCK.LINE'    = $LoopzUI.SmallEqualsLine;
-            'LOOPZ.WRITER'               = $_writer;
+            'LOOP.KRAYON'                = $_krayon;
           }
 
           Show-Header -Exchange $exchange;
@@ -171,12 +171,12 @@ Describe 'Show-Header' {
             $theme = (Get-KrayolaTheme).Clone();
             $theme['OPEN'] = '*** [';
             $theme['CLOSE'] = '] ***';
-            [writer]$writer = New-Writer($theme);
+            [Krayon]$krayon = New-Krayon($theme);
 
             [hashtable]$exchange = @{
               'LOOPZ.HEADER-BLOCK.MESSAGE' = ([string]::new('.', 4)).Replace('.', 'The monarch will be crowned ');
               'LOOPZ.HEADER-BLOCK.LINE'    = $LoopzUI.SmallEqualsLine;
-              'LOOPZ.WRITER'               = $writer;
+              'LOOP.KRAYON'                = $krayon;
             }
             Show-Header -Exchange $exchange;
           }
