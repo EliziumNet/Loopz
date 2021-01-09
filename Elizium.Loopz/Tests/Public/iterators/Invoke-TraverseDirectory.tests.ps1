@@ -80,11 +80,11 @@ Describe 'Invoke-TraverseDirectory' {
           }
 
           [hashtable]$theme = $(Get-KrayolaTheme);
-          [writer]$writer = New-Writer -Theme $theme;
+          [Krayon]$krayon = New-Krayon -Theme $theme;
           [hashtable]$exchange = @{
-            'LOOPZ.SUMMARY-BLOCK.LINE' = $LoopzUI.EqualsLine;
+            'LOOPZ.SUMMARY-BLOCK.LINE'    = $LoopzUI.EqualsLine;
             'LOOPZ.SUMMARY-BLOCK.MESSAGE' = 'Test Summary';
-            'LOOPZ.WRITER' = $writer;
+            'LOOP.KRAYON'                 = $krayon;
           }
 
           Invoke-TraverseDirectory -Path $resolvedSourcePath -Exchange $exchange `
@@ -147,11 +147,11 @@ Describe 'Invoke-TraverseDirectory' {
 
               [Parameter(Mandatory)]
               [boolean]$_trigger
-              )
-              $skipped = $($container.count -le 4);
-              Write-Debug "[+] Traverse with Hoist (Skipped); directory ($filter): '$($_underscore.Name)', index: $_index, Skipped: $skipped";
-              @{ Product = $_underscore; Skipped = $skipped; }
-              $container.count++;
+            )
+            $skipped = $($container.count -le 4);
+            Write-Debug "[+] Traverse with Hoist (Skipped); directory ($filter): '$($_underscore.Name)', index: $_index, Skipped: $skipped";
+            @{ Product = $_underscore; Skipped = $skipped; }
+            $container.count++;
           }
 
           [scriptblock]$summaryWithSkip = {

@@ -25,8 +25,7 @@ $global:LoopzHelpers = @{
 
   HeaderBlock          = [scriptblock] {
     param(
-      [hashtable]$Exchange = @{},
-      [writer]$Writer
+      [hashtable]$Exchange = @{}
     )
 
     Show-Header -Exchange $Exchange;

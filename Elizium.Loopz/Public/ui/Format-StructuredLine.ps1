@@ -19,23 +19,23 @@ function Format-StructuredLine {
     [switch]$Truncate,
 
     [Parameter()]
-    [writer]$Writer,
+    [Krayon]$Krayon,
 
     [Parameter()]
     [PSCustomObject]$Options = (@{
-        WingLength          = 3;
-        MinimumFlexSize     = 6;
-        Ellipses            = ' ...';
-        WithLead            = $false;
+        WingLength      = 3;
+        MinimumFlexSize = 6;
+        Ellipses        = ' ...';
+        WithLead        = $false;
       })
   )
   [int]$wingLength = Get-PsObjectField $Options 'WingLength' 3;
   [int]$minimumFlexSize = Get-PsObjectField $Options 'MinimumFlexSize' 6;
   [string]$ellipses = Get-PsObjectField $Options 'Ellipses' ' ...';
   [boolean]$withLead = Get-PsObjectField $Options 'WithLead' $false;
-  [string]$formatWithArg = $Writer.ApiFormatWithArg;
+  [string]$formatWithArg = $Krayon.ApiFormatWithArg;
 
-  [hashtable]$theme = $Writer.Theme;
+  [hashtable]$theme = $Krayon.Theme;
 
   [string]$line = $Exchange.ContainsKey($LineKey) `
     ? $Exchange[$LineKey] : ([string]::new("_", 81));

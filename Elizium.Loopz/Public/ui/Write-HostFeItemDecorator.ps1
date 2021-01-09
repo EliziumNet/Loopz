@@ -140,7 +140,7 @@
     $result.ToString();
   }
 
-  [writer]$writer = $_exchange['LOOPZ.WRITER'];
+  [Krayon]$krayon = $_exchange['LOOP.KRAYON'];
 
   [scriptblock]$decorator = {
     param ($_underscore, $_index, $_exchange, $_trigger)
@@ -204,14 +204,14 @@
       $themedPairs.append($invokeResult.Pairs);
     }
 
-    [hashtable]$krayolaTheme = $writer.Theme;
+    [hashtable]$krayolaTheme = $krayon.Theme;
 
     # Write the primary line
     #
     if (-not([string]::IsNullOrEmpty($message))) {
-      $null = $writer.Message($message);
+      $null = $krayon.Message($message);
     }
-    $null = $writer.Line($themedPairs);
+    $null = $krayon.Line($themedPairs);
 
     # Write additional lines
     #
@@ -220,14 +220,15 @@
         ? $Exchange['LOOPZ.WH-FOREACH-DECORATOR.INDENT'] : 3;
       [string]$blank = [string]::new(' ', $indent);
 
-      [writer]$adjustedWriter = if ($Exchange.ContainsKey('LOOPZ.WH-FOREACH-DECORATOR.WRITER')) {
+      [Krayon]$adjustedWriter = if ($Exchange.ContainsKey('LOOPZ.WH-FOREACH-DECORATOR.WRITER')) {
         $Exchange['LOOPZ.WH-FOREACH-DECORATOR.WRITER'];
-      } else {
+      }
+      else {
         [hashtable]$adjustedTheme = $krayolaTheme.Clone();
         $adjustedTheme['MESSAGE-SUFFIX'] = [string]::Empty;
         $adjustedTheme['OPEN'] = [string]::Empty;
         $adjustedTheme['CLOSE'] = [string]::Empty;
-        $Exchange['LOOPZ.WH-FOREACH-DECORATOR.WRITER'] = New-Writer -Theme $adjustedTheme;
+        $Exchange['LOOPZ.WH-FOREACH-DECORATOR.WRITER'] = New-Krayon -Theme $adjustedTheme;
 
         $Exchange['LOOPZ.WH-FOREACH-DECORATOR.WRITER'];
       }
