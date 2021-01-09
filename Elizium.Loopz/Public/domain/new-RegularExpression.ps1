@@ -21,7 +21,9 @@ function New-RegularExpression {
     '[\/\\](?<codes>[mixsn]{1,5})$');
 
   try {
-    [string]$adjustedExpression = $Expression;
+    [string]$adjustedExpression = $Expression.StartsWith('~') `
+      ? [regex]::Escape($Expression.Substring(1)) : $Expression;
+
     [string[]]$optionsArray = @();
 
     [string]$options = if ($extractOptionsRegEx.IsMatch($adjustedExpression)) {

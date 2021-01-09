@@ -626,6 +626,9 @@ function Rename-Many {
       return $($clientResult -and -not($isAlreadyAnchoredAt));
     };
 
+    [regex]$excludedRegEx = [string]::IsNullOrEmpty($Except) `
+      ? $null : $(New-RegularExpression -Expression $Except);
+
     [scriptblock]$matchesPattern = {
       param(
         [System.IO.FileSystemInfo]$pipelineItem
@@ -637,7 +640,7 @@ function Rename-Many {
       #
       [boolean]$isIncluded = $includeDefined ? $includeRegEx.IsMatch($pipelineItem.Name) : $true;
       return ($patternRegEx.IsMatch($pipelineItem.Name)) -and $isIncluded -and `
-      (($Except -eq [string]::Empty) -or -not($pipelineItem.Name -match $Except)) -and `
+      ((-not($excludedRegEx)) -or -not($excludedRegEx.IsMatch($pipelineItem.Name))) -and `
         $compoundCondition.InvokeReturnAsIs($pipelineItem);
     }
 
