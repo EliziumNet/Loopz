@@ -47,4 +47,11 @@ Describe 'New-RegularExpression' {
       $expression.Options | Should -Be 'None' # ... not [RegexOptions]::None;
     }
   }
+
+  Context 'given: expression is escaped with a tilde' {
+    It 'should: escape the expression' {
+      [Regex]$expression = New-RegularExpression -Expression "~year: (1234)";
+      'year: (1234)' | Should -Match $expression;
+    }
+  }
 }
