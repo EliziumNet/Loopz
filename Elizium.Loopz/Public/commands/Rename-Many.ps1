@@ -84,7 +84,11 @@ function Rename-Many {
     [switch]$Diagnose,
 
     [Parameter()]
-    [string]$Drop
+    [string]$Drop,
+
+    [Parameter()]
+    [ValidateScript( { $_ -gt 0 } )]
+    [int]$Top
   )
 
   begin {
@@ -657,6 +661,10 @@ function Rename-Many {
     }
     elseif ($PSBoundParameters.ContainsKey('Directory')) {
       $parameters['Directory'] = $true;
+    }
+
+    if ($PSBoundParameters.ContainsKey('Top')) {
+      $parameters['Top'] = $Top;
     }
 
     if ($whatIf -or $Diagnose.ToBool()) {
