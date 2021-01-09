@@ -40,6 +40,29 @@ Describe 'Invoke-ForeachFsItem' {
         Get-ChildItem $directoryPath -File | Invoke-ForeachFsItem -Block $block;
         $container.count | Should -Be 3;
       }
+
+      Context 'and: top 2' {
+        It 'should: process first 2 items only' -Tag 'Current' {
+          $container = @{
+            count = 0
+          }
+
+          [scriptblock]$block = {
+            param(
+              [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', '')]
+              [System.IO.FileInfo]$FileInfo,
+              [int]$Index,
+              [hashtable]$Exchange,
+              [boolean]$Trigger
+            )
+            $container.count++;
+          }
+
+          [string]$directoryPath = './Tests/Data/fefsi/csv';
+          Get-ChildItem $directoryPath -File | Invoke-ForeachFsItem -Block $block -Top 2;
+          $container.count | Should -Be 2;
+        }
+      }
     }
 
     Context 'and: files piped from same directory' {

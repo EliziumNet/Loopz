@@ -118,6 +118,18 @@ Describe 'Rename-Many' {
               Get-ChildItem -File -Path $directoryPath | Rename-Many -File `
                 -Pattern 'loopz.' -Anchor 'a', l -Relation 'before' -WhatIf;
             }
+
+            Context 'and: top 2' {
+              It 'should: process the first 2 items only' -Tag 'Current' {
+                $script:expected = @{
+                  'loopz.application.t1.log' = 'applicloopz.ation.t1.log';
+                  'loopz.application.t2.log' = 'applicloopz.ation.t2.log';
+                }
+
+                Get-ChildItem -File -Path $directoryPath | Rename-Many -File `
+                  -Pattern 'loopz.' -Anchor 'a', l -Relation 'before' -Top 2 -WhatIf;
+              }
+            } 
           }
 
           Context 'and: Source matches Pattern, but differs by case' {

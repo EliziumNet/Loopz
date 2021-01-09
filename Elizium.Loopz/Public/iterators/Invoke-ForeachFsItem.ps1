@@ -282,7 +282,11 @@ function Invoke-ForeachFsItem {
     [Parameter(ParameterSetName = 'InvokeScriptBlock')]
     [Parameter(ParameterSetName = 'InvokeFunction')]
     [ValidateScript( { -not($PSBoundParameters.ContainsKey('File')) })]
-    [switch]$Directory
+    [switch]$Directory,
+
+    [Parameter()]
+    [ValidateScript( { $_ -gt 0 } )]
+    [int]$Top
   ) # param
 
   begin {
@@ -292,6 +296,8 @@ function Invoke-ForeachFsItem {
     }
     $controller = $Exchange['LOOPZ.CONTROLLER'];
     $controller.ForeachBegin();
+
+    [boolean]$topBreached = $false;
   }
 
   process {
@@ -303,7 +309,7 @@ function Invoke-ForeachFsItem {
     if (-not($controller.IsBroken())) {
       if ( $acceptAll -or ($Directory.ToBool() -and $itemIsDirectory) -or
         ($File.ToBool() -and -not($itemIsDirectory)) ) {
-        if ($Condition.InvokeReturnAsIs($pipelineItem)) {
+        if ($Condition.InvokeReturnAsIs($pipelineItem) -and -not($topBreached)) {
           [PSCustomObject]$result = $null;
           [int]$index = $controller.RequestIndex();
           [boolean]$trigger = $controller.GetTrigger();
@@ -333,6 +339,10 @@ function Invoke-ForeachFsItem {
           $controller.HandleResult($result);
           if ($result -and $result.psobject.properties.match('Product') -and $result.Product) {
             $result.Product;
+          }
+
+          if ($PSBoundParameters.ContainsKey('Top') -and ($index -eq ($Top - 1))) {
+            $topBreached = $true;
           }
         }
         else {
