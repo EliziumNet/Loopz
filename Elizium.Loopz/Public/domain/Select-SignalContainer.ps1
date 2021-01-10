@@ -32,18 +32,18 @@ function Select-SignalContainer {
 
   if ($PSBoundParameters.ContainsKey('Force')) {
     if ($Force -eq 'Wide') {
-      $Containers.Wide.append($formattedSignal);
+      $null = $Containers.Wide.append($formattedSignal);
     }
     else {
-      $Containers.Props.append($formattedSignal);
+      $null = $Containers.Props.append($formattedSignal);
     }
   }
   else {
     if ($Value.Length -gt $Threshold) {
-      $Containers.Wide.append($formattedSignal);
+      $null = $Containers.Wide.append($formattedSignal);
     }
     else {
-      $Containers.Props.append($formattedSignal);
+      $null = $Containers.Props.append($formattedSignal);
     }
   }
 }
