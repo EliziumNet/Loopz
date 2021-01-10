@@ -22,7 +22,7 @@ function Rename-Many {
     [System.IO.FileSystemInfo]$underscore,
 
     [Parameter()]
-    [ValidateSet('p', 'a', 'c', 'i', '*')]
+    [ValidateSet('p', 'a', 'c', 'i', 'x', '*')]
     [string]$Whole,
 
     [Parameter(Mandatory, Position = 0)]
@@ -458,6 +458,9 @@ function Rename-Many {
     }
 
     if ($PSBoundParameters.ContainsKey('Paste')) {
+      if (-not(Test-IsFileSystemSafe -Value $Paste)) {
+        throw [System.ArgumentException]::new("Paste parameter ('$Paste') contains unsafe characters")
+      }
       if (-not([string]::IsNullOrEmpty($Paste))) {
         Select-SignalContainer -Containers $containers -Name 'PASTE-A' `
           -Value $Paste -Signals $signals;
@@ -525,6 +528,9 @@ function Rename-Many {
       $exchange['LOOPZ.REMY.COPY'] = $copyRegEx;
     }
     elseif ($PSBoundParameters.ContainsKey('With')) {
+      if (-not(Test-IsFileSystemSafe -Value $With)) {
+        throw [System.ArgumentException]::new("With parameter ('$With') contains unsafe characters")
+      }
       $exchange['LOOPZ.REMY.WITH'] = $With;
     }
 
@@ -679,7 +685,9 @@ function Rename-Many {
       $null = $collection | Invoke-ForeachFsItem @parameters;
     }
     catch {
-
+     # ctrl-c doesn't invoke an exception, it just abandons processing,
+     # ending up in the finally block.
+     #  
     }
     finally {
       # catch ctrl-c
