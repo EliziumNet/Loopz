@@ -42,7 +42,7 @@ Describe 'Invoke-ForeachFsItem' {
       }
 
       Context 'and: top 2' {
-        It 'should: process first 2 items only' -Tag 'Current' {
+        It 'should: process first 2 items only' {
           $container = @{
             count = 0
           }

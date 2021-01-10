@@ -120,7 +120,7 @@ Describe 'Rename-Many' {
             }
 
             Context 'and: top 2' {
-              It 'should: process the first 2 items only' -Tag 'Current' {
+              It 'should: process the first 2 items only' {
                 $script:expected = @{
                   'loopz.application.t1.log' = 'applicloopz.ation.t1.log';
                   'loopz.application.t2.log' = 'applicloopz.ation.t2.log';
@@ -594,6 +594,26 @@ Describe 'Rename-Many' {
 
             Get-ChildItem -File -Path $directoryPath | Rename-Many -File `
               -Pattern $pattern -Copy $copy -Paste $paste -WhatIf -Diagnose;
+          }
+        }
+      }
+
+      Context 'and: accidental/incorrect escape' {
+        Context 'and: invalid With' {
+          It 'should: throw' {
+            {
+              Get-ChildItem -Path $directoryPath | Rename-Many -File `
+                -Pattern 'o', 3 -With $(esc('(name)')) -WhatIf;
+            } | Should -Throw;
+          }
+        }
+
+        Context 'and: invalid Paste' {
+          It 'should: throw' {
+            {
+              Get-ChildItem -Path $directoryPath | Rename-Many -File `
+                -Pattern 'o', 3 -Paste $(esc('(o)')) -WhatIf;
+            } | Should -Throw;
           }
         }
       }

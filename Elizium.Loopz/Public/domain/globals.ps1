@@ -233,4 +233,6 @@ $global:Loopz = [PSCustomObject]@{
       }
     }
   }
+
+  InvalidCharacterSet   = [char[]]'<>:"/\|?*';
 }
