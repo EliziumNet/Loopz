@@ -554,8 +554,8 @@ function Rename-Many {
     }
     elseif ($PSBoundParameters.ContainsKey('Start')) {
 
-      Select-SignalContainer -Containers $containers -Name 'SWITCH-ON' `
-        -Value $patternExpression -Signals $signals -CustomLabel 'Start' -Force 'Props';
+      Select-SignalContainer -Containers $containers -Name 'REMY.ANCHOR' `
+        -Value $signals['SWITCH-ON'].Value -Signals $signals -CustomLabel 'Start' -Force 'Props';
 
       $exchange['LOOPZ.REMY.ANCHOR-TYPE'] = 'START';
 
@@ -564,8 +564,8 @@ function Rename-Many {
     }
     elseif ($PSBoundParameters.ContainsKey('End')) {
 
-      Select-SignalContainer -Containers $containers -Name 'SWITCH-ON' `
-        -Value $patternExpression -Signals $signals -CustomLabel 'End' -Force 'Props';
+      Select-SignalContainer -Containers $containers -Name 'REMY.ANCHOR' `
+        -Value $signals['SWITCH-ON'].Value -Signals $signals -CustomLabel 'End' -Force 'Props';
 
       $exchange['LOOPZ.REMY.ANCHOR-TYPE'] = 'END';
 
