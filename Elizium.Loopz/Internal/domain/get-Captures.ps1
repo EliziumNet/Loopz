@@ -1,4 +1,4 @@
-function get-Captures {
+﻿function get-Captures {
   [OutputType([hashtable])]
   param(
     [Parameter(Mandatory)]
@@ -11,6 +11,6 @@ function get-Captures {
   foreach ($key in $groups.Keys) {
     $captures[$key] = $groups[$key];
   }
-  
+
   return $captures;
 }

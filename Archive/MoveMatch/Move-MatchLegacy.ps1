@@ -1,4 +1,4 @@
-
+﻿
 function Move-MatchLegacy {
   # PowerShell ParameterSets are too unmanageable and over-bearing for commands that have complex usage
   # scenarios such as with this command. Ideally, ParameterSets should be defined, but the correct definition
@@ -61,7 +61,7 @@ function Move-MatchLegacy {
 
     [Parameter()]
     [int]$Quantity = 1,
-  
+
     [Parameter()]
     [string]$Paste
   )
@@ -142,7 +142,7 @@ function Move-MatchLegacy {
           else {
             # With doesn't match so abort and return unmodified source
             #
-            $failed = $true;         
+            $failed = $true;
           }
         }
         elseif ($PSBoundParameters.ContainsKey('LiteralWith')) {

@@ -143,7 +143,7 @@ task Compile @compileParams {
         [string]$contentToAdd = "Export-ModuleMember -Alias $aliasesArgument";
 
         Add-Content $script:PsmPath "Export-ModuleMember -Alias $aliasesArgument";
-      } 
+      }
     }
   }
 
@@ -202,7 +202,7 @@ task UpdatePublicFunctionsToExport -if (Test-Path -Path $script:PublicFolder) {
   if ($sourceDefinition.ContainsKey('AliasesToExport')) {
     [string[]]$aliases = Get-PublicFunctionAliasesToExport;
 
-    if ($aliases.Count -gt 0) {      
+    if ($aliases.Count -gt 0) {
       [string]$aliasesArgument = $($aliases -join "', '");
       $aliasesStatement = "AliasesToExport = @('{0}')" -f $aliasesArgument
       Write-Verbose "AliasesToExport statement: $aliasesStatement"

@@ -1,4 +1,4 @@
-
+﻿
 function Format-StructuredLine {
   # We need to replace the exchange key parameters with direct parameters
   [OutputType([string])]
@@ -65,7 +65,7 @@ function Format-StructuredLine {
   else {
     [string]$open = $theme['OPEN'];
     [string]$close = $theme['CLOSE'];
-    
+
     # TODO: The deductions need to be calculated in a dynamic form, to cater
     # for optional fields.
     #

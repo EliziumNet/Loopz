@@ -1,5 +1,6 @@
 
 function new-expr {
+  [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', '')]
   param(
     [Parameter(Position = 0, Mandatory)]
     [string]$Expression

@@ -1,5 +1,6 @@
 
 function Update-Match {
+  [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', '')]
   [OutputType([string])]
   param(
     [Parameter()]

@@ -44,7 +44,7 @@ function Invoke-ForeachFsItem {
   any of the items so far processed in the pipeline. This is the responsibility of the
   client's block implementation. The trigger is only of use for state changing operations
   and can be ignored otherwise.
-                              
+
   In addition to these fixed positional parameters, if the invoked scriptblock is defined
   with additional parameters, then these will also be passed in. In order to achieve this,
   the client has to provide excess parameters in BlockParam and these parameters must be

@@ -181,7 +181,7 @@
     $getResult = $Exchange.Contains('LOOPZ.WH-FOREACH-DECORATOR.GET-RESULT') `
       ? $Exchange['LOOPZ.WH-FOREACH-DECORATOR.GET-RESULT'] : $defaultGetResult;
 
-    [line]$themedPairs = $( kl( $(kp('No', $("{0,3}" -f ($Index + 1)))) ) );
+    [line]$themedPairs = $( New-Line( $(New-Pair('No', $("{0,3}" -f ($Index + 1)))) ) );
 
     # Get Product if it exists
     #
@@ -193,7 +193,7 @@
         ? $Exchange['LOOPZ.WH-FOREACH-DECORATOR.PRODUCT-LABEL'] : 'Product';
 
       if (-not([string]::IsNullOrWhiteSpace($productLabel))) {
-        $themedPairs.append($(kp(@($productLabel, $productValue, $affirm))));
+        $themedPairs.append($(New-Pair(@($productLabel, $productValue, $affirm))));
       }
     }
 

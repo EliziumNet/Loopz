@@ -1,6 +1,7 @@
-
+﻿
 function Invoke-ByPlatform {
   [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingWriteHost", "")]
+  [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSPossibleIncorrectUsageOfAssignmentOperator", "")]
   param(
     [Parameter()]
     [hashtable]$Hash
@@ -19,7 +20,7 @@ function Invoke-ByPlatform {
     Write-Error "!!!!!! Missing platform: '$platform' (and no default available)" -ErrorAction Continue;
     $null;
   }
-  
+
   if ($invokeInfo -and $invokeInfo.FnInfo) {
     if ($invokeInfo.psobject.properties.match('Positional') -and $invokeInfo.Positional) {
       [array]$positional = $invokeInfo.Positional;

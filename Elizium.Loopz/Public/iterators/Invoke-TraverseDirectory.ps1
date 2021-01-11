@@ -215,6 +215,7 @@ function Invoke-TraverseDirectory {
     -SessionHeader $LoopzHelpers.DefaultHeaderBlock -SessionSummary $DefaultHeaderBlock.SimpleSummaryBlock;
 
   #>
+  [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', '')]
   [CmdletBinding(DefaultParameterSetName = 'InvokeScriptBlock')]
   [Alias('itd', 'Traverse-Directory')]
   param

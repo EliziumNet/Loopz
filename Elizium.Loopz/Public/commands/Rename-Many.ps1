@@ -1,7 +1,9 @@
-
+﻿
 function Rename-Many {
   [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSShouldProcess', '',
     Justification = 'WhatIf IS accessed and passed into Exchange')]
+  [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingEmptyCatchBlock', '')]
+  [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', '')]
   [CmdletBinding(SupportsShouldProcess, DefaultParameterSetName = 'ReplaceWith')]
   [Alias('remy')]
   param
@@ -119,6 +121,7 @@ function Rename-Many {
     }
 
     [scriptblock]$doRenameFsItems = {
+      [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', '')]
       param(
         [Parameter(Mandatory)]
         [System.IO.FileSystemInfo]$_underscore,
@@ -274,8 +277,8 @@ function Rename-Many {
       }
 
       if ($trigger) {
-        $null = $lines += (kl(
-            kp(@($_exchange['LOOPZ.REMY.FROM-LABEL'], $_underscore.Name))
+        $null = $lines += (New-Line(
+            New-Pair(@($_exchange['LOOPZ.REMY.FROM-LABEL'], $_underscore.Name))
           ));
       }
       else {
@@ -295,7 +298,7 @@ function Rename-Many {
       if (-not($actionResult.Success)) {
         [couplet]$failedSignal = Get-FormattedSignal -Name 'FAILED-A' `
           -Signals $signals -Value $actionResult.FailedReason;
-        $properties.append($failedSignal); 
+        $properties.append($failedSignal);
       }
 
       # Do diagnostics
@@ -321,8 +324,8 @@ function Rename-Many {
 
               $diagnosticLines += $compoundValue;
             }
-            $null = $lines += (kl(
-                kp(@($namedLabel, $($diagnosticLines -join ', ')))
+            $null = $lines += (New-Line(
+                New-Pair(@($namedLabel, $($diagnosticLines -join ', ')))
               ));
           }
         }
@@ -685,9 +688,9 @@ function Rename-Many {
       $null = $collection | Invoke-ForeachFsItem @parameters;
     }
     catch {
-     # ctrl-c doesn't invoke an exception, it just abandons processing,
-     # ending up in the finally block.
-     #  
+      # ctrl-c doesn't invoke an exception, it just abandons processing,
+      # ending up in the finally block.
+      #
     }
     finally {
       # catch ctrl-c

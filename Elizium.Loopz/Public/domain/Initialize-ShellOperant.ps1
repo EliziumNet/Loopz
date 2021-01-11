@@ -1,4 +1,4 @@
-
+﻿
 function Initialize-ShellOperant {
   [OutputType([Operant])]
   param(
@@ -38,7 +38,7 @@ function Initialize-ShellOperant {
         ? Join-Path -Path $loopzPath -ChildPath $subPath `
         : Join-Path -Path $HomePath -ChildPath $loopzPath -AdditionalChildPath $subPath;
     }
-  
+
     if (-not(Test-Path -Path $loopzPath -PathType Container)) {
       if (-not($DryRun)) {
         $null = New-Item -Type Directory -Path $loopzPath;

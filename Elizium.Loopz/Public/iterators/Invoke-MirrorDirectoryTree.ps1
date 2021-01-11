@@ -70,7 +70,7 @@
     When the script block is invoked, the trigger should indicate if the trigger was pulled for
     any of the items so far processed in the batch. This is the responsibility of the
     client's script-block/function implementation.
-  
+
   In addition to these fixed positional parameters, if the invoked scriptblock is defined
   with additional parameters, then these will also be passed in. In order to achieve this,
   the client has to provide excess parameters in BlockParams and these parameters must be
@@ -153,7 +153,7 @@
   directory in the destination tree. The invoked function has an extra parameter in it's
   signature, so the extra parameters must be passed in via FuncteeParams (the standard
   signature being the first 4 parameters shown.)
-  
+
   function Test-Mirror {
     param(
       [System.IO.DirectoryInfo]$Underscore,
@@ -252,6 +252,7 @@
   -SessionHeader $LoopzHelpers.DefaultHeaderBlock -SessionSummary $DefaultHeaderBlock.SimpleSummaryBlock;
   #>
 
+  [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', '')]
   [CmdletBinding(SupportsShouldProcess, DefaultParameterSetName = 'InvokeScriptBlock')]
   [Alias('imdt', 'Mirror-Directory')]
   param

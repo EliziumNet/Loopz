@@ -1,5 +1,6 @@
 
 function Move-Match {
+  [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSPossibleIncorrectUsageOfAssignmentOperator', '')]
   [Alias('moma')]
   [OutputType([string])]
   param (
