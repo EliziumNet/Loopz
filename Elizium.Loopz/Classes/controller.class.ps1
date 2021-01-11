@@ -257,6 +257,8 @@ class TraverseController : BaseController {
 }
 
 function New-Controller {
+  [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions',
+    '', Justification = 'Not a state changing function, its a factory')]
   [CmdletBinding(DefaultParameterSetName = 'Iterating')]
   [OutputType([BaseController])]
   param (

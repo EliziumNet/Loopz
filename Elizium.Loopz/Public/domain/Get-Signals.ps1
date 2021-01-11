@@ -1,5 +1,6 @@
 
 function Get-Signals {
+  [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidGlobalVars', '')]
   [OutputType([hashtable])]
   param(
     [Parameter()]

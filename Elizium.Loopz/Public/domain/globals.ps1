@@ -1,5 +1,4 @@
-﻿
-$global:LoopzHelpers = @{
+﻿$global:LoopzHelpers = @{
   # Helper Script Blocks
   #
   WhItemDecoratorBlock = [scriptblock] {
@@ -84,93 +83,93 @@ $global:Loopz = [PSCustomObject]@{
   SignalEmoji           = 1;
 
   MissingSignal         = @{
-    'windows' = (kp(@('???', '🔻')));
-    'linux'   = (kp(@('???', '🔴')));
-    'mac'     = (kp(@('???', '🔺')));
+    'windows' = (New-Pair(@('???', '🔻')));
+    'linux'   = (New-Pair(@('???', '🔴')));
+    'mac'     = (New-Pair(@('???', '🔺')));
   }
 
   # TODO:
-  # - See 
+  # - See
   #   * https://devblogs.microsoft.com/commandline/windows-command-line-unicode-and-utf-8-output-text-buffer/
   #   * https://stackoverflow.com/questions/49476326/displaying-unicode-in-powershell
   #
   DefaultSignals        = [ordered]@{
     # Operations
     #
-    'CUT-A'        = (kp(@('Cut', '✂️')));
-    'CUT-B'        = (kp(@('Cut', '🔪')));
-    'COPY-A'       = (kp(@('Copy', '🍒')));
-    'COPY-B'       = (kp(@('Copy', '🥒')));
-    'MOVE-A'       = (kp(@('Move', '🍺')));
-    'MOVE-B'       = (kp(@('Move', '🍻')));
-    'PASTE-A'      = (kp(@('Paste', '🌶️')));
-    'PASTE-B'      = (kp(@('Paste', '🥜')));
-    'OVERWRITE-A'  = (kp(@('Overwrite', '♻️')));
-    'OVERWRITE-B'  = (kp(@('Overwrite', '❗')));
+    'CUT-A'        = (New-Pair(@('Cut', '✂️')));
+    'CUT-B'        = (New-Pair(@('Cut', '🔪')));
+    'COPY-A'       = (New-Pair(@('Copy', '🍒')));
+    'COPY-B'       = (New-Pair(@('Copy', '🥒')));
+    'MOVE-A'       = (New-Pair(@('Move', '🍺')));
+    'MOVE-B'       = (New-Pair(@('Move', '🍻')));
+    'PASTE-A'      = (New-Pair(@('Paste', '🌶️')));
+    'PASTE-B'      = (New-Pair(@('Paste', '🥜')));
+    'OVERWRITE-A'  = (New-Pair(@('Overwrite', '♻️')));
+    'OVERWRITE-B'  = (New-Pair(@('Overwrite', '❗')));
 
     # Thingies
     #
-    'DIRECTORY-A'  = (kp(@('Directory', '📁')));
-    'DIRECTORY-B'  = (kp(@('Directory', '🗂️')));
-    'FILE-A'       = (kp(@('File', '🏷️')));
-    'FILE-B'       = (kp(@('File', '📝')));
-    'PATTERN'      = (kp(@('Pattern', '🛡️')));
-    'WITH'         = (kp(@('With', '🍑')));
-    'CRUMB-A'      = (kp(@('Crumb', '🎯')));
-    'CRUMB-B'      = (kp(@('Crumb', '🧿')));
-    'CRUMB-C'      = (kp(@('Crumb', '💎')));
-    'SUMMARY-A'    = (kp(@('Summary', '🔆')));
-    'SUMMARY-B'    = (kp(@('Summary', '✨')));
-    'MESSAGE'      = (kp(@('Message', '🗯️')));
-    'CAPTURE'      = (kp(@('Capture', '☂️')));
+    'DIRECTORY-A'  = (New-Pair(@('Directory', '📁')));
+    'DIRECTORY-B'  = (New-Pair(@('Directory', '🗂️')));
+    'FILE-A'       = (New-Pair(@('File', '🏷️')));
+    'FILE-B'       = (New-Pair(@('File', '📝')));
+    'PATTERN'      = (New-Pair(@('Pattern', '🛡️')));
+    'WITH'         = (New-Pair(@('With', '🍑')));
+    'CRUMB-A'      = (New-Pair(@('Crumb', '🎯')));
+    'CRUMB-B'      = (New-Pair(@('Crumb', '🧿')));
+    'CRUMB-C'      = (New-Pair(@('Crumb', '💎')));
+    'SUMMARY-A'    = (New-Pair(@('Summary', '🔆')));
+    'SUMMARY-B'    = (New-Pair(@('Summary', '✨')));
+    'MESSAGE'      = (New-Pair(@('Message', '🗯️')));
+    'CAPTURE'      = (New-Pair(@('Capture', '☂️')));
 
     # Media
     #
-    'AUDIO'        = (kp(@('Audio', '🎶')));
-    'TEXT'         = (kp(@('Text', '🆎')));
-    'DOCUMENT'     = (kp(@('Document', '📜')));
-    'IMAGE'        = (kp(@('Image', '🖼️')));
-    'MOVIE'        = (kp(@('Movie', '🎬')));
+    'AUDIO'        = (New-Pair(@('Audio', '🎶')));
+    'TEXT'         = (New-Pair(@('Text', '🆎')));
+    'DOCUMENT'     = (New-Pair(@('Document', '📜')));
+    'IMAGE'        = (New-Pair(@('Image', '🖼️')));
+    'MOVIE'        = (New-Pair(@('Movie', '🎬')));
 
     # Indicators
     #
-    'WHAT-IF'      = (kp(@('WhatIf', '☑️')));
-    'WARNING-A'    = (kp(@('Warning', '⚠️')));
-    'WARNING-B'    = (kp(@('Warning', '👻')));
-    'SWITCH-ON'    = (kp(@('On', '✔️')));
-    'SWITCH-OFF'   = (kp(@('Off', '❌')));
-    'OK-A'         = (kp(@('🆗', '🚀')));
-    'OK-B'         = (kp(@('🆗', '🌟')));
-    'BAD-A'        = (kp(@('Bad', '💥')));
-    'BAD-B'        = (kp(@('Bad', '💢')));
-    'PROHIBITED'   = (kp(@('Prohibited', '🚫')));
-    'INCLUDE'      = (kp(@('Include', '💠')));
-    'SOURCE'       = (kp(@('Source', '🎀')));
-    'DESTINATION'  = (kp(@('Destination', '☀️')));
-    'TRIM'         = (kp(@('Trim', '🌊')));
-    'MULTI-SPACES' = (kp(@('Spaces', '❄️')));
-    'DIAGNOSTICS'  = (kp(@('Diagnostics', '🧪')));
-    'LOCKED'       = (kp(@('Locked', '🔐')));
-    'NOVICE'       = (kp(@('Novice', '🔰')));
+    'WHAT-IF'      = (New-Pair(@('WhatIf', '☑️')));
+    'WARNING-A'    = (New-Pair(@('Warning', '⚠️')));
+    'WARNING-B'    = (New-Pair(@('Warning', '👻')));
+    'SWITCH-ON'    = (New-Pair(@('On', '✔️')));
+    'SWITCH-OFF'   = (New-Pair(@('Off', '❌')));
+    'OK-A'         = (New-Pair(@('🆗', '🚀')));
+    'OK-B'         = (New-Pair(@('🆗', '🌟')));
+    'BAD-A'        = (New-Pair(@('Bad', '💥')));
+    'BAD-B'        = (New-Pair(@('Bad', '💢')));
+    'PROHIBITED'   = (New-Pair(@('Prohibited', '🚫')));
+    'INCLUDE'      = (New-Pair(@('Include', '💠')));
+    'SOURCE'       = (New-Pair(@('Source', '🎀')));
+    'DESTINATION'  = (New-Pair(@('Destination', '☀️')));
+    'TRIM'         = (New-Pair(@('Trim', '🌊')));
+    'MULTI-SPACES' = (New-Pair(@('Spaces', '❄️')));
+    'DIAGNOSTICS'  = (New-Pair(@('Diagnostics', '🧪')));
+    'LOCKED'       = (New-Pair(@('Locked', '🔐')));
+    'NOVICE'       = (New-Pair(@('Novice', '🔰')));
 
     # Outcomes
     #
-    'FAILED-A'     = (kp(@('Failed', '☢️')));
-    'FAILED-B'     = (kp(@('Failed', '💩')));
-    'SKIPPED-A'    = (kp(@('Skipped', '💤')));
-    'SKIPPED-B'    = (kp(@('Skipped', '👾')));
-    'ABORTED-A'    = (kp(@('Aborted', '✖️')));
-    'ABORTED-B'    = (kp(@('Aborted', '👽')));
-    'CLASH'        = (kp(@('Clash', '📛')));
-    'NOT-ACTIONED' = (kp(@('Not Actioned', '⛔')));
+    'FAILED-A'     = (New-Pair(@('Failed', '☢️')));
+    'FAILED-B'     = (New-Pair(@('Failed', '💩')));
+    'SKIPPED-A'    = (New-Pair(@('Skipped', '💤')));
+    'SKIPPED-B'    = (New-Pair(@('Skipped', '👾')));
+    'ABORTED-A'    = (New-Pair(@('Aborted', '✖️')));
+    'ABORTED-B'    = (New-Pair(@('Aborted', '👽')));
+    'CLASH'        = (New-Pair(@('Clash', '📛')));
+    'NOT-ACTIONED' = (New-Pair(@('Not Actioned', '⛔')));
 
     # Command Specific
     #
-    'REMY.ANCHOR'  = (kp(@('Anchor', '⚓')));
-    'REMY.POST'    = (kp(@('Post Process', '🌈')));
-    'REMY.DROP'    = (kp(@('Drop', '💧')));
-    'REMY.UNDO'    = (kp(@('Undo Rename', '❎')));
-    'GREPS'        = (kp(@('greps', '🔍')));
+    'REMY.ANCHOR'  = (New-Pair(@('Anchor', '⚓')));
+    'REMY.POST'    = (New-Pair(@('Post Process', '🌈')));
+    'REMY.DROP'    = (New-Pair(@('Drop', '💧')));
+    'REMY.UNDO'    = (New-Pair(@('Undo Rename', '❎')));
+    'GREPS'        = (New-Pair(@('greps', '🔍')));
   }
 
   OverrideSignals       = @{ # Label, Emoji

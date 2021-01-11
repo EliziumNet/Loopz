@@ -1,5 +1,7 @@
 
 function New-RegularExpression {
+  [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions',
+    '', Justification = 'Not a state changing function, its a factory')]
   [OutputType([System.Text.RegularExpressions.RegEx])]
   param(
     [Parameter(Position = 0, Mandatory)]

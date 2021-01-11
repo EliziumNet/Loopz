@@ -1,4 +1,4 @@
-
+﻿
 class EndAdapter {
   [System.IO.FileSystemInfo]$_fsInfo;
   [boolean]$_isDirectory;
@@ -16,7 +16,7 @@ class EndAdapter {
   [string] GetAdjustedName() {
     return $this._adjustedName;
   }
-  
+
   [string] GetNameWithExtension([string]$newName) {
     [string]$result = ($this._isDirectory) ? $newName `
       : ($newName + [System.IO.Path]::GetExtension($this._fsInfo.Name));
@@ -33,6 +33,8 @@ class EndAdapter {
 }
 
 function New-EndAdapter {
+  [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions',
+    '', Justification = 'Not a state changing function, its a factory')]
   param(
     [System.IO.FileSystemInfo]$fsInfo
   )

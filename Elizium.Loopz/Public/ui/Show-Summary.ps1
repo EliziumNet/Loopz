@@ -1,4 +1,4 @@
-
+﻿
 function Show-Summary {
   param(
     [Parameter()]
@@ -39,10 +39,10 @@ function Show-Summary {
 
   # Inner detail
   #
-  [line]$properties = kl(@(
-      $(kp('Count', $Count)),
-      $(kp('Skipped', $Skipped)),
-      $(kp('Triggered', $Triggered))
+  [line]$properties = New-Line(@(
+      $(New-Pair('Count', $Count)),
+      $(New-Pair('Skipped', $Skipped)),
+      $(New-Pair('Triggered', $Triggered))
     ));
 
   [line]$summaryProperties = $Exchange.ContainsKey(
@@ -71,7 +71,7 @@ function Show-Summary {
     }
     else {
       foreach ($couplet in $wideItems.Line) {
-        [line]$syntheticLine = kl($couplet);
+        [line]$syntheticLine = New-Line($couplet);
         $null = $krayon.Line($blank, $syntheticLine);
       }
     }

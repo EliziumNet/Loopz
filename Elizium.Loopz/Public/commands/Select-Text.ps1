@@ -8,7 +8,7 @@ function Select-Text {
     [parameter(Mandatory = $true, Position = 0)]
     [ValidateNotNullOrEmpty()]
     [String[]] $patterns,
-  
+
     [parameter(Position = 1)]
     [ValidateNotNullOrEmpty()]
     [String]$filter = $(Get-EnvironmentVariable 'LOOPZ_GREPS_FILTER')

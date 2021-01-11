@@ -1,5 +1,6 @@
-
+﻿
 function Show-Signals {
+  [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidGlobalVars', '')]
   param(
     [Parameter()]
     [hashtable]$SourceSignals = $global:Loopz.Signals,
@@ -26,7 +27,7 @@ function Show-Signals {
     $collection[$_.Name] = [PSCustomObject]@{
       Label  = $_.Value[0];
       Icon   = $_.Value[1];
-      Length = $_.Value[1].Length 
+      Length = $_.Value[1].Length
     }
   }
 
