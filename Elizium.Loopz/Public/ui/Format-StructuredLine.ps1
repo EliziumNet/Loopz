@@ -1,11 +1,64 @@
 ﻿
 function Format-StructuredLine {
-  # We need to replace the exchange key parameters with direct parameters
+  <#
+  .NAME
+    Format-StructuredLine
+
+  .SYNOPSIS
+    Helper function to make it easy to generate a line to be displayed.
+
+  .DESCRIPTION
+    A structured line is some text that includes embedded colour instructions that
+  will be interpreted by the Krayola krayon writer. This function behaves like a
+  layout manager for a single line.
+
+  .PARAMETER Exchange
+    The exchange hashtable object.
+
+  .PARAMETER LineKey
+    The key used to index into the $Exchange hashtable to denote the core line.
+
+  .PARAMETER CrumbKey
+    The key used to index into the $Exchange hashtable to denote which crumb is used.
+
+  .PARAMETER MessageKey
+    The key used to index into the $Exchange hashtable to denote what message to display.
+
+  .PARAMETER Truncate
+    switch parameter to indicate whether the message is truncated to fit the line length.
+
+  .PARAMETER Krayon
+    The writer object which contains the Krayola theme.
+
+  .PARAMETER Options
+
+   + this is the crumb
+   |
+   V                                                          <-- message ->|
+  [@@] --------------------------------------------------- [  Rename (WhatIf) ] ---
+                                                                                |<-- This is a trailing wing
+                                                                                whose length is WingLength
+       |<--- flex part (which must be at least   -------->|
+                        MinimumFlexSize in length, it shrinks to accommodate the message)
+
+    A PSCustomObject that allows further customisation of the structured line. Can contain the following
+  fields:
+  - WingLength: The size of the lead and tail portions of the line ('---')
+  - MinimumFlexSize: The smallest size that the flex part can shrink to, to accommodate
+  the message. If the message is so large that is pushes up against the minimal flex size
+  it will be truncated according to the presence of Truncate switch
+  - Ellipses: When message truncation occurs, the ellipses string is used to indicate that
+  the message has been truncated.
+  - WithLead: boolean flag to indicate whether a leading wing is displayed which would precede
+  the crumb. In the above example and by default, there is no leading wing.
+
+  #>
   [OutputType([string])]
   param(
     [Parameter(Mandatory)]
     [hashtable]$Exchange,
 
+    # We need to replace the exchange key parameters with direct parameters
     [Parameter(Mandatory)]
     [string]$LineKey,
 

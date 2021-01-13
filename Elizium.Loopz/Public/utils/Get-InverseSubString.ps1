@@ -1,5 +1,36 @@
 
 function Get-InverseSubString {
+  <#
+  .NAME
+    Get-InverseSubString
+
+  .SYNOPSIS
+    Performs the opposite of [string]::Substring.
+
+  .DESCRIPTION
+    Returns the remainder of that part of the substring denoted by the $StartIndex
+  $Length.
+
+  .PARAMETER Source
+    The source string
+
+  .PARAMETER StartIndex
+    The index of sub-string.
+
+  .PARAMETER Length
+    The number of characters in the sub-string.
+
+  .PARAMETER Split
+    When getting the inverse sub-string there are two elements that are returned,
+  the head (prior to sub-string) and the tail, what comes after the sub-string.
+    This switch indicates whether the function returns the head and tail as separate
+  entities in an array, or should simply return the tail appended to the head.
+
+  .PARAMETER Marker
+    A character used to mark the position of the sub-string. If the client specifies
+  a marker, then this marker is inserted between the head and the tail.
+
+  #>
   param(
     [Parameter(Position = 0, Mandatory)]
     [string]$Source,

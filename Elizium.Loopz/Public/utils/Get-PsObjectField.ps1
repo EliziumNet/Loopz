@@ -1,5 +1,17 @@
 
 function Get-PsObjectField {
+  <#
+  .NAME
+    Get-PsObjectField
+
+  .SYNOPSIS
+    Simplifies getting the value of a field from a PSCustomObject.
+
+  .DESCRIPTION
+    Returns the value of the specified field. If the field is missing, then
+  the default is returned.
+
+  #>
   param(
     [Parameter(Position = 0, Mandatory)]
     [PSCustomObject]$Object,

@@ -1,5 +1,27 @@
 
 function Show-Header {
+  <#
+  .NAME
+    Show-Header
+
+  .SYNOPSIS
+    Function to display header as part of an iteration batch.
+
+  .DESCRIPTION
+    Behaviour can be customised by the following entries in the Exchange:
+  - 'LOOP.KRAYON' (mandatory): the Krayola Krayon writer object.
+  - 'LOOPZ.HEADER-BLOCK.MESSAGE': The custom message to be displayed as
+  part of the header.
+  - 'LOOPZ.HEADER.PROPERTIES': A Krayon [line] instance contain a collection
+  of Krayola [couplet]s. When present, the header displayed will be a static
+  line, the collection of these properties then another static line.
+  - 'LOOPZ.HEADER-BLOCK.LINE': The static line text. The length of this line controls
+  how everything else is aligned (ie the flex part and the message if present).
+
+  .PARAMETER Exchange
+    The exchange hashtable object.
+
+  #>
   param(
     [Parameter()]
     [hashtable]$Exchange
