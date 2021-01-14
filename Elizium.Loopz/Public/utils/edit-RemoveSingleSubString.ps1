@@ -8,8 +8,8 @@ function Edit-RemoveSingleSubString {
   Removes a sub-string from the target string provided.
 
 .DESCRIPTION
-  Either the first or the last occurrence of a single can be removed depending on
-  whether the Last flag has been set.
+  Either the first or the last occurrence of a single substring can be removed
+  depending on whether the Last flag has been set.
 
 .PARAMETER Last
   Flag to indicate whether the last occurrence of a sub string is to be removed from the

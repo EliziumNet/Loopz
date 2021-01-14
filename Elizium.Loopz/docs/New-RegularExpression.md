@@ -62,7 +62,7 @@ Accept wildcard characters: False
 
 ### -Label
 
-string that give a name to the regular expression being created and is used for
+string that gives a name to the regular expression being created and is used for
 logging/error reporting purposes only, so it's not mandatory.
 
 ```yaml

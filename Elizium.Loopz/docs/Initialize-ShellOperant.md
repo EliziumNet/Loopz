@@ -33,7 +33,7 @@ the following fields (examples provided inside brackets relate to Rename-Many co
 for PowerShell the user would specify 'PoShShell' (which for the time being is the
 only shell supported).
 + BaseFilename ('undo-rename'): the core part of the file name which should reflect
-the nature of the operant (the operation, which ideally should be a bern noun pair
+the nature of the operant (the operation, which ideally should be a verb noun pair
 but is not enforced)
 + DisabledKey ('LOOPZ_REMY_UNDO_DISABLED'): The environment variable used to disable
 this operant.

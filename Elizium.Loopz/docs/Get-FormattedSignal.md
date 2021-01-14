@@ -26,7 +26,7 @@ is used.
   Generally, this function returns either a Pair object or a single string.
 The user can define a format string (or simply use the default) which controls
 how the signal is displayed. If the function is invoked without a Value, then
-a formatted string is returned other a pair object is returned.
+a formatted string is returned, otherwise a pair (couplet) object is returned.
 
 ## PARAMETERS
 
@@ -65,7 +65,7 @@ Accept wildcard characters: False
 
 ### -EmojiOnly
 
-Changes what is returned to be a single only whose formatted as EmojiOnlyFormat.
+Changes what is returned, to be a single value only, formatted as EmojiOnlyFormat.
 
 ```yaml
 Type: SwitchParameter
@@ -81,9 +81,8 @@ Accept wildcard characters: False
 
 ### -EmojiOnlyFormat
 
-When the switch EmojiOnly is enabled, defines the format used to create
-the result. Should contain at least 1 occurrence of {1} representing the
-emoji.
+When the switch EmojiOnly is enabled, EmojiOnlyFormat defines the format used to create
+the result. Should contain at least 1 occurrence of {1} representing the emoji.
 
 ```yaml
 Type: String
@@ -102,7 +101,7 @@ Accept wildcard characters: False
 A string defining the format defining how the signal is displayed. Should
 contain either {0} representing the signal's emoji or {1} the label. They
 can appear as many time as is required, but there should be at least either
-of these.
+one of these.
 
 ```yaml
 Type: String

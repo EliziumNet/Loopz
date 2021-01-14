@@ -37,7 +37,7 @@ such as Get-ChildItems/Copy-Item/Get-Item etc only work on files not directories
     [string[]]$directoryIncludes = @('A*');
     [string[]]$directoryExcludes = @('*_*', '*-*');
 
-    Select-FsItem -Name $directoryInfo.Name `
+    $filterDirectories = Select-FsItem -Name $directoryInfo.Name `
       -Includes $directoryIncludes -Excludes $directoryExcludes;
 
     Invoke-TraverseDirectory -Path <path> -Block <block> -Condition $filterDirectories;

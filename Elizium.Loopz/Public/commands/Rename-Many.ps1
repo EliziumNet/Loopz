@@ -29,7 +29,7 @@ function Rename-Many {
   by accident without specifying $WhatIf (or any other WhatIf equivalent like $Diagnose)
   then the user can execute the undo script to reverse the rename operation. The user
   should clearly do this immediately on recognising the error of their ways. In a panic,
-  the user may terminate th command via ctrl-c. In this case, a partial undo script is
+  the user may terminate the command via ctrl-c. In this case, a partial undo script is
   still generated and should contain the undo operations for the renames that were
   performed up to the point of the termination request.
     The name of the undo script is based upon the current date and time and is displayed
@@ -61,7 +61,7 @@ function Rename-Many {
   (it doesn't make sense for example to move all occurrences of a pattern to the anchor)
   The occurrence is specified after the regular expression eg:
   -Pattern '\w\d{2,3}', l
-    means match the Last occurrence of the expression.
+    which means match the Last occurrence of the expression.
   (Actually, an occurrence may be specified for $Include and $Exclude but there is no
   point in doing so because these patterns only provide a filtering function an play
   not part in the actual renaming process).
@@ -71,10 +71,10 @@ function Rename-Many {
   * use the 'esc' function; eg: -Pattern $($esc('(\d{2})'))
   * use a leading ~; -Pattern '~(123)'
   The above 2 approaches escape the entire string. The second approach is more concise
-  and is avoids the necessary use of extra brackets and $s.
+  and avoids the necessary use of extra brackets and $s.
   * use 'esc' alongside other string concatenation:
     eg: -Pattern $($esc('(123)') + '-(?<ccy>GBP|SEK)').
-  This third method is required when the whole pattern should not be subjecting to
+  This third method is required when the whole pattern should not be subjected to
   escaping.
 
   .PARAMETER Anchor

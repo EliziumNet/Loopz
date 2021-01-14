@@ -27,14 +27,15 @@ Edit-RemoveSingleSubString [-Last] [<CommonParameters>]
 
 ## DESCRIPTION
 
-Either the first or the last occurrence of a single can be removed depending on
-whether the Last flag has been set.
+Either the first or the last occurrence of a single substring can be removed
+depending on whether the Last flag has been set.
 
 ## PARAMETERS
 
 ### -Insensitive
 
-{{ Fill Insensitive Description }}
+Flag to indicate if the search is case sensitive or not. By default, search is case
+sensitive.
 
 ```yaml
 Type: SwitchParameter

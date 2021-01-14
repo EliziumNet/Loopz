@@ -33,7 +33,7 @@ understandable for the user. NB: $Pattern only tells you what to remove, but it'
 $With, $Copy and $Paste that defines what to insert, with the $Anchor/$Start/$End
 defining where the replacement text should go. The user should not be using named capture
 groups in $Copy, or $Anchor, rather, they should be defined inside $Paste and referenced
-inside $Paste.
+inside $Paste/$With.
 
 ## PARAMETERS
 
@@ -84,7 +84,7 @@ is no value in the user specifying a static pattern, because that static string 
 defined in $Paste/$With. The value in the $Copy parameter comes when a generic pattern is
 defined eg \d{3} (is non static), specifies any 3 digits as opposed to say '123', which
 could be used directly in the $Paste/$With parameter without the need for $Copy. The match
-defined by $Copy is stored in special variable ${_p} and can be referenced as such from
+defined by $Copy is stored in special variable ${_c} and can be referenced as such from
 $Paste and $With.
 
 ```yaml
@@ -143,10 +143,10 @@ Accept wildcard characters: False
 
 ### -Drop
 
-A string parameter (only applicable to move operations, ie Anchor/Star/End) that defines
-what text is used to replace the $Pattern match. So in this use-case, the user wants to
-move a particular token/pattern to another part of the name and at the same time drop a
-static string in the place where the $Pattern was removed from.
+A string parameter (only applicable to move operations, ie any of these Anchor/Star/End
+are present) that defines what text is used to replace the $Pattern match. So in this
+use-case, the user wants to move a particular token/pattern to another part of the name
+and at the same time drop a static string in the place where the $Pattern was removed from.
 
 ```yaml
 Type: String
@@ -181,9 +181,7 @@ Accept wildcard characters: False
 
 A character used to mark the place where the $Pattern was removed from. It should be a
 special character that is not easily typed on the keyboard by the user so as to not
-interfere wth $Anchor/$Copy matches which occur after $Pattern match is removed. If a
-marker is not used, then the $Drop would not work as there would be no way to know where
-to place it.
+interfere wth $Anchor/$Copy matches which occur after $Pattern match is removed.
 
 ```yaml
 Type: Char

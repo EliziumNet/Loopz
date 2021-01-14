@@ -10,13 +10,13 @@ schema: 2.0.0
 ## SYNOPSIS
 
 Escapes the regular expression specified. This is just a wrapper around the
-.net regex::escape method, but gives the user a much more user friendly to
-invoke it from the command line
+.net regex::escape method, but gives the user a much easier way to
+invoke it from the command line.
 
 ## SYNTAX
 
 ```powershell
-Format-Escape [-pattern] <Object> [<CommonParameters>]
+Format-Escape [-Source] <Object> [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -28,9 +28,9 @@ requirements.
 
 ## PARAMETERS
 
-### -pattern
+### -Source
 
-The source string to escape. (should really be called source)
+The source string to escape.
 
 ```yaml
 Type: Object
