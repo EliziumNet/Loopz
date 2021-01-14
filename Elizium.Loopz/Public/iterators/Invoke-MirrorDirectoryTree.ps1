@@ -14,47 +14,6 @@
   Summary script block can be specified which will be invoked at the end of the mirroring
   batch.
 
-  .PARAMETER Path
-    The source Path denoting the root of the directory tree to be mirrored.
-
-  .PARAMETER DestinationPath
-    The destination Path denoting the root of the directory tree where the source tree
-  will be mirrored to.
-
-  .PARAMETER DirectoryIncludes
-    An array containing a list of filters, each must contain a wild-card ('*'). If a
-  particular filter does not contain a wild-card, then it will be ignored. If the directory
-  matches any of the filters in the list, it will be mirrored in the destination tree.
-  If DirectoryIncludes contains just a single element which is the empty string, this means
-  that nothing is included (rather than everything being included).
-
-  .PARAMETER DirectoryExcludes
-    An array containing a list of filters, each must contain a wild-card ('*'). If a
-  particular filter does not contain a wild-card, then it will be ignored. If the directory
-  matches any of the filters in the list, it will NOT be mirrored in the destination tree.
-  Any match in the DirectoryExcludes overrides a match in DirectoryIncludes, so a directory
-  that is matched in Include, can be excluded by the Exclude.
-
-  .PARAMETER FileIncludes
-    An array containing a list of filters, each may contain a wild-card ('*'). If a
-  particular filter does not contain a wild-card, then it will be treated as a file suffix.
-  If the file in the source tree matches any of the filters in the list, it will be mirrored
-  in the destination tree. If FileIncludes contains just a single element which is the empty
-  string, this means that nothing is included (rather than everything being included).
-
-  .PARAMETER FileExcludes
-    An array containing a list of filters, each may contain a wild-card ('*'). If a
-  particular filter does not contain a wild-card, then it will be treated as a file suffix.
-  If the file in the source tree matches any of the filters in the list, it will NOT be
-  mirrored in the destination tree. Any match in the FileExcludes overrides a match in
-  FileIncludes, so a file that is matched in Include, can be excluded by the Exclude.
-
-  .PARAMETER Exchange
-    A hash table containing miscellaneous information gathered internally
-  throughout the pipeline batch. This can be of use to the user, because it is the way
-  the user can perform bi-directional communication between the invoked custom script block
-  and client side logic.
-
   .PARAMETER Block
     The script block to be invoked. The script block is invoked for each directory in the
   source directory tree that satisfy the specified Directory Include/Exclude filters with
@@ -83,13 +42,60 @@
   .PARAMETER BlockParams
     Optional array containing the excess parameters to pass into the script-block/function.
 
+  .PARAMETER CopyFiles
+    Switch parameter that indicates that files matching the specified filters should be copied
+
+  .PARAMETER CreateDirs
+    switch parameter indicates that directories should be created in the destination tree. If
+  not set, then Invoke-MirrorDirectoryTree turns into a function that traverses the source
+  directory invoking the function/script-block for matching directories.
+
+  .PARAMETER DestinationPath
+    The destination Path denoting the root of the directory tree where the source tree
+  will be mirrored to.
+
+  .PARAMETER DirectoryIncludes
+    An array containing a list of filters, each must contain a wild-card ('*'). If a
+  particular filter does not contain a wild-card, then it will be ignored. If the directory
+  matches any of the filters in the list, it will be mirrored in the destination tree.
+  If DirectoryIncludes contains just a single element which is the empty string, this means
+  that nothing is included (rather than everything being included).
+
+  .PARAMETER DirectoryExcludes
+    An array containing a list of filters, each must contain a wild-card ('*'). If a
+  particular filter does not contain a wild-card, then it will be ignored. If the directory
+  matches any of the filters in the list, it will NOT be mirrored in the destination tree.
+  Any match in the DirectoryExcludes overrides a match in DirectoryIncludes, so a directory
+  that is matched in Include, can be excluded by the Exclude.
+
+  .PARAMETER Exchange
+    A hash table containing miscellaneous information gathered internally
+  throughout the pipeline batch. This can be of use to the user, because it is the way
+  the user can perform bi-directional communication between the invoked custom script block
+  and client side logic.
+
+  .PARAMETER FileExcludes
+    An array containing a list of filters, each may contain a wild-card ('*'). If a
+  particular filter does not contain a wild-card, then it will be treated as a file suffix.
+  If the file in the source tree matches any of the filters in the list, it will NOT be
+  mirrored in the destination tree. Any match in the FileExcludes overrides a match in
+  FileIncludes, so a file that is matched in Include, can be excluded by the Exclude.
+
+  .PARAMETER FileIncludes
+    An array containing a list of filters, each may contain a wild-card ('*'). If a
+  particular filter does not contain a wild-card, then it will be treated as a file suffix.
+  If the file in the source tree matches any of the filters in the list, it will be mirrored
+  in the destination tree. If FileIncludes contains just a single element which is the empty
+  string, this means that nothing is included (rather than everything being included).
+
+
   .PARAMETER Functee
     String defining the function to be invoked. Works in a similar way to the Block parameter
   for script-blocks. The Function's base signature is as follows:
-    "Underscore": (See underscore described above)
-    "Index": (See index described above)
-    "Exchange": (See PathThru described above)
-    "Trigger": (See trigger described above)
+  * "Underscore": (See underscore described above)
+  * "Index": (See index described above)
+  * "Exchange": (See PathThru described above)
+  * "Trigger": (See trigger described above)
 
   The destination DirectoryInfo object can be accessed via the Exchange denoted by
   the 'LOOPZ.MIRROR.DESTINATION' entry.
@@ -98,33 +104,36 @@
     Optional hash-table containing the named parameters which are splatted into the Functee
   function invoke. As it's a hash table, order is not significant.
 
-  .PARAMETER CreateDirs
-    Switch parameter indicates that directories should be created in the destination tree. If
-  not set, then Invoke-MirrorDirectoryTree turns into a function that traverses the source
-  directory invoking the function/script-block for matching directories.
-
-  .PARAMETER CopyFiles
-    Switch parameter that indicates that files matching the specified filters should be copied
-
-  .PARAMETER Hoist
-    Switch parameter. Without Hoist being specified, the filters can prove to be too restrictive
-  on matching against directories. If a directory does not match the filters then none of its
-  descendants will be considered to be mirrored in the destination tree. When Hoist is specified
-  then a descendant directory that does match the filters will be mirrored even though any of
-  its ancestors may not match the filters.
-
   .PARAMETER Header
     A script-block that is invoked for each directory that also contains child directories.
   The script-block is invoked with the following positional parameters:
     * Exchange: (see Exchange previously described)
 
     The Header can be customised with the following Exchange entries:
-    - 'LOOPZ.KRAYOLA-THEME': Krayola Theme generally in use
-    - 'LOOPZ.HEADER-BLOCK.MESSAGE': message displayed as part of the header
-    - 'LOOPZ.HEADER-BLOCK.CRUMB-SIGNAL': Lead text displayed in header, default: '[+] '
-    - 'LOOPZ.HEADER.PROPERTIES': An array of Key/Value pairs of items to be displayed
-    - 'LOOPZ.HEADER-BLOCK.LINE': A string denoting the line to be displayed. (There are
+    * 'LOOPZ.KRAYOLA-THEME': Krayola Theme generally in use
+    * 'LOOPZ.HEADER-BLOCK.MESSAGE': message displayed as part of the header
+    * 'LOOPZ.HEADER-BLOCK.CRUMB-SIGNAL': Lead text displayed in header, default: '[+] '
+    * 'LOOPZ.HEADER.PROPERTIES': An array of Key/Value pairs of items to be displayed
+    * 'LOOPZ.HEADER-BLOCK.LINE': A string denoting the line to be displayed. (There are
     predefined lines available to use in $LoopzUI, or a custom one can be used instead)
+
+  .PARAMETER Hoist
+    switch parameter. Without Hoist being specified, the filters can prove to be too restrictive
+  on matching against directories. If a directory does not match the filters then none of its
+  descendants will be considered to be mirrored in the destination tree. When Hoist is specified
+  then a descendant directory that does match the filters will be mirrored even though any of
+  its ancestors may not match the filters.
+
+  .PARAMETER Path
+    The source Path denoting the root of the directory tree to be mirrored.
+
+  .PARAMETER SessionHeader
+    A script-block that is invoked at the start of the mirroring batch. The script-block has
+  the same signature as the Header script block.
+
+  .PARAMETER SessionSummary
+    A script-block that is invoked at the end of the mirroring batch. The script-block has
+  the same signature as the Summary script block.
 
   .PARAMETER Summary
     A script-block that is invoked foreach directory that also contains child directories,
@@ -139,14 +148,6 @@
     This helps in written idempotent operations that can be re-run without adverse
     consequences.
     * Exchange: (see Exchange previously described)
-
-  .PARAMETER SessionHeader
-    A script-block that is invoked at the start of the mirroring batch. The script-block has
-  the same signature as the Header script block.
-
-  .PARAMETER SessionSummary
-    A script-block that is invoked at the end of the mirroring batch. The script-block has
-  the same signature as the Summary script block.
 
   .EXAMPLE 1
     Invoke a named function for every directory in the source tree and mirror every

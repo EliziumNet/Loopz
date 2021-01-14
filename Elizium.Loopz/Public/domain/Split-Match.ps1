@@ -15,25 +15,26 @@ function Split-Match {
   the source with the matched text removed and the third is the match object
   that represents the matched text.
 
-  .PARAMETER Source
-    The source value against which regular expression is applied.
-
-  .PARAMETER PatternRegEx
-    The regex object to apply to the $Source.
-
-  .PARAMETER Occurrence
-    Denotes which match should be used.
-
   .PARAMETER CapturedOnly
     switch parameter to indicate what should be returned. When the client does not need
   the match object or the remainder, they can use this switch to ensure only the matched
   text is returned.
-
+  
   .PARAMETER Marker
     A character used to mark the place where the $PatternRegEx's match was removed from.
   It should be a special character that is not easily typed on the keyboard by the user
   so as to not interfere wth $Anchor/$Copy matches which occur after $Pattern match is
   removed.
+
+  .PARAMETER Occurrence
+    Denotes which match should be used.
+
+  .PARAMETER PatternRegEx
+    The regex object to apply to the $Source.
+
+  .PARAMETER Source
+    The source value against which regular expression is applied.
+
 
   #>
   param(

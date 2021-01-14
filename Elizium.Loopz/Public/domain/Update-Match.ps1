@@ -20,20 +20,6 @@ function Update-Match {
   capture groups in Copy rather, they should be defined inside $Paste and referenced
   inside Paste.
   
-  .PARAMETER Value
-    The source value against which regular expressions are applied
-
-  .PARAMETER Pattern
-    Regular expression string that indicates which part of the $Value that either needs
-  to be moved or replaced as part of overall rename operation. Those characters in $Value
-  which match $Pattern, are removed.
-
-  .PARAMETER PatternOccurrence
-    Can be a number or the letters f, l
-  - f: first occurrence
-  - l: last occurrence
-  - <number>: the nth occurrence
-
   .PARAMETER Copy
     Regular expression string applied to $Value (after the $Pattern match has been removed),
   indicating a portion which should be copied and re-inserted (via the $Paste parameter;
@@ -47,26 +33,9 @@ function Update-Match {
 
   .PARAMETER CopyOccurrence
     Can be a number or the letters f, l
-  - f: first occurrence
-  - l: last occurrence
-  - <number>: the nth occurrence
-
-  .PARAMETER With
-    This is a NON regular expression string. It would be more accurately described as a formatter,
-  similar to the $Paste parameter. Defines what text is used as the replacement for the $Pattern
-  match. Works in concert with $Relation (whereas $Paste does not). $With can reference special
-  variables:
-  - $0: the pattern match
-  - ${_c}: the copy match
-  When $Pattern contains named capture groups, these variables can also be referenced. Eg if the
-  $Pattern is defined as '(?<day>\d{1,2})-(?<mon>\d{1,2})-(?<year>\d{4})', then the variables
-  ${day}, ${mon} and ${year} also become available for use in $With or $Paste.
-  Typically, $With is static text which is used to replace the $Pattern match.
-
-  .PARAMETER Paste
-    This is a NON regular expression string. It would be more accurately described as a formatter,
-  similar to the $With parameter. The other special variables that can be used inside a $Paste
-  string is documented under the $With parameter.
+  * f: first occurrence
+  * l: last occurrence
+  * <number>: the nth occurrence
 
   .PARAMETER Diagnose
     switch parameter that indicates the command should be run in WhatIf mode. When enabled
@@ -76,7 +45,38 @@ function Update-Match {
   is not renamed (usually because of an incorrect regular expression), the user can use the
   diagnostics along side the 'Not Renamed' reason to track down errors. When $Diagnose has
   been specified, $WhatIf does not need to be specified.
-  
+
+  .PARAMETER Paste
+    This is a NON regular expression string. It would be more accurately described as a formatter,
+  similar to the $With parameter. The other special variables that can be used inside a $Paste
+  string is documented under the $With parameter.
+
+  .PARAMETER Pattern
+    Regular expression string that indicates which part of the $Value that either needs
+  to be moved or replaced as part of overall rename operation. Those characters in $Value
+  which match $Pattern, are removed.
+
+  .PARAMETER PatternOccurrence
+    Can be a number or the letters f, l
+  * f: first occurrence
+  * l: last occurrence
+  * <number>: the nth occurrence
+
+  .PARAMETER Value
+    The source value against which regular expressions are applied.
+
+  .PARAMETER With
+    This is a NON regular expression string. It would be more accurately described as a formatter,
+  similar to the $Paste parameter. Defines what text is used as the replacement for the $Pattern
+  match. Works in concert with $Relation (whereas $Paste does not). $With can reference special
+  variables:
+  * $0: the pattern match
+  * ${_c}: the copy match
+  When $Pattern contains named capture groups, these variables can also be referenced. Eg if the
+  $Pattern is defined as '(?<day>\d{1,2})-(?<mon>\d{1,2})-(?<year>\d{4})', then the variables
+  ${day}, ${mon} and ${year} also become available for use in $With or $Paste.
+  Typically, $With is static text which is used to replace the $Pattern match.
+
   #>
   [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', '')]
   [OutputType([string])]

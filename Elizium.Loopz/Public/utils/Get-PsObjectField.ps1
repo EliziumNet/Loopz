@@ -11,6 +11,15 @@ function Get-PsObjectField {
     Returns the value of the specified field. If the field is missing, then
   the default is returned.
 
+  .PARAMETER Default
+    Default value to return if the $Field doesn't exist on the $Object.
+
+  .PARAMETER Field
+    The field to get value of.
+
+  .PARAMETER Object
+    The object to get the field value from.
+
   #>
   param(
     [Parameter(Position = 0, Mandatory)]

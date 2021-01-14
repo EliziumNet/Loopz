@@ -20,20 +20,6 @@ function Move-Match {
   defining where the replacement text should go. The user should not be using named capture
   groups in $Copy, or $Anchor, rather, they should be defined inside $Paste and referenced
   inside $Paste.
-  
-  .PARAMETER Value
-    The source value against which regular expressions are applied.
-
-  .PARAMETER Pattern
-    Regular expression string that indicates which part of the $Value that
-  either needs to be moved or replaced as part of overall rename operation. Those characters
-  in $Value which match $Pattern, are removed.
-
-  .PARAMETER PatternOccurrence
-    Can be a number or the letters f, l
-  - f: first occurrence
-  - l: last occurrence
-  - <number>: the nth occurrence
 
   .PARAMETER Anchor
     Anchor is a regular expression string applied to $Value (after the $Pattern match has
@@ -42,14 +28,9 @@ function Move-Match {
 
   .PARAMETER AnchorOccurrence
     Can be a number or the letters f, l
-  - f: first occurrence
-  - l: last occurrence
-  - <number>: the nth occurrence
-
-  .PARAMETER Relation
-    Used in conjunction with the $Anchor parameter and can be set to either 'before' or
-  'after' (the default). Defines the relationship of the $Pattern match with the $Anchor
-  match in the new name for $Value.
+  * f: first occurrence
+  * l: last occurrence
+  * <number>: the nth occurrence
 
   .PARAMETER Copy
     Regular expression string applied to $Value (after the $Pattern match has been removed),
@@ -64,42 +45,9 @@ function Move-Match {
 
   .PARAMETER CopyOccurrence
     Can be a number or the letters f, l
-  - f: first occurrence
-  - l: last occurrence
-  - <number>: the nth occurrence
-
-  .PARAMETER With
-    This is a NON regular expression string. It would be more accurately described as a formatter,
-  similar to the $Paste parameter. Defines what text is used as the replacement for the $Pattern
-  match. Works in concert with $Relation (whereas $Paste does not). $With can reference special
-  variables:
-  - $0: the pattern match
-  - ${_a}: the anchor match
-  - ${_c}: the copy match
-  When $Pattern contains named capture groups, these variables can also be referenced. Eg if the
-  $Pattern is defined as '(?<day>\d{1,2})-(?<mon>\d{1,2})-(?<year>\d{4})', then the variables
-  ${day}, ${mon} and ${year} also become available for use in $With or $Paste.
-  Typically, $With is static text which is used to replace the $Pattern match and is inserted
-  according to the Anchor match, (or indeed $Start or $End) and $Relation. When using $With,
-  whatever is defined in the $Anchor match is not removed from $Value (this is different to how
-  $Paste works).
-
-  .PARAMETER Paste
-    This is a NON regular expression string. It would be more accurately described as a formatter,
-  similar to the $With parameter. When $Paste is defined, the $Anchor (if specified) is removed
-  from $Value and needs to be be re-inserted using the special variable ${_a}. The
-  other special variables that can be used inside a $Paste string is documented under the $With
-  parameter.
-    The $Paste string can specify a format that defines the replacement and since it removes the
-  $Anchor, the $Relation is not applicable ($Relation and $Paste can't be used together).
-
-  .PARAMETER Start
-    Is another type of anchor used instead of $Anchor and specifies that the $Pattern match
-  should be moved to the start of the new name.
-
-  .PARAMETER End
-    Is another type of anchor used instead of $Anchor and specifies that the $Pattern match
-  should be moved to the end of the new name.
+  * f: first occurrence
+  * l: last occurrence
+  * <number>: the nth occurrence
 
   .PARAMETER Diagnose
     switch parameter that indicates the command should be run in WhatIf mode. When enabled
@@ -116,12 +64,66 @@ function Move-Match {
   move a particular token/pattern to another part of the name and at the same time drop a
   static string in the place where the $Pattern was removed from.
 
+  .PARAMETER End
+    Is another type of anchor used instead of $Anchor and specifies that the $Pattern match
+  should be moved to the end of the new name.
+
+
   .PARAMETER Marker
     A character used to mark the place where the $Pattern was removed from. It should be a
   special character that is not easily typed on the keyboard by the user so as to not
   interfere wth $Anchor/$Copy matches which occur after $Pattern match is removed. If a
   marker is not used, then the $Drop would not work as there would be no way to know where
   to place it.
+
+  .PARAMETER Paste
+    This is a NON regular expression string. It would be more accurately described as a formatter,
+  similar to the $With parameter. When $Paste is defined, the $Anchor (if specified) is removed
+  from $Value and needs to be be re-inserted using the special variable ${_a}. The
+  other special variables that can be used inside a $Paste string is documented under the $With
+  parameter.
+    The $Paste string can specify a format that defines the replacement and since it removes the
+  $Anchor, the $Relation is not applicable ($Relation and $Paste can't be used together).
+
+
+  .PARAMETER Pattern
+    Regular expression string that indicates which part of the $Value that
+  either needs to be moved or replaced as part of overall rename operation. Those characters
+  in $Value which match $Pattern, are removed.
+
+  .PARAMETER PatternOccurrence
+    Can be a number or the letters f, l
+  * f: first occurrence
+  * l: last occurrence
+  * <number>: the nth occurrence
+
+  .PARAMETER Relation
+    Used in conjunction with the $Anchor parameter and can be set to either 'before' or
+  'after' (the default). Defines the relationship of the $Pattern match with the $Anchor
+  match in the new name for $Value.
+
+  .PARAMETER Start
+    Is another type of anchor used instead of $Anchor and specifies that the $Pattern match
+  should be moved to the start of the new name.
+
+  .PARAMETER Value
+    The source value against which regular expressions are applied.
+
+  .PARAMETER With
+    This is a NON regular expression string. It would be more accurately described as a formatter,
+  similar to the $Paste parameter. Defines what text is used as the replacement for the $Pattern
+  match. Works in concert with $Relation (whereas $Paste does not). $With can reference special
+  variables:
+  * $0: the pattern match
+  * ${_a}: the anchor match
+  * ${_c}: the copy match
+  When $Pattern contains named capture groups, these variables can also be referenced. Eg if the
+  $Pattern is defined as '(?<day>\d{1,2})-(?<mon>\d{1,2})-(?<year>\d{4})', then the variables
+  ${day}, ${mon} and ${year} also become available for use in $With or $Paste.
+  Typically, $With is static text which is used to replace the $Pattern match and is inserted
+  according to the Anchor match, (or indeed $Start or $End) and $Relation. When using $With,
+  whatever is defined in the $Anchor match is not removed from $Value (this is different to how
+  $Paste works).
    
   #>
   [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSPossibleIncorrectUsageOfAssignmentOperator', '')]

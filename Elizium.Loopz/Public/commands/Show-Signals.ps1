@@ -5,11 +5,12 @@ function Show-Signals {
     Show-Signals
 
   .SYNOPSIS
-    Shows all defined signals, including user defined signals
+    Shows all defined signals, including user defined signals.
 
   .DESCRIPTION
     User can override signal definitions in their profile, typically using the provided
   function Update-CustomSignals.
+
   #>
   [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidGlobalVars', '')]
   param(

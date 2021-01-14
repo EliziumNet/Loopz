@@ -12,23 +12,20 @@ function Format-StructuredLine {
   will be interpreted by the Krayola krayon writer. This function behaves like a
   layout manager for a single line.
 
+  .PARAMETER CrumbKey
+    The key used to index into the $Exchange hashtable to denote which crumb is used.
+
   .PARAMETER Exchange
     The exchange hashtable object.
+
+  .PARAMETER Krayon
+    The writer object which contains the Krayola theme.
 
   .PARAMETER LineKey
     The key used to index into the $Exchange hashtable to denote the core line.
 
-  .PARAMETER CrumbKey
-    The key used to index into the $Exchange hashtable to denote which crumb is used.
-
   .PARAMETER MessageKey
     The key used to index into the $Exchange hashtable to denote what message to display.
-
-  .PARAMETER Truncate
-    switch parameter to indicate whether the message is truncated to fit the line length.
-
-  .PARAMETER Krayon
-    The writer object which contains the Krayola theme.
 
   .PARAMETER Options
 
@@ -51,6 +48,9 @@ function Format-StructuredLine {
   the message has been truncated.
   - WithLead: boolean flag to indicate whether a leading wing is displayed which would precede
   the crumb. In the above example and by default, there is no leading wing.
+
+  .PARAMETER Truncate
+    switch parameter to indicate whether the message is truncated to fit the line length.
 
   #>
   [OutputType([string])]

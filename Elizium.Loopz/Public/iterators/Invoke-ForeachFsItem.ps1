@@ -5,7 +5,7 @@ function Invoke-ForeachFsItem {
     Invoke-ForeachFsItem
 
   .SYNOPSIS
-    Allows a custom defined scriptblock or function to be invoked for all file system
+    Allows a custom defined script-block or function to be invoked for all file system
   objects delivered through the pipeline.
 
   .DESCRIPTION
@@ -18,16 +18,6 @@ function Invoke-ForeachFsItem {
   Invoke-ForeachFsItem will invoke the script-block/function specified. Invoke-ForeachFsItem
   will deliver what ever is returned from the script-block/function, so the result of
   Invoke-ForeachFsItem can be piped to another command.
-
-  .PARAMETER pipelineItem
-    This is the pipeline object, so should not be specified explicitly and can represent
-  a file object (System.IO.FileInfo) or a directory object (System.IO.DirectoryInfo).
-
-  .PARAMETER Condition
-    This is a predicate scriptblock, which is invoked with either a DirectoryInfo or
-  FileInfo object presented as a result of invoking Get-ChildItem. It provides a filtering
-  mechanism that is defined by the user to define which file system objects are selected
-  for function/scriptblock invocation.
 
   .PARAMETER Block
     The script block to be invoked. The script block is invoked for each item in the
@@ -45,14 +35,30 @@ function Invoke-ForeachFsItem {
   client's block implementation. The trigger is only of use for state changing operations
   and can be ignored otherwise.
 
-  In addition to these fixed positional parameters, if the invoked scriptblock is defined
+  In addition to these fixed positional parameters, if the invoked script-block is defined
   with additional parameters, then these will also be passed in. In order to achieve this,
   the client has to provide excess parameters in BlockParam and these parameters must be
   defined as the same type and in the same order as the additional parameters in the
-  scriptblock.
+  script-block.
 
   .PARAMETER BlockParams
     Optional array containing the excess parameters to pass into the script block.
+
+  .PARAMETER Condition
+    This is a predicate script-block, which is invoked with either a DirectoryInfo or
+  FileInfo object presented as a result of invoking Get-ChildItem. It provides a filtering
+  mechanism that is defined by the user to define which file system objects are selected
+  for function/script-block invocation.
+
+  .PARAMETER Directory
+    Switch to indicate that the invoked function/script-block (invokee) is to handle Directory
+  objects.
+
+  .PARAMETER File
+    Switch to indicate that the invoked function/script-block (invokee) is to handle FileInfo
+  objects. Is mutually exclusive with the Directory switch. If neither switch is specified, then
+  the invokee must be able to handle both therefore the Underscore parameter it defines must
+  be declared as FileSystemInfo.
 
   .PARAMETER Functee
     String defining the function to be invoked. Works in a similar way to the Block parameter
@@ -60,7 +66,7 @@ function Invoke-ForeachFsItem {
     * Underscore: (See pipelineItem described above)
     * Index: (See index described above)
     * Exchange: (See PathThru described above)
-    *Trigger: (See trigger described above)
+    * Trigger: (See trigger described above)
 
   .PARAMETER FuncteeParams
     Optional hash-table containing the named parameters which are splatted into the Functee
@@ -77,11 +83,11 @@ function Invoke-ForeachFsItem {
     * Exchange: (see Exchange previously described)
 
     The Header can be customised with the following Exchange entries:
-    - 'LOOPZ.KRAYOLA-THEME': Krayola Theme generally in use
-    - 'LOOPZ.HEADER-BLOCK.MESSAGE': message displayed as part of the header
-    - 'LOOPZ.HEADER-BLOCK.CRUMB-SIGNAL': Lead text displayed in header, default: '[+] '
-    - 'LOOPZ.HEADER.PROPERTIES': An array of Key/Value pairs of items to be displayed
-    - 'LOOPZ.HEADER-BLOCK.LINE': A string denoting the line to be displayed. (There are
+    * 'LOOPZ.KRAYOLA-THEME': Krayola Theme generally in use
+    * 'LOOPZ.HEADER-BLOCK.MESSAGE': message displayed as part of the header
+    * 'LOOPZ.HEADER-BLOCK.CRUMB-SIGNAL': Lead text displayed in header, default: '[+] '
+    * 'LOOPZ.HEADER.PROPERTIES': An array of Key/Value pairs of items to be displayed
+    * 'LOOPZ.HEADER-BLOCK.LINE': A string denoting the line to be displayed. (There are
     predefined lines available to use in $LoopzUI, or a custom one can be used instead)
 
   .PARAMETER Summary
@@ -99,15 +105,13 @@ function Invoke-ForeachFsItem {
     consequences.
     * Exchange: (see Exchange previously described)
 
-  .PARAMETER File
-    Switch to indicate that the invoked function/script-block (invokee) is to handle FileInfo
-  objects. Is mutually exclusive with the Directory switch. If neither switch is specified, then
-  the invokee must be able to handle both therefore the Underscore parameter it defines must
-  be declared as FileSystemInfo.
+  .PARAMETER Top
+    Restricts the number of items processed in the rename batch, the remaining items
+  are skipped. User can set this for experimental purposes.
 
-  .PARAMETER Directory
-    Switch to indicate that the invoked function/script-block (invokee) is to handle Directory
-  objects.
+  .PARAMETER pipelineItem
+    This is the pipeline object, so should not be specified explicitly and can represent
+  a file object (System.IO.FileInfo) or a directory object (System.IO.DirectoryInfo).
 
   .EXAMPLE 1
   Invoke a script-block to handle .txt file objects from the same directory (without -Recurse):

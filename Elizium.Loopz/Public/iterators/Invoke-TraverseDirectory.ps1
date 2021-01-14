@@ -15,19 +15,6 @@ function Invoke-TraverseDirectory {
   for invoking a scriptblock. An optional Summary script block can be specified which will be
   invoked at the end of the traversal batch.
 
-  .PARAMETER Path
-    The source Path denoting the root of the directory tree to be traversed.
-
-  .PARAMETER Condition
-    This is a predicate scriptblock, which is invoked with a DirectoryInfo object presented
-  as a result of invoking Get-ChildItem. It provides a filtering mechanism that is defined
-  by the user to define which directories are selected for function/scriptblock invocation.
-
-  .PARAMETER Exchange
-    A hash table containing miscellaneous information gathered internally throughout the
-  traversal batch. This can be of use to the user, because it is the way the user can perform
-  bi-directional communication between the invoked custom script block and client side logic.
-
   .PARAMETER Block
     The script block to be invoked. The script block is invoked for each directory in the
   source directory tree that satisfy the specified Condition predicate with
@@ -53,13 +40,23 @@ function Invoke-TraverseDirectory {
   .PARAMETER BlockParams
     Optional array containing the excess parameters to pass into the script-block.
 
+  .PARAMETER Condition
+    This is a predicate script-block, which is invoked with a DirectoryInfo object presented
+  as a result of invoking Get-ChildItem. It provides a filtering mechanism that is defined
+  by the user to define which directories are selected for function/script-block invocation.
+
+  .PARAMETER Exchange
+    A hash table containing miscellaneous information gathered internally throughout the
+  traversal batch. This can be of use to the user, because it is the way the user can perform
+  bi-directional communication between the invoked custom script block and client side logic.
+
   .PARAMETER Functee
     String defining the function to be invoked. Works in a similar way to the Block parameter
   for script-blocks. The Function's base signature is as follows:
-    "Underscore": (See underscore described above)
-    "Index": (See index described above)
-    "Exchange": (See PathThru described above)
-    "Trigger": (See trigger described above)
+  * "Underscore": (See underscore described above)
+  * "Index": (See index described above)
+  * "Exchange": (See PathThru described above)
+  * "Trigger": (See trigger described above)
 
   The destination DirectoryInfo object can be accessed via the Exchange denoted by
   the 'LOOPZ.MIRROR.DESTINATION' entry.
@@ -74,12 +71,30 @@ function Invoke-TraverseDirectory {
     * Exchange: (see Exchange previously described)
 
     The Header can be customised with the following Exchange entries:
-    - 'LOOPZ.KRAYOLA-THEME': Krayola Theme generally in use
-    - 'LOOPZ.HEADER-BLOCK.MESSAGE': message displayed as part of the header
-    - 'LOOPZ.HEADER-BLOCK.CRUMB-SIGNAL': Lead text displayed in header, default: '[+] '
-    - 'LOOPZ.HEADER.PROPERTIES': An array of Key/Value pairs of items to be displayed
-    - 'LOOPZ.HEADER-BLOCK.LINE': A string denoting the line to be displayed. (There are
+    * 'LOOPZ.KRAYOLA-THEME': Krayola Theme generally in use
+    * 'LOOPZ.HEADER-BLOCK.MESSAGE': message displayed as part of the header
+    * 'LOOPZ.HEADER-BLOCK.CRUMB-SIGNAL': Lead text displayed in header, default: '[+] '
+    * 'LOOPZ.HEADER.PROPERTIES': An array of Key/Value pairs of items to be displayed
+    * 'LOOPZ.HEADER-BLOCK.LINE': A string denoting the line to be displayed. (There are
     predefined lines available to use in $LoopzUI, or a custom one can be used instead)
+
+  .PARAMETER Hoist
+    Switch parameter. Without Hoist being specified, the Condition can prove to be too restrictive
+  on matching against directories. If a directory does not match the Condition then none of its
+  descendants will be considered to be traversed. When Hoist is specified then a descendant directory
+  that does match the Condition will be traversed even though any of its ancestors may not match the
+  same Condition.
+
+  .PARAMETER Path
+    The source Path denoting the root of the directory tree to be traversed.
+
+  .PARAMETER SessionHeader
+    A script-block that is invoked at the start of the traversal batch. The script-block has
+  the same signature as the Header script block.
+
+  .PARAMETER SessionSummary
+    A script-block that is invoked at the end of the traversal batch. The script-block has
+  the same signature as the Summary script block.
 
   .PARAMETER Summary
     A script-block that is invoked foreach directory that also contains child directories,
@@ -94,21 +109,6 @@ function Invoke-TraverseDirectory {
     This helps in written idempotent operations that can be re-run without adverse
     consequences.
     * Exchange: (see Exchange previously described)
-
-  .PARAMETER SessionHeader
-    A script-block that is invoked at the start of the traversal batch. The script-block has
-  the same signature as the Header script block.
-
-  .PARAMETER SessionSummary
-    A script-block that is invoked at the end of the traversal batch. The script-block has
-  the same signature as the Summary script block.
-
-  .PARAMETER Hoist
-    Switch parameter. Without Hoist being specified, the Condition can prove to be too restrictive
-  on matching against directories. If a directory does not match the Condition then none of its
-  descendants will be considered to be traversed. When Hoist is specified then a descendant directory
-  that does match the Condition will be traversed even though any of its ancestors may not match the
-  same Condition.
 
   .EXAMPLE 1
     Invoke a script-block for every directory in the source tree.

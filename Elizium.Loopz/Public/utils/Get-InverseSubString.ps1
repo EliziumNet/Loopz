@@ -11,14 +11,15 @@ function Get-InverseSubString {
     Returns the remainder of that part of the substring denoted by the $StartIndex
   $Length.
 
-  .PARAMETER Source
-    The source string
-
-  .PARAMETER StartIndex
-    The index of sub-string.
-
   .PARAMETER Length
     The number of characters in the sub-string.
+
+  .PARAMETER Marker
+    A character used to mark the position of the sub-string. If the client specifies
+  a marker, then this marker is inserted between the head and the tail.
+
+  .PARAMETER Source
+    The source string
 
   .PARAMETER Split
     When getting the inverse sub-string there are two elements that are returned,
@@ -26,9 +27,8 @@ function Get-InverseSubString {
     This switch indicates whether the function returns the head and tail as separate
   entities in an array, or should simply return the tail appended to the head.
 
-  .PARAMETER Marker
-    A character used to mark the position of the sub-string. If the client specifies
-  a marker, then this marker is inserted between the head and the tail.
+  .PARAMETER StartIndex
+    The index of sub-string.
 
   #>
   param(

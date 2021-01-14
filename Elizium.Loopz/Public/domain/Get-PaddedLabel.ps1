@@ -11,14 +11,15 @@ function Get-PaddedLabel {
     Pads out a string with leading or trailing spaces depending on
   alignment.
 
-  .PARAMETER Label
-    The string to be padded
-
   .PARAMETER Align
     Left or right alignment of the label.
 
+  .PARAMETER Label
+    The string to be padded
+
   .PARAMETER Width
     Size of the field into which the label is to be placed.
+
   #>
   [OutputType([string])]
   param(

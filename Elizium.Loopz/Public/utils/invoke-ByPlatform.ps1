@@ -17,9 +17,9 @@ function Invoke-ByPlatform {
   .PARAMETER Hash
     A hashtable object whose keys are values that can be returned by Get-PlatformName. The
   values are of type PSCustomObject and can contain the following properties:
-  - FnInfo: A FunctionInfo instance. This can be obtained from an existing function by
+  + FnInfo: A FunctionInfo instance. This can be obtained from an existing function by
   invoking Get-Command -Name <function-name>
-  - Positional: an array of positional parameter values
+  + Positional: an array of positional parameter values
 
   #>
   [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingWriteHost", "")]

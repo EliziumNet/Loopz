@@ -32,17 +32,20 @@ function Select-Text {
   all pattern matches in the result with each match displayed in the corresponding allocated
   colour.
 
+  .PARAMETER filter
+    Defines which files are considered in the search. It can be a path with a wildcard or
+  simply a wildcard. If its just a wildcard (eg *.txt), then files considered will be from
+  the current directory only.
+    The user can define a default filter in the environment as variable 'LOOPZ_GREPS_FILTER'
+  which should be a glob such as '*.txt' to represent all text files. If no filter parameter
+  is supplied to the greps invoke, then the filter is defined by the value of
+  'LOOPZ_GREPS_FILTER'.
+
   .PARAMETER Patterns
     An array of patterns. The result shows all lines that match all the patterns specified.
   An individual pattern can be prefixed with a not op: '!', which means exclude those lines
   which match the subsequent pattern; it is a more succinct way of specifying the -NotMatch
   operator on Select-String. The '!' is not part of the pattern.
-
-  .PARAMETER filter
-    Defines which files are considered in the search. It can be a path with a wildcard or
-  simply a wildcard. If its just a wildcard (eg *.txt), then files consider will be from
-  the current directory only.
-    The user can define 
 
   .EXAMPLE 1
     Show lines in all .txt files in the current directory files that contain the patterns

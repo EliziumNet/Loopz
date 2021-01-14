@@ -5,7 +5,7 @@ function Initialize-ShellOperant {
     Initialize-ShellOperant
 
   .SYNOPSIS
-    Operant factory function
+    Operant factory function.
 
   .DESCRIPTION
     By default all operant related files are stored somewhere inside the home path.
@@ -25,6 +25,17 @@ function Initialize-ShellOperant {
   but is not enforced)
   - DisabledKey ('LOOPZ_REMY_UNDO_DISABLED'): The environment variable used to disable
   this operant.
+
+  .PARAMETER DryRun
+    Similar to WhatIf, but by passing ShouldProcess process for custom handling of
+  dry run scenario. DryRun should be set if WhatIf is enabled.
+
+  .PARAMETER HomePath
+      User's home directory. (This parameter does not need to be set by client, just
+    used for testing purposes.)
+
+  .PARAMETER Options
+    (See command description for $Options field descriptions).
 
   .EXAMPLE 1
   Operant options for Rename-Many(remy) command

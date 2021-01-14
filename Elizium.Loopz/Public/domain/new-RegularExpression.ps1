@@ -12,22 +12,22 @@ function New-RegularExpression {
   flags ('mixsn') which must be specified at the end of the $Expression after a
   '/'.
 
+  .PARAMETER Escape
+    switch parameter to indicate that the expression should be escaped. (This is an
+  alternative to the '~' prefix).
+
   .PARAMETER Expression
     The pattern for the regular expression. If it starts with a tilde ('~'), then
   the whole expression is escaped so any special regex characters are interpreted
   literally.
 
-  .PARAMETER Escape
-    switch parameter to indicate that the expression should be escaped. (This is an
-  alternative to the '~' prefix).
+  .PARAMETER Label
+    string that give a name to the regular expression being created and is used for
+  logging/error reporting purposes only, so it's not mandatory.
 
   .PARAMETER WholeWord
     switch parameter to indicate the expression should be wrapped with word boundary
   markers \b, so an $Expression defined as 'foo' would be adjusted to '\bfoo\b'.
-
-  .PARAMETER Label
-    string that give a name to the regular expression being created and is used for
-  logging/error reporting purposes only, so it's not mandatory.
   
   #>
   [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions',

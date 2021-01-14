@@ -9,7 +9,7 @@ schema: 2.0.0
 
 ## SYNOPSIS
 
-Mirrors a directory tree to a new location, invoking a custom defined script-block
+Mirrors a directory tree to a new location, invoking a custom defined scriptblock
 or function as it goes.
 
 ## SYNTAX
@@ -18,7 +18,7 @@ or function as it goes.
 
 ```powershell
 Invoke-MirrorDirectoryTree -Path <String> -DestinationPath <String> [-DirectoryIncludes <String[]>]
- [-DirectoryExcludes <String[]>] [-FileIncludes <String[]>] [-FileExcludes <String[]>] [-PassThru <Hashtable>]
+ [-DirectoryExcludes <String[]>] [-FileIncludes <String[]>] [-FileExcludes <String[]>] [-Exchange <Hashtable>]
  [-Block <ScriptBlock>] [-BlockParams <Object>] [-CreateDirs] [-CopyFiles] [-Hoist] [-Header <ScriptBlock>]
  [-Summary <ScriptBlock>] [-SessionHeader <ScriptBlock>] [-SessionSummary <ScriptBlock>] [-WhatIf] [-Confirm]
  [<CommonParameters>]
@@ -28,7 +28,7 @@ Invoke-MirrorDirectoryTree -Path <String> -DestinationPath <String> [-DirectoryI
 
 ```powershell
 Invoke-MirrorDirectoryTree -Path <String> -DestinationPath <String> [-DirectoryIncludes <String[]>]
- [-DirectoryExcludes <String[]>] [-FileIncludes <String[]>] [-FileExcludes <String[]>] [-PassThru <Hashtable>]
+ [-DirectoryExcludes <String[]>] [-FileIncludes <String[]>] [-FileExcludes <String[]>] [-Exchange <Hashtable>]
  -Functee <String> [-FuncteeParams <Hashtable>] [-CreateDirs] [-CopyFiles] [-Hoist] [-Header <ScriptBlock>]
  [-Summary <ScriptBlock>] [-SessionHeader <ScriptBlock>] [-SessionSummary <ScriptBlock>] [-WhatIf] [-Confirm]
  [<CommonParameters>]
@@ -36,7 +36,13 @@ Invoke-MirrorDirectoryTree -Path <String> -DestinationPath <String> [-DirectoryI
 
 ## DESCRIPTION
 
-Copies a source directory tree to a new location applying custom functionality for each directory. File and directory filters can be applied. 2 parameters set are defined, one for invoking a named function (InvokeFunction) and the other (InvokeScriptBlock, the default) for invoking a script-block. An optional
+Copies a source directory tree to a new location applying custom functionality for each
+directory. 2 parameters set are defined, one for invoking a named function (InvokeFunction) and
+the other (InvokeScriptBlock, the default) for invoking a scriptblock. An optional
+Summary script block can be specified which will be invoked at the end of the mirroring
+batch.Copies a source directory tree to a new location applying custom functionality for each
+directory. 2 parameters set are defined, one for invoking a named function (InvokeFunction) and
+the other (InvokeScriptBlock, the default) for invoking a scriptblock. An optional
 Summary script block can be specified which will be invoked at the end of the mirroring
 batch.
 
@@ -44,24 +50,19 @@ batch.
 
 ### Example 1
 
-  Invoke a named function for every directory in the source tree and mirror every
-directory in the destination tree. The invoked function has an extra parameter in it's
-signature, so the extra parameters must be passed in via FuncteeParams (the standard
-signature being the first 4 parameters shown.)
-
 ```powershell
   function Test-Mirror {
     param(
       [System.IO.DirectoryInfo]$Underscore,
       [int]$Index,
-      [System.Collections.Hashtable]$PassThru,
+      [hashtable]$Exchange,
       [boolean]$Trigger,
       [string]$Format
     )
     ...
   }
 
-  [System.Collections.Hashtable]$parameters = @{
+  [hashtable]$parameters = @{
     'Format' = '---- {0} ----';
   }
   Invoke-MirrorDirectoryTree -Path './Tests/Data/fefsi' `
@@ -69,9 +70,12 @@ signature being the first 4 parameters shown.)
     -Functee 'Test-Mirror' -FuncteeParams $parameters;
 ```
 
-### Example 2
+Invoke a named function for every directory in the source tree and mirror every
+directory in the destination tree. The invoked function has an extra parameter in it's
+signature, so the extra parameters must be passed in via FuncteeParams (the standard
+signature being the first 4 parameters shown.)
 
-Invoke a script-block for every directory in the source tree and copy all files.
+### Example 2
 
 ```powershell
   Invoke-MirrorDirectoryTree -Path './Tests/Data/fefsi' `
@@ -79,21 +83,23 @@ Invoke a script-block for every directory in the source tree and copy all files.
       param(
         [System.IO.DirectoryInfo]$Underscore,
         [int]$Index,
-        [System.Collections.Hashtable]$PassThru,
+        [hashtable]$Exchange,
         [boolean]$Trigger
       )
       ...
     };
 ```
 
+Invoke a script-block for every directory in the source tree and copy all files
+
 ### Example 3
 
-Mirror a directory tree, including only directories beginning with A (filter A*)
-
 ```powershell
-  Invoke-MirrorDirectoryTree -Path './Tests/Data/fefsi' -DestinationPath './Tests/Data/mirror' `
+Invoke-MirrorDirectoryTree -Path './Tests/Data/fefsi' -DestinationPath './Tests/Data/mirror' `
     -DirectoryIncludes @('A*')
 ```
+
+Mirror a directory tree, including only directories beginning with A (filter A*)
 
 Note the possible issue with this example is that any descendants named A... which are located
 under an ancestor which is not named A..., will not be mirrored;
@@ -105,14 +111,14 @@ See the following example for a resolution.
 
 ### Example 4
 
-Mirror a directory tree, including only directories beginning with A (filter A*) regardless of
-the matching of intermediate ancestors (specifying -Hoist flag resolves the possible
-issue in the previous example)
-
 ```powershell
   Invoke-MirrorDirectoryTree -Path './Tests/Data/fefsi' -DestinationPath './Tests/Data/mirror' `
     -DirectoryIncludes @('A*') -CreateDirs -CopyFiles -Hoist
 ```
+
+Mirror a directory tree, including only directories beginning with A (filter A*) regardless of
+the matching of intermediate ancestors (specifying -Hoist flag resolves the possible
+issue in the previous example)
 
 Note that the directory filter must include a wild-card, otherwise it will be ignored. So a
 directory include of @('A'), is problematic, because A is not a valid directory filter so its
@@ -121,19 +127,17 @@ directory passes the filter.
 
 ### Example 5
 
-Mirror a directory tree, including files with either .flac or .wav suffix
-
 ```powershell
   Invoke-MirrorDirectoryTree -Path './Tests/Data/fefsi' -DestinationPath './Tests/Data/mirror' `
     -FileIncludes @('flac', '*.wav') -CreateDirs -CopyFiles -Hoist
 ```
 
+Mirror a directory tree, including files with either .flac or .wav suffix
+
 Note that for files, a filter may or may not contain a wild-card. If the wild-card is missing
 then it is automatically treated as a file suffix; so 'flac' means '*.flac'.
 
 ### Example 6
-
-Mirror a directory tree copying over just flac files
 
 ```powershell
   [scriptblock]$summary = {
@@ -141,7 +145,7 @@ Mirror a directory tree copying over just flac files
       [int]$_count,
       [int]$_skipped,
       [boolean]$_triggered,
-      [System.Collections.Hashtable]$_passThru
+      [hashtable]$_exchange
     )
     ...
   }
@@ -150,19 +154,22 @@ Mirror a directory tree copying over just flac files
     -FileIncludes @('flac') -CopyFiles -Hoist -Summary $summary
 ```
 
+Mirror a directory tree copying over just flac files
+
 Note that -CreateDirs is missing which means directories will not be mirrored by default. They
 are only mirrored as part of the process of copying over flac files, so in the end the
 resultant mirror directory tree will contain directories that include flac files.
 
 ### Example 7
 
-Same as EXAMPLE 6, but using predefined Header and Summary script-blocks for Session header/summary
-and per directory header/summary.
+```powershell
+  Invoke-MirrorDirectoryTree -Path './Tests/Data/fefsi' -DestinationPath './Tests/Data/mirror' `
+  -FileIncludes @('flac') -CopyFiles -Hoist `
+  -Header $LoopzHelpers.DefaultHeaderBlock -Summary $DefaultHeaderBlock.SimpleSummaryBlock `
+  -SessionHeader $LoopzHelpers.DefaultHeaderBlock -SessionSummary $DefaultHeaderBlock.SimpleSummaryBlock;
+```
 
-Invoke-MirrorDirectoryTree -Path './Tests/Data/fefsi' -DestinationPath './Tests/Data/mirror' `
--FileIncludes @('flac') -CopyFiles -Hoist `
--Header $LoopzHelpers.DefaultHeaderBlock -Summary $DefaultHeaderBlock.SimpleSummaryBlock `
--SessionHeader $LoopzHelpers.DefaultHeaderBlock -SessionSummary $DefaultHeaderBlock.SimpleSummaryBlock;
+Same as EXAMPLE 6, but using predefined Header and Summary script-blocks for Session header/summary and per directory header/summary.
 
 ## PARAMETERS
 
@@ -174,7 +181,7 @@ the following positional parameters:
 
 * underscore: the DirectoryInfo object representing the directory in the source tree
 * index: the 0 based index representing current directory in the source tree
-* PassThru object: a hash table containing miscellaneous information gathered internally
+* Exchange object: a hash table containing miscellaneous information gathered internally
 throughout the mirroring batch. This can be of use to the user, because it is the way
 the user can perform bi-directional communication between the invoked custom script block
 and client side logic.
@@ -183,14 +190,14 @@ of the batch, the state of the trigger indicates whether any of the items were a
 When the script block is invoked, the trigger should indicate if the trigger was pulled for
 any of the items so far processed in the batch. This is the responsibility of the
 client's script-block/function implementation.
-  
-In addition to these fixed positional parameters, if the invoked script-block is defined
+
+In addition to these fixed positional parameters, if the invoked scriptblock is defined
 with additional parameters, then these will also be passed in. In order to achieve this,
 the client has to provide excess parameters in BlockParams and these parameters must be
 defined as the same type and in the same order as the additional parameters in the
 script-block.
 
-The destination DirectoryInfo object can be accessed via the PassThru denoted by
+The destination DirectoryInfo object can be accessed via the Exchange denoted by
 the 'LOOPZ.MIRROR.DESTINATION' entry.
 
 ```yaml
@@ -239,7 +246,7 @@ Accept wildcard characters: False
 
 ### -CopyFiles
 
-Switch parameter that indicates that files matching the specified filters should be copied
+{{ Fill CopyFiles Description }}
 
 ```yaml
 Type: SwitchParameter
@@ -255,7 +262,7 @@ Accept wildcard characters: False
 
 ### -CreateDirs
 
-Switch parameter indicates that directories should be created in the destination tree. If
+switch parameter indicates that directories should be created in the destination tree. If
 not set, then Invoke-MirrorDirectoryTree turns into a function that traverses the source
 directory invoking the function/script-block for matching directories.
 
@@ -292,9 +299,9 @@ Accept wildcard characters: False
 
 An array containing a list of filters, each must contain a wild-card ('*'). If a
 particular filter does not contain a wild-card, then it will be ignored. If the directory
-matches any of the filters in the list, it will NOT be mirrored in the destination tree.
-Any match in the DirectoryExcludes overrides a match in DirectoryIncludes, so a directory
-that is matched in Include, can be excluded by the Exclude.
+matches any of the filters in the list, it will be mirrored in the destination tree.
+If DirectoryIncludes contains just a single element which is the empty string, this means
+that nothing is included (rather than everything being included).
 
 ```yaml
 Type: String[]
@@ -310,14 +317,33 @@ Accept wildcard characters: False
 
 ### -DirectoryIncludes
 
-An array containing a list of filters, each must contain a wild-card ('*'). If a
-particular filter does not contain a wild-card, then it will be ignored. If the directory
-matches any of the filters in the list, it will be mirrored in the destination tree.
-If DirectoryIncludes contains just a single element which is the empty string, this means
-that nothing is included (rather than everything being included).
+An array containing a list of filters, each may contain a wild-card ('*'). If a
+particular filter does not contain a wild-card, then it will be treated as a file suffix.
+If the file in the source tree matches any of the filters in the list, it will be mirrored
+in the destination tree. If FileIncludes contains just a single element which is the empty
+string, this means that nothing is included (rather than everything being included).
 
 ```yaml
 Type: String[]
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Exchange
+
+A hash table containing miscellaneous information gathered internally
+throughout the pipeline batch. This can be of use to the user, because it is the way
+the user can perform bi-directional communication between the invoked custom script block
+and client side logic.
+
+```yaml
+Type: Hashtable
 Parameter Sets: (All)
 Aliases:
 
@@ -370,15 +396,15 @@ Accept wildcard characters: False
 
 ### -Functee
 
-String defining the function to be invoked. Works in a similar way to the Block parameter
+  String defining the function to be invoked. Works in a similar way to the Block parameter
 for script-blocks. The Function's base signature is as follows:
 
-* "Underscore": (See underscore described in Block parameter)
-* "Index": (See index described in Block parameter)
-* "PassThru": (See PathThru described in Block parameter)
-* "Trigger": (See trigger described in Block parameter)
+* "Underscore": (See underscore described above)
+* "Index": (See index described above)
+* "Exchange": (See PathThru described above)
+* "Trigger": (See trigger described above)
 
-The destination DirectoryInfo object can be accessed via the PassThru denoted by
+The destination DirectoryInfo object can be accessed via the Exchange denoted by
 the 'LOOPZ.MIRROR.DESTINATION' entry.
 
 ```yaml
@@ -412,16 +438,16 @@ Accept wildcard characters: False
 
 ### -Header
 
-  A script-block that is invoked for each directory that also contains child directories.
+A script-block that is invoked for each directory that also contains child directories.
 The script-block is invoked with the following positional parameters:
 
-* PassThru: (see PassThru previously described)
+* Exchange: (see Exchange previously described)
 
-  The Header can be customised with the following PassThru entries:
+The Header can be customised with the following Exchange entries:
 
 * 'LOOPZ.KRAYOLA-THEME': Krayola Theme generally in use
 * 'LOOPZ.HEADER-BLOCK.MESSAGE': message displayed as part of the header
-* 'LOOPZ.HEADER-BLOCK.CRUMB-SIGNAL': Signal Emoji displayed in header
+* 'LOOPZ.HEADER-BLOCK.CRUMB-SIGNAL': Lead text displayed in header, default: '[+] '
 * 'LOOPZ.HEADER.PROPERTIES': An array of Key/Value pairs of items to be displayed
 * 'LOOPZ.HEADER-BLOCK.LINE': A string denoting the line to be displayed. (There are
 predefined lines available to use in $LoopzUI, or a custom one can be used instead)
@@ -440,7 +466,7 @@ Accept wildcard characters: False
 
 ### -Hoist
 
-Switch parameter. Without Hoist being specified, the filters can prove to be too restrictive
+switch parameter. Without Hoist being specified, the filters can prove to be too restrictive
 on matching against directories. If a directory does not match the filters then none of its
 descendants will be considered to be mirrored in the destination tree. When Hoist is specified
 then a descendant directory that does match the filters will be mirrored even though any of
@@ -448,25 +474,6 @@ its ancestors may not match the filters.
 
 ```yaml
 Type: SwitchParameter
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -PassThru
-
-A hash table containing miscellaneous information gathered internally
-throughout the pipeline batch. This can be of use to the user, because it is the way
-the user can perform bi-directional communication between the invoked custom script block
-and client side logic.
-
-```yaml
-Type: Hashtable
 Parameter Sets: (All)
 Aliases:
 
@@ -487,51 +494,6 @@ Parameter Sets: (All)
 Aliases:
 
 Required: True
-Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -Summary
-
-A script-block that is invoked foreach directory that also contains child directories,
-after all its descendants have been processed and serves as a sub-total for the current
-directory. The script-block is invoked with the following positional parameters:
-
-* count: the number of items processed in the mirroring batch.
-* skipped: the number of items skipped in the mirroring batch. An item is skipped if
-it fails the defined condition or is not of the correct type (eg if its a directory
-but we have specified the -File flag).
-* trigger: Flag set by the script-block/function, but should typically be used to
-indicate whether any of the items processed were actively updated/written in this batch.
-This helps in written idempotent operations that can be re-run without adverse
-consequences.
-* PassThru: (see PassThru previously described)
-
-```yaml
-Type: ScriptBlock
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -WhatIf
-
-Shows what would happen if the cmdlet runs.
-The cmdlet is not run.
-
-```yaml
-Type: SwitchParameter
-Parameter Sets: (All)
-Aliases: wi
-
-Required: False
 Position: Named
 Default value: None
 Accept pipeline input: False
@@ -564,6 +526,51 @@ the same signature as the Summary script block.
 Type: ScriptBlock
 Parameter Sets: (All)
 Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Summary
+
+A script-block that is invoked foreach directory that also contains child directories,
+after all its descendants have been processed and serves as a sub-total for the current
+directory. The script-block is invoked with the following positional parameters:
+
+* count: the number of items processed in the mirroring batch.
+* skipped: the number of items skipped in the mirroring batch. An item is skipped if
+it fails the defined condition or is not of the correct type (eg if its a directory
+but we have specified the -File flag).
+* trigger: Flag set by the script-block/function, but should typically be used to
+indicate whether any of the items processed were actively updated/written in this batch.
+This helps in written idempotent operations that can be re-run without adverse
+consequences.
+* Exchange: (see Exchange previously described)
+
+```yaml
+Type: ScriptBlock
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -WhatIf
+
+Shows what would happen if the cmdlet runs.
+The cmdlet is not run.
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases: wi
 
 Required: False
 Position: Named

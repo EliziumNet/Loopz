@@ -15,6 +15,9 @@ function Format-Escape {
   this manually themselves which could be tricky to get right depending on their
   requirements.
 
+.PARAMETER Pattern
+    The source string to escape.
+
   #>
   [Alias('esc')]
   [OutputType([string])]

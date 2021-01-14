@@ -17,27 +17,27 @@ function Select-SignalContainer {
     PSCustomObject that contains Wide and Props properties which must be of Krayola's
   type [line].
 
-  .PARAMETER Name
-    The signal name.
-
-  .PARAMETER Value
-    The value associated wih the signal.
-
-  .PARAMETER Signals
-    The signal hashtable collection from which to select the required signal denoted by
-  $Name.
-
-  .PARAMETER Format
-    The format applied to the formatted signal.
-
-  .PARAMETER Threshold
-    A threshold that defines whether the signal is added to Wide or Props.
-
   .PARAMETER CustomLabel
     A custom label applied to the formatted signal.
 
   .PARAMETER Force
     An override (bypassing $Threshold) to push a signal into a specific collection.
+
+  .PARAMETER Format
+    The format applied to the formatted signal.
+
+  .PARAMETER Name
+    The signal name.
+
+  .PARAMETER Signals
+    The signal hashtable collection from which to select the required signal denoted by
+  $Name.
+
+  .PARAMETER Threshold
+    A threshold that defines whether the signal is added to Wide or Props.
+
+  .PARAMETER Value
+    The value associated wih the signal.
 
   #>
   param(
