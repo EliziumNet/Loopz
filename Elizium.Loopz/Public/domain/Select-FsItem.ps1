@@ -13,13 +13,10 @@ function Select-FsItem {
   This function is partly required because the Include/Exclude parameters on functions
   such as Get-ChildItems/Copy-Item/Get-Item etc only work on files not directories.
 
-  .PARAMETER Name
-    A string to be matched against the filters.
-
-  .PARAMETER Includes
-      An array containing a list of filters, each must contain a wild-card ('*'). If a
-  particular filter does not contain a wild-card, then it will be ignored. If Name matches
-  any of the filters in Includes, and are not Excluded, the result will be true.
+  .PARAMETER Case
+    Switch parameter which controls case sensitivity of inclusion/exclusion. By default
+  filtering is case insensitive. When The Case switch is specified, filtering is case
+  sensitive.
 
   .PARAMETER Excludes
     An array containing a list of filters, each must contain a wild-card ('*'). If a
@@ -28,10 +25,13 @@ function Select-FsItem {
   Any match in the Excludes overrides a match in Includes, so an item
   that is matched in Include, can be excluded by the Exclude.
 
-  .PARAMETER Case
-    Switch parameter which controls case sensitivity of inclusion/exclusion. By default
-  filtering is case insensitive. When The Case switch is specified, filtering is case
-  sensitive.
+  .PARAMETER Includes
+      An array containing a list of filters, each must contain a wild-card ('*'). If a
+  particular filter does not contain a wild-card, then it will be ignored. If Name matches
+  any of the filters in Includes, and are not Excluded, the result will be true.
+
+  .PARAMETER Name
+    A string to be matched against the filters.
 
   .EXAMPLE 1
     Define a Condition that allows only directories beginning with A, but also excludes
@@ -45,7 +45,7 @@ function Select-FsItem {
       [string[]]$directoryIncludes = @('A*');
       [string[]]$directoryExcludes = @('*_*', '*-*');
 
-      Select-FsItem -Name $directoryInfo.Name `
+      $filterDirectories = Select-FsItem -Name $directoryInfo.Name `
         -Includes $directoryIncludes -Excludes $directoryExcludes;
 
       Invoke-TraverseDirectory -Path <path> -Block <block> -Condition $filterDirectories;

@@ -18,9 +18,24 @@ The module can be installed using the standard **install-module** command:
 
 ### Dependencies
 
-Requires [Elizium.Krayola](https://github.com/plastikfan/Krayola) which will be installed automatically if not already present.
+Requires:
 
-## The Main Commands
+* [Elizium.Krayola](https://github.com/plastikfan/Krayola)
+* [Elizium.Klassy](https://github.com/plastikfan/Klassy)
+
+which will be installed automatically if not already present.
+
+## The Main Commands (for end users)
+
+| COMMAND-NAME                                                                     | DESCRIPTION
+|----------------------------------------------------------------------------------|------------
+| [Format-Escape](Elizium.Loopz/docs/Format-Escape.md)                             | Escape Regex param
+| [Rename-Many](Elizium.Loopz/docs/Rename-Many.md)                                 | Bulk Rename
+| [Show-Signals](Elizium.Loopz/docs/Show-Signals.md)                               | Show signals with
+ overrides
+| [Select-Patterns](Elizium.Loopz/docs/Select-Patterns.md)                         | Find text inside files
+
+## Iteration functions (for end developers)
 
 The following table shows the list of public commands exported from the Loopz module:
 
@@ -30,19 +45,40 @@ The following table shows the list of public commands exported from the Loopz mo
 | [Invoke-MirrorDirectoryTree](Elizium.Loopz/docs/Invoke-MirrorDirectoryTree.md)   | Copy a directory tree invoking a function
 | [Invoke-TraverseDirectory](Elizium.Loopz/docs/Invoke-TraverseDirectory.md)       | Navigate a directory tree invoking a function
 | [Write-HostFeItemDecorator](Elizium.Loopz/docs/Write-HostFeItemDecorator.md)     | Write output foreach file system object
+| [Show-Header](Elizium.Loopz/docs/Show-Header.md)                                 | Show iteration Header
+| [Show-Summary](Elizium.Loopz/docs/Show-Summary.md)                               | Show iteration Summary
 
-## Supporting Utilities
+## Supporting Utilities (for developers)
 
 | COMMAND-NAME                                                                     | DESCRIPTION
 |----------------------------------------------------------------------------------|------------
-| [Select-FsItem](Elizium.Loopz/docs/Select-FsItem.md)                             | A predicate function used for filtering
+| [Edit-RemoveSingleSubString](Elizium.Loopz/docs/Edit-RemoveSingleSubString.md)   | Remove single substring
+| [Format-StructuredLine](Elizium.Loopz/docs/Format-StructuredLine.md)             | Create Krayon line
+| [Get-FormattedSignal](Elizium.Loopz/docs/Get-FormattedSignal.md)                 | Get formatted signal
+| [Get-InverseSubstring](Elizium.Loopz/docs/Get-InverseSubstring.md)               | Get inverse substring
+| [Get-IsLocked](Elizium.Loopz/docs/Get-IsLocked.md)                               | Get locked state of a command
+| [Get-PaddedLabel](Elizium.Loopz/docs/Get-PaddedLabel.md)                         | Get space padded string
+| [Get-PlatformName](Elizium.Loopz/docs/PlatformName.md)                           | Get platform name
+| [Get-PsObjectField](Elizium.Loopz/docs/Get-PsObjectField.md)                     | Get field from PSCustomObject
+| [Get-Signals](Elizium.Loopz/docs/Signals.md)                                     | Get signals
+| [Initialize-ShellOperant](Elizium.Loopz/docs/Initialize-ShellOperant.md)         | Init shell operation
+| [Invoke-ByPlatform](Elizium.Loopz/docs/Invoke-ByPlatform.md)                     | Invoke OS specific fn
+| [Move-Match](Elizium.Loopz/docs/Move-Match.md)                                   | Move regex match
+| [New-RegularExpression](Elizium.Loopz/docs/New-RegularExpression.md)             | Regex factory fn
+| [Resolve-ByPlatform](Elizium.Loopz/docs/Resolve-ByPlatform.md)                   | Resolve item by OS
+| [Resolve-PatternOccurrence](Elizium.Loopz/docs/Resolve-PatternOccurrence.md)     | Regex param helper
+| [Select-FsItem](Elizium.Loopz/docs/Select-FsItem.md)                             | A predicate fn used for filtering
+| [Select-SignalContainer](Elizium.Loopz/docs/Select-SignalContainer.md)           | Select signal into a container
+| [Split-Match](Elizium.Loopz/docs/Split-Match.md)                                 | Split regex match
+| [Test-IsFileSystemSafe](Elizium.Loopz/docs/Test-IsFileSystemSafe.md)             | Tes if string is FS safe
+| [Update-Match](Elizium.Loopz/docs/Update-Match.md)                               | Update regex match
 
 ## General Concepts
 
-### :o: PassThru hash-table object
+### :o: Exchange hash-table object
 
-A common theme present in the main commands is the use of a Hash-table object called $PassThru.
-The scenarios in which the PassThru are as follows:
+A common theme present in the main commands is the use of a Hash-table object called $Exchange.
+The scenarios in which the Exchange are as follows:
 
 * Allows calling code to send additional parameters to a Loopz command outside of its regular signature.
 * Allows invoked code to return information back to calling code.
@@ -53,21 +89,21 @@ Let's elaborate the above points...
 
 * Underscore: the current pipeline item
 * Index: an allocated numeric value indicating the sequence number in the pipeline
-* PassThru: the hash-table containing additional named items, and other information gathered throughout processing
+* Exchange: the hash-table containing additional named items, and other information gathered throughout processing
 * Trigger: client controlled boolean flag that should be used to denote if update/write action was taken for a particular item in pipeline. (Relevant for state changing operations only).
 
 When additional parameters need to be sent to the invokee, there is already a mechanism for
 passing these (either with *BlockParams* or *FuncteeParams*), this approach is generally preferred.
 
-However, there is another commonly occurring pattern which would require the use of PassThru. This pattern is the adapter pattern. If there is an existing function that needs to be integrated to be used with Invoke-ForeachFsItem, but does not match the required signature, an intermediate adapter can be implemented. Calling code can put in any additional parameters (required by the non-conformant function) into the PassThru, which are picked up by the adapter and forwarded on as required. Using the adapter this way is much preferred than using additional parameters (*BlockParams* or *FuncteeParams*), because there could be confusion as to whom these parameters are required for, the adapter or the target function/script-block. Using parameters in PassThru can be made to be much clearer because very meaningful names can be used as hash-table keys; Eg, for internal Loopz command interaction (Invoke-MirrorDirectoryTree internally invokes Invoke-TraverseDirectory and uses keys like 'LOOPZ.MIRROR.INVOKEE', which means that, that value is only of importance to Invoke-TraverseDirectory, so any other function that sees this should ignore it).
+However, there is another commonly occurring pattern which would require the use of Exchange. This pattern is the adapter pattern. If there is an existing function that needs to be integrated to be used with Invoke-ForeachFsItem, but does not match the required signature, an intermediate adapter can be implemented. Calling code can put in any additional parameters (required by the non-conformant function) into the Exchange, which are picked up by the adapter and forwarded on as required. Using the adapter this way is much preferred than using additional parameters (*BlockParams* or *FuncteeParams*), because there could be confusion as to whom these parameters are required for, the adapter or the target function/script-block. Using parameters in Exchange can be made to be much clearer because very meaningful names can be used as hash-table keys; Eg, for internal Loopz command interaction (Invoke-MirrorDirectoryTree internally invokes Invoke-TraverseDirectory and uses keys like 'LOOPZ.MIRROR.INVOKEE', which means that, that value is only of importance to Invoke-TraverseDirectory, so any other function that sees this should ignore it).
 
 :exclamation: Note, users should use a similar namespaced style keys, for their own use, to avoid any chance of name clashes and users should not use any keys beginning with 'LOOPZ.' as these are reserved for internal Loopz operation.
 
-:warning: Warning don't nest Invoke-ForeachFsItem calls, using the same PassThru instance. That is to say do not use a function/script-block already known to call 'Invoke-ForeachFsItem' with its own Invoke-ForeachFsItem request using the same PassThru instance. If you need to achieve this, then a new and separate PassThru instance should be created. However, recursive functions are fine, as long as it makes sense that different iterations use the same PassThru.
+:warning: Warning don't nest Invoke-ForeachFsItem calls, using the same Exchange instance. That is to say do not use a function/script-block already known to call 'Invoke-ForeachFsItem' with its own Invoke-ForeachFsItem request using the same Exchange instance. If you need to achieve this, then a new and separate Exchange instance should be created. However, recursive functions are fine, as long as it makes sense that different iterations use the same Exchange.
 
 :star: Second point:
 
-The *Invoke-MirrorDirectoryTree* command illustrates this well. Invoke-MirrorDirectoryTree needs to be able to present the invokee with multiple (actually, just 2) DirectoryInfo objects for each source directory encountered, one for the source directory and another for the mirrored directory. Since *Invoke-ForeachFsItem* is the command that under-pins this functionality, Invoke-MirrorDirectoryTree needs to conform to it's requirements, one of which is that a single DirectoryInfo is presented to the invokee. To get around this, it populates a new entry inside the PassThru: 'LOOPZ.MIRROR.ROOT-DESTINATION', which the invokee can now access. This same technique can be used by calling code.
+The *Invoke-MirrorDirectoryTree* command illustrates this well. Invoke-MirrorDirectoryTree needs to be able to present the invokee with multiple (actually, just 2) DirectoryInfo objects for each source directory encountered, one for the source directory and another for the mirrored directory. Since *Invoke-ForeachFsItem* is the command that under-pins this functionality, Invoke-MirrorDirectoryTree needs to conform to it's requirements, one of which is that a single DirectoryInfo is presented to the invokee. To get around this, it populates a new entry inside the Exchange: 'LOOPZ.MIRROR.ROOT-DESTINATION', which the invokee can now access. This same technique can be used by calling code.
 
 ### :o: The Trigger
 
@@ -75,11 +111,11 @@ If the script-block/function (invokee) to be invoked by [Invoke-ForeachFsItem](E
 
 If the user needs to write functionality that needs to be able to support re-runs, where the re-run should not
 produce overly verbose output, because no real action was performed for some items in the pipeline, then use
-of the 'LOOPZ.WH-FOREACH-DECORATOR.IF-TRIGGERED' setting in the PassThru should be made. It should be set
+of the 'LOOPZ.WH-FOREACH-DECORATOR.IF-TRIGGERED' setting in the Exchange should be made. It should be set
 to true (although in reality, just the existence of the IF-TRIGGERED key, sets this option):
 
 ```powershell
-  $PassThru['LOOPZ.WH-FOREACH-DECORATOR.IF-TRIGGERED'] = $true
+  $Exchange['LOOPZ.WH-FOREACH-DECORATOR.IF-TRIGGERED'] = $true
 ```
 
 :exclamation: *This indicates that for a particular item in the pipeline, no output should be written
@@ -100,7 +136,7 @@ The following shows an example of using a named function with [*Invoke-ForeachFs
     param(
       [System.IO.FileInfo]$Underscore,
       [int]$Index,
-      [System.Collections.Hashtable]$PassThru,
+      [System.Collections.Hashtable]$Exchange,
       [boolean]$Trigger
     )
 
@@ -114,14 +150,14 @@ The following shows an example of using a named function with [*Invoke-ForeachFs
 
 The function does not write any output to the host. However, it might be desirable to do so. Rather than include that logic into *Resize-Image*, it can be modified to populate the returned PSCustomObject that it already creates with additional properties (although this part is optional) and then making use of *Write-HostFeItemDecorator*.
 
-This can be achieved by defining our end function in the PassThru under key 'LOOPZ.WH-FOREACH-DECORATOR.FUNCTION-NAME' and selecting *Write-HostFeItemDecorator* to be the Functee on *Invoke-ForeachFsItem*.
+This can be achieved by defining our end function in the Exchange under key 'LOOPZ.WH-FOREACH-DECORATOR.FUNCTION-NAME' and selecting *Write-HostFeItemDecorator* to be the Functee on *Invoke-ForeachFsItem*.
 
 ```powershell
   function Resize-Image {
     param(
       [System.IO.DirectoryInfo]$Underscore,
       [int]$Index,
-      [System.Collections.Hashtable]$PassThru,
+      [System.Collections.Hashtable]$Exchange,
       [boolean]$Trigger,
     )
     ...
@@ -131,12 +167,12 @@ This can be achieved by defining our end function in the PassThru under key 'LOO
     @{ Product = $Underscore; Pairs = $pairs; }
   }
 
-  [Systems.Collection.Hashtable]$passThru = @{
+  [Systems.Collection.Hashtable]$Exchange = @{
     'LOOPZ.WH-FOREACH-DECORATOR.FUNCTION-NAME' = 'Resize-Image';
   }
 
   [string]$directoryPath = './Data/fefsi';
-  Get-ChildItem $directoryPath -Recurse -File -Filter "*.jpg" | Invoke-ForeachFsItem -PassThru $passThru
+  Get-ChildItem $directoryPath -Recurse -File -Filter "*.jpg" | Invoke-ForeachFsItem -Exchange $Exchange
     -Functee 'Write-HostFeItemDecorator'
 ```
 
@@ -149,10 +185,10 @@ Some global definitions have been exported as global variables as an aid to usin
 ### :dart: Predefined Header script-block
 
 ```powershell
-$LoopzHelpers.DefaultHeaderBlock
+$LoopzHelpers.HeaderBlock
 ```
 
-The *DefaultHeaderBlock* can be used on any compound function that that has a *Header* parameter. The Header can be customised with the following PassThru entries:
+The *HeaderBlock* can be used on any compound function that that has a *Header* parameter. The Header can be customised with the following Exchange entries:
 
 * 'LOOPZ.KRAYOLA-THEME': Krayola Theme generally in use
 * 'LOOPZ.HEADER-BLOCK.MESSAGE': message displayed as part of the header
@@ -161,7 +197,7 @@ The *DefaultHeaderBlock* can be used on any compound function that that has a *H
 * 'LOOPZ.HEADER-BLOCK.LINE': A string denoting the line to be displayed. (There are
 predefined lines available to use in $LoopzUI, or a custom one can be used instead)
 
-The *DefaultHeaderBlock* will generated either a single line or multi-line Header depending on whether custom properties have been defined. When properties have been defined under key *LOOPZ.HEADER.PROPERTIES* then a multi-line Header is generated, eg:
+The *HeaderBlock* will generated either a single line or multi-line Header depending on whether custom properties have been defined. When properties have been defined under key *LOOPZ.HEADER.PROPERTIES* then a multi-line Header is generated, eg:
 
 ```powershell
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -175,10 +211,10 @@ If no properties have been defined then a single line Header will be generated, 
 [+] ============================================================= [ What lies in the darkness ] ===
 ```
 
-What is displayed in the Header is driven by what is defined in the Krayola theme or items in the PassThru, so in this example
+What is displayed in the Header is driven by what is defined in the Krayola theme or items in the Exchange, so in this example
 
-* 'CRUMB-A' (*PassThru*): 'LOOPZ.HEADER-BLOCK.CRUMB-SIGNAL'
-* 'What lies in the darkness' (*PassThru*): 'LOOPZ.HEADER-BLOCK.MESSAGE'
+* 'CRUMB-A' (*Exchange*): 'LOOPZ.HEADER-BLOCK.CRUMB-SIGNAL'
+* 'What lies in the darkness' (*Exchange*): 'LOOPZ.HEADER-BLOCK.MESSAGE'
 * '[': (*Theme*): 'OPEN'
 * ']': (*Theme*): 'CLOSE'
 
@@ -186,17 +222,17 @@ The user can specify the pre-defined Header script block or can defined their ow
 
 ```powershell
   param(
-    [System.Collections.Hashtable]$PassThru
+    [System.Collections.Hashtable]$Exchange
   )
 ```
 
 ### :dart: Predefined Summary script-block
 
 ```powershell
-$LoopzHelpers.SimpleSummaryBlock
+$LoopzHelpers.SummaryBlock
 ```
 
-The *SimpleSummaryBlock* can be used on any compound function that that has a *Summary* parameter. It can be customised by specifying a line string under key 'LOOPZ.SUMMARY-BLOCK.LINE'. Any string can be defined or one of the pre-defined lines (see below) can be specified.
+The *SummaryBlock* can be used on any compound function that that has a *Summary* parameter. It can be customised by specifying a line string under key 'LOOPZ.SUMMARY-BLOCK.LINE'. Any string can be defined or one of the pre-defined lines (see below) can be specified.
 
 A custom summary message may also be defined under key 'LOOPZ.SUMMARY-BLOCK.MESSAGE'; this is optional and if not specified, the word 'Summary' will be used.
 
@@ -209,13 +245,13 @@ The user can specify the pre-defined Summary script block or can defined their o
     [int]$Count,
     [int]$Skipped,
     [boolean]$Triggered,
-    [System.Collections.Hashtable]$PassThru
+    [System.Collections.Hashtable]$Exchange
   )
 ```
 
 ### :dart: Line definitions
 
-To be set under key 'LOOPZ.HEADER-BLOCK.LINE' and/or 'LOOPZ.SUMMARY-BLOCK.LINE' of the PassThru as previously discussed.
+To be set under key 'LOOPZ.HEADER-BLOCK.LINE' and/or 'LOOPZ.SUMMARY-BLOCK.LINE' of the Exchange as previously discussed.
 
 ```powershell
 $LoopzUI.UnderscoreLine
@@ -241,8 +277,3 @@ As the write host decorator is functionally the same used in different contents,
 ```powershell
 $LoopzHelpers.WhItemDecoratorBlock
 ```
-
-### And Finally
-
-If any points have not been explained properly or if there is any confusion then I am happy to update documentation accordingly and am more than happy to accept any constructive criticism, please raise issues
-as you see fit.

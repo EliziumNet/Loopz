@@ -4,7 +4,7 @@
     Write-HostFeItemDecorator
 
   .SYNOPSIS
-    Wraps a function or scriptblock as a decorator writing appropriate user interface
+    Wraps a function or script-block as a decorator writing appropriate user interface
     info to the host for each entry in the pipeline.
 
   .DESCRIPTION
@@ -15,7 +15,7 @@
     'WHAT-IF' dictates the value of WhatIf. This way, we only need a single
     value in the Exchange, rather than having to represent SupportShouldProcess explicitly with
     another value.
-      The PastThru must contain either a 'LOOPZ.WH-FOREACH-DECORATOR.FUNCTION-NAME' entry meaning
+      The Exchange must contain either a 'LOOPZ.WH-FOREACH-DECORATOR.FUNCTION-NAME' entry meaning
     a named function is being decorated or 'LOOPZ.WH-FOREACH-DECORATOR.BLOCK' meaning a script
     block is being decorated, but not both.
       By default, Write-HostFeItemDecorator will display an item no for each object in the pipeline
@@ -48,24 +48,24 @@
     not contain any UI related code. This strategy also helps for the development of different
     commands that produce output to the terminal in a consistent manner.
 
-  .PARAMETER $Underscore
-    The current pipeline object.
-
-  .PARAMETER $Index
-    The 0 based index representing current item in the pipeline.
-
-  .PARAMETER $Exchange
+  .PARAMETER Exchange
     A hash table containing miscellaneous information gathered internally
     throughout the iteration batch. This can be of use to the user, because it is the way
     the user can perform bi-directional communication between the invoked custom script block
     and client side logic.
 
-  .PARAMETER $Trigger
+  .PARAMETER Index
+    The 0 based index representing current item in the pipeline.
+
+  .PARAMETER Trigger
       A boolean value, useful for state changing idempotent operations. At the end
     of the batch, the state of the trigger indicates whether any of the items were actioned.
     When the script block is invoked, the trigger should indicate if the trigger was pulled for
     any of the items so far processed in the batch. This is the responsibility of the
     client's block implementation.
+
+  .PARAMETER Underscore
+    The current pipeline object.
 
   .RETURNS
     The result of invoking the decorated script-block.

@@ -1,5 +1,26 @@
 
-function get-PaddedLabel {
+function Get-PaddedLabel {
+  <#
+  .NAME
+    Get-PaddedLabel
+
+  .SYNOPSIS
+    Controls and standardises the way that signals are displayed.
+
+  .DESCRIPTION
+    Pads out a string with leading or trailing spaces depending on
+  alignment.
+
+  .PARAMETER Align
+    Left or right alignment of the label.
+
+  .PARAMETER Label
+    The string to be padded
+
+  .PARAMETER Width
+    Size of the field into which the label is to be placed.
+
+  #>
   [OutputType([string])]
   param(
     [Parameter()]

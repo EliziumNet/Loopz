@@ -8,22 +8,24 @@ function Edit-RemoveSingleSubString {
   Removes a sub-string from the target string provided.
 
 .DESCRIPTION
-  Either the first or the last occurrence of a single can be removed depending on
-  whether the Last flag has been set.
+  Either the first or the last occurrence of a single substring can be removed
+  depending on whether the Last flag has been set.
 
-.PARAMETER Target
-  The string from which the subtraction is to occur.
+.PARAMETER Last
+  Flag to indicate whether the last occurrence of a sub string is to be removed from the
+  Target.
 
 .PARAMETER Subtract
   The sub string to subtract from the Target.
+
+.PARAMETER Target
+  The string from which the subtraction is to occur.
 
 .PARAMETER Insensitive
   Flag to indicate if the search is case sensitive or not. By default, search is case
   sensitive.
 
-.PARAMETER Last
-  Flag to indicate whether the last occurrence of a sub string is to be removed from the
-  Target.
+
 #>
   [CmdletBinding(DefaultParameterSetName = 'Single')]
   [OutputType([string])]

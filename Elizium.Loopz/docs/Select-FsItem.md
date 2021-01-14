@@ -28,9 +28,6 @@ such as Get-ChildItems/Copy-Item/Get-Item etc only work on files not directories
 
 ### Example 1
 
-Define a Condition that allows only directories beginning with A, but also excludes
-any directory containing '_' or '-'.
-
 ```powershell
   [scriptblock]$filterDirectories = {
     [OutputType([boolean])]
@@ -40,12 +37,15 @@ any directory containing '_' or '-'.
     [string[]]$directoryIncludes = @('A*');
     [string[]]$directoryExcludes = @('*_*', '*-*');
 
-    Select-FsItem -Name $directoryInfo.Name `
+    $filterDirectories = Select-FsItem -Name $directoryInfo.Name `
       -Includes $directoryIncludes -Excludes $directoryExcludes;
 
     Invoke-TraverseDirectory -Path <path> -Block <block> -Condition $filterDirectories;
   }
 ```
+
+Define a Condition that allows only directories beginning with A, but also excludes
+any directory containing '_' or '-'.
 
 ## PARAMETERS
 

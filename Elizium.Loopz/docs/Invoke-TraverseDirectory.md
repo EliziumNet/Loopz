@@ -9,23 +9,24 @@ schema: 2.0.0
 
 ## SYNOPSIS
 
-Traverses a directory tree invoking a custom defined script-block or named function
-as it goes.
+Traverses a directory tree invoking a custom defined script-block or named function as it goes.
 
 ## SYNTAX
 
 ### InvokeScriptBlock (Default)
 
 ```powershell
-Invoke-TraverseDirectory -Path <String> [-Condition <ScriptBlock>] [-PassThru <Hashtable>]
- [-Block <ScriptBlock>] [-BlockParams <Object>] [-Header <ScriptBlock>] [-Summary <ScriptBlock>] [-Hoist] [<CommonParameters>]
+Invoke-TraverseDirectory -Path <String> [-Condition <ScriptBlock>] [-Exchange <Hashtable>]
+ [-Block <ScriptBlock>] [-BlockParams <Object>] [-Header <ScriptBlock>] [-Summary <ScriptBlock>]
+ [-SessionHeader <ScriptBlock>] [-SessionSummary <ScriptBlock>] [-Hoist] [<CommonParameters>]
 ```
 
 ### InvokeFunction
 
 ```powershell
-Invoke-TraverseDirectory -Path <String> [-Condition <ScriptBlock>] [-PassThru <Hashtable>] -Functee <String>
- [-FuncteeParams <Hashtable>] [-Header <ScriptBlock>] [-Summary <ScriptBlock>] [-Hoist] [<CommonParameters>]
+Invoke-TraverseDirectory -Path <String> [-Condition <ScriptBlock>] [-Exchange <Hashtable>] -Functee <String>
+ [-FuncteeParams <Hashtable>] [-Header <ScriptBlock>] [-Summary <ScriptBlock>] [-SessionHeader <ScriptBlock>]
+ [-SessionSummary <ScriptBlock>] [-Hoist] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -40,14 +41,12 @@ invoked at the end of the traversal batch.
 
 ### Example 1
 
-Invoke a script-block for every directory in the source tree.
-
 ```powershell
   [scriptblock]$block = {
     param(
       $underscore,
       [int]$index,
-      [System.Collections.Hashtable]$passThru,
+      [hashtable]$exchange,
       [boolean]$trigger
     )
     ...
@@ -56,22 +55,22 @@ Invoke a script-block for every directory in the source tree.
   Invoke-TraverseDirectory -Path './Tests/Data/fefsi' -Block $block
 ```
 
-### Example 2
+Invoke a script-block for every directory in the source tree.
 
-Invoke a named function with extra parameters for every directory in the source tree.
+### Example 2
 
 ```powershell
   function Test-Traverse {
     param(
       [System.IO.DirectoryInfo]$Underscore,
       [int]$Index,
-      [System.Collections.Hashtable]$PassThru,
+      [hashtable]$Exchange,
       [boolean]$Trigger,
       [string]$Format
     )
     ...
   }
-  [System.Collections.Hashtable]$parameters = @{
+  [hashtable]$parameters = @{
     'Format' = "=== {0} ===";
   }
 
@@ -79,16 +78,16 @@ Invoke a named function with extra parameters for every directory in the source 
     -Functee 'Test-Traverse' -FuncteeParams $parameters;
 ```
 
-### Example 3
+Invoke a named function with extra parameters for every directory in the source tree.
 
-Invoke a named function, including only directories beginning with A (filter A*)
+### Example 3
 
 ```powershell
   function Test-Traverse {
     param(
       [System.IO.DirectoryInfo]$Underscore,
       [int]$Index,
-      [System.Collections.Hashtable]$PassThru,
+      [hashtable]$Exchange,
       [boolean]$Trigger
     )
     ...
@@ -107,21 +106,19 @@ Invoke a named function, including only directories beginning with A (filter A*)
     -Condition $filterDirectories;
 ```
 
+Invoke a named function, including only directories beginning with A (filter A*)
+
 Note the possible issue with this example is that any descendants named A... which are located
-under an ancestor which is not named A..., will not be processed by the provided function
+under an ancestor which is not named A..., will not be processed by the provided function.
 
 ### Example 4
-
-Mirror a directory tree, including only directories beginning with A (filter A*) regardless of
-the matching of intermediate ancestors (specifying -Hoist flag resolves the possible
-issue in the previous example)
 
 ```powershell
   function Test-Traverse {
     param(
       [System.IO.DirectoryInfo]$Underscore,
       [int]$Index,
-      [System.Collections.Hashtable]$PassThru,
+      [hashtable]$Exchange,
       [boolean]$Trigger
     )
     ...
@@ -140,6 +137,10 @@ issue in the previous example)
     -Condition $filterDirectories -Hoist;
 ```
 
+Mirror a directory tree, including only directories beginning with A (filter A*) regardless of
+the matching of intermediate ancestors (specifying -Hoist flag resolves the possible
+issue in the previous example).
+
 Note that the directory filter must include a wild-card, otherwise it will be ignored. So a
 directory include of @('A'), is problematic, because A is not a valid directory filter so its
 ignored and there are no remaining filters that are able to include any directory, so no
@@ -147,13 +148,14 @@ directory passes the filter.
 
 ### Example 5
 
-Same as EXAMPLE 4, but using predefined Header and Summary script-blocks for Session header/summary
-and per directory header/summary. (Test-Traverse and filterDirectories as per EXAMPLE 4)
+```powershell
+  Invoke-TraverseDirectory -Path './Tests/Data/fefsi' -Functee 'Test-Traverse' `
+    -Condition $filterDirectories -Hoist `
+    -Header $LoopzHelpers.DefaultHeaderBlock -Summary $DefaultHeaderBlock.SimpleSummaryBlock `
+    -SessionHeader $LoopzHelpers.DefaultHeaderBlock -SessionSummary $DefaultHeaderBlock.SimpleSummaryBlock;
+```
 
-Invoke-TraverseDirectory -Path './Tests/Data/fefsi' -Functee 'Test-Traverse' `
-  -Condition $filterDirectories -Hoist `
-  -Header $LoopzHelpers.DefaultHeaderBlock -Summary $DefaultHeaderBlock.SimpleSummaryBlock `
-  -SessionHeader $LoopzHelpers.DefaultHeaderBlock -SessionSummary $DefaultHeaderBlock.SimpleSummaryBlock;
+Same as EXAMPLE 4, but using predefined Header and Summary script-blocks for Session header/summary and per directory header/summary. (Test-Traverse and filterDirectories as per EXAMPLE 4)
 
 ## PARAMETERS
 
@@ -165,7 +167,7 @@ the following positional parameters:
 
 * underscore: the DirectoryInfo object representing the directory in the source tree
 * index: the 0 based index representing current directory in the source tree
-* PassThru object: a hash table containing miscellaneous information gathered internally
+* Exchange object: a hash table containing miscellaneous information gathered internally
 throughout the mirroring batch. This can be of use to the user, because it is the way
 the user can perform bi-directional communication between the invoked custom script block
 and client side logic.
@@ -211,12 +213,30 @@ Accept wildcard characters: False
 
 ### -Condition
 
-This is a predicate scriptblock, which is invoked with a DirectoryInfo object presented
+This is a predicate script-block, which is invoked with a DirectoryInfo object presented
 as a result of invoking Get-ChildItem. It provides a filtering mechanism that is defined
-by the user to define which directories are selected for function/scriptblock invocation.
+by the user to define which directories are selected for function/script-block invocation.
 
 ```yaml
 Type: ScriptBlock
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Exchange
+
+A hash table containing miscellaneous information gathered internally throughout the
+traversal batch. This can be of use to the user, because it is the way the user can perform
+bi-directional communication between the invoked custom script block and client side logic.
+
+```yaml
+Type: Hashtable
 Parameter Sets: (All)
 Aliases:
 
@@ -234,10 +254,10 @@ for script-blocks. The Function's base signature is as follows:
 
 * "Underscore": (See underscore described above)
 * "Index": (See index described above)
-* "PassThru": (See PathThru described above)
+* "Exchange": (See PathThru described above)
 * "Trigger": (See trigger described above)
 
-The destination DirectoryInfo object can be accessed via the PassThru denoted by
+The destination DirectoryInfo object can be accessed via the Exchange denoted by
 the 'LOOPZ.MIRROR.DESTINATION' entry.
 
 ```yaml
@@ -274,13 +294,13 @@ Accept wildcard characters: False
 A script-block that is invoked for each directory that also contains child directories.
 The script-block is invoked with the following positional parameters:
 
-* PassThru: (see PassThru previously described)
+* Exchange: (see Exchange previously described)
 
-  The Header can be customised with the following PassThru entries:
+The Header can be customised with the following Exchange entries:
 
 * 'LOOPZ.KRAYOLA-THEME': Krayola Theme generally in use
 * 'LOOPZ.HEADER-BLOCK.MESSAGE': message displayed as part of the header
-* 'LOOPZ.HEADER-BLOCK.CRUMB-SIGNAL': Signal Emoji displayed in header
+* 'LOOPZ.HEADER-BLOCK.CRUMB-SIGNAL': Lead text displayed in header, default: '[+] '
 * 'LOOPZ.HEADER.PROPERTIES': An array of Key/Value pairs of items to be displayed
 * 'LOOPZ.HEADER-BLOCK.LINE': A string denoting the line to be displayed. (There are
 predefined lines available to use in $LoopzUI, or a custom one can be used instead)
@@ -299,32 +319,12 @@ Accept wildcard characters: False
 
 ### -Hoist
 
-Switch parameter. Without Hoist being specified, the Condition can prove to be too restrictive
+  Switch parameter. Without Hoist being specified, the Condition can prove to be too restrictive
 on matching against directories. If a directory does not match the Condition then none of its
-descendants will be considered to be traversed. When Hoist is specified then a descendant directory
-that does match the Condition will be traversed even though any of its ancestors may not match the
-same Condition.
+descendants will be considered to be traversed. When Hoist is specified then a descendant directory that does match the Condition will be traversed even though any of its ancestors may not match the same Condition.
 
 ```yaml
 Type: SwitchParameter
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -PassThru
-
-A hash table containing miscellaneous information gathered internally throughout the
-traversal batch. This can be of use to the user, because it is the way the user can perform
-bi-directional communication between the invoked custom script block and client side logic.
-
-```yaml
-Type: Hashtable
 Parameter Sets: (All)
 Aliases:
 
@@ -351,34 +351,6 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -Summary
-
-  A script-block that is invoked foreach directory that also contains child directories,
-after all its descendants have been processed and serves as a sub-total for the current
-directory. The script-block is invoked with the following positional parameters:
-
-* count: the number of items processed in the mirroring batch.
-* skipped: the number of items skipped in the mirroring batch. An item is skipped if
-it fails the defined condition or is not of the correct type (eg if its a directory
-but we have specified the -File flag).
-* trigger: Flag set by the script-block/function, but should typically be used to
-indicate whether any of the items processed were actively updated/written in this batch.
-This helps in written idempotent operations that can be re-run without adverse
-consequences.
-* PassThru: (see PassThru previously described)
-
-```yaml
-Type: ScriptBlock
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
 ### -SessionHeader
 
 A script-block that is invoked at the start of the traversal batch. The script-block has
@@ -398,8 +370,36 @@ Accept wildcard characters: False
 
 ### -SessionSummary
 
-A script-block that is invoked at the start of the traversal batch. The script-block has
-the same signature as the Header script block.
+A script-block that is invoked at the end of the traversal batch. The script-block has
+the same signature as the Summary script block.
+
+```yaml
+Type: ScriptBlock
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Summary
+
+A script-block that is invoked foreach directory that also contains child directories,
+after all its descendants have been processed and serves as a sub-total for the current
+directory. The script-block is invoked with the following positional parameters:
+
+* count: the number of items processed in the mirroring batch.
+* skipped: the number of items skipped in the mirroring batch. An item is skipped if
+it fails the defined condition or is not of the correct type (eg if its a directory
+but we have specified the -File flag).
+* trigger: Flag set by the script-block/function, but should typically be used to
+indicate whether any of the items processed were actively updated/written in this batch.
+This helps in written idempotent operations that can be re-run without adverse
+consequences.
+* Exchange: (see Exchange previously described)
 
 ```yaml
 Type: ScriptBlock
