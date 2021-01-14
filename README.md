@@ -31,8 +31,7 @@ which will be installed automatically if not already present.
 |----------------------------------------------------------------------------------|------------
 | [Format-Escape](Elizium.Loopz/docs/Format-Escape.md)                             | Escape Regex param
 | [Rename-Many](Elizium.Loopz/docs/Rename-Many.md)                                 | Bulk Rename
-| [Show-Signals](Elizium.Loopz/docs/Show-Signals.md)                               | Show signals with
- overrides
+| [Show-Signals](Elizium.Loopz/docs/Show-Signals.md)                               | Show signals with overrides
 | [Select-Patterns](Elizium.Loopz/docs/Select-Patterns.md)                         | Find text inside files
 
 ## Iteration functions (for end developers)
@@ -55,12 +54,12 @@ The following table shows the list of public commands exported from the Loopz mo
 | [Edit-RemoveSingleSubString](Elizium.Loopz/docs/Edit-RemoveSingleSubString.md)   | Remove single substring
 | [Format-StructuredLine](Elizium.Loopz/docs/Format-StructuredLine.md)             | Create Krayon line
 | [Get-FormattedSignal](Elizium.Loopz/docs/Get-FormattedSignal.md)                 | Get formatted signal
-| [Get-InverseSubstring](Elizium.Loopz/docs/Get-InverseSubstring.md)               | Get inverse substring
+| [Get-InverseSubstring](Elizium.Loopz/docs/Get-InverseSubString.md)               | Get inverse substring
 | [Get-IsLocked](Elizium.Loopz/docs/Get-IsLocked.md)                               | Get locked state of a command
 | [Get-PaddedLabel](Elizium.Loopz/docs/Get-PaddedLabel.md)                         | Get space padded string
-| [Get-PlatformName](Elizium.Loopz/docs/PlatformName.md)                           | Get platform name
+| [Get-PlatformName](Elizium.Loopz/docs/Get-PlatformName.md)                           | Get platform name
 | [Get-PsObjectField](Elizium.Loopz/docs/Get-PsObjectField.md)                     | Get field from PSCustomObject
-| [Get-Signals](Elizium.Loopz/docs/Signals.md)                                     | Get signals
+| [Get-Signals](Elizium.Loopz/docs/Get-Signals.md)                                     | Get signals
 | [Initialize-ShellOperant](Elizium.Loopz/docs/Initialize-ShellOperant.md)         | Init shell operation
 | [Invoke-ByPlatform](Elizium.Loopz/docs/Invoke-ByPlatform.md)                     | Invoke OS specific fn
 | [Move-Match](Elizium.Loopz/docs/Move-Match.md)                                   | Move regex match
