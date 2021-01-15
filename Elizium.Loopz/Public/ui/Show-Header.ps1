@@ -77,7 +77,7 @@ function Show-Header {
     [string]$messageKey = 'LOOPZ.HEADER-BLOCK.MESSAGE';
 
     [string]$structuredLine = Format-StructuredLine -Exchange $exchange `
-      -LineKey $LineKey -CrumbKey $CrumbKey -MessageKey $messageKey -Krayon $krayon;
+      -LineKey $LineKey -CrumbKey $CrumbKey -MessageKey $messageKey -Krayon $krayon -Truncate;
     $null = $krayon.ScribbleLn($structuredLine);
   }
 }
