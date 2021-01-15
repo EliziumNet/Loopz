@@ -467,7 +467,7 @@ Describe 'Rename-Many' {
       } # and: Except
 
       Context 'and: Context' {
-        It 'should: show the Context' {
+        It 'should: show the Context' -Tag 'Current' {
           $script:expected = @{
             'loopz.application.t1.log' = 'loopz.applic@tion.t1.log';
             'loopz.application.t2.log' = 'loopz.applic@tion.t2.log';
@@ -477,9 +477,11 @@ Describe 'Rename-Many' {
           }
 
           [PSCustomObject]$context = [PSCustomObject]@{
-            Title          = 'TITLE'
-            ItemMessage    = 'Widget *{_fileSystemItemType}'
-            SummaryMessage = '... and finally'
+            Title          = 'TITLE';
+            ItemMessage    = 'Widget *{_fileSystemItemType}';
+            SummaryMessage = '... and finally';
+            Locked            = 'LOOPZ_REMY_LOCKED';
+            UndoDisabledEnVar = 'LOOPZ_REMY_UNDO_DISABLED';
           }
 
           Get-ChildItem -Path $directoryPath | Rename-Many -Context $context -File `

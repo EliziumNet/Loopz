@@ -42,7 +42,7 @@ Describe 'initialize-ShellOperant' {
               OperantName  = 'UndoRename';
               Shell        = 'PoShShell';
               BaseFilename = 'undo-rename';
-              DisabledKey  = 'LOOPZ_UNDO_RENAME';
+              DisabledEnVar  = 'LOOPZ_UNDO_RENAME';
             }
             [string]$homePath = "$TestDrive$([System.IO.Path]::DirectorySeparatorChar)username";
             [UndoRename]$operant = initialize-ShellOperant -HomePath $homePath `

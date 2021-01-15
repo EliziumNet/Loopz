@@ -23,7 +23,7 @@ function Initialize-ShellOperant {
   - BaseFilename ('undo-rename'): the core part of the file name which should reflect
   the nature of the operant (the operation, which ideally should be a verb noun pair
   but is not enforced)
-  - DisabledKey ('LOOPZ_REMY_UNDO_DISABLED'): The environment variable used to disable
+  - DisabledEnVar ('LOOPZ_REMY_UNDO_DISABLED'): The environment variable used to disable
   this operant.
 
   .PARAMETER DryRun
@@ -45,7 +45,7 @@ function Initialize-ShellOperant {
     OperantName  = 'UndoRename';
     Shell        = 'PoShShell';
     BaseFilename = 'undo-rename';
-    DisabledKey  = 'LOOPZ_REMY_UNDO_DISABLED';
+    DisabledEnVar  = 'LOOPZ_REMY_UNDO_DISABLED';
   }
     
   #>
@@ -60,7 +60,7 @@ function Initialize-ShellOperant {
     [Parameter()]
     [switch]$DryRun
   )
-  [string]$envUndoRenameDisabled = $(Get-EnvironmentVariable -Variable $Options.DisabledKey);
+  [string]$envUndoRenameDisabled = $(Get-EnvironmentVariable -Variable $Options.DisabledEnVar);
 
   try {
     [boolean]$isDisabled = if (-not([string]::IsNullOrEmpty($envUndoRenameDisabled))) {
