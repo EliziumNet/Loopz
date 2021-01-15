@@ -9,7 +9,7 @@ function Show-Summary {
 
   .DESCRIPTION
     Behaviour can be customised by the following entries in the Exchange:
-  * 'LOOP.KRAYON' (mandatory): the Krayola Krayon writer object.
+  * 'LOOPZ.KRAYON' (mandatory): the Krayola Krayon writer object.
   * 'LOOPZ.SUMMARY-BLOCK.MESSAGE': The custom message to be displayed as
   part of the summary.
   * 'LOOPZ.SUMMARY.PROPERTIES': A Krayon [line] instance contain a collection
@@ -62,9 +62,9 @@ function Show-Summary {
     [hashtable]$Exchange = @{}
   )
 
-  [Krayon]$krayon = $Exchange['LOOP.KRAYON'];
+  [Krayon]$krayon = $Exchange['LOOPZ.KRAYON'];
   if (-not($krayon)) {
-    throw "Writer missing from Exchange under key 'LOOP.KRAYON'"
+    throw "Writer missing from Exchange under key 'LOOPZ.KRAYON'"
   }
 
   [string]$writerFormatWithArg = $krayon.ApiFormatWithArg;

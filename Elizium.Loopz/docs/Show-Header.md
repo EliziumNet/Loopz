@@ -21,7 +21,7 @@ Show-Header [[-Exchange] <Hashtable>] [<CommonParameters>]
 
 Behaviour can be customised by the following entries in the Exchange:
 
-* 'LOOP.KRAYON' (mandatory): the Krayola Krayon writer object.
+* 'LOOPZ.KRAYON' (mandatory): the Krayola Krayon writer object.
 * 'LOOPZ.HEADER-BLOCK.MESSAGE': The custom message to be displayed as
 part of the header.
 * 'LOOPZ.HEADER.PROPERTIES': A Krayon [line] instance contain a collection

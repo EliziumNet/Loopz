@@ -820,7 +820,7 @@ function Rename-Many {
       'LOOPZ.REMY.FROM-LABEL'                 = Get-PaddedLabel -Label 'From' -Width 9;
 
       'LOOPZ.SIGNALS'                         = $signals;
-      'LOOP.KRAYON'                           = $krayon;
+      'LOOPZ.KRAYON'                           = $krayon;
     }
     $exchange['LOOPZ.REMY.ACTION'] = $doMoveToken ? 'Move-Match' : 'Update-Match';
 

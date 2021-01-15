@@ -52,7 +52,7 @@ Describe 'Write-HostFeItemDecorator' {
     InModuleScope Elizium.Loopz {
       [hashtable]$theme = $(Get-KrayolaTheme);
       [Krayon]$krayon = New-Krayon -Theme $theme;
-      $_exchange['LOOP.KRAYON'] = $krayon;
+      $_exchange['LOOPZ.KRAYON'] = $krayon;
     }
   }
 
@@ -182,7 +182,7 @@ Describe 'Write-HostFeItemDecorator' {
             'LOOPZ.WH-FOREACH-DECORATOR.PRODUCT-LABEL' = 'Test product';
             'WHAT-IF'                                  = $false;
             'LOOPZ.WH-FOREACH-DECORATOR.IF-TRIGGERED'  = $true;
-            'LOOP.KRAYON'                              = New-Krayon -Theme $theme;
+            'LOOPZ.KRAYON'                             = New-Krayon -Theme $theme;
           }
 
           $underscore = 'What is the answer to life, love and unity';
@@ -202,7 +202,7 @@ Describe 'Write-HostFeItemDecorator' {
             'LOOPZ.WH-FOREACH-DECORATOR.PRODUCT-LABEL' = 'Test product';
             'WHAT-IF'                                  = $false;
             'LOOPZ.WH-FOREACH-DECORATOR.IF-TRIGGERED'  = $true;
-            'LOOP.KRAYON'                              = New-Krayon -Theme $theme;
+            'LOOPZ.KRAYON'                             = New-Krayon -Theme $theme;
           }
 
           $underscore = 'What is the answer to the universe';

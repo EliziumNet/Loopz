@@ -84,7 +84,7 @@ Describe 'Invoke-TraverseDirectory' {
           [hashtable]$exchange = @{
             'LOOPZ.SUMMARY-BLOCK.LINE'    = $LoopzUI.EqualsLine;
             'LOOPZ.SUMMARY-BLOCK.MESSAGE' = 'Test Summary';
-            'LOOP.KRAYON'                 = $krayon;
+            'LOOPZ.KRAYON'                 = $krayon;
           }
 
           Invoke-TraverseDirectory -Path $resolvedSourcePath -Exchange $exchange `

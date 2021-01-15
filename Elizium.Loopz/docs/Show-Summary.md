@@ -22,7 +22,7 @@ Show-Summary [[-Count] <Int32>] [[-Skipped] <Int32>] [[-Triggered] <Boolean>] [[
 
   Behaviour can be customised by the following entries in the Exchange:
 
-* 'LOOP.KRAYON' (mandatory): the Krayola Krayon writer object.
+* 'LOOPZ.KRAYON' (mandatory): the Krayola Krayon writer object.
 * 'LOOPZ.SUMMARY-BLOCK.MESSAGE': The custom message to be displayed as
 part of the summary.
 * 'LOOPZ.SUMMARY.PROPERTIES': A Krayon [line] instance contain a collection

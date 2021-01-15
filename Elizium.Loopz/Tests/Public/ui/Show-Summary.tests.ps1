@@ -19,7 +19,7 @@ Describe 'Show-Summary' {
       InModuleScope Elizium.Loopz {
         [hashtable]$exchange = @{
           'LOOPZ.SUMMARY-BLOCK.LINE' = $LoopzUI.DashLine;
-          'LOOP.KRAYON'              = $_krayon;
+          'LOOPZ.KRAYON'             = $_krayon;
         }
         Show-Summary -Count 999 -Skipped 0 -Triggered $false -Exchange $exchange;
       }
@@ -30,7 +30,7 @@ Describe 'Show-Summary' {
     It 'should: display summary' {
       InModuleScope Elizium.Loopz {
         [hashtable]$exchange = @{
-          'LOOP.KRAYON' = $_krayon;
+          'LOOPZ.KRAYON' = $_krayon;
         }
         Show-Summary -Count 101 -Skipped 0 -Triggered $true -Exchange $exchange;
       }
@@ -44,7 +44,7 @@ Describe 'Show-Summary' {
         [hashtable]$exchange = @{
           'LOOPZ.SUMMARY-BLOCK.LINE'       = $LoopzUI.DashLine;
           'LOOPZ.SUMMARY-BLOCK.WIDE-ITEMS' = $wideItems;
-          'LOOP.KRAYON'                    = $_krayon;
+          'LOOPZ.KRAYON'                   = $_krayon;
         }
         Show-Summary -Count 999 -Skipped 0 -Triggered $false -Exchange $exchange;
       }
@@ -57,7 +57,7 @@ Describe 'Show-Summary' {
           'LOOPZ.SUMMARY-BLOCK.LINE'             = $LoopzUI.DashLine;
           'LOOPZ.SUMMARY-BLOCK.WIDE-ITEMS'       = $wideItems;
           'LOOPZ.SUMMARY-BLOCK.GROUP-WIDE-ITEMS' = $true;
-          'LOOP.KRAYON'                          = $_krayon;
+          'LOOPZ.KRAYON'                         = $_krayon;
         }
         Show-Summary -Count 999 -Skipped 0 -Triggered $false -Exchange $exchange;
       }
@@ -69,9 +69,9 @@ Describe 'Show-Summary' {
       InModuleScope Elizium.Loopz {
         [line]$wideItems = $(kl($(kp('A', 'one')), $(kp('B', 'two'))));
         [hashtable]$exchange = @{
-          'LOOPZ.SUMMARY-BLOCK.LINE'       = $LoopzUI.DashLine;
+          'LOOPZ.SUMMARY-BLOCK.LINE' = $LoopzUI.DashLine;
           'LOOPZ.SUMMARY.PROPERTIES' = $wideItems;
-          'LOOP.KRAYON'                    = $_krayon;
+          'LOOPZ.KRAYON'             = $_krayon;
         }
         Show-Summary -Count 999 -Skipped 0 -Triggered $false -Exchange $exchange;
       }

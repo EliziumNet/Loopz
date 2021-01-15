@@ -140,7 +140,7 @@
     $result.ToString();
   }
 
-  [Krayon]$krayon = $_exchange['LOOP.KRAYON'];
+  [Krayon]$krayon = $_exchange['LOOPZ.KRAYON'];
 
   [scriptblock]$decorator = {
     param ($_underscore, $_index, $_exchange, $_trigger)
