@@ -75,15 +75,15 @@ function Initialize-ShellOperant {
   }
 
   [Operant]$operant = if (-not($isDisabled)) {
-    [string]$loopzPath = $(Get-EnvironmentVariable 'LOOPZ_PATH');
+    [string]$loopzPath = $(Get-EnvironmentVariable -Variable 'LOOPZ_PATH');
     [string]$subPath = ".loopz" + [System.IO.Path]::DirectorySeparatorChar + $($Options.ShortCode);
     if ([string]::IsNullOrEmpty($loopzPath)) {
       $loopzPath = Join-Path -Path $HomePath -ChildPath $subPath;
     }
     else {
-      $loopzPath = Path.IsPathRooted(loopzPath) `
-        ? Join-Path -Path $loopzPath -ChildPath $subPath `
-        : Join-Path -Path $HomePath -ChildPath $loopzPath -AdditionalChildPath $subPath;
+      $loopzPath = [System.IO.Path]::IsPathRooted($loopzPath) `
+        ? $(Join-Path -Path $loopzPath -ChildPath $subPath) `
+        : $(Join-Path -Path $HomePath -ChildPath $loopzPath -AdditionalChildPath $subPath);
     }
 
     if (-not(Test-Path -Path $loopzPath -PathType Container)) {
