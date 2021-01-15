@@ -180,6 +180,7 @@ Describe 'Invoke-ForeachFsItem' {
           param(
             [int]$Count,
             [int]$Skipped,
+            [int]$Errors,
             [boolean]$Triggered,
             [hashtable]$Exchange = @{}
           )
@@ -221,6 +222,7 @@ Describe 'Invoke-ForeachFsItem' {
               [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', '')]
               [int]$Count,
               [int]$Skipped,
+              [int]$Errors,
               [boolean]$Triggered,
               [hashtable]$Exchange = @{}
             )
@@ -257,6 +259,7 @@ Describe 'Invoke-ForeachFsItem' {
               [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', '')]
               [int]$Count,
               [int]$Skipped,
+              [int]$Errors,
               [boolean]$Triggered,
               [hashtable]$Exchange = @{}
             )
@@ -290,6 +293,7 @@ Describe 'Invoke-ForeachFsItem' {
               [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', '')]
               [int]$Count,
               [int]$Skipped,
+              [int]$Errors,
               [boolean]$Triggered,
               [hashtable]$Exchange = @{}
             )

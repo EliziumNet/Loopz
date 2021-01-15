@@ -34,12 +34,13 @@
     param(
       [int]$Count,
       [int]$Skipped,
+      [int]$Errors,
       [boolean]$Triggered,
       [hashtable]$Exchange = @{}
     )
 
     Show-Summary -Count $Count -Skipped $Skipped `
-      -Triggered $Triggered -Exchange $Exchange;
+      -Errors $Errors -Triggered $Triggered -Exchange $Exchange;
   } # SummaryBlock
 }
 

@@ -49,6 +49,7 @@ Describe 'Invoke-TraverseDirectory' {
           param(
             [int]$_count,
             [int]$_skipped,
+            [int]$_errors,
             [boolean]$_trigger,
             [hashtable]$_exchange
           )
@@ -118,6 +119,7 @@ Describe 'Invoke-TraverseDirectory' {
           param(
             [int]$_count,
             [int]$_skipped,
+            [int]$_errors,
             [boolean]$_trigger,
             [hashtable]$_exchange
           )
@@ -158,6 +160,7 @@ Describe 'Invoke-TraverseDirectory' {
             param(
               [int]$_count,
               [int]$_skipped,
+              [int]$_errors,
               [boolean]$_trigger,
               [hashtable]$_exchange
             )
@@ -206,6 +209,7 @@ Describe 'Invoke-TraverseDirectory' {
           param(
             [int]$_count,
             [int]$_skipped,
+            [int]$_errors,
             [boolean]$_trigger,
             [hashtable]$_exchange
           )
@@ -244,6 +248,7 @@ Describe 'Invoke-TraverseDirectory' {
             param(
               [int]$_count,
               [int]$_skipped,
+              [int]$_errors,
               [boolean]$_trigger,
               [hashtable]$_exchange
             )
@@ -283,6 +288,7 @@ Describe 'Invoke-TraverseDirectory' {
             param(
               [int]$_count,
               [int]$_skipped,
+              [int]$_errors,
               [boolean]$_trigger,
               [hashtable]$_exchange
             )
@@ -321,6 +327,7 @@ Describe 'Invoke-TraverseDirectory' {
               param(
                 [int]$_count,
                 [int]$_skipped,
+                [int]$_errors,
                 [boolean]$_trigger,
                 [hashtable]$_exchange
               )
@@ -361,6 +368,7 @@ Describe 'Invoke-TraverseDirectory' {
             param(
               [int]$_count,
               [int]$_skipped,
+              [int]$_errors,
               [boolean]$_trigger,
               [hashtable]$_exchange
             )
@@ -399,6 +407,7 @@ Describe 'Invoke-TraverseDirectory' {
             param(
               [int]$_count,
               [int]$_skipped,
+              [int]$_errors,
               [boolean]$_trigger,
               [hashtable]$_exchange
             )
@@ -462,6 +471,7 @@ Describe 'Invoke-TraverseDirectory' {
             param(
               [int]$_count,
               [int]$_skipped,
+              [int]$_errors,
               [boolean]$_trigger,
               [hashtable]$_exchange
             )

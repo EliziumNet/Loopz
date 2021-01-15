@@ -127,6 +127,11 @@ class BaseController {
       if ($invokeResult.psobject.properties.match('Skipped') -and $invokeResult.Skipped) {
         $this.SkipItem();
       }
+
+      if ($invokeResult.psobject.properties.match('ErrorReason') -and
+        ($invokeResult.ErrorReason -is [string])) {
+        $this.ErrorItem();
+      }
     }
   }
 }
@@ -162,7 +167,8 @@ class ForeachController : BaseController {
     $this._exchange['LOOPZ.FOREACH.TRIGGER'] = $this._trigger;
     $this._exchange['LOOPZ.FOREACH.COUNT'] = $this._index;
 
-    $this._summary.InvokeReturnAsIs($this._index, $this._skipped, $this._trigger, $this._exchange);
+    $this._summary.InvokeReturnAsIs($this._index, $this._skipped, $this._errors,
+      $this._trigger, $this._exchange);
   }
 }
 
@@ -217,7 +223,8 @@ class TraverseController : BaseController {
       $this._session.Trigger = $true;
     }
 
-    $this._summary.InvokeReturnAsIs($counter.Value(), $counter.Skipped(), $this._trigger, $this._exchange);
+    $this._summary.InvokeReturnAsIs($counter.Value(), $counter.Skipped(),
+      $counter.Errors(), $this._trigger, $this._exchange);
   }
 
   [void] BeginSession () {
@@ -250,6 +257,7 @@ class TraverseController : BaseController {
     $this._session.Count += $counter.Value();
     $this._session.Summary.InvokeReturnAsIs($this._session.Count,
       $this._session.Skipped,
+      $this._session.Errors,
       $this._session.Trigger,
       $this._exchange
     );
