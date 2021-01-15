@@ -1,8 +1,8 @@
 ﻿
-function Select-Text {
+function Select-Patterns {
   <#
   .NAME
-    Select-Text
+    Select-Patterns
 
   .SYNOPSIS
     This is a simplified yet enhanced version of standard Select-String command (or
@@ -70,13 +70,11 @@ function Select-Text {
   (
     [parameter(Mandatory = $true, Position = 0)]
     [ValidateNotNullOrEmpty()]
-    [String[]] $patterns,
+    [String[]]$Patterns,
 
     [parameter(Position = 1)]
-    [ValidateNotNullOrEmpty()]
-    [String]$filter = $(Get-EnvironmentVariable 'LOOPZ_GREPS_FILTER')
+    [String]$Filter = $(Get-EnvironmentVariable -Variable 'LOOPZ_GREPS_FILTER' -Default './*.*')
   )
-
   function build-command {
     [OutputType([string])]
     param(
@@ -121,11 +119,11 @@ function Select-Text {
   [string]$command = [string]::Empty;
   [int]$count = 0;
 
-  foreach ($pat in $patterns) {
+  foreach ($pat in $Patterns) {
     $count++;
 
     if ($count -eq 1) {
-      $command = build-command -Pattern $patterns[0] -Filter $filter;
+      $command = build-command -Pattern $Patterns[0] -Filter $Filter;
     }
     else {
       $segment = build-command -Pipe -Pattern $pat;
