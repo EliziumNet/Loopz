@@ -17,6 +17,7 @@ Describe 'controller' {
         param(
           [int]$_count,
           [int]$_skipped,
+          [int]$_errors,
           [boolean]$_trigger,
           [hashtable]$_exchange
         )
@@ -42,6 +43,7 @@ Describe 'controller' {
             param(
               [int]$_count,
               [int]$_skipped,
+              [int]$_errors,
               [boolean]$_trigger,
               [hashtable]$_exchange
             )
@@ -75,6 +77,7 @@ Describe 'controller' {
             param(
               [int]$_count,
               [int]$_skipped,
+              [int]$_errors,
               [boolean]$_trigger,
               [hashtable]$_exchange
             )
@@ -111,6 +114,7 @@ Describe 'controller' {
             param(
               [int]$_count,
               [int]$_skipped,
+              [int]$_errors,
               [boolean]$_trigger,
               [hashtable]$_exchange
             )
@@ -148,6 +152,7 @@ Describe 'controller' {
             param(
               [int]$_count,
               [int]$_skipped,
+              [int]$_errors,
               [boolean]$_trigger,
               [hashtable]$_exchange
             )

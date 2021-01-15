@@ -273,6 +273,7 @@ function Invoke-ForeachFsItem {
         param(
           [int]$_count,
           [int]$_skipped,
+          [int]$_errors,
           [boolean]$_trigger,
           [hashtable]$_exchange
         )

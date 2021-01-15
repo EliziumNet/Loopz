@@ -544,6 +544,8 @@ directory. The script-block is invoked with the following positional parameters:
 * skipped: the number of items skipped in the mirroring batch. An item is skipped if
 it fails the defined condition or is not of the correct type (eg if its a directory
 but we have specified the -File flag).
+* errors: the number of items which resulted in error. An error occurs when the function
+or the script-block has set the Error property on the invoke result.
 * trigger: Flag set by the script-block/function, but should typically be used to
 indicate whether any of the items processed were actively updated/written in this batch.
 This helps in written idempotent operations that can be re-run without adverse

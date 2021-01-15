@@ -233,7 +233,13 @@
         $Exchange['LOOPZ.WH-FOREACH-DECORATOR.WRITER'];
       }
 
-      foreach ($line in $invokeResult.Lines) {
+      [line[]]$additionalLines = if ([string]::IsNullOrEmpty($invokeResult.ErrorReason)) {
+        $invokeResult.Lines;
+      } else {
+        $( New-Line( $(New-Pair('Error', $invokeResult.ErrorReason)) ) ) + $invokeResult.Lines;
+      }
+
+      foreach ($line in $additionalLines) {
         $null = $adjustedWriter.Message($blank).Line($line);
       }
     }

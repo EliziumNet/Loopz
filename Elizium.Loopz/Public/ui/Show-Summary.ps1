@@ -29,6 +29,9 @@ function Show-Summary {
     The number items processed, this is the number of items in the pipeline which match
   the $Pattern specified and therefore are allocated an index.
 
+  .PARAMETER Errors
+    The number of errors that occurred during the batch.
+
   .PARAMETER Exchange
     The exchange hashtable object.
 
@@ -54,6 +57,9 @@ function Show-Summary {
 
     [Parameter()]
     [int]$Skipped,
+
+    [Parameter()]
+    [int]$Errors,
 
     [Parameter()]
     [boolean]$Triggered,
@@ -90,20 +96,24 @@ function Show-Summary {
   [line]$properties = New-Line(@(
       $(New-Pair('Count', $Count)),
       $(New-Pair('Skipped', $Skipped)),
+      $(New-Pair('Errors', $Errors)),
       $(New-Pair('Triggered', $Triggered))
     ));
-
-  [line]$summaryProperties = $Exchange.ContainsKey(
-    'LOOPZ.SUMMARY.PROPERTIES') ? $Exchange['LOOPZ.SUMMARY.PROPERTIES'] : [line]::new(@());
-
-  if ($summaryProperties.Line.Length -gt 0) {
-    $properties.append($summaryProperties);
-  }
 
   [string]$message = $Exchange.ContainsKey('LOOPZ.SUMMARY-BLOCK.MESSAGE') `
     ? $Exchange['LOOPZ.SUMMARY-BLOCK.MESSAGE'] : 'Summary';
 
   $null = $krayon.Line($message, $properties);
+  [string]$blank = [string]::new(' ', $message.Length);
+
+  # Custom properties
+  #
+  [line]$summaryProperties = $Exchange.ContainsKey(
+    'LOOPZ.SUMMARY.PROPERTIES') ? $Exchange['LOOPZ.SUMMARY.PROPERTIES'] : [line]::new(@());
+
+  if ($summaryProperties.Line.Length -gt 0) {
+    $null = $krayon.Line($blank, $summaryProperties);
+  }
 
   # Wide items
   #
@@ -112,7 +122,6 @@ function Show-Summary {
 
     [boolean]$group = ($Exchange.ContainsKey('LOOPZ.SUMMARY-BLOCK.GROUP-WIDE-ITEMS') -and
       $Exchange['LOOPZ.SUMMARY-BLOCK.GROUP-WIDE-ITEMS']);
-    [string]$blank = [string]::new(' ', $message.Length);
 
     if ($group) {
       $null = $krayon.Line($blank, $wideItems);

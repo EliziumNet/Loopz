@@ -252,7 +252,8 @@ Describe 'Invoke-MirrorDirectoryTree' {
         [scriptblock]$sessionSummary = {
           param(
             [int]$_count,
-            [int]$_skipped, 
+            [int]$_skipped,
+            [int]$_errors,
             [boolean]$_triggered,
             [hashtable]$_exchange
           )
