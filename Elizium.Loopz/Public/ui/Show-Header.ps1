@@ -9,7 +9,7 @@ function Show-Header {
 
   .DESCRIPTION
     Behaviour can be customised by the following entries in the Exchange:
-  * 'LOOP.KRAYON' (mandatory): the Krayola Krayon writer object.
+  * 'LOOPZ.KRAYON' (mandatory): the Krayola Krayon writer object.
   * 'LOOPZ.HEADER-BLOCK.MESSAGE': The custom message to be displayed as
   part of the header.
   * 'LOOPZ.HEADER.PROPERTIES': A Krayon [line] instance contain a collection
@@ -27,10 +27,10 @@ function Show-Header {
     [hashtable]$Exchange
   )
 
-  [Krayon]$krayon = $Exchange['LOOP.KRAYON'];
+  [Krayon]$krayon = $Exchange['LOOPZ.KRAYON'];
 
   if (-not($krayon)) {
-    throw "Writer missing from Exchange under key 'LOOP.KRAYON'"
+    throw "Writer missing from Exchange under key 'LOOPZ.KRAYON'"
   }
   $null = $krayon.Reset();
   [string]$writerFormatWithArg = $krayon.ApiFormatWithArg;

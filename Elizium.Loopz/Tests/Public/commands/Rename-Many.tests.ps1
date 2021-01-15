@@ -477,9 +477,11 @@ Describe 'Rename-Many' {
           }
 
           [PSCustomObject]$context = [PSCustomObject]@{
-            Title          = 'TITLE'
-            ItemMessage    = 'Widget *{_fileSystemItemType}'
-            SummaryMessage = '... and finally'
+            Title          = 'TITLE';
+            ItemMessage    = 'Widget *{_fileSystemItemType}';
+            SummaryMessage = '... and finally';
+            Locked            = 'LOOPZ_REMY_LOCKED';
+            UndoDisabledEnVar = 'LOOPZ_REMY_UNDO_DISABLED';
           }
 
           Get-ChildItem -Path $directoryPath | Rename-Many -Context $context -File `

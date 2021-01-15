@@ -88,12 +88,14 @@ function Update-Match {
     [System.Text.RegularExpressions.RegEx]$Pattern,
 
     [Parameter()]
+    [ValidateScript( { $_ -ne '0' })]
     [string]$PatternOccurrence = 'f',
 
     [Parameter()]
     [System.Text.RegularExpressions.RegEx]$Copy,
 
     [Parameter()]
+    [ValidateScript( { $_ -ne '0' })]
     [string]$CopyOccurrence = 'f',
 
     [Parameter()]

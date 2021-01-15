@@ -135,14 +135,14 @@ function Move-Match {
     [System.Text.RegularExpressions.RegEx]$Pattern,
 
     [Parameter()]
-    [ValidateScript( { $_ -ne '*' })]
+    [ValidateScript( { ($_ -ne '*') -and ($_ -ne '0') })]
     [string]$PatternOccurrence = 'f',
 
     [Parameter()]
-    [ValidateScript( { $_ -ne '*' })]
     [System.Text.RegularExpressions.RegEx]$Anchor,
 
     [Parameter()]
+    [ValidateScript( { ($_ -ne '*') -and ($_ -ne '0') })]
     [string]$AnchorOccurrence = 'f',
 
     [Parameter()]
@@ -150,10 +150,10 @@ function Move-Match {
     [string]$Relation = 'after',
 
     [Parameter()]
-    [ValidateScript( { $_ -ne '*' })]
     [System.Text.RegularExpressions.RegEx]$Copy,
 
     [Parameter()]
+    [ValidateScript( { ($_ -ne '*') -and ($_ -ne '0') })]
     [string]$CopyOccurrence = 'f',
 
     [Parameter()]

@@ -45,6 +45,7 @@ function Split-Match {
     [System.Text.RegularExpressions.RegEx]$PatternRegEx,
 
     [Parameter()]
+    [ValidateScript( { $_ -ne '0' })]
     [string]$Occurrence = 'f',
 
     [Parameter()]

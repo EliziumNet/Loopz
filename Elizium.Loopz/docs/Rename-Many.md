@@ -101,6 +101,7 @@ The following regular expression parameters:
 * $Pattern
 * $Anchor
 * $Copy
+
 can optionally have an occurrence value specified that can be used to select which
 match is active. In the case where a provided expression has multiple matches, the
 occurrence value can be used to single out which one. When no occurrence is specified,
@@ -109,21 +110,23 @@ the default is the first match only. The occurrence for a parameter can be:
 * f: first occurrence
 * l: last occurrence
 * \<number\>: the nth occurrence
-* *: all occurrences. The wild card occurrence can only be used with update operations
-(it doesn't make sense for example to move all occurrences of a pattern to the anchor)
+* *: all occurrences. The wild card occurrence can only be used with 'update' or 'cut' operations
+(it doesn't make sense for example to 'move' all occurrences of a pattern to the anchor)
 The occurrence is specified after the regular expression eg:
 -Pattern '\w\d{2,3}', l
   which means match the Last occurrence of the expression.
 (Actually, an occurrence may be specified for $Include and $Exclude but there is no
-point in doing so because these patterns only provide a filtering function an play
-not part in the actual renaming process).
+point in doing so because these patterns only provide a filtering function and play
+no part in the actual renaming process).
 
-  A note about escaping. If an pattern needs to use an regular expression character as
+  A note about escaping. If a pattern needs to use an regular expression character as
 a literal, it must be escaped. There are multiple ways of doing this:
 * use the 'esc' function; eg: -Pattern $($esc('(\d{2})'))
 * use a leading \~; -Pattern '\~(123)'
+
 The above 2 approaches escape the entire string. The second approach is more concise
-and avoids the necessary use of extra brackets and $s.
+and avoids the necessary use of extra brackets and $.
+
 * use 'esc' alongside other string concatenation:
   eg: -Pattern $($esc('(123)') + '-(?\<ccy\>GBP|SEK)').
 This third method is required when the whole pattern should not be subjected to
@@ -329,8 +332,12 @@ $Context should be a PSCustomObject with the following note properties:
 * SummaryMessage (default: 'Rename Summary') the name used in the batch summary.
 * Locked (default: 'LOOPZ_REMY_LOCKED) the name of the environment variable which controls
   the locking of the command.
-* DisabledKey (default: 'LOOPZ_REMY_UNDO_DISABLED') the name of the environment variable
+* DisabledEnVar (default: 'LOOPZ_REMY_UNDO_DISABLED') the name of the environment variable
   which controls if the undo script feature is disabled.
+* UndoDisabledEnVar (default: 'LOOPZ_REMY_UNDO_DISABLED') the name of the environment
+  variable which determines if the Undo feature is disabled. This allows any other function
+  built on top of Rename-Many to control the undo feature for itself independently of
+  Rename-Many.
 
 ```yaml
 Type: PSObject
@@ -353,7 +360,7 @@ $Paste/$With, there is no value in the user specifying a static pattern, because
 static string can just be defined in $Paste/$With. The value in the $Copy parameter comes
 when a generic pattern is defined eg \d{3} (is non static), specifies any 3 digits as
 opposed to say '123', which could be used directly in the $Paste/$With parameter without
-the need for $Copy. The match defined by $Copy is stored in special variable ${_p} and
+the need for $Copy. The match defined by $Copy is stored in special variable ${_c} and
 can be referenced as such from $Paste and $With.
 
 ```yaml

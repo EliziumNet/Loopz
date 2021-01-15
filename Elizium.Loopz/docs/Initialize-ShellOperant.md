@@ -35,7 +35,7 @@ only shell supported).
 + BaseFilename ('undo-rename'): the core part of the file name which should reflect
 the nature of the operant (the operation, which ideally should be a verb noun pair
 but is not enforced)
-+ DisabledKey ('LOOPZ_REMY_UNDO_DISABLED'): The environment variable used to disable
++ DisabledEnVar ('LOOPZ_REMY_UNDO_DISABLED'): The environment variable used to disable
 this operant.
 
 ## EXAMPLES
@@ -48,7 +48,7 @@ this operant.
     OperantName  = 'UndoRename';
     Shell        = 'PoShShell';
     BaseFilename = 'undo-rename';
-    DisabledKey  = 'LOOPZ_REMY_UNDO_DISABLED';
+    DisabledEnVar  = 'LOOPZ_REMY_UNDO_DISABLED';
   }
 ```
 

@@ -9,10 +9,10 @@ function Show-Summary {
 
   .DESCRIPTION
     Behaviour can be customised by the following entries in the Exchange:
-  * 'LOOP.KRAYON' (mandatory): the Krayola Krayon writer object.
+  * 'LOOPZ.KRAYON' (mandatory): the Krayola Krayon writer object.
   * 'LOOPZ.SUMMARY-BLOCK.MESSAGE': The custom message to be displayed as
   part of the summary.
-  * 'LOOPZ.SUMMARY-BLOCK.PROPERTIES': A Krayon [line] instance contain a collection
+  * 'LOOPZ.SUMMARY.PROPERTIES': A Krayon [line] instance contain a collection
   of Krayola [couplet]s. The first line of summary properties shows the values of
   $Count, $Skipped and $Triggered. The properties, if present are appended to this line.
   * 'LOOPZ.SUMMARY-BLOCK.LINE': The static line text. The length of this line controls
@@ -62,9 +62,9 @@ function Show-Summary {
     [hashtable]$Exchange = @{}
   )
 
-  [Krayon]$krayon = $Exchange['LOOP.KRAYON'];
+  [Krayon]$krayon = $Exchange['LOOPZ.KRAYON'];
   if (-not($krayon)) {
-    throw "Writer missing from Exchange under key 'LOOP.KRAYON'"
+    throw "Writer missing from Exchange under key 'LOOPZ.KRAYON'"
   }
 
   [string]$writerFormatWithArg = $krayon.ApiFormatWithArg;
@@ -94,7 +94,7 @@ function Show-Summary {
     ));
 
   [line]$summaryProperties = $Exchange.ContainsKey(
-    'LOOPZ.SUMMARY-BLOCK.PROPERTIES') ? $Exchange['LOOPZ.SUMMARY-BLOCK.PROPERTIES'] : [line]::new(@());
+    'LOOPZ.SUMMARY.PROPERTIES') ? $Exchange['LOOPZ.SUMMARY.PROPERTIES'] : [line]::new(@());
 
   if ($summaryProperties.Line.Length -gt 0) {
     $properties.append($summaryProperties);
