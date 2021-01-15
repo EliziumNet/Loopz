@@ -70,7 +70,7 @@ Describe 'Show-Summary' {
         [line]$wideItems = $(kl($(kp('A', 'one')), $(kp('B', 'two'))));
         [hashtable]$exchange = @{
           'LOOPZ.SUMMARY-BLOCK.LINE'       = $LoopzUI.DashLine;
-          'LOOPZ.SUMMARY-BLOCK.PROPERTIES' = $wideItems;
+          'LOOPZ.SUMMARY.PROPERTIES' = $wideItems;
           'LOOP.KRAYON'                    = $_krayon;
         }
         Show-Summary -Count 999 -Skipped 0 -Triggered $false -Exchange $exchange;

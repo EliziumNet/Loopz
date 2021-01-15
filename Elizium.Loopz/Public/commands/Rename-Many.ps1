@@ -925,7 +925,7 @@ function Rename-Many {
     }
 
     if ($containers.Props.Line.Length -gt 0) {
-      $exchange['LOOPZ.SUMMARY-BLOCK.PROPERTIES'] = $containers.Props;
+      $exchange['LOOPZ.SUMMARY.PROPERTIES'] = $containers.Props;
     }
 
     [scriptblock]$clientCondition = $Condition;

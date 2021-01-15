@@ -20,8 +20,6 @@ function Resolve-ByPlatform {
   param(
     [Parameter()]
     [hashtable]$Hash
-
-    # TODO, add Default param
   )
 
   $result = $null;
