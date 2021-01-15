@@ -992,6 +992,8 @@ function Rename-Many {
       # ctrl-c doesn't invoke an exception, it just abandons processing,
       # ending up in the finally block.
       #
+      Write-Host $_.Exception.StackTrace;
+      Write-Error $_.Exception.Message;
     }
     finally {
       # catch ctrl-c
