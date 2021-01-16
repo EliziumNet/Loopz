@@ -197,10 +197,16 @@ $global:Loopz = [PSCustomObject]@{
 
   Defaults              = [PSCustomObject]@{
     Remy = [PSCustomObject]@{
-      Title          = 'Rename'
-      ItemMessage    = 'Rename Item'
-      SummaryMessage = 'Rename Summary'
-      Marker         = [char]0x2BC1
+      Marker            = [char]0x2BC1;
+
+      Context           = [PSCustomObject]@{
+        Title             = 'Rename';
+        ItemMessage       = 'Rename Item';
+        SummaryMessage    = 'Rename Summary';
+        Locked            = 'LOOPZ_REMY_LOCKED';
+        UndoDisabledEnVar = 'LOOPZ_REMY_UNDO_DISABLED';
+        OperantShortCode  = 'remy';
+      }
     }
   }
 

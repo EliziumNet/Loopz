@@ -375,13 +375,7 @@ function Rename-Many {
     [string]$Paste,
 
     [Parameter()]
-    [PSCustomObject]$Context = [PSCustomObject]@{
-      Title             = $Loopz.Defaults.Remy.Title;
-      ItemMessage       = $Loopz.Defaults.Remy.ItemMessage;
-      SummaryMessage    = $Loopz.Defaults.Remy.SummaryMessage;
-      Locked            = 'LOOPZ_REMY_LOCKED';
-      UndoDisabledEnVar = 'LOOPZ_REMY_UNDO_DISABLED';
-    },
+    [PSCustomObject]$Context = $Loopz.Defaults.Remy.Context,
 
     [Parameter()]
     [switch]$Diagnose,
