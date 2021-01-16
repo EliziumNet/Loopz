@@ -895,7 +895,7 @@ function Rename-Many {
     }
 
     [PSCustomObject]$operantOptions = [PSCustomObject]@{
-      ShortCode    = 'remy';
+      ShortCode    = $Context.OperantShortCode;
       OperantName  = 'UndoRename';
       Shell        = 'PoShShell';
       BaseFilename = 'undo-rename';
