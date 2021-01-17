@@ -197,6 +197,18 @@ function Rename-Many {
   number of items. This is typically used as an exploratory tool, to determine the effects
   of the rename operation.
 
+  .PARAMETER Transform
+    A script block which is given the chance to perform a modification to the finally named
+  item. The transform is invoked prior to post-processing, so that the post-processing rules
+  are not breached and the transform does not have to worry about breaking them. The transform
+  function's signature is as follows:
+  * Original: original item's name
+  * Renamed: new name
+  * CapturedPattern: pattern capture
+
+  and should return the new name. If the transform does not change the name, it should return
+  an empty string.
+
   .PARAMETER Whole
     Provides an alternative way to indicate that the regular expression parameters
   should be treated as a whole word (it just wraps the expression inside \b tokens).
@@ -385,7 +397,10 @@ function Rename-Many {
 
     [Parameter()]
     [ValidateScript( { $_ -gt 0 } )]
-    [int]$Top
+    [int]$Top,
+
+    [Parameter()]
+    [scriptblock]$Transform
   )
 
   begin {
@@ -511,6 +526,20 @@ function Rename-Many {
       #
       [PSCustomObject]$actionResult = & $action @actionParameters;
       [string]$newItemName = $actionResult.Payload;
+
+      if ($_exchange.ContainsKey('LOOPZ.REMY.TRANSFORM')) {
+        [scriptblock]$transform = $_exchange['LOOPZ.REMY.TRANSFORM'];
+
+        if ($transform) {
+          [string]$transformed = $transform.InvokeReturnAsIs(
+            $_underscore, $newItemName, $actionResult.CapturedPattern);
+
+          if (-not([string]::IsNullOrEmpty($transformed))) {
+            $newItemName = $transformed;
+          }
+        }
+      }
+
       $postResult = invoke-PostProcessing -InputSource $newItemName -Rules $Loopz.Rules.Remy `
         -Signals $signals;
 
@@ -892,6 +921,13 @@ function Rename-Many {
 
     if ($PSBoundParameters.ContainsKey('Paste')) {
       $exchange['LOOPZ.REMY.PASTE'] = $Paste;
+    }
+
+    if ($PSBoundParameters.ContainsKey('Transform')) {
+      $exchange['LOOPZ.REMY.TRANSFORM'] = $Transform;
+
+      Select-SignalContainer -Containers $containers -Name 'TRANSFORM' `
+        -Value $signals['SWITCH-ON'].Value -Signals $signals -Force 'Wide';
     }
 
     [PSCustomObject]$operantOptions = [PSCustomObject]@{
