@@ -202,6 +202,7 @@ function Rename-Many {
   item. The transform is invoked prior to post-processing, so that the post-processing rules
   are not breached and the transform does not have to worry about breaking them. The transform
   function's signature is as follows:
+
   * Original: original item's name
   * Renamed: new name
   * CapturedPattern: pattern capture
@@ -214,6 +215,7 @@ function Rename-Many {
   should be treated as a whole word (it just wraps the expression inside \b tokens).
   If set to '*', then it applies to all expression parameters otherwise a single letter
   can specify which of the parameters 'Whole' should be applied to. Valid values are:
+
   * 'p': $Pattern
   * 'a': $Anchor
   * 'c': $Copy
@@ -227,9 +229,11 @@ function Rename-Many {
   similar to the $Paste parameter. Defines what text is used as the replacement for the $Pattern
   match. Works in concert with $Relation (whereas $Paste does not). $With can reference special
   variables:
+
   * $0: the pattern match
   * ${_a}: the anchor match
   * ${_c}: the copy match
+
   When $Pattern contains named capture groups, these variables can also be referenced. Eg if the
   $Pattern is defined as '(?<day>\d{1,2})-(?<mon>\d{1,2})-(?<year>\d{4})', then the variables
   ${day}, ${mon} and ${year} also become available for use in $With or $Paste.
@@ -532,7 +536,7 @@ function Rename-Many {
 
         if ($transform) {
           [string]$transformed = $transform.InvokeReturnAsIs(
-            $_underscore, $newItemName, $actionResult.CapturedPattern);
+            $_underscore.Name, $newItemName, $actionResult.CapturedPattern);
 
           if (-not([string]::IsNullOrEmpty($transformed))) {
             $newItemName = $transformed;
