@@ -19,8 +19,8 @@ via regular expression replacement.
 ```powershell
 Rename-Many [-File] [-Directory] -underscore <FileSystemInfo> [-Whole <String>] [-Pattern] <Array>
  [-Copy <Array>] [-Except <String>] [-Include <String>] [-Condition <ScriptBlock>] [-Start] [-End]
- [-Paste <String>] [-Context <PSObject>] [-Diagnose] [-Drop <String>] [-Top <Int32>] [-WhatIf] [-Confirm]
- [<CommonParameters>]
+ [-Paste <String>] [-Context <PSObject>] [-Diagnose] [-Drop <String>] [-Top <Int32>] [-Transform <ScriptBlock>]
+ [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 
 ### MoveToAnchor
@@ -29,7 +29,7 @@ Rename-Many [-File] [-Directory] -underscore <FileSystemInfo> [-Whole <String>] 
 Rename-Many [-File] [-Directory] -underscore <FileSystemInfo> [-Whole <String>] [-Pattern] <Array>
  -Anchor <Array> [-Relation <String>] [-Copy <Array>] [-Except <String>] [-Include <String>]
  [-Condition <ScriptBlock>] [-Paste <String>] [-Context <PSObject>] [-Diagnose] [-Drop <String>] [-Top <Int32>]
- [-WhatIf] [-Confirm] [<CommonParameters>]
+ [-Transform <ScriptBlock>] [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 
 ### ReplaceLiteralWith
@@ -37,7 +37,8 @@ Rename-Many [-File] [-Directory] -underscore <FileSystemInfo> [-Whole <String>] 
 ```powershell
 Rename-Many [-File] [-Directory] -underscore <FileSystemInfo> [-Whole <String>] [-Pattern] <Array>
  -With <String> [-Except <String>] [-Include <String>] [-Condition <ScriptBlock>] [-Paste <String>]
- [-Context <PSObject>] [-Diagnose] [-Drop <String>] [-Top <Int32>] [-WhatIf] [-Confirm] [<CommonParameters>]
+ [-Context <PSObject>] [-Diagnose] [-Drop <String>] [-Top <Int32>] [-Transform <ScriptBlock>] [-WhatIf]
+ [-Confirm] [<CommonParameters>]
 ```
 
 ### MoveToStart
@@ -45,7 +46,8 @@ Rename-Many [-File] [-Directory] -underscore <FileSystemInfo> [-Whole <String>] 
 ```powershell
 Rename-Many [-File] [-Directory] -underscore <FileSystemInfo> [-Whole <String>] [-Pattern] <Array>
  [-Except <String>] [-Include <String>] [-Condition <ScriptBlock>] [-Start] [-Paste <String>]
- [-Context <PSObject>] [-Diagnose] [-Drop <String>] [-Top <Int32>] [-WhatIf] [-Confirm] [<CommonParameters>]
+ [-Context <PSObject>] [-Diagnose] [-Drop <String>] [-Top <Int32>] [-Transform <ScriptBlock>] [-WhatIf]
+ [-Confirm] [<CommonParameters>]
 ```
 
 ### MoveToEnd
@@ -53,7 +55,8 @@ Rename-Many [-File] [-Directory] -underscore <FileSystemInfo> [-Whole <String>] 
 ```powershell
 Rename-Many [-File] [-Directory] -underscore <FileSystemInfo> [-Whole <String>] [-Pattern] <Array>
  [-Except <String>] [-Include <String>] [-Condition <ScriptBlock>] [-End] [-Paste <String>]
- [-Context <PSObject>] [-Diagnose] [-Drop <String>] [-Top <Int32>] [-WhatIf] [-Confirm] [<CommonParameters>]
+ [-Context <PSObject>] [-Diagnose] [-Drop <String>] [-Top <Int32>] [-Transform <ScriptBlock>] [-WhatIf]
+ [-Confirm] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -628,6 +631,32 @@ of the rename operation.
 
 ```yaml
 Type: Int32
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Transform
+
+A script block which is given the chance to perform a modification to the finally named
+item. The transform is invoked prior to post-processing, so that the post-processing rules
+are not breached and the transform does not have to worry about breaking them. The transform
+function's signature is as follows:
+
+* Original: original item's name
+* Renamed: new name
+* CapturedPattern: pattern capture
+
+and should return the new name. If the transform does not change the name, it should return
+an empty string.
+
+```yaml
+Type: ScriptBlock
 Parameter Sets: (All)
 Aliases:
 

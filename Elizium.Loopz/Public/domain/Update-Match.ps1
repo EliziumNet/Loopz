@@ -167,8 +167,9 @@ function Update-Match {
   }
 
   [PSCustomObject]$updateResult = [PSCustomObject]@{
-    Payload = $result;
-    Success = $success;
+    Payload         = $result;
+    Success         = $success;
+    CapturedPattern = $capturedPattern;
   }
 
   if (-not([string]::IsNullOrEmpty($failedReason))) {

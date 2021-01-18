@@ -158,6 +158,31 @@ Describe 'Rename-Many' {
             }
           }
         } # and: Source matches Pattern
+
+        Context 'and: Transform' {
+          It 'should: transform Rename' {
+            $script:expected = @{
+              'loopz.application.t1.log' = '_applicloopz.ation.t1_.log';
+              'loopz.application.t2.log' = '_applicloopz.ation.t2_.log';
+              'loopz.data.t1.txt'        = '_datloopz.a.t1_.txt';
+              'loopz.data.t2.txt'        = '_datloopz.a.t2_.txt';
+              'loopz.data.t3.txt'        = '_datloopz.a.t3_.txt';
+            }
+
+            [scriptblock]$transform = [scriptblock] {
+              param(
+                [string]$Original,
+                [string]$Renamed,
+                [string]$PatternCapture
+              )
+
+              return $("_{0}_" -f $Renamed);
+            }
+
+            Get-ChildItem -File -Path $directoryPath | Rename-Many -File `
+              -Pattern 'loopz.' -Anchor 'a', l -Relation 'before' -Transform $transform -WhatIf;
+          }
+        }
       } # and Relation is Before
 
       Context 'and Relation is After' {
@@ -435,6 +460,31 @@ Describe 'Rename-Many' {
             }
           } # and: Last Only
         } # and: First Only
+
+        Context 'and: Transform' {
+          It 'should: transform Rename' {
+            $script:expected = @{
+              'loopz.application.t1.log' = '_loopz.@pplication.t1_.log';
+              'loopz.application.t2.log' = '_loopz.@pplication.t2_.log';
+              'loopz.data.t1.txt'        = '_loopz.d@ta.t1_.txt';
+              'loopz.data.t2.txt'        = '_loopz.d@ta.t2_.txt';
+              'loopz.data.t3.txt'        = '_loopz.d@ta.t3_.txt';
+            }
+
+            [scriptblock]$transform = [scriptblock] {
+              param(
+                [string]$Original,
+                [string]$Renamed,
+                [string]$PatternCapture
+              )
+
+              return $("_{0}_" -f $Renamed);
+            }
+
+            Get-ChildItem -Path $directoryPath | Rename-Many -File `
+              -Pattern 'a', f -With '@' -Transform $transform -WhatIf;
+          }
+        }
       } # With
 
       Context 'and: Except' {
@@ -477,9 +527,9 @@ Describe 'Rename-Many' {
           }
 
           [PSCustomObject]$context = [PSCustomObject]@{
-            Title          = 'TITLE';
-            ItemMessage    = 'Widget *{_fileSystemItemType}';
-            SummaryMessage = '... and finally';
+            Title             = 'TITLE';
+            ItemMessage       = 'Widget *{_fileSystemItemType}';
+            SummaryMessage    = '... and finally';
             Locked            = 'LOOPZ_REMY_LOCKED';
             UndoDisabledEnVar = 'LOOPZ_REMY_UNDO_DISABLED';
           }

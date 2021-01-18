@@ -152,6 +152,7 @@ $global:Loopz = [PSCustomObject]@{
     'DIAGNOSTICS'  = (New-Pair(@('Diagnostics', '🧪')));
     'LOCKED'       = (New-Pair(@('Locked', '🔐')));
     'NOVICE'       = (New-Pair(@('Novice', '🔰')));
+    'TRANSFORM'    = (New-Pair(@('Transform', '🤖')));
 
     # Outcomes
     #
