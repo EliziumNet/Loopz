@@ -12,7 +12,7 @@
   RootModule        = 'Elizium.Loopz.psm1'
 
   # Version number of this module.
-  ModuleVersion     = '1.2.0'
+  ModuleVersion     = '2.0.0'
 
   # Supported PSEditions
   # CompatiblePSEditions = @()
@@ -54,13 +54,13 @@
   RequiredModules   = @(
     @{
       ModuleName    = 'Elizium.Klassy';
-      ModuleVersion = '0.0.1';
+      ModuleVersion = '0.0.2';
       Guid          = 'ba99a3c5-afd7-4f93-a77f-4941ddeb1abb';
     },
 
     @{
       ModuleName    = 'Elizium.Krayola';
-      ModuleVersion = '0.0.4';
+      ModuleVersion = '1.0.0';
       Guid          = 'cc13fedc-6dea-4573-b600-d26c9f77e6ac';
     }
   )
