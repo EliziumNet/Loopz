@@ -256,8 +256,41 @@ Describe 'Move-Match' {
               [string]$source = 'In the day of 29-03-2525.';
               [RegEx]$escapedPattern = new-expr('\s(?<d>\d{2})-(?<m>\d{2})-(?<y>\d{4})');
 
-              [PSCustomObject]$moveResult = Move-Match -Value $source -Pattern $escapedPattern -Paste 'Americanised: ${m}-${d}-${y} ' -Start;
+              [PSCustomObject]$moveResult = Move-Match -Value $source -Pattern $escapedPattern `
+                -Paste 'Americanised: ${m}-${d}-${y} ' -Start;
               $moveResult.Payload | Should -BeExactly 'Americanised: 03-29-2525 In the day of.';
+            }
+
+            Context 'and: Drop' {
+              It 'should: Move Pattern to Start and Drop Captures' -Tag 'Current' {
+                [string]$source = 'In the day of 29-03-2525.';
+                [RegEx]$escapedPattern = new-expr('\s(?<d>\d{2})-(?<m>\d{2})-(?<y>\d{4})');
+
+                [PSCustomObject]$moveResult = Move-Match -Value $source -Pattern $escapedPattern `
+                  -Paste 'Americanised: ${m}-${d}-${y} ' -Start -Drop ' iso:(${y}_${m}_${d})';
+                $moveResult.Payload | Should -BeExactly 'Americanised: 03-29-2525 In the day of iso:(2525_03_29).';
+              }
+
+              It 'should: Move Pattern to Start and Drop Copy' -Tag 'Current' {
+                [string]$source = 'In the day of 29-03-2525.';
+                [RegEx]$escapedPattern = new-expr('\s(?<d>\d{2})-(?<m>\d{2})-(?<y>\d{4})');
+
+                [PSCustomObject]$moveResult = Move-Match -Value $source -Pattern $escapedPattern `
+                  -Paste 'Americanised: ${m}-${d}-${y} ' -Start -Drop ' [${_c}]' -Copy '^[\w]+';
+
+                $moveResult.Payload | Should -BeExactly 'Americanised: 03-29-2525 In the day of [In].';
+              }
+
+              It 'should: Move Pattern to Start and Drop Copy' -Tag 'Current' {
+                [string]$source = 'In the day of 29-03-2525.';
+                [RegEx]$escapedPattern = new-expr('\s(?<d>\d{2})-(?<m>\d{2})-(?<y>\d{4})');
+
+                [PSCustomObject]$moveResult = Move-Match -Value $source -Pattern $escapedPattern `
+                  -Paste 'Americanised: ${m}-${d}-${y} ' -Start -Drop ' [${first}, ${second}]' `
+                  -Copy '^(?<first>[\w]+)\s(?<second>[\w]+)';
+
+                $moveResult.Payload | Should -BeExactly 'Americanised: 03-29-2525 In the day of [In, the].';
+              }
             }
           }
         } # and: Start specified
