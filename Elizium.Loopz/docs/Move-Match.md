@@ -147,6 +147,8 @@ A string parameter (only applicable to move operations, ie any of these Anchor/S
 are present) that defines what text is used to replace the $Pattern match. So in this
 use-case, the user wants to move a particular token/pattern to another part of the name
 and at the same time drop a static string in the place where the $Pattern was removed from.
+The user can also reference named group captures defined inside Pattern or Copy. (Note that
+the whole Copy capture can be referenced with ${_c}.)
 
 ```yaml
 Type: String

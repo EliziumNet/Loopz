@@ -63,6 +63,8 @@ function Move-Match {
   are present) that defines what text is used to replace the $Pattern match. So in this
   use-case, the user wants to move a particular token/pattern to another part of the name
   and at the same time drop a static string in the place where the $Pattern was removed from.
+  The user can also reference named group captures defined inside Pattern or Copy. (Note that
+  the whole Copy capture can be referenced with ${_c}.)
 
   .PARAMETER End
     Is another type of anchor used instead of $Anchor and specifies that the $Pattern match
@@ -178,6 +180,27 @@ function Move-Match {
     [char]$Marker = 0x20DE
   )
 
+  function update-GroupRefs {
+    [OutputType([string])]
+    param(
+      [Parameter()]
+      [string]$Source,
+
+      [Parameter()]
+      [Hashtable]$Captures
+    )
+
+    [string]$sourceText = $Source;
+    $Captures.GetEnumerator() | ForEach-Object {
+      if ($_.Key -ne '0') {
+        [string]$groupRef = $('${' + $_.Key + '}');
+        $sourceText = $sourceText.Replace($groupRef, $_.Value);
+      }
+    }
+
+    return $sourceText;
+  }
+
   [string]$result = [string]::Empty;
   [string]$failedReason = [string]::Empty;
   [PSCustomObject]$groups = [PSCustomObject]@{
@@ -197,6 +220,10 @@ function Move-Match {
     $parameters['Marker'] = $Marker;
   }
 
+  [string]$capturedAnchor = [string]::Empty;
+  [Hashtable]$patternCaptures = @{}
+  [Hashtable]$copyCaptures = @{}
+
   [string]$capturedPattern, [string]$patternRemoved, `
     [System.Text.RegularExpressions.Match]$patternMatch = Split-Match @parameters;
 
@@ -204,8 +231,9 @@ function Move-Match {
     [boolean]$isVanilla = -not($PSBoundParameters.ContainsKey('Copy') -or `
       ($PSBoundParameters.ContainsKey('With') -and -not([string]::IsNullOrEmpty($With))));
 
+    $patternCaptures = get-Captures -MatchObject $patternMatch;  
     if ($Diagnose.ToBool()) {
-      $groups.Named['Pattern'] = get-Captures -MatchObject $patternMatch;
+      $groups.Named['Pattern'] = $patternCaptures;
     }
 
     # Determine the replacement text
@@ -236,8 +264,9 @@ function Move-Match {
           [string]$replaceWith, $null, `
             [System.Text.RegularExpressions.Match]$copyMatch = Split-Match @parameters;
 
+          $copyCaptures = get-Captures -MatchObject $copyMatch;
           if ($Diagnose.ToBool()) {
-            $groups.Named['Copy'] = get-Captures -MatchObject $copyMatch;
+            $groups.Named['Copy'] = $copyCaptures;
           }
         }
         else {
@@ -352,7 +381,27 @@ function Move-Match {
 
   if ([boolean]$success = $([string]::IsNullOrEmpty($failedReason))) {
     if ($dropped -and $result.Contains([string]$Marker)) {
-      $result = $result.Replace([string]$Marker, $Drop);
+
+      [string]$dropText = $Drop;
+      if ($PSBoundParameters.ContainsKey('Copy') -and ($copyCaptures.Count -gt 0)) {
+        $dropText = $dropText.Replace('${_c}', $copyCaptures['0']);
+
+        # Now cross reference the Copy group references
+        #
+        $dropText = update-GroupRefs -Source $dropText -Captures $copyCaptures;
+      }
+
+      if (-not([string]::IsNullOrEmpty($capturedAnchor))) {
+        $dropText = $dropText.Replace('${_a}', $capturedAnchor);
+      }
+
+      # Now cross reference the Pattern group references
+      #
+      if ($patternCaptures.Count -gt 0) {
+        $dropText = update-GroupRefs -Source $dropText -Captures $patternCaptures;
+      }
+
+      $result = $result.Replace([string]$Marker, $dropText);
     }
   }
   else {

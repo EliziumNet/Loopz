@@ -905,6 +905,9 @@ function Rename-Many {
     }
 
     if ($PSBoundParameters.ContainsKey('Drop') -and -not([string]::IsNullOrEmpty($Drop))) {
+      if (-not(Test-IsFileSystemSafe -Value $Drop)) {
+        throw [System.ArgumentException]::new("Drop parameter ('$Drop') contains unsafe characters")
+      }
       Select-SignalContainer -Containers $containers -Name 'REMY.DROP' `
         -Value $Drop -Signals $signals -Force 'Wide';
 

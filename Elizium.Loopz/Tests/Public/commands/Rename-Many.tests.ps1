@@ -594,6 +594,27 @@ Describe 'Rename-Many' {
               Get-ChildItem -File -Path $directoryPath | Rename-Many -File `
                 -Pattern $pattern -Copy $copy -Anchor $anchor -Relation 'after' -Paste $paste -WhatIf -Diagnose;
             }
+
+            Context 'and: Drop' {
+              It 'should: do rename; move Pattern match with Copy capture' -Tag 'Current' {
+                $script:expected = @{
+                  'loopz.application.t1.log' = '[loopz, application.]_application.BEGIN-.t1-application.-loopz-END.log';
+                  'loopz.application.t2.log' = '[loopz, application.]_application.BEGIN-.t2-application.-loopz-END.log';
+                  'loopz.data.t1.txt'        = '[loopz, data.]_data.BEGIN-.t1-data.-loopz-END.txt';
+                  'loopz.data.t2.txt'        = '[loopz, data.]_data.BEGIN-.t2-data.-loopz-END.txt';
+                  'loopz.data.t3.txt'        = '[loopz, data.]_data.BEGIN-.t3-data.-loopz-END.txt';
+                }
+
+                [string]$pattern = '^(?<header>[\w]+)\.';
+                [string]$anchor = '\.(?<tail>t\d)';
+                [string]$copy = '(?<body>[\w]+)\.';
+                [string]$paste = '.BEGIN-${_a}-${_c}-${header}-END';
+
+                Get-ChildItem -File -Path $directoryPath | Rename-Many -File `
+                  -Pattern $pattern -Copy $copy -Anchor $anchor -Relation 'after' -Paste $paste `
+                  -Diagnose -Drop '[${header}, ${_c}]_';
+              }
+            }
           }
         }
 
