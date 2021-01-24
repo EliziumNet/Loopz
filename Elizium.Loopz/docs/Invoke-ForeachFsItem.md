@@ -304,7 +304,13 @@ Accept wildcard characters: False
 
 ### -Functee
 
-{{ Fill Functee Description }}
+String defining the function to be invoked. Works in a similar way to the Block parameter
+for script-blocks. The Function's base signature is as follows:
+
+* Underscore: (See pipelineItem described above)
+* Index: (See index described above)
+* Exchange: (See PathThru described above)
+* Trigger: (See trigger described above)
 
 ```yaml
 Type: String

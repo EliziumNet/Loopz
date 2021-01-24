@@ -246,7 +246,7 @@ Accept wildcard characters: False
 
 ### -CopyFiles
 
-{{ Fill CopyFiles Description }}
+Switch parameter that indicates that files matching the specified filters should be copied.
 
 ```yaml
 Type: SwitchParameter
