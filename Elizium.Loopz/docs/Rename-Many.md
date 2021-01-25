@@ -17,46 +17,53 @@ via regular expression replacement.
 ### ReplaceWith (Default)
 
 ```powershell
-Rename-Many [-File] [-Directory] -underscore <FileSystemInfo> [-Whole <String>] [-Pattern] <Array>
- [-Copy <Array>] [-Except <String>] [-Include <String>] [-Condition <ScriptBlock>] [-Start] [-End]
- [-Paste <String>] [-Context <PSObject>] [-Diagnose] [-Drop <String>] [-Top <Int32>] [-Transform <ScriptBlock>]
+Rename-Many -underscore <FileSystemInfo> [-Pattern] <Array> [-Copy <Array>] [-With <String>] [-Start] [-End]
+ [-Paste <String>] [-Drop <String>] [-File] [-Directory] [-Except <String>] [-Include <String>]
+ [-Whole <String>] [-Condition <ScriptBlock>] [-Top <Int32>] [-Transform <ScriptBlock>] [-Context <PSObject>]
+ [-Diagnose] [-WhatIf] [-Confirm] [<CommonParameters>]
+```
+
+### MoveToEnd
+
+```powershell
+Rename-Many -underscore <FileSystemInfo> [-Pattern] <Array> [-With <String>] [-End] [-Paste <String>]
+ [-Drop <String>] [-File] [-Directory] [-Except <String>] [-Include <String>] [-Whole <String>]
+ [-Condition <ScriptBlock>] [-Top <Int32>] [-Transform <ScriptBlock>] [-Context <PSObject>] [-Diagnose]
+ [-WhatIf] [-Confirm] [<CommonParameters>]
+```
+
+### MoveToStart
+
+```powershell
+Rename-Many -underscore <FileSystemInfo> [-Pattern] <Array> [-With <String>] [-Start] [-Paste <String>]
+ [-Drop <String>] [-File] [-Directory] [-Except <String>] [-Include <String>] [-Whole <String>]
+ [-Condition <ScriptBlock>] [-Top <Int32>] [-Transform <ScriptBlock>] [-Context <PSObject>] [-Diagnose]
  [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 
 ### MoveToAnchor
 
 ```powershell
-Rename-Many [-File] [-Directory] -underscore <FileSystemInfo> [-Whole <String>] [-Pattern] <Array>
- -Anchor <Array> [-Relation <String>] [-Copy <Array>] [-Except <String>] [-Include <String>]
- [-Condition <ScriptBlock>] [-Paste <String>] [-Context <PSObject>] [-Diagnose] [-Drop <String>] [-Top <Int32>]
- [-Transform <ScriptBlock>] [-WhatIf] [-Confirm] [<CommonParameters>]
+Rename-Many -underscore <FileSystemInfo> [-Pattern] <Array> -Anchor <Array> [-Relation <String>]
+ [-Copy <Array>] [-With <String>] [-Paste <String>] [-Drop <String>] [-File] [-Directory] [-Except <String>]
+ [-Include <String>] [-Whole <String>] [-Condition <ScriptBlock>] [-Top <Int32>] [-Transform <ScriptBlock>]
+ [-Context <PSObject>] [-Diagnose] [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 
-### ReplaceLiteralWith
+### Append
 
 ```powershell
-Rename-Many [-File] [-Directory] -underscore <FileSystemInfo> [-Whole <String>] [-Pattern] <Array>
- -With <String> [-Except <String>] [-Include <String>] [-Condition <ScriptBlock>] [-Paste <String>]
- [-Context <PSObject>] [-Diagnose] [-Drop <String>] [-Top <Int32>] [-Transform <ScriptBlock>] [-WhatIf]
- [-Confirm] [<CommonParameters>]
+Rename-Many -underscore <FileSystemInfo> [-Copy <Array>] -Append <String> [-File] [-Directory]
+ [-Except <String>] [-Include <String>] [-Whole <String>] [-Condition <ScriptBlock>] [-Top <Int32>]
+ [-Transform <ScriptBlock>] [-Context <PSObject>] [-Diagnose] [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 
-### MoveToStart
+### Prepend
 
 ```powershell
-Rename-Many [-File] [-Directory] -underscore <FileSystemInfo> [-Whole <String>] [-Pattern] <Array>
- [-Except <String>] [-Include <String>] [-Condition <ScriptBlock>] [-Start] [-Paste <String>]
- [-Context <PSObject>] [-Diagnose] [-Drop <String>] [-Top <Int32>] [-Transform <ScriptBlock>] [-WhatIf]
- [-Confirm] [<CommonParameters>]
-```
-
-### MoveToEnd
-
-```powershell
-Rename-Many [-File] [-Directory] -underscore <FileSystemInfo> [-Whole <String>] [-Pattern] <Array>
- [-Except <String>] [-Include <String>] [-Condition <ScriptBlock>] [-End] [-Paste <String>]
- [-Context <PSObject>] [-Diagnose] [-Drop <String>] [-Top <Int32>] [-Transform <ScriptBlock>] [-WhatIf]
- [-Confirm] [<CommonParameters>]
+Rename-Many -underscore <FileSystemInfo> [-Copy <Array>] -Prepend <String> [-File] [-Directory]
+ [-Except <String>] [-Include <String>] [-Whole <String>] [-Condition <ScriptBlock>] [-Top <Int32>]
+ [-Transform <ScriptBlock>] [-Context <PSObject>] [-Diagnose] [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
