@@ -1,4 +1,4 @@
-
+﻿
 function Resolve-ByPlatform {
   <#
   .NAME
@@ -9,7 +9,7 @@ function Resolve-ByPlatform {
   the operating system name as returned by Get-PlatformName.
 
   .DESCRIPTION
-    Provides a way to select data depending on the current OS as determined by 
+    Provides a way to select data depending on the current OS as determined by
   Get-PlatformName.
 
   .PARAMETER Hash

@@ -1,4 +1,4 @@
-
+﻿
 function Resolve-PatternOccurrence {
   <#
   .NAME
@@ -15,7 +15,7 @@ function Resolve-PatternOccurrence {
   .PARAMETER Value
     The value of a regex parameter, which is an array whose first element is the
   pattern and the second if present is the match occurrence.
-  
+
   #>
   param (
     [Parameter(Position = 0)]

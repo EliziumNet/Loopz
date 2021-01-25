@@ -1,11 +1,11 @@
-
+﻿
 function Move-Match {
   <#
   .NAME
     Move-Match
 
   .SYNOPSIS
-    The core move match action function principally used by Rename-Many. Moves a 
+    The core move match action function principally used by Rename-Many. Moves a
   match according to the specified anchor(s).
 
   .DESCRIPTION
@@ -124,7 +124,7 @@ function Move-Match {
   according to the Anchor match, (or indeed $Start or $End) and $Relation. When using $With,
   whatever is defined in the $Anchor match is not removed from $Value (this is different to how
   $Paste works).
-   
+
   #>
   [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSPossibleIncorrectUsageOfAssignmentOperator', '')]
   [Alias('moma')]
@@ -210,7 +210,7 @@ function Move-Match {
     [boolean]$isVanilla = -not($PSBoundParameters.ContainsKey('Copy') -or `
       ($PSBoundParameters.ContainsKey('With') -and -not([string]::IsNullOrEmpty($With))));
 
-    $patternCaptures = get-Captures -MatchObject $patternMatch;  
+    $patternCaptures = get-Captures -MatchObject $patternMatch;
     if ($Diagnose.ToBool()) {
       $groups.Named['Pattern'] = $patternCaptures;
     }

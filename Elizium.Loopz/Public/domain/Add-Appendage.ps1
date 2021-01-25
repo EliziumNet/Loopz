@@ -1,4 +1,4 @@
-
+﻿
 function Add-Appendage {
   <#
   .NAME
@@ -124,7 +124,7 @@ function Add-Appendage {
     else {
       throw [System.Management.Automation.MethodInvocationException]::new(
         "Add-Appendage: Invalid Appendage Type: '$Type', Appendage: '$Appendage'");
-    }    
+    }
   }
 
   [boolean]$success = $([string]::IsNullOrEmpty($failedReason));

@@ -19,6 +19,7 @@ function Update-GroupRefs {
 
   #>
   [OutputType([string])]
+  [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', '')]
   param(
     [Parameter()]
     [string]$Source,

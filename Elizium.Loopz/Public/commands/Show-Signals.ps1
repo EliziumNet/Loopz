@@ -15,10 +15,7 @@ function Show-Signals {
   [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidGlobalVars', '')]
   param(
     [Parameter()]
-    [hashtable]$SourceSignals = $(Get-Signals),
-
-    [Parameter()]
-    [hashtable]$Custom = $global:Loopz.CustomSignals
+    [hashtable]$SourceSignals = $(Get-Signals)
   )
   $result = $SourceSignals;
 

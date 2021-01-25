@@ -47,7 +47,7 @@ function Initialize-ShellOperant {
     BaseFilename = 'undo-rename';
     DisabledEnVar  = 'LOOPZ_REMY_UNDO_DISABLED';
   }
-    
+
   #>
   [OutputType([Operant])]
   param(

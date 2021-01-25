@@ -61,7 +61,7 @@ function Select-Patterns {
     Show lines in all files defined in environment as 'LOOPZ_GREPS_FILTER' that contains
   'foo' but not 'bar':
   greps foo, !bar
-  
+
   #>
   [CmdletBinding()]
   [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingInvokeExpression', '')]
