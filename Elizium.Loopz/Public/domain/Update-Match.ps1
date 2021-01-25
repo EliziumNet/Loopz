@@ -1,4 +1,4 @@
-
+﻿
 function Update-Match {
 
   <#
@@ -19,7 +19,7 @@ function Update-Match {
   With, Copy and Paste that defines what to insert. The user should not be using named
   capture groups in Copy rather, they should be defined inside $Paste and referenced
   inside Paste.
-  
+
   .PARAMETER Copy
     Regular expression string applied to $Value (after the $Pattern match has been removed),
   indicating a portion which should be copied and re-inserted (via the $Paste parameter;

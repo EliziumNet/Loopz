@@ -284,6 +284,82 @@ Describe 'Rename-Many' {
     } # and: Source matches Pattern in middle
   } # given: MoveToEnd
 
+  Context 'given: Prepend' {
+    It 'should: prepend literal text' {
+      $script:expected = @{
+        'loopz.application.t1.log' = 'PREFIX-loopz.application.t1.log';
+        'loopz.application.t2.log' = 'PREFIX-loopz.application.t2.log';
+        'loopz.data.t1.txt'        = 'PREFIX-loopz.data.t1.txt';
+        'loopz.data.t2.txt'        = 'PREFIX-loopz.data.t2.txt';
+        'loopz.data.t3.txt'        = 'PREFIX-loopz.data.t3.txt';
+      }
+
+      Get-ChildItem -Path $directoryPath -File | Rename-Many -Prepend 'PREFIX-' -WhatIf;
+    }
+
+    It 'should: prepend literal text' {
+      $script:expected = @{
+        'loopz.application.t1.log' = 't1_PREFIX-loopz.application.t1.log';
+        'loopz.application.t2.log' = 't2_PREFIX-loopz.application.t2.log';
+        'loopz.data.t1.txt'        = 't1_PREFIX-loopz.data.t1.txt';
+        'loopz.data.t2.txt'        = 't2_PREFIX-loopz.data.t2.txt';
+        'loopz.data.t3.txt'        = 't3_PREFIX-loopz.data.t3.txt';
+      }
+
+      [string]$copy = '(?<header>[\w]+)\.(?<mid>[\w]+).(?<tail>[\w]+)';
+      Get-ChildItem -Path $directoryPath -File | Rename-Many -Prepend '${tail}_PREFIX-' `
+        -Copy $copy -Diagnose;
+    }
+
+    Context 'and: Copy does not match' {
+      It 'should: not rename' {
+        $script:expected = @{}
+
+        [string]$copy = 'blah';
+        Get-ChildItem -Path $directoryPath -File | Rename-Many -Prepend '${tail}_PREFIX-' `
+          -Copy $copy -Diagnose;
+      }
+    }
+  }
+
+  Context 'given: Append' {
+    It 'should: append literal text' {
+      $script:expected = @{
+        'loopz.application.t1.log' = 'loopz.application.t1-POSTFIX.log';
+        'loopz.application.t2.log' = 'loopz.application.t2-POSTFIX.log';
+        'loopz.data.t1.txt'        = 'loopz.data.t1-POSTFIX.txt';
+        'loopz.data.t2.txt'        = 'loopz.data.t2-POSTFIX.txt';
+        'loopz.data.t3.txt'        = 'loopz.data.t3-POSTFIX.txt';
+      }
+
+      Get-ChildItem -Path $directoryPath -File | Rename-Many -Append '-POSTFIX' -WhatIf;
+    }
+
+    It 'should: append literal text' {
+      $script:expected = @{
+        'loopz.application.t1.log' = 'loopz.application.t1-POSTFIX_t1.log';
+        'loopz.application.t2.log' = 'loopz.application.t2-POSTFIX_t2.log';
+        'loopz.data.t1.txt'        = 'loopz.data.t1-POSTFIX_t1.txt';
+        'loopz.data.t2.txt'        = 'loopz.data.t2-POSTFIX_t2.txt';
+        'loopz.data.t3.txt'        = 'loopz.data.t3-POSTFIX_t3.txt';
+      }
+
+      [string]$copy = '(?<header>[\w]+)\.(?<mid>[\w]+).(?<tail>[\w]+)';
+      Get-ChildItem -Path $directoryPath -File | Rename-Many -Append '-POSTFIX_${tail}' `
+        -Copy $copy -Diagnose;
+    }
+
+    Context 'and: Copy does not match' {
+      It 'should: not rename' {
+        $script:expected = @{}
+
+        [string]$copy = 'blah';
+        Get-ChildItem -Path $directoryPath -File | Rename-Many -Append '-POSTFIX_${tail}' `
+          -Copy $copy -Diagnose;
+      }
+    }
+  }
+
   Context 'given: ReplaceWith' {
     Context 'and: Source matches Pattern' {
       Context 'and: Copy is non-regex static text' {
@@ -572,7 +648,7 @@ Describe 'Rename-Many' {
     } # and: Source matches Pattern
   } # given: ReplaceWith
 
-  Context 'given: Diagnose enabled' {
+  Context 'given: Diagnose enabled' { # THESE TESTS ARE IN WRONG SECTION
     Context 'MoveToAnchor' {
       Context 'and: Source matches with Named Captures' {
         Context 'and: Copy matches' {
@@ -596,7 +672,7 @@ Describe 'Rename-Many' {
             }
 
             Context 'and: Drop' {
-              It 'should: do rename; move Pattern match with Copy capture' -Tag 'Current' {
+              It 'should: do rename; move Pattern match with Copy capture' {
                 $script:expected = @{
                   'loopz.application.t1.log' = '[loopz, application.]_application.BEGIN-.t1-application.-loopz-END.log';
                   'loopz.application.t2.log' = '[loopz, application.]_application.BEGIN-.t2-application.-loopz-END.log';
@@ -793,6 +869,24 @@ Describe 'Rename-Many' {
           | Should -Not -Throw;
         }
       } # ReplaceWith
+
+      Context 'Prepend' {
+        It 'should: not throw ParameterBindingException' {
+          {
+            Get-ChildItem -File -Path $sourcePath -Filter $filter | Rename-Many -File `
+              -Prepend 'pre-fix_${_c}_' -Copy '.', f -WhatIf:$whatIf; } `
+          | Should -Not -Throw;
+        }
+      }
+
+      Context 'Append' {
+        It 'should: not throw ParameterBindingException' {
+          {
+            Get-ChildItem -File -Path $sourcePath -Filter $filter | Rename-Many -File `
+              -Append '${_c}_post-fix' -Copy '.', l -WhatIf:$whatIf; } `
+          | Should -Not -Throw;
+        }
+      }
     } # is: valid
 
     Context 'is not: valid (MoveToAnchor)' {
@@ -841,7 +935,7 @@ Describe 'Rename-Many' {
 
     Context 'is not: valid (MoveToEnd)' {
       Context 'and: "Relation" specified' {
-        It 'should: ParameterBindingException' {
+        It 'should: throw ParameterBindingException' {
           {
             Get-ChildItem -File -Path $sourcePath -Filter $filter | Rename-Many -File `
               -Pattern 'data.' -End -Relation 'after' -Whole p -Condition $successCondition -WhatIf:$whatIf; } `
@@ -867,6 +961,46 @@ Describe 'Rename-Many' {
         }
       } # and: "Anchor" specified
     } # is not: valid (MoveToEnd)
+
+    Context 'is not: valid (Prepend)' {
+      Context 'and: "Pattern" specified' {
+        It 'should: throw ParameterBindingException' {
+          {
+            Get-ChildItem -File -Path $sourcePath -Filter $filter | Rename-Many -File `
+              -Pattern 'blah' -Prepend 'prefix' -WhatIf:$whatIf; } `
+          | Assert-Throw -ExceptionType ([ParameterBindingException]);
+        }
+      }
+
+      Context 'and: "Anchor" specified' {
+        It 'should: throw ParameterBindingException' {
+          {
+            Get-ChildItem -File -Path $sourcePath -Filter $filter | Rename-Many -File `
+              -Anchor 'blah' -Prepend 'prefix' -WhatIf:$whatIf; } `
+          | Assert-Throw -ExceptionType ([ParameterBindingException]);
+        }
+      }
+    } # 'is not: valid (Prepend)'
+
+    Context 'is not: valid (Append)' {
+      Context 'and: "Pattern" specified' {
+        It 'should: throw ParameterBindingException' {
+          {
+            Get-ChildItem -File -Path $sourcePath -Filter $filter | Rename-Many -File `
+              -Pattern 'blah' -Append 'postfix' -WhatIf:$whatIf; } `
+          | Assert-Throw -ExceptionType ([ParameterBindingException]);
+        }
+      }
+
+      Context 'and: "Anchor" specified' {
+        It 'should: throw ParameterBindingException' {
+          {
+            Get-ChildItem -File -Path $sourcePath -Filter $filter | Rename-Many -File `
+              -Anchor 'blah' -Append 'postfix' -WhatIf:$whatIf; } `
+          | Assert-Throw -ExceptionType ([ParameterBindingException]);
+        }
+      }
+    } # 'is not: valid (Prepend)'
 
     Context 'is not: valid; given: File & Directory specified together' {
       It 'should: throw ParameterBindingException' {

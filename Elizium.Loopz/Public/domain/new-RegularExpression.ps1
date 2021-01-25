@@ -1,4 +1,4 @@
-
+﻿
 function New-RegularExpression {
   <#
   .NAME
@@ -28,7 +28,7 @@ function New-RegularExpression {
   .PARAMETER WholeWord
     switch parameter to indicate the expression should be wrapped with word boundary
   markers \b, so an $Expression defined as 'foo' would be adjusted to '\bfoo\b'.
-  
+
   #>
   [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions',
     '', Justification = 'Not a state changing function, its a factory')]

@@ -1,5 +1,6 @@
 
 function Update-CustomSignals {
+  [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', '')]
   param(
     [Parameter(Mandatory)]
     [hashtable]$Signals

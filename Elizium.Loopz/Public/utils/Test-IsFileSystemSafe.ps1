@@ -1,4 +1,4 @@
-
+﻿
 function Test-IsFileSystemSafe {
   <#
   .NAME
@@ -18,7 +18,7 @@ function Test-IsFileSystemSafe {
     The string value to check.
 
   .PARAMETER Value
-    
+
 
   #>
   [OutputType([boolean])]

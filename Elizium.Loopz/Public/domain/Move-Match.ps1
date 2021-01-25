@@ -1,11 +1,11 @@
-
+﻿
 function Move-Match {
   <#
   .NAME
     Move-Match
 
   .SYNOPSIS
-    The core move match action function principally used by Rename-Many. Moves a 
+    The core move match action function principally used by Rename-Many. Moves a
   match according to the specified anchor(s).
 
   .DESCRIPTION
@@ -124,7 +124,7 @@ function Move-Match {
   according to the Anchor match, (or indeed $Start or $End) and $Relation. When using $With,
   whatever is defined in the $Anchor match is not removed from $Value (this is different to how
   $Paste works).
-   
+
   #>
   [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSPossibleIncorrectUsageOfAssignmentOperator', '')]
   [Alias('moma')]
@@ -180,27 +180,6 @@ function Move-Match {
     [char]$Marker = 0x20DE
   )
 
-  function update-GroupRefs {
-    [OutputType([string])]
-    param(
-      [Parameter()]
-      [string]$Source,
-
-      [Parameter()]
-      [Hashtable]$Captures
-    )
-
-    [string]$sourceText = $Source;
-    $Captures.GetEnumerator() | ForEach-Object {
-      if ($_.Key -ne '0') {
-        [string]$groupRef = $('${' + $_.Key + '}');
-        $sourceText = $sourceText.Replace($groupRef, $_.Value);
-      }
-    }
-
-    return $sourceText;
-  }
-
   [string]$result = [string]::Empty;
   [string]$failedReason = [string]::Empty;
   [PSCustomObject]$groups = [PSCustomObject]@{
@@ -231,7 +210,7 @@ function Move-Match {
     [boolean]$isVanilla = -not($PSBoundParameters.ContainsKey('Copy') -or `
       ($PSBoundParameters.ContainsKey('With') -and -not([string]::IsNullOrEmpty($With))));
 
-    $patternCaptures = get-Captures -MatchObject $patternMatch;  
+    $patternCaptures = get-Captures -MatchObject $patternMatch;
     if ($Diagnose.ToBool()) {
       $groups.Named['Pattern'] = $patternCaptures;
     }
@@ -388,7 +367,7 @@ function Move-Match {
 
         # Now cross reference the Copy group references
         #
-        $dropText = update-GroupRefs -Source $dropText -Captures $copyCaptures;
+        $dropText = Update-GroupRefs -Source $dropText -Captures $copyCaptures;
       }
 
       if (-not([string]::IsNullOrEmpty($capturedAnchor))) {
@@ -398,7 +377,7 @@ function Move-Match {
       # Now cross reference the Pattern group references
       #
       if ($patternCaptures.Count -gt 0) {
-        $dropText = update-GroupRefs -Source $dropText -Captures $patternCaptures;
+        $dropText = Update-GroupRefs -Source $dropText -Captures $patternCaptures;
       }
 
       $result = $result.Replace([string]$Marker, $dropText);

@@ -107,6 +107,8 @@ $global:Loopz = [PSCustomObject]@{
     'PASTE-B'      = (New-Pair(@('Paste', '🥜')));
     'OVERWRITE-A'  = (New-Pair(@('Overwrite', '♻️')));
     'OVERWRITE-B'  = (New-Pair(@('Overwrite', '❗')));
+    'PREPEND'      = (New-Pair(@('Prepend', '📌')));
+    'APPEND'       = (New-Pair(@('Append', '📌')));
 
     # Thingies
     #
@@ -198,9 +200,9 @@ $global:Loopz = [PSCustomObject]@{
 
   Defaults              = [PSCustomObject]@{
     Remy = [PSCustomObject]@{
-      Marker            = [char]0x2BC1;
+      Marker  = [char]0x2BC1;
 
-      Context           = [PSCustomObject]@{
+      Context = [PSCustomObject]@{
         Title             = 'Rename';
         ItemMessage       = 'Rename Item';
         SummaryMessage    = 'Rename Summary';
