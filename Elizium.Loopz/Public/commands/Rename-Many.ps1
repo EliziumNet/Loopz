@@ -717,6 +717,12 @@ function Rename-Many {
       return $result;
     } # doRenameFsItems
 
+    [scriptblock]$getResult = {
+      param($result)
+
+      $result.GetType() -in @([System.IO.FileInfo], [System.IO.DirectoryInfo]) ? $result.Name : $result;
+    }
+
     [System.IO.FileSystemInfo[]]$collection = @();
   } # begin
 
@@ -729,13 +735,56 @@ function Rename-Many {
   end {
     Write-Debug '<<< Rename-Many <<<';
 
+    # ------------------------------------------------------ [ Init phase ] ---
+    #
+    [hashtable]$signals = $(Get-Signals);
+    [hashtable]$theme = $(Get-KrayolaTheme);
     [boolean]$locked = Get-IsLocked -Variable $(
       [string]::IsNullOrEmpty($Context.Locked) ? 'LOOPZ_REMY_LOCKED' : $Context.Locked
     );
+
+    [string]$title = $Context.psobject.properties.match('Title') -and `
+      -not([string]::IsNullOrEmpty($Context.Title)) `
+      ? $Context.Title : 'Rename';
+
+    if ($locked) {
+      $title = Get-FormattedSignal -Name 'LOCKED' -Signals $signals `
+        -Format '{1} {0} {1}' -CustomLabel $('Locked: ' + $title);
+    }
+
     [boolean]$whatIf = $PSBoundParameters.ContainsKey('WhatIf') -or $locked;
-    [PSCustomObject]$containers = @{
+    [PSCustomObject]$containers = [PSCustomObject]@{
       Wide  = [line]::new();
       Props = [line]::new();
+    }
+
+    [int]$maxItemMessageSize = $Context.ItemMessage.replace(
+      $Loopz.FsItemTypePlaceholder, 'Directory').Length;
+
+    [string]$summaryMessage = $Context.psobject.properties.match('SummaryMessage') -and `
+      -not([string]::IsNullOrEmpty($Context.SummaryMessage)) `
+      ? $Context.SummaryMessage : 'Rename Summary';
+
+    $summaryMessage = Get-FormattedSignal -Name 'SUMMARY-A' -Signals $signals -CustomLabel $summaryMessage;
+
+    [boolean]$doMoveToken = ($PSBoundParameters.ContainsKey('Anchor') -or
+      $PSBoundParameters.ContainsKey('Start') -or $PSBoundParameters.ContainsKey('End'));
+
+    [hashtable]$rendezvous = @{
+      'LOOPZ.WH-FOREACH-DECORATOR.BLOCK'      = $doRenameFsItems;
+      'LOOPZ.WH-FOREACH-DECORATOR.GET-RESULT' = $getResult;
+
+      'LOOPZ.HEADER-BLOCK.CRUMB-SIGNAL'       = 'CRUMB-A';
+      'LOOPZ.HEADER-BLOCK.LINE'               = $LoopzUI.DashLine;
+      'LOOPZ.HEADER-BLOCK.MESSAGE'            = $title;
+
+      'LOOPZ.SUMMARY-BLOCK.LINE'              = $LoopzUI.EqualsLine;
+      'LOOPZ.SUMMARY-BLOCK.MESSAGE'           = $summaryMessage;
+
+      'LOOPZ.REMY.CONTEXT'                    = $Context;
+      'LOOPZ.REMY.MAX-ITEM-MESSAGE-SIZE'      = $maxItemMessageSize;
+      'LOOPZ.REMY.FIXED-INDENT'               = get-fixedIndent -Theme $theme;
+      'LOOPZ.REMY.FROM-LABEL'                 = Get-PaddedLabel -Label 'From' -Width 9;
     }
 
     [string]$adjustedWhole = if ($PSBoundParameters.ContainsKey('Whole')) {
@@ -745,10 +794,36 @@ function Rename-Many {
       [string]::Empty;
     }
 
-    [hashtable]$signals = $(Get-Signals);
+    [PSCustomObject]$bootStrapOptions = [PSCustomObject]@{};
+    if (-not([string]::IsNullOrEmpty($adjustedWhole))) {
+      $bootStrapOptions | Add-Member -MemberType NoteProperty -Name 'Whole' -Value $adjustedWhole;
+    }
 
-    # RegEx/Occurrence parameters
+    [BootStrap]$bootStrap = New-BootStrap `
+      -Exchange $rendezvous `
+      -Containers @{ Wide = [line]::new(); Props = [line]::new(); } `
+      -Signals $signals `
+      -Theme $theme `
+      -Options $bootStrapOptions;
+
+    # ------------------------------------------------ [ Primary Entities ] ---
     #
+
+    # [Pattern]
+    #
+    [PSCustomObject]$patternSpec = [PSCustomObject]@{
+      Activate       = $PSBoundParameters.ContainsKey('Pattern') -and `
+        -not([string]::IsNullOrEmpty($Pattern));
+      SpecType       = 'regex';
+      Name           = 'Pattern';
+      Value          = $Pattern;
+      Signal         = 'PATTERN';
+      WholeSpecifier = 'p';
+      RegExKey       = 'LOOPZ.REMY.PATTERN-REGEX';
+      OccurrenceKey  = 'LOOPZ.REMY.PATTERN-OCC';
+    }
+    $bootStrap.Register($patternSpec);
+
     if ($PSBoundParameters.ContainsKey('Pattern') -and -not([string]::IsNullOrEmpty($Pattern))) {
       [string]$patternExpression, [string]$patternOccurrence = Resolve-PatternOccurrence $Pattern
 
@@ -756,12 +831,61 @@ function Rename-Many {
         -Value $patternExpression -Signals $signals;
     }
 
+    # [Anchor]
+    #
+    [PSCustomObject]$anchorSpec = [PSCustomObject]@{
+      Activate       = $PSBoundParameters.ContainsKey('Anchor') -and `
+        -not([string]::IsNullOrEmpty($Anchor));
+      SpecType       = 'regex';
+      Name           = 'Anchor';
+      Value          = $Anchor;
+      Signal         = 'ANCHOR';
+      WholeSpecifier = 'a';
+      RegExKey       = 'LOOPZ.REMY.ANCHOR';
+      OccurrenceKey  = 'LOOPZ.REMY.ANCHOR-OCC';
+      Keys           = @{
+        'LOOPZ.REMY.ACTION'      = 'Move-Match';
+        'LOOPZ.REMY.ANCHOR-TYPE' = 'MATCHED-ITEM';
+      }
+    }
+    $bootStrap.Register($anchorSpec);
+
     if ($PSBoundParameters.ContainsKey('Anchor')) {
       [string]$anchorExpression, [string]$anchorOccurrence = Resolve-PatternOccurrence $Anchor
 
       Select-SignalContainer -Containers $containers -Name 'REMY.ANCHOR' `
         -Value $anchorExpression -Signals $signals -CustomLabel $('Anchor ({0})' -f $Relation);
     }
+
+    # [Copy]
+    #
+    [PSCustomObject]$copySpec = [PSCustomObject]@{
+      Activate       = $PSBoundParameters.ContainsKey('Copy') -and `
+        -not([string]::IsNullOrEmpty($Copy));
+      SpecType       = 'regex';
+      Name           = 'Copy';
+      Value          = $Copy;
+      Signal         = 'COPY-A';
+      WholeSpecifier = 'c';
+      RegExKey       = 'LOOPZ.REMY.COPY';
+      OccurrenceKey  = 'LOOPZ.REMY.COPY-OCC';
+    }
+    $bootStrap.Register($copySpec);
+
+    # [With]
+    #
+    [PSCustomObject]$withSpec = [PSCustomObject]@{
+      Activate    = $PSBoundParameters.ContainsKey('With') -and `
+        -not([string]::IsNullOrEmpty($With));
+      SpecType    = 'formatter';
+      Name        = 'With';
+      Signal      = 'WITH';
+      SignalValue = $With;
+      Keys        = @{
+        'LOOPZ.REMY.WITH' = $With;
+      }
+    }
+    $bootStrap.Register($withSpec);
 
     if ($PSBoundParameters.ContainsKey('Copy')) {
       [string]$copyExpression, [string]$copyOccurrence = Resolve-PatternOccurrence $Copy;
@@ -777,10 +901,26 @@ function Rename-Many {
       }
       elseif (-not($PSBoundParameters.ContainsKey('Paste'))) {
 
+        # simple?
         Select-SignalContainer -Containers $containers -Name 'CUT-A' `
           -Value $patternExpression -Signals $signals -Force 'Props';
       }
     }
+
+    # [Include]
+    #
+    [PSCustomObject]$includeSpec = [PSCustomObject]@{
+      Activate       = $PSBoundParameters.ContainsKey('Include') -and `
+        -not([string]::IsNullOrEmpty($Include));
+      SpecType       = 'regex';
+      Name           = 'Include';
+      Value          = $Include;
+      Signal         = 'INCLUDE';
+      WholeSpecifier = 'i';
+      RegExKey       = 'LOOPZ.REMY.INCLUDE';
+      OccurrenceKey  = 'LOOPZ.REMY.INCLUDE-OCC';
+    }
+    $bootStrap.Register($includeSpec);
 
     if ($PSBoundParameters.ContainsKey('Include')) {
       [string]$includeExpression, [string]$includeOccurrence = Resolve-PatternOccurrence $Include;
@@ -788,6 +928,19 @@ function Rename-Many {
       Select-SignalContainer -Containers $containers -Name 'INCLUDE' `
         -Value $includeExpression -Signals $signals;
     }
+
+    # [Diagnose]
+    #
+    [PSCustomObject]$diagnoseSpec = [PSCustomObject]@{
+      Activate    = $Diagnose.ToBool();
+      SpecType    = 'signal';
+      Name        = 'Diagnose';
+      Value       = $true;
+      Signal      = 'DIAGNOSTICS';
+      SignalValue = $('[{0}]' -f $signals['SWITCH-ON'].Value);
+      Force       = 'Props';
+    }
+    $bootStrap.Register($diagnoseSpec);
 
     if ($PSBoundParameters.ContainsKey('Diagnose')) {
       [string]$switchOnEmoji = $signals['SWITCH-ON'].Value;
@@ -797,9 +950,6 @@ function Rename-Many {
 
       $containers.Props.Line += $diagnosticsSignal;
     }
-
-    [boolean]$doMoveToken = ($PSBoundParameters.ContainsKey('Anchor') -or
-      $PSBoundParameters.ContainsKey('Start') -or $PSBoundParameters.ContainsKey('End'));
 
     if ($doMoveToken -and ($patternOccurrence -eq '*')) {
       [string]$errorMessage = "'Pattern' wildcard prohibited for move operation (Anchor/Start/End).`r`n";
@@ -822,6 +972,21 @@ function Rename-Many {
         -Value $patternExpression -Signals $signals -Force 'Props';
     }
 
+    # [Paste]
+    #
+    [PSCustomObject]$pasteSpec = [PSCustomObject]@{
+      Activate    = $PSBoundParameters.ContainsKey('Paste') -and `
+        -not([string]::IsNullOrEmpty($Paste));
+      Name        = 'Paste';
+      SpecType    = 'formatter';
+      Signal      = 'PASTE-A';
+      SignalValue = $Paste;
+      Keys        = @{
+        'LOOPZ.REMY.PASTE' = $Paste;
+      }
+    }
+    $bootStrap.Register($pasteSpec);
+
     if ($PSBoundParameters.ContainsKey('Paste')) {
       if (-not(Test-IsFileSystemSafe -Value $Paste)) {
         throw [System.ArgumentException]::new("Paste parameter ('$Paste') contains unsafe characters")
@@ -832,12 +997,6 @@ function Rename-Many {
       }
     }
 
-    [scriptblock]$getResult = {
-      param($result)
-
-      $result.GetType() -in @([System.IO.FileInfo], [System.IO.DirectoryInfo]) ? $result.Name : $result;
-    }
-
     if ($PSBoundParameters.ContainsKey('Pattern')) {
       [regex]$patternRegEx = New-RegularExpression -Expression $patternExpression `
         -WholeWord:$(-not([string]::IsNullOrEmpty($adjustedWhole)) -and ($adjustedWhole -in @('*', 'p')));
@@ -846,26 +1005,263 @@ function Rename-Many {
       [regex]$patternRegEx = $null;
     }
 
-    [string]$title = $Context.psobject.properties.match('Title') -and `
-      -not([string]::IsNullOrEmpty($Context.Title)) `
-      ? $Context.Title : 'Rename';
+    # [Append]
+    #
+    [PSCustomObject]$appendSpec = [PSCustomObject]@{
+      Activate    = $PSBoundParameters.ContainsKey('Append') -and `
+        -not([string]::IsNullOrEmpty($Append));
+      Name        = 'Append';
+      SpecType    = 'formatter';
+      Signal      = 'APPEND';
+      SignalValue = $Append;
+      Keys        = @{
+        'LOOPZ.REMY.APPENDAGE'      = $Append;
+        'LOOPZ.REMY.ACTION'         = 'Add-Appendage';
+        'LOOPZ.REMY.APPENDAGE.TYPE' = 'Append';
+      }
+    }
+    $bootStrap.Register($appendSpec);
 
-    if ($locked) {
-      $title = Get-FormattedSignal -Name 'LOCKED' -Signals $signals `
-        -Format '{1} {0} {1}' -CustomLabel $('Locked: ' + $title);
+    # [Prepend]
+    #
+    [PSCustomObject]$prependSpec = [PSCustomObject]@{
+      Activate    = $PSBoundParameters.ContainsKey('Prepend') -and `
+        -not([string]::IsNullOrEmpty($Prepend));
+      Name        = 'Prepend';
+      SpecType    = 'formatter';
+      Signal      = 'PREPEND';
+      SignalValue = $Prepend;
+      Keys        = @{
+        'LOOPZ.REMY.APPENDAGE'      = $Prepend;
+        'LOOPZ.REMY.ACTION'         = 'Add-Appendage';
+        'LOOPZ.REMY.APPENDAGE.TYPE' = 'Prepend';
+      }
+    }
+    $bootStrap.Register($prependSpec);
+
+    # [Start]
+    #
+    [PSCustomObject]$startSpec = [PSCustomObject]@{
+      Activate    = $PSBoundParameters.ContainsKey('Start') -and $Start;
+      Name        = 'Start';
+      SpecType    = 'signal';
+      Value       = $true;
+      Signal      = 'REMY.ANCHOR';
+      CustomLabel = 'Start';
+      Force       = 'Props';
+      SignalValue = $signals['SWITCH-ON'].Value;
+      Keys        = @{
+        # 'LOOPZ.REMY.ACTION'      = '??';
+        'LOOPZ.REMY.ANCHOR-TYPE' = 'START';
+      };
+    }
+    $bootStrap.Register($startSpec);
+
+    # [End]
+    #
+    [PSCustomObject]$endSpec = [PSCustomObject]@{
+      Activate    = $PSBoundParameters.ContainsKey('End') -and $End;
+      Name        = 'End';
+      SpecType    = 'signal';
+      Value       = $true;
+      Signal      = 'REMY.ANCHOR';
+      CustomLabel = 'End';
+      Force       = 'Props';
+      SignalValue = $signals['SWITCH-ON'].Value;
+      Keys        = @{
+        # 'LOOPZ.REMY.ACTION'      = '??';
+        'LOOPZ.REMY.ANCHOR-TYPE' = 'END';
+      };
+    }
+    $bootStrap.Register($endSpec);
+
+    # [Anchored]
+    #
+    [PSCustomObject]$anchoredSpec = if ($PSBoundParameters.ContainsKey('Start') -and $Start) {
+      [PSCustomObject]@{
+        Activate       = $true;
+        Name           = 'Anchored';
+        SpecType       = 'regex';
+        Value          = $("^*{_dependency}");
+        Dependency     = 'Pattern';
+        WholeSpecifier = 's';
+        RegExKey       = 'LOOPZ.REMY.ANCHORED-REGEX';
+        OccurrenceKey  = 'LOOPZ.REMY.ANCHORED-OCC';
+      }
+    }
+    elseif ($PSBoundParameters.ContainsKey('End') -and $End) {
+      [PSCustomObject]@{
+        Activate       = $true;
+        Name           = 'Anchored';
+        SpecType       = 'regex';
+        Value          = $("*{_dependency}$");
+        Dependency     = 'Pattern';
+        WholeSpecifier = 'e';
+        RegExKey       = 'LOOPZ.REMY.ANCHORED-REGEX';
+        OccurrenceKey  = 'LOOPZ.REMY.ANCHORED-OCC';
+      }
+    }
+    else {
+      $null;
+    }
+    if ($anchoredSpec) {
+      $bootStrap.Register($anchoredSpec);
     }
 
-    [int]$maxItemMessageSize = $Context.ItemMessage.replace(
-      $Loopz.FsItemTypePlaceholder, 'Directory').Length;
+    # [Drop]
+    #
+    [PSCustomObject]$dropSpec = [PSCustomObject]@{
+      Activate    = $PSBoundParameters.ContainsKey('Drop') -and `
+        -not([string]::IsNullOrEmpty($Drop));
+      Name        = 'Drop';
+      SpecType    = 'formatter';
+      Signal      = 'REMY.DROP';
+      SignalValue = $Drop;
+      Force       = 'Wide';
+      Keys        = @{
+        'LOOPZ.REMY.DROP'   = $Drop;
+        'LOOPZ.REMY.MARKER' = $Loopz.Defaults.Remy.Marker;
+      }
+    }
+    $bootStrap.Register($dropSpec);
 
-    [string]$summaryMessage = $Context.psobject.properties.match('SummaryMessage') -and `
-      -not([string]::IsNullOrEmpty($Context.SummaryMessage)) `
-      ? $Context.SummaryMessage : 'Rename Summary';
+    # [Novice]
+    #
+    [PSCustomObject]$noviceSpec = [PSCustomObject]@{
+      Activate    = $locked;
+      Name        = 'Novice';
+      SpecType    = 'signal';
+      Signal      = 'NOVICE';
+      SignalValue = $signals['SWITCH-ON'].Value;
+      Force       = 'Wide';
+    }
+    $bootStrap.Register($noviceSpec);
 
-    $summaryMessage = Get-FormattedSignal -Name 'SUMMARY-A' -Signals $signals -CustomLabel $summaryMessage;
+    # [Transform]
+    #
+    [PSCustomObject]$transformSpec = [PSCustomObject]@{
+      Activate    = $PSBoundParameters.ContainsKey('Transform') -and $Transform;
+      SpecType    = 'signal';
+      Name        = 'Transform';
+      Value       = $Transform;
+      Signal      = 'TRANSFORM';
+      SignalValue = $signals['SWITCH-ON'].Value;
+      Key         = 'LOOPZ.REMY.TRANSFORM';
+      Force       = 'Wide';
+    }
+    $bootStrap.Register($transformSpec);
 
-    [hashtable]$theme = $(Get-KrayolaTheme);
-    [Krayon]$krayon = New-Krayon -Theme $theme;
+    # [Undo]
+    #
+    [PSCustomObject]$operantOptions = [PSCustomObject]@{
+      ShortCode     = $Context.OperantShortCode;
+      OperantName   = 'UndoRename';
+      Shell         = 'PoShShell';
+      BaseFilename  = 'undo-rename';
+      DisabledEnVar = $Context.UndoDisabledEnVar;
+    }
+    [UndoRename]$operant = Initialize-ShellOperant -Options $operantOptions -DryRun:$whatIf;
+
+    [PSCustomObject]$undoSpec = [PSCustomObject]@{
+      Activate    = $true;
+      SpecType    = 'signal';
+      Name        = 'Undo';
+      Signal      = 'REMY.UNDO';
+      SignalValue = $($operant ? $operant.Shell.FullPath : $signals['SWITCH-OFF'].Value);
+      Force       = 'Wide';
+      Keys        = @{
+        'LOOPZ.REMY.UNDO' = $operant;
+      }
+    }
+    $bootStrap.Register($undoSpec);
+
+    [Krayon]$krayon = New-Krayon -Theme $theme; # ???
+
+    # ------------------------------------------------------- [ Relations ] ---
+    #
+
+    # [IsMove]
+    #
+    [PSCustomObject]$isMoveSpec = [PSCustomObject]@{
+      Activator = [scriptblock] {
+        [OutputType([boolean])]
+        param(
+          [hashtable]$Entities,
+          [hashtable]$Relations
+        )
+
+        [boolean]$result = $Entities.ContainsKey('Anchor') -or `
+          $Entities.ContainsKey('Start') -or $Entities.ContainsKey('End');
+
+        return $result;
+      }
+      Name      = 'IsMove';
+      SpecType  = 'simple';
+      Key       = 'LOOPZ.REMY.ACTION';
+      Value     = 'Move-Match';
+    }
+
+    # [Cut]
+    #
+    [PSCustomObject]$cutSpec = [PSCustomObject]@{
+      Activator   = [scriptblock] {
+        [OutputType([boolean])]
+        param(
+          [hashtable]$Entities,
+          [hashtable]$Relations
+        )
+
+        [boolean]$ime = $Relations.ContainsKey('IsMove');
+        [boolean]$result = $Entities.ContainsKey('Pattern') -and -not($ime) -and `
+          -not($Entities.ContainsKey('Copy')) -and `
+          -not($Entities.ContainsKey('With')) -and `
+          -not($Entities.ContainsKey('Paste')) -and `
+          -not($Entities.ContainsKey('Prepend')) -and `
+          -not($Entities.ContainsKey('Append'));
+
+        return $result;
+      }
+      Name        = 'Cut';
+      SpecType    = 'signal';
+      Signal      = 'CUT-A';
+      SignalValue = $signals['SWITCH-ON'].Value;
+      Force       = 'Props';
+    }
+
+    # [IsUpdate]
+    #
+    [PSCustomObject]$isUpdateSpec = [PSCustomObject]@{
+      Activator = [scriptblock] {
+        [OutputType([boolean])]
+        param(
+          [hashtable]$Entities,
+          [hashtable]$Relations
+        )
+        [boolean]$result = $(-not($Relations.Contains('IsMove')) -and `
+            -not($Entities.Contains('Append')) -and `
+            -not($Entities.Contains('Prepend')));
+        return $result;
+      }
+      Name      = 'IsUpdate';
+      SpecType  = 'simple';
+      Keys      = @{
+        'LOOPZ.REMY.ACTION' = 'Move-Match';
+      }
+    }
+
+    # Bootstrap ***
+    #
+    $null = $bootStrap.Build(@($isMoveSpec, $cutSpec, $isUpdateSpec)); # keep the return value
+
+    if ($bootStrap.Contains('IsMove')) {
+      if ([RegexEntity]$pe = $bootStrap.Get('Pattern')) {
+        if ($pe.Occurrence -eq '*') {
+          [string]$errorMessage = "'Pattern' wildcard prohibited for move operation (Anchor/Start/End).`r`n";
+          $errorMessage += "Please use a digit, 'f' (first) or 'l' (last) for Pattern Occurrence";
+          Write-Error $errorMessage -ErrorAction Stop;
+        }
+      }
+    }
 
     [hashtable]$exchange = @{
       'LOOPZ.WH-FOREACH-DECORATOR.BLOCK'      = $doRenameFsItems;
@@ -898,6 +1294,7 @@ function Rename-Many {
       $exchange['LOOPZ.REMY.ACTION'] = 'Move-Match';
     }
     elseif ($PSBoundParameters.ContainsKey('Append')) {
+      # CUT THIS OUT
       $exchange['LOOPZ.REMY.ACTION'] = 'Add-Appendage';
       $exchange['LOOPZ.REMY.APPENDAGE'] = $Append;
       $exchange['LOOPZ.REMY.APPENDAGE.TYPE'] = 'Append';
@@ -906,6 +1303,7 @@ function Rename-Many {
         -Value $Append -Signals $signals;
     }
     elseif ($PSBoundParameters.ContainsKey('Prepend')) {
+      # CUT THIS OUT
       $exchange['LOOPZ.REMY.ACTION'] = 'Add-Appendage';
       $exchange['LOOPZ.REMY.APPENDAGE'] = $Prepend;
       $exchange['LOOPZ.REMY.APPENDAGE.TYPE'] = 'Prepend';
@@ -931,6 +1329,16 @@ function Rename-Many {
       $exchange['LOOPZ.REMY.WITH'] = $With;
     }
 
+    [PSCustomObject]$relationSpec = [PSCustomObject]@{
+      Activate = $PSBoundParameters.ContainsKey('Relation') -and `
+        -not([string]::IsNullOrEmpty($Relation));
+      Name     = 'Relation';
+      SpecType = 'simple';
+      Value    = $Relation;
+      Key      = 'LOOPZ.REMY.RELATION';
+    }
+    $bootStrap.Register($relationSpec);
+
     if ($PSBoundParameters.ContainsKey('Relation')) {
       $exchange['LOOPZ.REMY.RELATION'] = $Relation;
     }
@@ -938,7 +1346,7 @@ function Rename-Many {
     # NB: anchoredRegEx refers to whether -Start or -End anchors have been specified,
     # NOT the -Anchor pattern (when ANCHOR-TYPE = 'MATCHED-ITEM') itself.
     #
-    [regex]$anchoredRegEx = $null;
+    [regex]$anchoredRegEx = $null; # invoke $bootStrap.Get('Anchored')
 
     if ($PSBoundParameters.ContainsKey('Anchor')) {
 
@@ -953,7 +1361,6 @@ function Rename-Many {
 
       Select-SignalContainer -Containers $containers -Name 'REMY.ANCHOR' `
         -Value $signals['SWITCH-ON'].Value -Signals $signals -CustomLabel 'Start' -Force 'Props';
-
       $exchange['LOOPZ.REMY.ANCHOR-TYPE'] = 'START';
 
       [regex]$anchoredRegEx = New-RegularExpression `
@@ -963,7 +1370,6 @@ function Rename-Many {
 
       Select-SignalContainer -Containers $containers -Name 'REMY.ANCHOR' `
         -Value $signals['SWITCH-ON'].Value -Signals $signals -CustomLabel 'End' -Force 'Props';
-
       $exchange['LOOPZ.REMY.ANCHOR-TYPE'] = 'END';
 
       [regex]$anchoredRegEx = New-RegularExpression `
@@ -1002,15 +1408,6 @@ function Rename-Many {
       Select-SignalContainer -Containers $containers -Name 'TRANSFORM' `
         -Value $signals['SWITCH-ON'].Value -Signals $signals -Force 'Wide';
     }
-
-    [PSCustomObject]$operantOptions = [PSCustomObject]@{
-      ShortCode     = $Context.OperantShortCode;
-      OperantName   = 'UndoRename';
-      Shell         = 'PoShShell';
-      BaseFilename  = 'undo-rename';
-      DisabledEnVar = $Context.UndoDisabledEnVar;
-    }
-    [UndoRename]$operant = Initialize-ShellOperant -Options $operantOptions -DryRun:$whatIf;
 
     if ($operant) {
       $exchange['LOOPZ.REMY.UNDO'] = $operant;
@@ -1063,7 +1460,7 @@ function Rename-Many {
         $compoundCondition.InvokeReturnAsIs($pipelineItem);
     }
 
-    [hashtable]$parameters = @{
+    [hashtable]$feParameters = @{
       'Condition' = $invokeCondition;
       'Exchange'  = $exchange;
       'Header'    = $LoopzHelpers.HeaderBlock;
@@ -1072,14 +1469,14 @@ function Rename-Many {
     }
 
     if ($PSBoundParameters.ContainsKey('File')) {
-      $parameters['File'] = $true;
+      $feParameters['File'] = $true;
     }
     elseif ($PSBoundParameters.ContainsKey('Directory')) {
-      $parameters['Directory'] = $true;
+      $feParameters['Directory'] = $true;
     }
 
     if ($PSBoundParameters.ContainsKey('Top')) {
-      $parameters['Top'] = $Top;
+      $feParameters['Top'] = $Top;
     }
 
     if ($whatIf -or $Diagnose.ToBool()) {
@@ -1091,7 +1488,7 @@ function Rename-Many {
     }
 
     try {
-      $null = $collection | Invoke-ForeachFsItem @parameters;
+      $null = $collection | Invoke-ForeachFsItem @feParameters;
     }
     catch {
       # ctrl-c doesn't invoke an exception, it just abandons processing,
