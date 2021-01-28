@@ -1,5 +1,5 @@
-
-Describe 'Bootstrap' {
+using namespace System.Management.Automation;
+Describe 'Bootstrap' -Tag 'Current' {
   BeforeAll {
     Get-Module Elizium.Loopz | Remove-Module
     Import-Module .\Output\Elizium.Loopz\Elizium.Loopz.psm1 `
@@ -8,6 +8,8 @@ Describe 'Bootstrap' {
     InModuleScope Elizium.Loopz {
       [hashtable]$script:_signals = Get-Signals;
       [hashtable]$script:_theme = Get-KrayolaTheme;
+
+      Import-Module Assert;
     }
   }
 
@@ -50,7 +52,7 @@ Describe 'Bootstrap' {
             Signal      = 'PASTE-A';
             SignalValue = '${_a}, __${name}__';
             Force       = 'Props';
-            Keys = @{
+            Keys        = @{
               'LOOPZ.REMY.PASTE' = '${_a}, __${name}__';
             }
           }
@@ -73,7 +75,7 @@ Describe 'Bootstrap' {
             SignalValue = 'clanger';
             Force       = 'Wide';
             Keys        = @{
-              'LOOPZ.REMY.DROP' = 'clanger';
+              'LOOPZ.REMY.DROP'   = 'clanger';
               'LOOPZ.REMY.MARKER' = $Loopz.Defaults.Remy.Marker;
             }
           }
@@ -159,17 +161,6 @@ Describe 'Bootstrap' {
           $_containers.Wide.Line.Count | Should -Be 0;
         }
       }
-
-      It 'should: bind signal' -Skip -Tag 'UNDER CONSTRUCTION' {
-        InModuleScope Elizium.Loopz {
-          # [PSCustomObject]$cutSpec = [PSCustomObject]@{ # SignalParam?
-          #   Activate    = $doCut;
-          #   Signal      = 'CUT-A';
-          #   SignalValue = $signals['SWITCH-ON'].Value;
-          #   Force       = 'Props';
-          # }
-        }
-      }
     } # and: signal entity
 
     Context 'and: simple entity' {
@@ -193,5 +184,112 @@ Describe 'Bootstrap' {
         }
       }
     } # and: simple entity
+
+    Context 'and: Related' {
+      BeforeEach {
+        InModuleScope Elizium.Loopz {
+          [PSCustomObject]$script:_isRelatedToPatternSpec = [PSCustomObject]@{
+            Activator = [scriptblock] {
+              [OutputType([boolean])]
+              param(
+                [hashtable]$Entities,
+                [hashtable]$Relations
+              )
+              return $Entities.ContainsKey('Pattern');
+            }
+            Name      = 'IsRelated';
+            SpecType  = 'simple';
+          }
+        }
+      }
+
+      It 'should: Register spec related to primary entity' {
+        InModuleScope Elizium.Loopz {
+          $_bootStrapper.Register($_patternSpec);
+          $_bootStrapper.Build($_isRelatedToPatternSpec);
+          ($null -ne $_bootStrapper.Get('IsRelated')) | Should -BeTrue;
+        }
+      }
+
+      It 'should: Register spec related to Relation entity' {
+        InModuleScope Elizium.Loopz {
+          [PSCustomObject]$relationSpec = [PSCustomObject]@{
+            Activator = [scriptblock] {
+              [OutputType([boolean])]
+              param(
+                [hashtable]$Entities,
+                [hashtable]$Relations
+              )
+              return $Relations.ContainsKey('IsRelated');
+            }
+            Name      = 'Relation';
+            SpecType  = 'simple';
+          }
+          $_bootStrapper.Register($_patternSpec);
+          $_bootStrapper.Build(@($_isRelatedToPatternSpec, $relationSpec));
+          ($null -ne $_bootStrapper.Get('Relation')) | Should -BeTrue;
+        }
+      }
+    }
+  }
+
+  Context 'given: invalid spec' {
+    BeforeEach {
+      InModuleScope Elizium.Loopz {
+        [PSCustomObject]$script:_invalidSpec = [PSCustomObject]@{
+          SpecType    = 'formatter';
+          Mutable     = $true;
+          Shade       = 'dark';
+          Shape       = 'rectangle';
+          Name        = 'Invalid';
+          Signal      = 'INVALID';
+          SignalValue = 'computer says no';
+        }
+      }
+    }
+
+    Context 'and: missing single item' {
+      It 'should: throw' {
+        InModuleScope Elizium.Loopz {
+          {
+            [FormatterEntity]$entity = $_bootStrapper.Create($_invalidSpec);
+            $entity.Require('Widget');
+          } | Assert-Throw -ExceptionType ([MethodInvocationException]);
+        }
+      }
+    }
+
+    Context 'and: contains more than 1 of' {
+      It 'should: throw' {
+        InModuleScope Elizium.Loopz {
+          {
+            [FormatterEntity]$entity = $_bootStrapper.Create($_invalidSpec);
+            $entity.RequireOnlyOne(@('Mutable', 'Shape'));
+          } | Assert-Throw -ExceptionType ([MethodInvocationException]);
+        }
+      }
+    }
+
+    Context 'and: does not contain all' {
+      It 'should: throw' {
+        InModuleScope Elizium.Loopz {
+          {
+            [FormatterEntity]$entity = $_bootStrapper.Create($_invalidSpec);
+            $entity.RequireAll(@('Mutable', 'Shape', 'Widget'));
+          } | Assert-Throw -ExceptionType ([MethodInvocationException]);
+        }
+      }
+    }
+
+    Context 'and: does not contain any of' {
+      It 'should: throw' {
+        InModuleScope Elizium.Loopz {
+          {
+            [FormatterEntity]$entity = $_bootStrapper.Create($_invalidSpec);
+            $entity.RequireAny(@('Type', 'Sides', 'Widget'));
+          } | Assert-Throw -ExceptionType ([MethodInvocationException]);
+        }
+      }
+    }
   }
 }

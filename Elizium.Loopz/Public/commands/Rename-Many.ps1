@@ -481,6 +481,9 @@ function Rename-Many {
       [boolean]$performDiagnosis = ($_exchange.ContainsKey('LOOPZ.DIAGNOSE') -and
         $_exchange['LOOPZ.DIAGNOSE']);
 
+      # ------------------------------------------ [ Bind action parameters ] ---
+      #
+
       if ($action -eq 'Add-Appendage') {
         [hashtable]$actionParameters = @{
           'Value'     = $adjustedName;
@@ -498,8 +501,8 @@ function Rename-Many {
           ? $_exchange['LOOPZ.REMY.PATTERN-OCC'] : 'f';
 
         if ($action -eq 'Move-Match') {
-          if ($_exchange.ContainsKey('LOOPZ.REMY.ANCHOR')) {
-            $actionParameters['Anchor'] = $_exchange['LOOPZ.REMY.ANCHOR'];
+          if ($_exchange.ContainsKey('LOOPZ.REMY.ANCHOR.REGEX')) {
+            $actionParameters['Anchor'] = $_exchange['LOOPZ.REMY.ANCHOR.REGEX'];
           }
           if ($_exchange.ContainsKey('LOOPZ.REMY.ANCHOR-OCC')) {
             $actionParameters['AnchorOccurrence'] = $_exchange['LOOPZ.REMY.ANCHOR-OCC'];
@@ -536,8 +539,8 @@ function Rename-Many {
         $actionParameters['Diagnose'] = $_exchange['LOOPZ.DIAGNOSE']
       }
 
-      if ($_exchange.ContainsKey('LOOPZ.REMY.COPY')) {
-        $actionParameters['Copy'] = $_exchange['LOOPZ.REMY.COPY'];
+      if ($_exchange.ContainsKey('LOOPZ.REMY.COPY.REGEX')) {
+        $actionParameters['Copy'] = $_exchange['LOOPZ.REMY.COPY.REGEX'];
 
         if ($_exchange.ContainsKey('LOOPZ.REMY.COPY-OCC')) {
           $actionParameters['CopyOccurrence'] = $_exchange['LOOPZ.REMY.COPY-OCC'];
@@ -551,12 +554,12 @@ function Rename-Many {
         $actionParameters['Paste'] = $_exchange['LOOPZ.REMY.PASTE']
       }
 
+      # -------------------------------------------------- [ Execute action ] ---
+      #
+
       [line]$properties = [line]::new();
       [line[]]$lines = @();
       [hashtable]$signals = $_exchange['LOOPZ.SIGNALS'];
-
-      # Perform Rename Action, then post process
-      #
       [PSCustomObject]$actionResult = & $action @actionParameters;
       [string]$newItemName = $actionResult.Payload;
 
@@ -735,7 +738,7 @@ function Rename-Many {
   end {
     Write-Debug '<<< Rename-Many <<<';
 
-    # ------------------------------------------------------ [ Init phase ] ---
+    # ------------------------------------------------------ [ Init Phase ] ---
     #
     [hashtable]$signals = $(Get-Signals);
     [hashtable]$theme = $(Get-KrayolaTheme);
@@ -766,9 +769,6 @@ function Rename-Many {
       ? $Context.SummaryMessage : 'Rename Summary';
 
     $summaryMessage = Get-FormattedSignal -Name 'SUMMARY-A' -Signals $signals -CustomLabel $summaryMessage;
-
-    [boolean]$doMoveToken = ($PSBoundParameters.ContainsKey('Anchor') -or
-      $PSBoundParameters.ContainsKey('Start') -or $PSBoundParameters.ContainsKey('End'));
 
     [hashtable]$rendezvous = @{
       'LOOPZ.WH-FOREACH-DECORATOR.BLOCK'      = $doRenameFsItems;
@@ -841,7 +841,7 @@ function Rename-Many {
       Value          = $Anchor;
       Signal         = 'ANCHOR';
       WholeSpecifier = 'a';
-      RegExKey       = 'LOOPZ.REMY.ANCHOR';
+      RegExKey       = 'LOOPZ.REMY.ANCHOR.REGEX';
       OccurrenceKey  = 'LOOPZ.REMY.ANCHOR-OCC';
       Keys           = @{
         'LOOPZ.REMY.ACTION'      = 'Move-Match';
@@ -849,13 +849,6 @@ function Rename-Many {
       }
     }
     $bootStrap.Register($anchorSpec);
-
-    if ($PSBoundParameters.ContainsKey('Anchor')) {
-      [string]$anchorExpression, [string]$anchorOccurrence = Resolve-PatternOccurrence $Anchor
-
-      Select-SignalContainer -Containers $containers -Name 'REMY.ANCHOR' `
-        -Value $anchorExpression -Signals $signals -CustomLabel $('Anchor ({0})' -f $Relation);
-    }
 
     # [Copy]
     #
@@ -867,7 +860,7 @@ function Rename-Many {
       Value          = $Copy;
       Signal         = 'COPY-A';
       WholeSpecifier = 'c';
-      RegExKey       = 'LOOPZ.REMY.COPY';
+      RegExKey       = 'LOOPZ.REMY.COPY.REGEX';
       OccurrenceKey  = 'LOOPZ.REMY.COPY-OCC';
     }
     $bootStrap.Register($copySpec);
@@ -879,6 +872,7 @@ function Rename-Many {
         -not([string]::IsNullOrEmpty($With));
       SpecType    = 'formatter';
       Name        = 'With';
+      Value       = $With;
       Signal      = 'WITH';
       SignalValue = $With;
       Keys        = @{
@@ -886,26 +880,6 @@ function Rename-Many {
       }
     }
     $bootStrap.Register($withSpec);
-
-    if ($PSBoundParameters.ContainsKey('Copy')) {
-      [string]$copyExpression, [string]$copyOccurrence = Resolve-PatternOccurrence $Copy;
-
-      Select-SignalContainer -Containers $containers -Name 'COPY-A' `
-        -Value $copyExpression -Signals $signals;
-    }
-    elseif ($PSBoundParameters.ContainsKey('With')) {
-      if (-not([string]::IsNullOrEmpty($With))) {
-
-        Select-SignalContainer -Containers $containers -Name 'WITH' `
-          -Value $With -Signals $signals;
-      }
-      elseif (-not($PSBoundParameters.ContainsKey('Paste'))) {
-
-        # simple?
-        Select-SignalContainer -Containers $containers -Name 'CUT-A' `
-          -Value $patternExpression -Signals $signals -Force 'Props';
-      }
-    }
 
     # [Include]
     #
@@ -916,18 +890,24 @@ function Rename-Many {
       Name           = 'Include';
       Value          = $Include;
       Signal         = 'INCLUDE';
-      WholeSpecifier = 'i';
-      RegExKey       = 'LOOPZ.REMY.INCLUDE';
+      RegExKey       = 'LOOPZ.REMY.INCLUDE.REGEX';
       OccurrenceKey  = 'LOOPZ.REMY.INCLUDE-OCC';
     }
     $bootStrap.Register($includeSpec);
 
-    if ($PSBoundParameters.ContainsKey('Include')) {
-      [string]$includeExpression, [string]$includeOccurrence = Resolve-PatternOccurrence $Include;
-
-      Select-SignalContainer -Containers $containers -Name 'INCLUDE' `
-        -Value $includeExpression -Signals $signals;
+    # [Exclude]
+    #
+    [PSCustomObject]$excludeSpec = [PSCustomObject]@{
+      Activate      = $PSBoundParameters.ContainsKey('Exclude') -and `
+        -not([string]::IsNullOrEmpty($Exclude));
+      SpecType      = 'regex';
+      Name          = 'Exclude';
+      Value         = $Exclude;
+      Signal        = 'EXCLUDE';
+      RegExKey      = 'LOOPZ.REMY.EXCLUDE.REGEX';
+      OccurrenceKey = 'LOOPZ.REMY.EXCLUDE-OCC';
     }
+    $bootStrap.Register($excludeSpec);
 
     # [Diagnose]
     #
@@ -942,42 +922,13 @@ function Rename-Many {
     }
     $bootStrap.Register($diagnoseSpec);
 
-    if ($PSBoundParameters.ContainsKey('Diagnose')) {
-      [string]$switchOnEmoji = $signals['SWITCH-ON'].Value;
-
-      [couplet]$diagnosticsSignal = Get-FormattedSignal -Name 'DIAGNOSTICS' `
-        -Signals $signals -Value $('[{0}]' -f $switchOnEmoji);
-
-      $containers.Props.Line += $diagnosticsSignal;
-    }
-
-    if ($doMoveToken -and ($patternOccurrence -eq '*')) {
-      [string]$errorMessage = "'Pattern' wildcard prohibited for move operation (Anchor/Start/End).`r`n";
-      $errorMessage += "Please use a digit, 'f' (first) or 'l' (last) for Pattern Occurrence";
-      Write-Error $errorMessage -ErrorAction Stop;
-    }
-
-    [boolean]$doCut = (
-      $PSBoundParameters.ContainsKey('Pattern') -and
-      -not($doMoveToken) -and
-      -not($PSBoundParameters.ContainsKey('Copy')) -and
-      -not($PSBoundParameters.ContainsKey('With')) -and
-      -not($PSBoundParameters.ContainsKey('Paste')) -and
-      -not($PSBoundParameters.ContainsKey('Prepend')) -and
-      -not($PSBoundParameters.ContainsKey('Append'))
-    )
-
-    if ($doCut) {
-      Select-SignalContainer -Containers $containers -Name 'CUT-A' `
-        -Value $patternExpression -Signals $signals -Force 'Props';
-    }
-
     # [Paste]
     #
     [PSCustomObject]$pasteSpec = [PSCustomObject]@{
       Activate    = $PSBoundParameters.ContainsKey('Paste') -and `
         -not([string]::IsNullOrEmpty($Paste));
       Name        = 'Paste';
+      Value       = $Paste;
       SpecType    = 'formatter';
       Signal      = 'PASTE-A';
       SignalValue = $Paste;
@@ -987,30 +938,13 @@ function Rename-Many {
     }
     $bootStrap.Register($pasteSpec);
 
-    if ($PSBoundParameters.ContainsKey('Paste')) {
-      if (-not(Test-IsFileSystemSafe -Value $Paste)) {
-        throw [System.ArgumentException]::new("Paste parameter ('$Paste') contains unsafe characters")
-      }
-      if (-not([string]::IsNullOrEmpty($Paste))) {
-        Select-SignalContainer -Containers $containers -Name 'PASTE-A' `
-          -Value $Paste -Signals $signals;
-      }
-    }
-
-    if ($PSBoundParameters.ContainsKey('Pattern')) {
-      [regex]$patternRegEx = New-RegularExpression -Expression $patternExpression `
-        -WholeWord:$(-not([string]::IsNullOrEmpty($adjustedWhole)) -and ($adjustedWhole -in @('*', 'p')));
-    }
-    else {
-      [regex]$patternRegEx = $null;
-    }
-
     # [Append]
     #
     [PSCustomObject]$appendSpec = [PSCustomObject]@{
       Activate    = $PSBoundParameters.ContainsKey('Append') -and `
         -not([string]::IsNullOrEmpty($Append));
       Name        = 'Append';
+      Value       = $Append;
       SpecType    = 'formatter';
       Signal      = 'APPEND';
       SignalValue = $Append;
@@ -1028,6 +962,7 @@ function Rename-Many {
       Activate    = $PSBoundParameters.ContainsKey('Prepend') -and `
         -not([string]::IsNullOrEmpty($Prepend));
       Name        = 'Prepend';
+      Value       = $Prepend;
       SpecType    = 'formatter';
       Signal      = 'PREPEND';
       SignalValue = $Prepend;
@@ -1051,7 +986,7 @@ function Rename-Many {
       Force       = 'Props';
       SignalValue = $signals['SWITCH-ON'].Value;
       Keys        = @{
-        # 'LOOPZ.REMY.ACTION'      = '??';
+        'LOOPZ.REMY.ACTION'      = 'Move-Match';
         'LOOPZ.REMY.ANCHOR-TYPE' = 'START';
       };
     }
@@ -1069,7 +1004,7 @@ function Rename-Many {
       Force       = 'Props';
       SignalValue = $signals['SWITCH-ON'].Value;
       Keys        = @{
-        # 'LOOPZ.REMY.ACTION'      = '??';
+        'LOOPZ.REMY.ACTION'      = 'Move-Match';
         'LOOPZ.REMY.ANCHOR-TYPE' = 'END';
       };
     }
@@ -1084,7 +1019,6 @@ function Rename-Many {
         SpecType       = 'regex';
         Value          = $("^*{_dependency}");
         Dependency     = 'Pattern';
-        WholeSpecifier = 's';
         RegExKey       = 'LOOPZ.REMY.ANCHORED-REGEX';
         OccurrenceKey  = 'LOOPZ.REMY.ANCHORED-OCC';
       }
@@ -1096,7 +1030,6 @@ function Rename-Many {
         SpecType       = 'regex';
         Value          = $("*{_dependency}$");
         Dependency     = 'Pattern';
-        WholeSpecifier = 'e';
         RegExKey       = 'LOOPZ.REMY.ANCHORED-REGEX';
         OccurrenceKey  = 'LOOPZ.REMY.ANCHORED-OCC';
       }
@@ -1114,6 +1047,7 @@ function Rename-Many {
       Activate    = $PSBoundParameters.ContainsKey('Drop') -and `
         -not([string]::IsNullOrEmpty($Drop));
       Name        = 'Drop';
+      Value       = $Drop;
       SpecType    = 'formatter';
       Signal      = 'REMY.DROP';
       SignalValue = $Drop;
@@ -1143,11 +1077,12 @@ function Rename-Many {
       Activate    = $PSBoundParameters.ContainsKey('Transform') -and $Transform;
       SpecType    = 'signal';
       Name        = 'Transform';
-      Value       = $Transform;
       Signal      = 'TRANSFORM';
       SignalValue = $signals['SWITCH-ON'].Value;
-      Key         = 'LOOPZ.REMY.TRANSFORM';
       Force       = 'Wide';
+      Keys        = @{
+        'LOOPZ.REMY.TRANSFORM' = $Transform;
+      }
     }
     $bootStrap.Register($transformSpec);
 
@@ -1175,12 +1110,25 @@ function Rename-Many {
     }
     $bootStrap.Register($undoSpec);
 
-    [Krayon]$krayon = New-Krayon -Theme $theme; # ???
+    # [Relation]
+    #
+    [PSCustomObject]$relationSpec = [PSCustomObject]@{
+      Activate = $PSBoundParameters.ContainsKey('Relation') -and `
+        -not([string]::IsNullOrEmpty($Relation));
+      Name     = 'Relation';
+      SpecType = 'simple';
+      Value    = $Relation;
+      Keys     = @{
+        'LOOPZ.REMY.RELATION' = $Relation;
+      }
+    }
+    $bootStrap.Register($relationSpec);
 
     # ------------------------------------------------------- [ Relations ] ---
     #
 
-    # [IsMove]
+    # [IsMove] (Doesn't need to define the action, its simply a flag. To determine
+    # if the operation is a move, can use the presence of this entity as an indicator)
     #
     [PSCustomObject]$isMoveSpec = [PSCustomObject]@{
       Activator = [scriptblock] {
@@ -1197,8 +1145,6 @@ function Rename-Many {
       }
       Name      = 'IsMove';
       SpecType  = 'simple';
-      Key       = 'LOOPZ.REMY.ACTION';
-      Value     = 'Move-Match';
     }
 
     # [Cut]
@@ -1245,187 +1191,55 @@ function Rename-Many {
       Name      = 'IsUpdate';
       SpecType  = 'simple';
       Keys      = @{
-        'LOOPZ.REMY.ACTION' = 'Move-Match';
+        'LOOPZ.REMY.ACTION' = 'Update-Match';
       }
     }
 
     # Bootstrap ***
     #
-    $null = $bootStrap.Build(@($isMoveSpec, $cutSpec, $isUpdateSpec)); # keep the return value
+    $null = $bootStrap.Build(@($isMoveSpec, $cutSpec, $isUpdateSpec));
 
-    if ($bootStrap.Contains('IsMove')) {
-      if ([RegexEntity]$pe = $bootStrap.Get('Pattern')) {
-        if ($pe.Occurrence -eq '*') {
-          [string]$errorMessage = "'Pattern' wildcard prohibited for move operation (Anchor/Start/End).`r`n";
-          $errorMessage += "Please use a digit, 'f' (first) or 'l' (last) for Pattern Occurrence";
-          Write-Error $errorMessage -ErrorAction Stop;
-        }
-      }
-    }
-
-    [hashtable]$exchange = @{
-      'LOOPZ.WH-FOREACH-DECORATOR.BLOCK'      = $doRenameFsItems;
-      'LOOPZ.WH-FOREACH-DECORATOR.GET-RESULT' = $getResult;
-
-      'LOOPZ.HEADER-BLOCK.CRUMB-SIGNAL'       = 'CRUMB-A';
-      'LOOPZ.HEADER-BLOCK.LINE'               = $LoopzUI.DashLine;
-      'LOOPZ.HEADER-BLOCK.MESSAGE'            = $title;
-
-      'LOOPZ.SUMMARY-BLOCK.LINE'              = $LoopzUI.EqualsLine;
-      'LOOPZ.SUMMARY-BLOCK.MESSAGE'           = $summaryMessage;
-
-      'LOOPZ.REMY.CONTEXT'                    = $Context;
-      'LOOPZ.REMY.MAX-ITEM-MESSAGE-SIZE'      = $maxItemMessageSize;
-      'LOOPZ.REMY.FIXED-INDENT'               = $(get-fixedIndent -Theme $theme);
-      'LOOPZ.REMY.FROM-LABEL'                 = Get-PaddedLabel -Label 'From' -Width 9;
-
-      'LOOPZ.SIGNALS'                         = $signals;
-      'LOOPZ.KRAYON'                          = $krayon;
-    }
-
-    if ($PSBoundParameters.ContainsKey('Pattern')) {
-      $exchange['LOOPZ.REMY.PATTERN-REGEX'] = $patternRegEx;
-      $exchange['LOOPZ.REMY.PATTERN-OCC'] = $patternOccurrence;
-    }
-
-    # Define the operation action
+    # --------------------------------------- [ Bootstrap dependent setup ] ---
     #
-    if ($doMoveToken) {
-      $exchange['LOOPZ.REMY.ACTION'] = 'Move-Match';
-    }
-    elseif ($PSBoundParameters.ContainsKey('Append')) {
-      # CUT THIS OUT
-      $exchange['LOOPZ.REMY.ACTION'] = 'Add-Appendage';
-      $exchange['LOOPZ.REMY.APPENDAGE'] = $Append;
-      $exchange['LOOPZ.REMY.APPENDAGE.TYPE'] = 'Append';
 
-      Select-SignalContainer -Containers $containers -Name 'APPEND' `
-        -Value $Append -Signals $signals;
-    }
-    elseif ($PSBoundParameters.ContainsKey('Prepend')) {
-      # CUT THIS OUT
-      $exchange['LOOPZ.REMY.ACTION'] = 'Add-Appendage';
-      $exchange['LOOPZ.REMY.APPENDAGE'] = $Prepend;
-      $exchange['LOOPZ.REMY.APPENDAGE.TYPE'] = 'Prepend';
-
-      Select-SignalContainer -Containers $containers -Name 'PREPEND' `
-        -Value $Prepend -Signals $signals;
-    }
-    else {
-      $exchange['LOOPZ.REMY.ACTION'] = 'Update-Match';
-    }
-
-    if ($PSBoundParameters.ContainsKey('Copy')) {
-      [regex]$copyRegEx = New-RegularExpression -Expression $copyExpression `
-        -WholeWord:$(-not([string]::IsNullOrEmpty($adjustedWhole)) -and ($adjustedWhole -in @('*', 'c')));
-
-      $exchange['LOOPZ.REMY.COPY-OCC'] = $copyOccurrence;
-      $exchange['LOOPZ.REMY.COPY'] = $copyRegEx;
-    }
-    elseif ($PSBoundParameters.ContainsKey('With')) {
-      if (-not(Test-IsFileSystemSafe -Value $With)) {
-        throw [System.ArgumentException]::new("With parameter ('$With') contains unsafe characters")
+    [RegexEntity]$patternEntity = $bootStrap.Get('Pattern');
+    if ($bootStrap.Contains('IsMove')) {
+      if ($patternEntity -and $patternEntity.Occurrence -eq '*') {
+        [string]$errorMessage = "'Pattern' wildcard prohibited for move operation (Anchor/Start/End).`r`n";
+        $errorMessage += "Please use a digit, 'f' (first) or 'l' (last) for Pattern Occurrence";
+        Write-Error $errorMessage -ErrorAction Stop;
       }
-      $exchange['LOOPZ.REMY.WITH'] = $With;
-    }
-
-    [PSCustomObject]$relationSpec = [PSCustomObject]@{
-      Activate = $PSBoundParameters.ContainsKey('Relation') -and `
-        -not([string]::IsNullOrEmpty($Relation));
-      Name     = 'Relation';
-      SpecType = 'simple';
-      Value    = $Relation;
-      Key      = 'LOOPZ.REMY.RELATION';
-    }
-    $bootStrap.Register($relationSpec);
-
-    if ($PSBoundParameters.ContainsKey('Relation')) {
-      $exchange['LOOPZ.REMY.RELATION'] = $Relation;
     }
 
     # NB: anchoredRegEx refers to whether -Start or -End anchors have been specified,
     # NOT the -Anchor pattern (when ANCHOR-TYPE = 'MATCHED-ITEM') itself.
     #
-    [regex]$anchoredRegEx = $null; # invoke $bootStrap.Get('Anchored')
-
-    if ($PSBoundParameters.ContainsKey('Anchor')) {
-
-      [regex]$anchorRegEx = New-RegularExpression -Expression $anchorExpression `
-        -WholeWord:$(-not([string]::IsNullOrEmpty($adjustedWhole)) -and ($adjustedWhole -in @('*', 'a')));
-
-      $exchange['LOOPZ.REMY.ANCHOR-OCC'] = $anchorOccurrence;
-      $exchange['LOOPZ.REMY.ANCHOR-TYPE'] = 'MATCHED-ITEM';
-      $exchange['LOOPZ.REMY.ANCHOR'] = $anchorRegEx;
-    }
-    elseif ($PSBoundParameters.ContainsKey('Start')) {
-
-      Select-SignalContainer -Containers $containers -Name 'REMY.ANCHOR' `
-        -Value $signals['SWITCH-ON'].Value -Signals $signals -CustomLabel 'Start' -Force 'Props';
-      $exchange['LOOPZ.REMY.ANCHOR-TYPE'] = 'START';
-
-      [regex]$anchoredRegEx = New-RegularExpression `
-        -Expression $('^' + $patternExpression);
-    }
-    elseif ($PSBoundParameters.ContainsKey('End')) {
-
-      Select-SignalContainer -Containers $containers -Name 'REMY.ANCHOR' `
-        -Value $signals['SWITCH-ON'].Value -Signals $signals -CustomLabel 'End' -Force 'Props';
-      $exchange['LOOPZ.REMY.ANCHOR-TYPE'] = 'END';
-
-      [regex]$anchoredRegEx = New-RegularExpression `
-        -Expression $($patternExpression + '$');
-    }
-
-    if ($PSBoundParameters.ContainsKey('Drop') -and -not([string]::IsNullOrEmpty($Drop))) {
-      if (-not(Test-IsFileSystemSafe -Value $Drop)) {
-        throw [System.ArgumentException]::new("Drop parameter ('$Drop') contains unsafe characters")
-      }
-      Select-SignalContainer -Containers $containers -Name 'REMY.DROP' `
-        -Value $Drop -Signals $signals -Force 'Wide';
-
-      $exchange['LOOPZ.REMY.DROP'] = $Drop;
-      $exchange['LOOPZ.REMY.MARKER'] = $Loopz.Defaults.Remy.Marker;
-    }
-
-    if ($locked) {
-      Select-SignalContainer -Containers $containers -Name 'NOVICE' `
-        -Value $signals['SWITCH-ON'].Value -Signals $signals -Force 'Wide';
-    }
-
-    [boolean]$includeDefined = $PSBoundParameters.ContainsKey('Include');
-    [regex]$includeRegEx = $includeDefined `
-      ? (New-RegularExpression -Expression $includeExpression `
-        -WholeWord:$(-not([string]::IsNullOrEmpty($adjustedWhole)) -and ($adjustedWhole -in @('*', 'i')))) `
-      : $null;
-
-    if ($PSBoundParameters.ContainsKey('Paste')) {
-      $exchange['LOOPZ.REMY.PASTE'] = $Paste;
-    }
-
-    if ($PSBoundParameters.ContainsKey('Transform')) {
-      $exchange['LOOPZ.REMY.TRANSFORM'] = $Transform;
-
-      Select-SignalContainer -Containers $containers -Name 'TRANSFORM' `
-        -Value $signals['SWITCH-ON'].Value -Signals $signals -Force 'Wide';
-    }
-
-    if ($operant) {
-      $exchange['LOOPZ.REMY.UNDO'] = $operant;
-
-      Select-SignalContainer -Containers $containers -Name 'REMY.UNDO' `
-        -Value $operant.Shell.FullPath -Signals $signals -Force 'Wide';
+    [regex]$anchoredRegEx = if ([RegexEntity]$ae = $bootStrap.Get('Anchored')) {
+      $ae.RegEx;
     }
     else {
-      Select-SignalContainer -Containers $containers -Name 'REMY.UNDO' `
-        -Value $signals['SWITCH-OFF'].Value -Signals $signals -Force 'Wide';
+      $null;
     }
 
-    if ($containers.Wide.Line.Length -gt 0) {
-      $exchange['LOOPZ.SUMMARY-BLOCK.WIDE-ITEMS'] = $containers.Wide;
+    [regex]$includedRegEx = if ([RegExEntity]$ie = $bootStrap.Get('Include')) {
+      $ie.RexEx;
+    }
+    else {
+      $null;
     }
 
-    if ($containers.Props.Line.Length -gt 0) {
-      $exchange['LOOPZ.SUMMARY.PROPERTIES'] = $containers.Props;
+    [regex]$excludedRegEx = if ([RegExEntity]$ee = $bootStrap.Get('Exclude')) {
+      $ee.RexEx;
+    }
+    else {
+      $null;
+    }
+
+    [regex]$patternRegEx = if ($patternEntity) {
+      $patternEntity.RegEx;
+    }
+    else {
+      $null;
     }
 
     [scriptblock]$clientCondition = $Condition;
@@ -1440,9 +1254,6 @@ function Rename-Many {
       return $($clientResult -and -not($isAlreadyAnchoredAt));
     };
 
-    [regex]$excludedRegEx = [string]::IsNullOrEmpty($Except) `
-      ? $null : $(New-RegularExpression -Expression $Except);
-
     [scriptblock]$invokeCondition = {
       param(
         [System.IO.FileSystemInfo]$pipelineItem
@@ -1452,7 +1263,7 @@ function Rename-Many {
       # overflow due to infinite recursion. We need to use a temporary variable so that
       # the client's Condition (Rename-Many) is not accidentally hidden.
       #
-      [boolean]$isIncluded = $includeDefined ? $includeRegEx.IsMatch($pipelineItem.Name) : $true;
+      [boolean]$isIncluded = ($null -ne $includedRegEx) ? $includedRegEx.IsMatch($pipelineItem.Name) : $true;
       [boolean]$patternIsMatch = (-not($patternRegEx) -or ($patternRegEx.IsMatch($pipelineItem.Name)));
 
       return $patternIsMatch -and $isIncluded -and `
@@ -1460,9 +1271,12 @@ function Rename-Many {
         $compoundCondition.InvokeReturnAsIs($pipelineItem);
     }
 
+    # ------------------------------------------------- [ Execution Phase ] ---
+    #
+
     [hashtable]$feParameters = @{
       'Condition' = $invokeCondition;
-      'Exchange'  = $exchange;
+      'Exchange'  = $rendezvous;
       'Header'    = $LoopzHelpers.HeaderBlock;
       'Summary'   = $LoopzHelpers.SummaryBlock;
       'Block'     = $LoopzHelpers.WhItemDecoratorBlock;
@@ -1480,11 +1294,11 @@ function Rename-Many {
     }
 
     if ($whatIf -or $Diagnose.ToBool()) {
-      $exchange['WHAT-IF'] = $true;
+      $rendezvous['WHAT-IF'] = $true;
     }
 
     if ($Diagnose.ToBool()) {
-      $exchange['LOOPZ.DIAGNOSE'] = $true;
+      $rendezvous['LOOPZ.DIAGNOSE'] = $true;
     }
 
     try {
