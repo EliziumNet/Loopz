@@ -79,6 +79,7 @@ $global:Loopz = [PSCustomObject]@{
   }
 
   FsItemTypePlaceholder = '*{_fileSystemItemType}';
+  DependencyPlaceholder = '*{_dependency}';
 
   SignalLabel           = 0;
   SignalEmoji           = 1;
