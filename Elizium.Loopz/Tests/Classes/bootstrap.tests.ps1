@@ -1,5 +1,5 @@
 using namespace System.Management.Automation;
-Describe 'Bootstrap' -Tag 'Current' {
+Describe 'Bootstrap' {
   BeforeAll {
     Get-Module Elizium.Loopz | Remove-Module
     Import-Module .\Output\Elizium.Loopz\Elizium.Loopz.psm1 `

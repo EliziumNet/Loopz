@@ -246,5 +246,6 @@ function Format-StructuredLine {
     }
   }
 
+  # Write-Host ">>> structuredLine: '$structuredLine'";
   return $structuredLine;
 }

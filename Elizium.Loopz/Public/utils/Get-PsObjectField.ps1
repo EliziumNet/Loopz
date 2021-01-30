@@ -32,5 +32,5 @@ function Get-PsObjectField {
     $Default = $null
   )
 
-  ($Object.psobject.properties.match($Field) -and $Object.$Field) ? ($Object.$Field) : $Default;
+  ($Object.psobject.properties.match($Field) -and ($null -ne $Object.$Field)) ? ($Object.$Field) : $Default;
 }
