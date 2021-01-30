@@ -62,7 +62,7 @@ function Rename-Many {
   The occurrence is specified after the regular expression eg:
   -Pattern '\w\d{2,3}', l
     which means match the Last occurrence of the expression.
-  (Actually, an occurrence may be specified for $Include and $Exclude but there is no
+  (Actually, an occurrence may be specified for $Include and $Except but there is no
   point in doing so because these patterns only provide a filtering function and play
   no part in the actual renaming process).
 
@@ -220,7 +220,7 @@ function Rename-Many {
   * 'a': $Anchor
   * 'c': $Copy
   * 'i': $Include
-  * 'x': $Exclude
+  * 'x': $Except
   * '*': All the above
   (NB: Currently, can't be set to more than 1 of the above items at a time)
 
@@ -895,19 +895,19 @@ function Rename-Many {
     }
     $bootStrap.Register($includeSpec);
 
-    # [Exclude]
+    # [Except]
     #
-    [PSCustomObject]$excludeSpec = [PSCustomObject]@{
-      Activate      = $PSBoundParameters.ContainsKey('Exclude') -and `
-        -not([string]::IsNullOrEmpty($Exclude));
+    [PSCustomObject]$exceptSpec = [PSCustomObject]@{
+      Activate      = $PSBoundParameters.ContainsKey('Except') -and `
+        -not([string]::IsNullOrEmpty($Except));
       SpecType      = 'regex';
-      Name          = 'Exclude';
-      Value         = $Exclude;
+      Name          = 'Except';
+      Value         = $Except;
       Signal        = 'EXCLUDE';
       RegExKey      = 'LOOPZ.REMY.EXCLUDE.REGEX';
       OccurrenceKey = 'LOOPZ.REMY.EXCLUDE-OCC';
     }
-    $bootStrap.Register($excludeSpec);
+    $bootStrap.Register($exceptSpec);
 
     # [Diagnose]
     #
@@ -1228,7 +1228,7 @@ function Rename-Many {
       $null;
     }
 
-    [regex]$excludedRegEx = if ([RegExEntity]$ee = $bootStrap.Get('Exclude')) {
+    [regex]$exceptRegEx = if ([RegExEntity]$ee = $bootStrap.Get('Except')) {
       $ee.RexEx;
     }
     else {
@@ -1267,7 +1267,7 @@ function Rename-Many {
       [boolean]$patternIsMatch = (-not($patternRegEx) -or ($patternRegEx.IsMatch($pipelineItem.Name)));
 
       return $patternIsMatch -and $isIncluded -and `
-      ((-not($excludedRegEx)) -or -not($excludedRegEx.IsMatch($pipelineItem.Name))) -and `
+      ((-not($exceptRegEx)) -or -not($exceptRegEx.IsMatch($pipelineItem.Name))) -and `
         $compoundCondition.InvokeReturnAsIs($pipelineItem);
     }
 

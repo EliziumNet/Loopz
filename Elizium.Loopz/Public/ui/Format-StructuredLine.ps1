@@ -85,8 +85,7 @@ function Format-StructuredLine {
   [int]$wingLength = Get-PsObjectField $Options 'WingLength' 3;
   [int]$minimumFlexSize = Get-PsObjectField $Options 'MinimumFlexSize' 6;
   [string]$ellipses = Get-PsObjectField $Options 'Ellipses' ' ...';
-  [boolean]$withLead = $Options.psobject.properties.match('WithLead').Count;
-  # [boolean]$withLead = Get-PsObjectField $Options 'WithLead' $false;
+  [boolean]$withLead = Get-PsObjectField $Options 'WithLead' $false;
   [string]$formatWithArg = $Krayon.ApiFormatWithArg;
 
   [hashtable]$theme = $Krayon.Theme;
