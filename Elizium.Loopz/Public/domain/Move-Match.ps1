@@ -182,6 +182,7 @@ function Move-Match {
 
   [string]$result = [string]::Empty;
   [string]$failedReason = [string]::Empty;
+  [hashtable]$notes = [hashtable]@{}
   [PSCustomObject]$groups = [PSCustomObject]@{
     Named = @{}
   }
@@ -271,13 +272,7 @@ function Move-Match {
       $replaceWith = $capturedPattern -replace $pattern, $replaceWith;
     }
 
-    if ($Start.ToBool()) {
-      $result = $replaceWith + $patternRemoved;
-    }
-    elseif ($End.ToBool()) {
-      $result = $patternRemoved + $replaceWith;
-    }
-    elseif ($PSBoundParameters.ContainsKey('Anchor')) {
+    if ($PSBoundParameters.ContainsKey('Anchor')) {
       [hashtable]$parameters = @{
         'Source'       = $patternRemoved
         'PatternRegEx' = $Anchor
@@ -339,10 +334,26 @@ function Move-Match {
         $result = $Anchor.Replace($patternRemoved, $format, 1, $anchorMatch.Index);
       }
       else {
-        # Anchor doesn't match Pattern
-        #
-        $failedReason = 'Anchor Match';
+        if ($Start.ToBool()) {
+          $result = $replaceWith + $patternRemoved;
+          $notes['hybrid'] = 'Start (Anchor failed)';
+        }
+        elseif ($End.ToBool()) {
+          $result = $patternRemoved + $replaceWith;
+          $notes['hybrid'] = 'End  (Anchor failed)';
+        }
+        else {
+          # Anchor doesn't match Pattern
+          #
+          $failedReason = 'Anchor Match';
+        }
       }
+    }
+    elseif ($Start.ToBool()) {
+      $result = $replaceWith + $patternRemoved;
+    }
+    elseif ($End.ToBool()) {
+      $result = $patternRemoved + $replaceWith;
     }
     else {
       # This is an error, because there is no place to move the pattern to, as there is no Anchor,

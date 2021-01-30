@@ -361,12 +361,12 @@ function Rename-Many {
     #
     [Parameter(ParameterSetName = 'ReplaceWith')]
     [Parameter(ParameterSetName = 'MoveToStart', Mandatory)]
-    [ValidateScript( { -not($PSBoundParameters.ContainsKey('End')); })]
+    [ValidateScript( { -not($PSBoundParameters.ContainsKey('End')); })] # validation no longer required
     [switch]$Start,
 
     [Parameter(ParameterSetName = 'ReplaceWith')]
     [Parameter(ParameterSetName = 'MoveToEnd', Mandatory)]
-    [ValidateScript( { -not($PSBoundParameters.ContainsKey('Start')); })]
+    [ValidateScript( { -not($PSBoundParameters.ContainsKey('Start')); })] # validation no longer required
     [switch]$End,
 
     [Parameter(ParameterSetName = 'MoveToAnchor')]
