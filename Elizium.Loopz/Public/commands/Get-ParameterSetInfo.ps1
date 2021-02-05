@@ -1,110 +1,133 @@
 
-function Get-ParameterSetInfo { # <= Get-NewCommandDetail
+function Get-ParameterSetInfo {
+  # <= Get-NewCommandDetail
   #  by KirkMunro (https://github.com/PowerShell/PowerShell/issues/8692)
+  #
   [CmdletBinding()]
   param(
     [Parameter(Mandatory, Position = 0, ValueFromPipeline, ValueFromPipelineByPropertyName)]
     [ValidateNotNullOrEmpty()]
     [string[]]$Name
   )
+
+  begin {
+    [array]$commonParamSet = @('Verbose', 'Debug', 'ErrorAction', 'WarningAction',
+      'InformationAction', 'VerboseAction', 'DebugAction', 'ProgressAction',
+      'ErrorVariable', 'WarningVariable', 'InformationVariable', 'DebugVariable',
+      'VerboseVariable', 'ProgressVariable', 'OutVariable', 'OutBuffer',
+      'PipelineVariable', 'WhatIf', 'Confirm');
+
+    [Krayon]$krayon = Get-Krayon
+    [hashtable]$theme = $krayon.Theme;
+
+    # This scheme is specific to Get-ParameterSetInfo
+    #
+    [hashtable]$parSetScheme = @{
+      'COLS.PUNCTUATION'    = $theme['META-COLOURS'];
+      'COLS.HEADER'         = 'blue';
+      'COLS.UNDERLINE'      = $theme['META-COLOURS'];
+      #
+      'COLS.CELL'           = 'gray';
+      'COLS.TYPE'           = 'darkCyan';
+      'COLS.MAN-PARAM'      = $theme['AFFIRM-COLOURS'];
+      'COLS.OPT-PARAM'      = $theme['VALUE-COLOURS'];
+      'COLS.CMD-NAME'       = 'green';
+      'COLS.PARAM-SET-NAME' = 'darkGreen';
+      'COLS.SWITCH'         = 'magenta';
+    }
+    #
+    [string]$api = $krayon.ApiFormat;
+    [string]$punctSnippet = $($api -f $parSetScheme['COLS.PUNCTUATION']);
+    [string]$typeSnippet = $($api -f $parSetScheme['COLS.TYPE']);
+    [string]$manSnippet = $($api -f $parSetScheme['COLS.MAN-PARAM']);
+    [string]$optSnippet = $($api -f $parSetScheme['COLS.OPT-PARAM']);
+    [string]$switchSnippet = $($api -f $parSetScheme['COLS.SWITCH']);
+    [string]$defaultSnippet = $($api -f $parSetScheme['COLS.CELL']);
+    [string]$paramSetNameSnippet = $($api -f $parSetScheme['COLS.PARAM-SET-NAME']);
+    [string]$commandSnippet = $($api -f $parSetScheme['COLS.CMD-NAME']);
+    [string]$resetSnippet = $($api -f 'Reset');
+    #
+    [string]$parameterNamePattern = "\-(?<name>\w+)";
+    [string]$typePattern = "\<(?<type>\w+)\>";
+    [string]$mandatoryPattern = "$parameterNamePattern\s$typePattern";
+    [string]$paramWithInsideTypePattern = "\[$parameterNamePattern\s$typePattern\]";
+    [string]$paramWithExternalTypePattern = "\[$parameterNamePattern\]\s$typePattern";
+    [string]$optionalTypedParamPattern = "$paramWithInsideTypePattern|$paramWithExternalTypePattern"
+    #
+    [regex]$mandatoryParamExpr = New-RegularExpression -Expression $mandatoryPattern;
+    [regex]$optionalParamExpr = New-RegularExpression -Expression $optionalTypedParamPattern;
+    [regex]$switchExpr = New-RegularExpression -Expression $('\[' + $parameterNamePattern + '\]');
+
+    # NB: These Format variables are used as the replacement text in regex replace operations
+    # which means they can't be defined with interpolated strings; named capture group
+    # references would not be evaluated.
+    #
+    [string]$typeSegmentFormat = $punctSnippet + '<' + $typeSnippet + '${type}' + $punctSnippet + '>';
+    [string]$mandatoryFormat = $manSnippet + '-${name} ' + $punctSnippet + $typeSegmentFormat;
+    [string]$optionalFormat = $punctSnippet + '[' + $optSnippet + '-${name} ' + $typeSegmentFormat + $punctSnippet + ']';
+    [string]$switchFormat = $punctSnippet + '[' + $switchSnippet + '-${name}' + $punctSnippet + ']';
+
+    [PSCustomObject]$tableOptions = [PSCustomObject]@{
+      Select  = @('Name', 'Type', 'Mandatory', 'Pos', 'PipeValue', 'Alias');
+
+      Chrome  = [PSCustomObject]@{
+        Indent    = 3;
+        Underline = '-';
+        Inter     = 1;
+      }
+
+      Colours = [PSCustomObject]@{
+        Header    = 'blue';
+        Cell      = 'white';
+        Underline = 'yellow';
+        HiLight   = 'green';
+      }
+
+      Values  = [PSCustomObject]@{
+        True  = '✔️';
+        False = '✖️';
+      }
+
+      Align   = @{
+        Header = 'right';
+        Cell   = 'left';
+      }
+
+      Custom  = [PSCustomObject]@{
+        Colours          = [PSCustomObject]@{
+          Mandatory = $parSetScheme['COLS.MAN-PARAM'];
+          Switch    = $parSetScheme['COLS.SWITCH'];
+        }
+        Snippets         = [PSCustomObject]@{
+          Header    = $($api -f $parSetScheme['COLS.HEADER']);
+          Underline = $($api -f $parSetScheme['COLS.UNDERLINE']);
+          Mandatory = $($api -f $parSetScheme['COLS.MAN-PARAM']);
+          Switch    = $($api -f $parSetScheme['COLS.SWITCH']);
+          Cell      = $($api -f $parSetScheme['COLS.OPT-PARAM']);
+          Type      = $($api -f $parSetScheme['COLS.TYPE']);
+        }
+        ParameterSetInfo = $null;
+      }
+    }
+  }
+
   process {
-    if ($_ -isnot [System.Management.Automation.CommandInfo]) {
+    if ($_ -isNot [System.Management.Automation.CommandInfo]) {
       Get-Command -Name $_ | Get-ParameterSetInfo
     }
     else {
-      [scriptblock]$evaluate = { # this is getting a bit long, we need to store this elsewhere
-        [OutputType([string])]
-        param(
-          [string]$value,
-          [PSCustomObject]$columnData,
-          [boolean]$isHeader,
-          [PSCustomObject]$Options
-        )
-        # If the client wants to use this default, the meta data must
-        # contain an int Max field denoting the max value size.
-        #
-        $max = $columnData.Max;
-
-        [string]$align = $isHeader ? $Options.HeaderAlign : $Options.ValueAlign;
-        return $(Get-PaddedLabel -Label $value -Width $max -Align $align);
-      }
-
-      [array]$commonParamSet = @('Verbose', 'Debug', 'ErrorAction', 'WarningAction',
-        'InformationAction', 'VerboseAction', 'DebugAction', 'ProgressAction',
-        'ErrorVariable', 'WarningVariable', 'InformationVariable', 'DebugVariable',
-        'VerboseVariable', 'ProgressVariable', 'OutVariable', 'OutBuffer',
-        'PipelineVariable', 'WhatIf', 'Confirm');
-
-      [Krayon]$krayon = Get-Krayon
-      [hashtable]$theme = $krayon.Theme;
-      [hashtable]$scheme = @{
-        'PUNCTUATION'    = $theme['META-COLOURS'];
-        'TYPE-COL'       = 'darkCyan';
-        'MAN-PARAM'      = $theme['AFFIRM-COLOURS'];
-        'OPT-PARAM'      = $theme['VALUE-COLOURS'];
-        'COMMAND-NAME'   = 'green';
-        'PARAM-SET-NAME' = 'darkGreen';
-        'TABLE-COLS'     = $theme['KEY-COLOURS'];
-        'TABLE-DEF-VAL'  = 'gray';
-        'SWITCH-COL'     = 'magenta';
-      }
-      [string]$api = $krayon.ApiFormat;
-      #
-      [string]$manParamCol = $scheme['MAN-PARAM'];
-      [string]$optParamCol = $scheme['OPT-PARAM'];
-      [string]$punctCol = $scheme['PUNCTUATION'];
-      [string]$typeCol = $scheme['TYPE-COL'];
-      [string]$defaultCol = $scheme['TABLE-DEF-VAL'];
-      [string]$switchCol = $scheme['SWITCH-COL'];
-      [string]$paramSetNameCol = $scheme['PARAM-SET-NAME'];
-      [string]$commandCol = $scheme['COMMAND-NAME'];
-      #
-      # TODO: These segments should be populated onto the options object
-      # Perhaps on a sub-object just for segments => Snippets
-      #
-      [string]$punctSegment = $($api -f $punctCol);
-      [string]$typeSegment = $($api -f $typeCol);
-      [string]$manSegment = $($api -f $manParamCol);
-      [string]$switchSegment = $($api -f $switchCol);
-      [string]$defaultSegment = $($api -f $defaultCol);
-      [string]$paramSetNameSegment = $($api -f $paramSetNameCol);
-      [string]$commandSegment = $($api -f $commandCol);
-      #
-      [string]$resetSegment = $($api -f 'Reset');
-
-      [string]$parameterNamePattern = "\-(?<name>\w+)";
-      [string]$typePattern = "\<(?<type>\w+)\>";
-      [string]$mandatoryPattern = "$parameterNamePattern\s$typePattern";
-
-      [string]$paramWithInsideTypePattern = "\[$parameterNamePattern\s$typePattern\]";
-      [string]$paramWithExternalTypePattern = "\[$parameterNamePattern\]\s$typePattern";
-      [string]$optionalTypedParamPattern = "$paramWithInsideTypePattern|$paramWithExternalTypePattern"
-      #
-      [regex]$mandatoryParamExpr = New-RegularExpression -Expression $mandatoryPattern;
-      [regex]$optionalParamExpr = New-RegularExpression -Expression $optionalTypedParamPattern;
-      [regex]$switchExpr = New-RegularExpression -Expression $('\[' + $parameterNamePattern + '\]');
-
-      [string]$typeSegmentFormat = $punctSegment + '<' + $typeSegment + '${type}' + $punctSegment + '>';
-      #
-      [string]$mandatoryFormat = $manSegment + '-${name} ' + $punctSegment + $typeSegmentFormat;
-      [string]$optionalFormat = $punctSegment + '[' + '&[' + $optParamCol + ']' + '-${name} ' + $typeSegmentFormat + $punctSegment + ']';
-      [string]$switchFormat = $punctSegment + '[' + $switchSegment + '-${name}' + $punctSegment + ']';
-    
       # Since we're inside a process block $_ refers to a CommandInfo (the result of get-command) and
       # one property is ParameterSets.
       #
       foreach ($parameterSet in $_.ParameterSets) {
 
         $parametersToShow = $parameterSet.Parameters | Where-Object Name -NotIn $commonParamSet;
-        $parameterGroups = $parametersToShow.where( { $_.Position -ge 0 }, 'split')
-        $parameterGroups[0] = @($parameterGroups[0] | Sort-Object -Property Position)
-        $parametersToShow = $parameterGroups[0] + $parameterGroups[1]
+        $parameterGroups = $parametersToShow.where( { $_.Position -ge 0 }, 'split');
+        $parameterGroups[0] = @($parameterGroups[0] | Sort-Object -Property Position);
+        $parametersToShow = $parameterGroups[0] + $parameterGroups[1];
 
-        # Yup we want this => this needs to be extracted out so it can be reused
-        # We can inject info here to provide extra context
-        #
-        [PSCustomObject[]]$parameterObjects = ($parametersToShow `
-          | Select-Object -Property @( # table columns
+        [PSCustomObject[]]$resultSet = ($parametersToShow `
+          | Select-Object -Property @( # this is a query statement
             'Name'
             @{Name = 'Type'; Expression = { $_.ParameterType.Name }; }
             @{Name = 'Mandatory'; Expression = { $_.IsMandatory } }
@@ -114,49 +137,16 @@ function Get-ParameterSetInfo { # <= Get-NewCommandDetail
             @{Name = 'Alias'; Expression = { $_.Aliases -join ',' } }
           ));
 
-        [hashtable]$fieldMetaData = @{}
+        [hashtable]$fieldMetaData = Get-FieldMetaData -Data $resultSet;
+        $tableOptions.Custom.ParameterSetInfo = $parameterSet;
 
-        # Just look at the first row, so we can see each field
-        #
-        foreach ($field in $parameterObjects[0].psobject.properties.name) {
-          $fieldMetaData[$field] = @{
-            ParamName = $field; # don't call this ParamName => FieldName
-            # !array compound statement: => .$field
-            # Note, we also add the field name to the collection, because the field name
-            # might be larger than any of the field values
-            # 
-            Max       = Get-LargestLength $($parameterObjects.$field + $field);
-            Type      = $parameterObjects[0].$field.GetType();
-          }
-        }
-
-        [PSCustomObject]$tableOptions = [PSCustomObject]@{
-          Indent           = 3;
-          Underline        = '-';
-          Inter            = 1;
-          Select           = @('Name', 'Type', 'Mandatory', 'Pos', 'PipeValue', 'Alias');
-          HeaderCol        = 'blue';
-          ValueCol         = 'white';
-          UnderlineCol     = 'yellow';
-          HighlightCol     = 'green';
-          TrueValue        = '✔️';
-          FalseValue       = '✖️';
-          HeaderAlign      = 'right';
-          ValueAlign       = 'left';
-          # These items are non generic and should only be reference by client side Evaluate script blocks
-          #
-          MandatoryCol     = 'red';
-          SwitchCol        = $switchCol;
-          ParameterSetInfo = $parameterSet;
-        }
-
-        [hashtable]$headers, [hashtable]$table = `
-          Get-AsTable -MetaData $fieldMetaData -TableData $parameterObjects -Options $tableOptions -Evaluate $evaluate;
+        [hashtable]$headers, [hashtable]$tableContent = Get-AsTable -MetaData $fieldMetaData `
+          -TableData $resultSet -Options $tableOptions;
 
         [string]$defaultLabel = ($_.DefaultParameterSet -eq $ParameterSet.Name) ? " (Default)" : [string]::Empty;
         [string]$structuredParameterSetStmt = `
-          "$resetSegment===> Parameter Set: '$paramSetNameSegment$($ParameterSet.Name)$resetSegment'$defaultLabel";
-        [string]$structuredSyntax = "Syntax: $commandSegment$($_.Name) $parameterSet";
+          "$resetSnippet===> Parameter Set: '$paramSetNameSnippet$($ParameterSet.Name)$resetSnippet'$defaultLabel";
+        [string]$structuredSyntax = "Syntax: $commandSnippet$($_.Name) $parameterSet";
 
         #
         # the syntax can be processed by regex: (gcm command -syntax) -replace '\]? \[*(?=-|<C)',"`r`n "
@@ -165,14 +155,14 @@ function Get-ParameterSetInfo { # <= Get-NewCommandDetail
         $structuredSyntax = $mandatoryParamExpr.Replace($structuredSyntax, $mandatoryFormat);
         $structuredSyntax = $switchExpr.Replace($structuredSyntax, $switchFormat);
         $structuredSyntax = $structuredSyntax.Replace('[<CommonParameters>]',
-          "$punctSegment[<$($defaultSegment)CommonParameters$punctSegment>]")
+          "$punctSnippet[<$($defaultSnippet)CommonParameters$punctSnippet>]")
 
         $krayon.Ln().End();
         $krayon.ScribbleLn($structuredParameterSetStmt).End();
         $krayon.ScribbleLn($structuredSyntax).End();
         $krayon.Ln().End();
 
-        [scriptblock]$render = {
+        [scriptblock]$renderParSetCell = {
           [OutputType([boolean])]
           param(
             [string]$column,
@@ -181,34 +171,33 @@ function Get-ParameterSetInfo { # <= Get-NewCommandDetail
             [Krayon]$Krayon
           )
           [boolean]$result = $true;
-          [string]$api = $Krayon.ApiFormat;
           # https://github.com/EliziumNet/Krayola/issues/41
           # (Krayon.Scribble does not render a vanilla string)
           #
           switch -Regex ($column) {
             'Name' {
-              [System.Management.Automation.CommandParameterInfo]$parameter = `
-                $Options.ParameterSetInfo.Parameters | Where-Object Name -eq $value.Trim();
-              [string]$parameterType = $parameter.ParameterType;
+              [System.Management.Automation.CommandParameterInfo]$parameterInfo = `
+                $Options.Custom.ParameterSetInfo.Parameters | Where-Object Name -eq $value.Trim();
+              [string]$parameterType = $parameterInfo.ParameterType;
 
-              if ($parameter.IsMandatory) {
-                $krayon.Scribble("$($api -f $Options.MandatoryCol)$value").End();
+              if ($parameterInfo.IsMandatory) {
+                $krayon.Scribble("$($Options.Custom.Snippets.Mandatory)$value").End();
               }
               elseif ($parameterType -eq 'switch') {
-                $krayon.Scribble("$($api -f $Options.SwitchCol)$value").End();
+                $krayon.Scribble("$($Options.Custom.Snippets.Switch)$value").End();
               }
               else {
-                $krayon.Scribble("$($api -f $Options.ValueCol)$value").End();
+                $krayon.Scribble("$($Options.Custom.Snippets.Cell)$value").End();
               }
             }
 
             'Type' {
-              $krayon.Scribble("$($api -f 'darkCyan')$value").End();              
+              $krayon.Scribble("$($Options.Custom.Snippets.Type)$value").End();              
             }
 
             'Mandatory|PipeValue' {
-              [string]$coreValue = $value.Trim() -eq 'True' ? $Options.TrueValue : $Options.FalseValue;
-              [string]$padded = Get-PaddedLabel -Label $coreValue -Width $value.Length -Align $Options.ValueAlign;
+              [string]$coreValue = $value.Trim() -eq 'True' ? $Options.Values.True : $Options.Values.False;
+              [string]$padded = Get-PaddedLabel -Label $coreValue -Width $value.Length -Align $Options.Align.Cell;
               $krayon.Reset().Text($padded).End();
             }
 
@@ -222,10 +211,10 @@ function Get-ParameterSetInfo { # <= Get-NewCommandDetail
           # https://blogs.msmvps.com/jcoehoorn/blog/2017/10/02/powershell-expandproperty-vs-property/
 
           return $result;
-        } # render
+        } # renderParSetCell
 
-        Show-AsTable -MetaData $fieldMetaData -Headers $headers -Table $table `
-          -Scheme $scheme -Krayon $krayon -Options $tableOptions -Render $render;
+        Show-AsTable -MetaData $fieldMetaData -Headers $headers -Table $tableContent `
+          -Krayon $krayon -Options $tableOptions -Render $renderParSetCell;
       }
       $krayon.Ln().End();
     }

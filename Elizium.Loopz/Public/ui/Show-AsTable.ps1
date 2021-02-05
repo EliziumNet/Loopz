@@ -1,5 +1,5 @@
 
-function Show-AsTable { # <= Show-RenderedTable
+function Show-AsTable {
   param(
     [Parameter()]
     [hashtable]$MetaData,
@@ -12,9 +12,6 @@ function Show-AsTable { # <= Show-RenderedTable
 
     [Parameter()]
     [Krayon]$Krayon,
-
-    [Parameter()]
-    [hashtable]$Scheme,
 
     [Parameter()]
     [scriptblock]$Render = $([scriptblock] {
@@ -30,29 +27,16 @@ function Show-AsTable { # <= Show-RenderedTable
       }),
 
     [Parameter()]
-    [PSCustomObject]$Options = [PSCustomObject]@{ # these options needs ot go elsewhere so they can be reused 
-      Indent       = 3;
-      Underline    = '-';
-      Inter        = 1; # space in between field (look how this is defined in bootstrap for a better name)
-      HeaderCol    = 'blue';
-      ValueCol     = 'white';
-      UnderlineCol = 'yellow';
-      HighlightCol = 'green';
-      TrueValue    = 'True';
-      FalseValue   = 'False';
-      HeaderAlign  = 'right';
-      ValueAlign   = 'left'
-    }
+    [PSCustomObject]$Options
   )
   $krayon.Reset().Ln().End();
 
   if (($MetaData.Count -gt 0) -and ($Table.Count -gt 0)) {
-    [string]$api = $krayon.ApiFormat;
     #
-    [string]$indentation = [string]::new(' ', $Options.Indent);
-    [string]$inter = [string]::new(' ', $Options.Inter);
-    [string]$headerSegment = $($api -f $Options.HeaderCol);
-    [string]$underlineSegment = $($api -f $Options.UnderlineCol);
+    [string]$indentation = [string]::new(' ', $Options.Chrome.Indent);
+    [string]$inter = [string]::new(' ', $Options.Chrome.Inter);
+    [string]$headerSegment = $($Options.Custom.Snippets.Header);
+    [string]$underlineSegment = $($Options.Custom.Snippets.Underline);
 
     # Establish field selection
     #
@@ -75,7 +59,7 @@ function Show-AsTable { # <= Show-RenderedTable
     #
     $krayon.Text($indentation).End();
     foreach ($col in $selection) {
-      $underline = [string]::new($Options.Underline, $MetaData[$col].Max);
+      $underline = [string]::new($Options.Chrome.Underline, $MetaData[$col].Max);
       $Krayon.Scribble("$($underlineSegment)$($underline)$($inter)").Reset().End();
     }
     $krayon.Ln().End();
