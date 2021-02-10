@@ -37,15 +37,16 @@ function Get-ParameterSetInfo {
             $Options.Custom.ParameterSetInfo.Parameters | Where-Object Name -eq $value.Trim();
           [string]$parameterType = $parameterInfo.ParameterType;
 
-          if ($parameterInfo.IsMandatory) {
-            $krayon.Scribble("$($Options.Custom.Snippets.Mandatory)$value").End();
+          [string]$nameSnippet = if ($parameterInfo.IsMandatory) {
+            $Options.Custom.Snippets.Mandatory;
           }
           elseif ($parameterType -eq 'switch') {
-            $krayon.Scribble("$($Options.Custom.Snippets.Switch)$value").End();
+            $Options.Custom.Snippets.Switch;
           }
           else {
-            $krayon.Scribble("$($Options.Custom.Snippets.Cell)$value").End();
+            $Options.Custom.Snippets.Cell;
           }
+          $krayon.Scribble("$($nameSnippet)$value").End();
         }
 
         'Type' {

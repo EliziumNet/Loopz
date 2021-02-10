@@ -1,5 +1,5 @@
 
-Describe 'Get-ParameterSetInfo' {
+Describe 'Get-ParameterSetInfo' -Tag 'Current' {
   BeforeAll {
     Get-Module Elizium.Loopz | Remove-Module;
     Import-Module .\Output\Elizium.Loopz\Elizium.Loopz.psm1 `

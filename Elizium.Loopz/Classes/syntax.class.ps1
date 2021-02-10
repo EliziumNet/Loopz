@@ -19,7 +19,7 @@ class Syntax {
     'InformationAction', 'VerboseAction', 'DebugAction', 'ProgressAction',
     'ErrorVariable', 'WarningVariable', 'InformationVariable', 'DebugVariable',
     'VerboseVariable', 'ProgressVariable', 'OutVariable', 'OutBuffer',
-    'PipelineVariable', 'WhatIf', 'Confirm');
+    'PipelineVariable');
 
   Syntax([string]$commandName, [hashtable]$theme, [hashtable]$signals, [string]$api) {
     function snippets {
@@ -147,53 +147,28 @@ class Syntax {
       #
     }
 
-    $this.TableOptions = [PSCustomObject]@{
-      Select   = @('Name', 'Type', 'Mandatory', 'Pos', 'PipeValue', 'Alias');
-
-      Chrome   = [PSCustomObject]@{
-        Indent    = 3;
-        Underline = '=';
-        Inter     = 1;
+    [PSCustomObject]$custom = [PSCustomObject]@{
+      Colours          = [PSCustomObject]@{
+        Mandatory = $this.Scheme['COLS.MAN-PARAM'];
+        Switch    = $this.Scheme['COLS.SWITCH'];
       }
 
-      Colours  = [PSCustomObject]@{
-        Header    = 'blue';
-        Cell      = 'white';
-        Underline = 'yellow';
-        HiLight   = 'green';
+      Snippets         = [PSCustomObject]@{
+        Header    = $(snippets($this.Scheme['COLS.HEADER']));
+        Underline = $(snippets($this.Scheme['COLS.UNDERLINE']));
+        Mandatory = $(snippets($this.Scheme['COLS.MAN-PARAM']));
+        Switch    = $(snippets($this.Scheme['COLS.SWITCH']));
+        Cell      = $(snippets($this.Scheme['COLS.OPT-PARAM']));
+        Type      = $(snippets($this.Scheme['COLS.TYPE']));
+        Command   = $(snippets($this.Scheme['COLS.CMD-NAME']));
       }
-
-      Values   = [PSCustomObject]@{
-        True  = $signals['SWITCH-ON'].Value
-        False = $signals['SWITCH-OFF'].Value
-      }
-
-      Align    = @{
-        Header = 'right';
-        Cell   = 'left';
-      }
-
-      Snippets = [PSCustomObject]@{
-        Reset = $(snippets('Reset'));
-      }
-
-      Custom   = [PSCustomObject]@{
-        Colours          = [PSCustomObject]@{
-          Mandatory = $this.Scheme['COLS.MAN-PARAM'];
-          Switch    = $this.Scheme['COLS.SWITCH'];
-        }
-        Snippets         = [PSCustomObject]@{
-          Header    = $(snippets($this.Scheme['COLS.HEADER']));
-          Underline = $(snippets($this.Scheme['COLS.UNDERLINE']));
-          Mandatory = $(snippets($this.Scheme['COLS.MAN-PARAM']));
-          Switch    = $(snippets($this.Scheme['COLS.SWITCH']));
-          Cell      = $(snippets($this.Scheme['COLS.OPT-PARAM']));
-          Type      = $(snippets($this.Scheme['COLS.TYPE']));
-          Command   = $(snippets($this.Scheme['COLS.CMD-NAME']));
-        }
-        ParameterSetInfo = $null;
-      }
+      ParameterSetInfo = $null;
     }
+
+    [string[]]$columns = @('Name', 'Type', 'Mandatory', 'Pos', 'PipeValue', 'Alias');
+    $this.TableOptions = Get-TableDisplayOptions -Select $columns -Custom $custom `
+      -Signals $signals;
+
   } # ctor
 
   [string] ParamSetStmt(
