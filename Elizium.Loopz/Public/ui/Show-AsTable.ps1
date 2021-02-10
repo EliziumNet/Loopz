@@ -1,5 +1,10 @@
 
 function Show-AsTable {
+  # TODO: The client should be able to define a render method on a per column basis.
+  # Currently there is just a single render callback supported. And ideally, we should be
+  # able to present the entire row, not just the current cell. This will enable cross
+  # field functionality to be defined.
+  #
   param(
     [Parameter()]
     [hashtable]$MetaData,
@@ -34,9 +39,11 @@ function Show-AsTable {
   if (($MetaData.Count -gt 0) -and ($Table.Count -gt 0)) {
     #
     [string]$indentation = [string]::new(' ', $Options.Chrome.Indent);
+    # $($Options.Snippets.Space)
     [string]$inter = [string]::new(' ', $Options.Chrome.Inter);
-    [string]$headerSegment = $($Options.Custom.Snippets.Header);
-    [string]$underlineSegment = $($Options.Custom.Snippets.Underline);
+    [string]$headerSnippet = $($Options.Custom.Snippets.Header);
+    [string]$underlineSnippet = $($Options.Custom.Snippets.Underline);
+    [string]$resetSnippet = $($Options.Snippets.Reset);
 
     # Establish field selection
     #
@@ -50,8 +57,8 @@ function Show-AsTable {
     #
     $krayon.Text($indentation).End();
     foreach ($col in $selection) {
-      $padded = $Headers[$col.Trim()];
-      $krayon.Scribble("$($headerSegment)$($padded)$($inter)").End();
+      [string]$paddedValue = $Headers[$col.Trim()];
+      $krayon.Scribble("$($headerSnippet)$($paddedValue)$($resetSnippet)$($inter)").End();
     }
     $krayon.Ln().Reset().End();
 
@@ -60,7 +67,7 @@ function Show-AsTable {
     $krayon.Text($indentation).End();
     foreach ($col in $selection) {
       $underline = [string]::new($Options.Chrome.Underline, $MetaData[$col].Max);
-      $Krayon.Scribble("$($underlineSegment)$($underline)$($inter)").Reset().End();
+      $Krayon.Scribble("$($underlineSnippet)$($underline)$($inter)").Reset().End();
     }
     $krayon.Ln().End();
 

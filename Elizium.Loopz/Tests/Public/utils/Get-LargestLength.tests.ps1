@@ -29,4 +29,37 @@ Describe 'Get-LargestLength' {
       Get-LargestLength @('', '', '', '') | Should -Be 0;
     }
   }
+
+  Context 'given: an array of integers' {
+    It 'should: return 0' -Skip {
+      
+      [PScustomObject]$arr = @(
+        @{ Name = 'fred'; Size = 1; Girl = $false }
+        @{ Name = 'kerry'; Size = 2; Girl = $true }
+        @{ Name = 'julie'; Size = 3; Girl = $true }
+      )
+
+      Write-Host ">>> Names: '$($arr.Name)', Max: $(Get-LargestLength $arr.Name)";
+      Write-Host ">>> Sizes: '$($arr.Size)', Max: $(Get-LargestLength $arr.Size)";
+      Write-Host ">>> Girls: '$($arr.Girl)', Max: $(Get-LargestLength $arr.Girl)";
+
+      $field = 'Girl'
+      Write-Host "!!! SEX: '$($arr.Girl + 'sex')'"
+      Write-Host "!!! SEX: '$($arr.$field + 'sex')'"
+
+      $s = @('one', 'two');
+      $r = $s + 'three';
+
+      Write-Host ">>> SAFE: $r";
+      $b = $($true, $false);
+      $r = $b + 'three';
+      Write-Host ">>> UNSAFE: $r";
+    }
+  }
+
+  Context 'command syntax: regex parameter parsing' {
+    It 'blah' {
+      
+    }
+  }
 }

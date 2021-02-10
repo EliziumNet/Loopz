@@ -8,7 +8,7 @@ Describe 'Show-AsTable' {
   }
 
   Context 'given: valid table data' {
-    It 'should: show the table' -Tag 'Current' {
+    It 'should: show the table' {
       [krayon]$krayon = Get-Krayon;
       [string]$api = $krayon.ApiFormat;
 
