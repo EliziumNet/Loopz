@@ -839,7 +839,7 @@ function Rename-Many {
       SpecType       = 'regex';
       Name           = 'Anchor';
       Value          = $Anchor;
-      Signal         = 'ANCHOR';
+      Signal         = 'REMY.ANCHOR';
       WholeSpecifier = 'a';
       RegExKey       = 'LOOPZ.REMY.ANCHOR.REGEX';
       OccurrenceKey  = 'LOOPZ.REMY.ANCHOR-OCC';
