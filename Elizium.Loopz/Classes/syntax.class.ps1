@@ -21,6 +21,8 @@ class Syntax {
     'VerboseVariable', 'ProgressVariable', 'OutVariable', 'OutBuffer',
     'PipelineVariable');
 
+  [string[]]$AllCommonParamSet = $this.CommonParamSet + @('WhatIf', 'Confirm');
+
   Syntax([string]$commandName, [hashtable]$theme, [hashtable]$signals, [string]$api) {
     function snippets {
       param(

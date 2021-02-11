@@ -1,5 +1,5 @@
 
-Describe 'Get-ParameterSetInfo' -Tag 'Current' {
+Describe 'Get-ParameterSetInfo' {
   BeforeAll {
     Get-Module Elizium.Loopz | Remove-Module;
     Import-Module .\Output\Elizium.Loopz\Elizium.Loopz.psm1 `
@@ -25,7 +25,7 @@ Describe 'Get-ParameterSetInfo' -Tag 'Current' {
   }
 
   Context 'given: Command with no parameters defined' {
-    It 'should: show __AllParameterSets' -Tag 'Current' {
+    It 'should: show __AllParameterSets' {
       'Get-PlatformName' | Get-ParameterSetInfo;
     }
   }
