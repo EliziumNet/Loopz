@@ -11,44 +11,22 @@ Describe 'Show-AsTable' {
     It 'should: show the table' {
       [krayon]$krayon = Get-Krayon;
       [string]$api = $krayon.ApiFormat;
+      [hashtable]$signals = Get-Signals;
 
-      [PSCustomObject]$tableOptions = [PSCustomObject]@{
-        Select       = @('Name', 'Colour', 'Shape');
-
-        Chrome       = [PSCustomObject]@{
-          Indent    = 3;
-          Underline = '-';
-          Inter     = 1;
+      [PSCustomObject]$custom = [PSCustomObject]@{
+        Colours  = [PSCustomObject]@{
+          Mandatory = 'red';
+          Switch    = 'magenta';
         }
-
-        Colours      = [PSCustomObject]@{
-          Header    = 'blue';
-          Cell      = 'white';
-          Underline = 'yellow';
-          HiLight   = 'green';
-        }
-
-        Values       = [PSCustomObject]@{
-          True  = '✔️';
-          False = '✖️';
-        }
-
-        Align        = @{
-          Header = 'right';
-          Cell   = 'left';
-        }
-
-        Custom       = [PSCustomObject]@{
-          Colours          = [PSCustomObject]@{
-            Mandatory = 'red';
-            Switch    = 'magenta';
-          }
-          Snippets         = [PSCustomObject]@{
-            Header    = $($api -f 'blue');
-            Underline = $($api -f 'yellow');
-          }
+        Snippets = [PSCustomObject]@{
+          Header    = $($api -f 'blue');
+          Underline = $($api -f 'yellow');
         }
       }
+      [string[]]$columnSelection = @('Name', 'Colour', 'Shape');
+
+      [PSCustomObject]$tableOptions = Get-TableDisplayOptions -Select $columnSelection `
+        -Signals $signals -Krayon $krayon -Custom $custom;
 
       [PSCustomObject[]]$source = @(
         @{ Name = 'dice '; Colour = 'white'; Shape = 'cube' },
@@ -68,9 +46,10 @@ Describe 'Show-AsTable' {
 
       [hashtable]$headers, [hashtable]$tableContent = Get-AsTable -MetaData $fieldMetaData `
         -TableData $resultSet -Options $tableOptions;
+      [System.Text.StringBuilder]$builder = [System.Text.StringBuilder]::new();
 
       Show-AsTable -MetaData $fieldMetaData -Headers $headers -Table $tableContent `
-        -Krayon $krayon -Options $tableOptions;
+        -Builder $builder -Options $tableOptions;
     }
   }
 }

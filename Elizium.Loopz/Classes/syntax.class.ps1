@@ -3,7 +3,7 @@ class Syntax {
   [string]$CommandName;
   [hashtable]$Theme;
   [hashtable]$Signals
-  [string]$Api;
+  [object]$Krayon;
   [hashtable]$Scheme;
 
   [string]$ParamNamePattern = "\-(?<name>\w+)";
@@ -23,29 +23,11 @@ class Syntax {
 
   [string[]]$AllCommonParamSet = $this.CommonParamSet + @('WhatIf', 'Confirm');
 
-  Syntax([string]$commandName, [hashtable]$theme, [hashtable]$signals, [string]$api) {
-    function snippets {
-      param(
-        [string[]]$Items
-      )
-      [string]$result = [string]::Empty;
-      foreach ($i in $Items) {
-        $result += $($api -f $i);
-      }
-      return $result;
-    }
-
-    function snippet {
-      param(
-        [string[]]$Items
-      )
-      return $api -f $Items;
-    }
-
+  Syntax([string]$commandName, [hashtable]$theme, [hashtable]$signals, [object]$krayon) {
     $this.CommandName = $commandName;
     $this.Theme = $theme;
     $this.Signals = $signals;
-    $this.Api = $api;
+    $this.Krayon = $krayon;
 
     $this.Regex = [PSCustomObject]@{
       Param = [PSCustomObject]@{
@@ -74,22 +56,23 @@ class Syntax {
       'COLS.TYPE'           = 'darkCyan';
       'COLS.MAN-PARAM'      = $theme['AFFIRM-COLOURS'];
       'COLS.OPT-PARAM'      = 'blue' # $theme['VALUE-COLOURS'];
-      'COLS.CMD-NAME'       = 'green';
-      'COLS.PARAM-SET-NAME' = 'darkGreen';
+      'COLS.CMD-NAME'       = 'darkGreen';
+      'COLS.PARAM-SET-NAME' = 'green';
       'COLS.SWITCH'         = 'cyan'; # magenta
     }
 
     $this.Snippets = [PSCustomObject]@{
-      Punct        = $(snippets($this.Scheme['COLS.PUNCTUATION']));
-      Type         = $(snippets($this.Scheme['COLS.TYPE']));
-      Mandatory    = $(snippets($this.Scheme['COLS.MAN-PARAM']));
-      Optional     = $(snippets($this.Scheme['COLS.OPT-PARAM']));
-      Switch       = $(snippets($this.Scheme['COLS.SWITCH']));
-      Default      = $(snippets($this.Scheme['COLS.CELL']));
-      ParamSetName = $(snippets($this.Scheme['COLS.PARAM-SET-NAME']));
-      Command      = $(snippets($this.Scheme['COLS.CMD-NAME']));
-      Reset        = $(snippets('Reset'));
-      Space        = $(snippets('Reset')) + ' ';
+      Punct        = $($this.Krayon.snippets($this.Scheme['COLS.PUNCTUATION']));
+      Type         = $($this.Krayon.snippets($this.Scheme['COLS.TYPE']));
+      Mandatory    = $($this.Krayon.snippets($this.Scheme['COLS.MAN-PARAM']));
+      Optional     = $($this.Krayon.snippets($this.Scheme['COLS.OPT-PARAM']));
+      Switch       = $($this.Krayon.snippets($this.Scheme['COLS.SWITCH']));
+      Default      = $($this.Krayon.snippets($this.Scheme['COLS.CELL']));
+      ParamSetName = $($this.Krayon.snippets($this.Scheme['COLS.PARAM-SET-NAME']));
+      Command      = $($this.Krayon.snippets($this.Scheme['COLS.CMD-NAME']));
+      Reset        = $($this.Krayon.snippets('Reset'));
+      Space        = $($this.Krayon.snippets('Reset')) + ' ';
+      Ln           = $($this.Krayon.snippets('Ln'));
     }
 
     $this.Formats = @{
@@ -156,20 +139,20 @@ class Syntax {
       }
 
       Snippets         = [PSCustomObject]@{
-        Header    = $(snippets($this.Scheme['COLS.HEADER']));
-        Underline = $(snippets($this.Scheme['COLS.UNDERLINE']));
-        Mandatory = $(snippets($this.Scheme['COLS.MAN-PARAM']));
-        Switch    = $(snippets($this.Scheme['COLS.SWITCH']));
-        Cell      = $(snippets($this.Scheme['COLS.OPT-PARAM']));
-        Type      = $(snippets($this.Scheme['COLS.TYPE']));
-        Command   = $(snippets($this.Scheme['COLS.CMD-NAME']));
+        Header    = $($this.Krayon.snippets($this.Scheme['COLS.HEADER']));
+        Underline = $($this.Krayon.snippets($this.Scheme['COLS.UNDERLINE']));
+        Mandatory = $($this.Krayon.snippets($this.Scheme['COLS.MAN-PARAM']));
+        Switch    = $($this.Krayon.snippets($this.Scheme['COLS.SWITCH']));
+        Cell      = $($this.Krayon.snippets($this.Scheme['COLS.OPT-PARAM']));
+        Type      = $($this.Krayon.snippets($this.Scheme['COLS.TYPE']));
+        Command   = $($this.Krayon.snippets($this.Scheme['COLS.CMD-NAME']));
       }
       ParameterSetInfo = $null;
     }
 
     [string[]]$columns = @('Name', 'Type', 'Mandatory', 'Pos', 'PipeValue', 'Alias');
-    $this.TableOptions = Get-TableDisplayOptions -Select $columns -Custom $custom `
-      -Signals $signals;
+    $this.TableOptions = Get-TableDisplayOptions -Select $columns  `
+      -Signals $signals -Krayon $this.Krayon -Custom $custom;
 
   } # ctor
 

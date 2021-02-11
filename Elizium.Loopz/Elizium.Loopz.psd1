@@ -60,7 +60,7 @@
 
     @{
       ModuleName    = 'Elizium.Krayola';
-      ModuleVersion = '1.0.0';
+      ModuleVersion = '1.0.3';
       Guid          = 'cc13fedc-6dea-4573-b600-d26c9f77e6ac';
     }
   )

@@ -1,7 +1,7 @@
 using module Elizium.Krayola;
 using namespace System.Management.Automation;
 
-Describe 'test-AreParamSetsEqual' -Tag 'Current' {
+Describe 'test-AreParamSetsEqual' {
   BeforeAll {
     Get-Module Elizium.Loopz | Remove-Module;
     Import-Module .\Output\Elizium.Loopz\Elizium.Loopz.psm1 `
@@ -14,7 +14,7 @@ Describe 'test-AreParamSetsEqual' -Tag 'Current' {
       [Krayon]$krayon = Get-Krayon;
       [hashtable]$theme = $krayon.Theme;
       [hashtable]$signals = Get-Signals;
-      [Syntax]$script:_syntax = [Syntax]::new($_commandName, $theme, $signals, $krayon.ApiFormat);
+      [Syntax]$script:_syntax = [Syntax]::new($_commandName, $theme, $signals, $krayon);
 
       [CommandInfo]$commandInfo = Get-Command $_commandName;
       [CommandParameterSetInfo]$script:_appendPsi = $commandInfo.ParameterSets | Where-Object Name -eq 'Append';

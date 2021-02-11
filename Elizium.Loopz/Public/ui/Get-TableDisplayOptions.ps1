@@ -9,6 +9,9 @@ function Get-TableDisplayOptions {
     [hashtable]$Signals,
 
     [Parameter()]
+    [Object]$Krayon,
+
+    [Parameter()]
     [PSCustomObject]$Custom = $null
   )
 
@@ -41,13 +44,14 @@ function Get-TableDisplayOptions {
       False = $falseValue;
     }
 
-    Align    = @{
+    Align    = [PSCustomObject]@{
       Header = 'right';
       Cell   = 'left';
     }
 
     Snippets = [PSCustomObject]@{
-      Reset = $(snippets('Reset'));
+      Reset = $($Krayon.snippets('Reset'));
+      Ln    = $($Krayon.snippets('Ln'));
     }
 
     Custom = $Custom;

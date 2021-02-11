@@ -103,12 +103,6 @@ Describe 'Get-UniqueCrossPairs' {
 
       [PSCustomObject[]]$result = Get-UniqueCrossPairs $first $second;
       $result.Count | Should -Be 3;
-
-      foreach ($r in $result) {
-        Write-Host ">>> Pair: [$($r.First), $($r.Second)]";
-      }
-
-      Write-Host "  + Count: '$($result.Count)'"
     }
   }
 
@@ -118,12 +112,6 @@ Describe 'Get-UniqueCrossPairs' {
 
       [PSCustomObject[]]$result = Get-UniqueCrossPairs $first;
       $result.Count | Should -Be 3;
-
-      foreach ($r in $result) {
-        Write-Host ">>> Pair: [$($r.First), $($r.Second)]";
-      }
-
-      Write-Host "  + Count: '$($result.Count)'"
     }
   }
 } # Get-UniqueCrossPairs

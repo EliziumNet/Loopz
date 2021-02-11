@@ -18,6 +18,7 @@ function Show-ParameterSetInfo {
     [Krayon]$krayon = Get-Krayon
     [hashtable]$theme = $krayon.Theme;
     [hashtable]$signals = Get-Signals;
+    [System.Text.StringBuilder]$builder = [System.Text.StringBuilder]::new();
 
     [scriptblock]$renderParSetCell = {
       [OutputType([boolean])]
@@ -25,12 +26,10 @@ function Show-ParameterSetInfo {
         [string]$column,
         [string]$value,
         [PSCustomObject]$Options,
-        [Krayon]$Krayon
+        [System.Text.StringBuilder]$builder
       )
       [boolean]$result = $true;
-      # https://github.com/EliziumNet/Krayola/issues/41
-      # (Krayon.Scribble does not render a vanilla string)
-      #
+
       switch -Regex ($column) {
         'Name' {
           [System.Management.Automation.CommandParameterInfo]$parameterInfo = `
@@ -46,17 +45,17 @@ function Show-ParameterSetInfo {
           else {
             $Options.Custom.Snippets.Cell;
           }
-          $krayon.Scribble("$($nameSnippet)$value").End();
+          $null = $builder.Append("$($nameSnippet)$value");
         }
 
         'Type' {
-          $krayon.Scribble("$($Options.Custom.Snippets.Type)$value").End();              
+          $null = $builder.Append("$($Options.Custom.Snippets.Type)$value");
         }
 
         'Mandatory|PipeValue' {
           [string]$coreValue = $value.Trim() -eq 'True' ? $Options.Values.True : $Options.Values.False;
           [string]$padded = Get-PaddedLabel -Label $coreValue -Width $value.Length -Align $Options.Align.Cell;
-          $krayon.Reset().Text($padded).End();
+          $null = $builder.Append("$($Options.Snippets.Reset)$($padded)");
         }
 
         default {
@@ -82,10 +81,11 @@ function Show-ParameterSetInfo {
       }
     }
     else {
-      [syntax]$syntax = [syntax]::new($Name, $theme, $signals, $krayon.ApiFormat);
+      [syntax]$syntax = [syntax]::new($Name, $theme, $signals, $krayon);
 
       [string]$commandSnippet = $syntax.TableOptions.Custom.Snippets.Command;
       [string]$resetSnippet = $syntax.TableOptions.Snippets.Reset;
+      [string]$lnSnippet = $syntax.TableOptions.Snippets.Ln;
 
       # Since we're inside a process block $_ refers to a CommandInfo (the result of get-command) and
       # one property is ParameterSets.
@@ -125,13 +125,14 @@ function Show-ParameterSetInfo {
               [string]$structuredParamSetStmt = $syntax.ParamSetStmt($_, $parameterSet);
               [string]$structuredSyntax = $syntax.SyntaxStmt($parameterSet);
 
-              $krayon.Ln().End();
-              $krayon.ScribbleLn($structuredParamSetStmt).End();
-              $krayon.ScribbleLn($structuredSyntax).End();
-              $krayon.Ln().End();
+              $null = $builder.Append($(
+                  "$($lnSnippet)" +
+                  "$($structuredParamSetStmt)$($lnSnippet)$($structuredSyntax)$($lnSnippet)" +
+                  "$($lnSnippet)"
+                ));
 
               Show-AsTable -MetaData $fieldMetaData -Headers $headers -Table $tableContent `
-                -Krayon $krayon -Options $syntax.TableOptions -Render $renderParSetCell;
+                -Builder $builder -Options $syntax.TableOptions -Render $renderParSetCell;
 
               $count++;
             }
@@ -140,19 +141,23 @@ function Show-ParameterSetInfo {
             }
           }
         } # foreach
-        $krayon.Ln().End();
+        $null = $builder.Append("$($lnSnippet)");
 
         ($total -gt 0) `
-          ? "Command: $($commandSnippet)$($Name)$($resetSnippet); Showed $count of $total parameter set(s)."
-        : "Command: $($commandSnippet)$($Name)$($resetSnippet) contains no parameter sets!";
+          ? "Command: $($commandSnippet)$($Name)$($resetSnippet); Showed $count of $total parameter set(s)." `
+          : "Command: $($commandSnippet)$($Name)$($resetSnippet) contains no parameter sets!";
       }
       else {
         "Command: $($commandSnippet)$($Name)$($resetSnippet) contains no parameter sets!";
       }
 
       if (-not([string]::IsNullOrEmpty($structuredSummaryStmt))) {
-        $krayon.Reset().ScribbleLn($structuredSummaryStmt).Ln().End()
+        $null = $builder.Append(
+          $("$($resetSnippet)$($structuredSummaryStmt)$($lnSnippet)$($lnSnippet)")
+        );
       }
+
+      $krayon.ScribbleLn($builder.ToString()).End();
     }
   }
 }

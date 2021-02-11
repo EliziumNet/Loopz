@@ -18,7 +18,7 @@ Describe 'Syntax' {
       It 'should: show parameter set statements' {
         InModuleScope Elizium.Loopz {
           [string]$command = 'Rename-Many';
-          [syntax]$syntax = [syntax]::new($command, $_theme, $_signals, $_krayon.ApiFormat);
+          [syntax]$syntax = [syntax]::new($command, $_theme, $_signals, $_krayon);
           [CommandInfo]$commandInfo = Get-Command $command;
 
           foreach ($paramSet in $commandInfo.ParameterSets) {
@@ -37,7 +37,7 @@ Describe 'Syntax' {
       It 'should: show parameter set statements' {
         InModuleScope Elizium.Loopz {
           [string]$command = 'Rename-Many';
-          [syntax]$syntax = [syntax]::new($command, $_theme, $_signals, $_krayon.ApiFormat);
+          [syntax]$syntax = [syntax]::new($command, $_theme, $_signals, $_krayon);
           [CommandInfo]$commandInfo = Get-Command $command;
 
           foreach ($paramSet in $commandInfo.ParameterSets) {
@@ -54,7 +54,7 @@ Describe 'Syntax' {
       InModuleScope Elizium.Loopz {
         [string]$command = 'Rename-Many';
 
-        [syntax]$syntax = [syntax]::new($command, $_theme, $_signals, $_krayon.ApiFormat);
+        [syntax]$syntax = [syntax]::new($command, $_theme, $_signals, $_krayon);
         [CommandInfo]$commandInfo = Get-Command $command;
 
         foreach ($paramSet in $commandInfo.ParameterSets) {
