@@ -1,10 +1,10 @@
 
-function Get-ParameterSetInfo {
+function Show-ParameterSetInfo {
   # by KirkMunro (https://github.com/PowerShell/PowerShell/issues/8692)
   # https://docs.microsoft.com/en-us/powershell/scripting/developer/cmdlet/cmdlet-parameter-sets?view=powershell-7.1
   #
   [CmdletBinding()]
-  [Alias('gips')]
+  [Alias('sips')]
   param(
     [Parameter(Mandatory, Position = 0, ValueFromPipeline, ValueFromPipelineByPropertyName)]
     [ValidateNotNullOrEmpty()]
@@ -75,10 +75,10 @@ function Get-ParameterSetInfo {
   process {
     if ($_ -isNot [System.Management.Automation.CommandInfo]) {
       if ($PSBoundParameters.ContainsKey('Sets')) {
-        Get-Command -Name $_ | Get-ParameterSetInfo -Sets $Sets;
+        Get-Command -Name $_ | Show-ParameterSetInfo -Sets $Sets;
       }
       else {
-        Get-Command -Name $_ | Get-ParameterSetInfo;
+        Get-Command -Name $_ | Show-ParameterSetInfo;
       }
     }
     else {
