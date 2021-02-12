@@ -24,6 +24,7 @@ function Show-AsTable {
         param(
           [string]$column,
           [string]$Value,
+          [PSCustomObject]$row,
           [PSCustomObject]$Options,
           [System.Text.StringBuilder]$Builder
         )
@@ -77,7 +78,7 @@ function Show-AsTable {
       $null = $Builder.Append($indentation);
 
       foreach ($col in $selection) {
-        if (-not($Render.InvokeReturnAsIs($col, $_.Value.$col, $Options, $Builder))) {
+        if (-not($Render.InvokeReturnAsIs($col, $_.Value.$col, $_.Value, $Options, $Builder))) {
           $null = $Builder.Append("$($resetSnippet)$($_.Value.$col)");
         }
         $null = $Builder.Append($inter);

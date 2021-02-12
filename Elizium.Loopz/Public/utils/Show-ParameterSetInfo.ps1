@@ -25,6 +25,7 @@ function Show-ParameterSetInfo {
       param(
         [string]$column,
         [string]$value,
+        [PSCustomObject]$row,
         [PSCustomObject]$Options,
         [System.Text.StringBuilder]$builder
       )
