@@ -2,14 +2,14 @@
 function Get-TableDisplayOptions {
   [OutputType([PSCustomObject])]
   param(
-    [Parameter(Mandatory)]
-    [string[]]$Select,
-
     [Parameter()]
     [hashtable]$Signals,
 
     [Parameter()]
     [Object]$Krayon,
+
+    [Parameter()]
+    [string[]]$Select,
 
     [Parameter()]
     [PSCustomObject]$Custom = $null

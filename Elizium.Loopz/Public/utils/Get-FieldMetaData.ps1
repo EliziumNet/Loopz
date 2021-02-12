@@ -9,7 +9,7 @@ function Get-FieldMetaData {
   #
   foreach ($field in $Data[0].psobject.properties.name) {
 
-    try {
+    try { 
       $fieldMetaData[$field] = @{
         FieldName = $field;
         # !array compound statement: => .$field
@@ -28,7 +28,6 @@ function Get-FieldMetaData {
         Max       = [Math]::max($field.Length, "false".Length);
         Type      = $Data[0].$field.GetType();
       }
-
     }
   }
 

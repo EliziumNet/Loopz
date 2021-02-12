@@ -27,8 +27,7 @@ function Show-AsTable {
           [PSCustomObject]$Options,
           [System.Text.StringBuilder]$Builder
         )
-        $null = $Builder.Append("$($Options.Snippets.Reset)$Value")
-        return $true;
+        return $false;
       }),
 
     [Parameter()]

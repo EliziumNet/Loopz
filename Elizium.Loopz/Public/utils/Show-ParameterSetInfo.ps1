@@ -30,7 +30,25 @@ function Show-ParameterSetInfo {
       )
       [boolean]$result = $true;
 
+      # A warning about using -Regex option on a switch statement:
+      # - Make sure that each switch branch has a break, this ensures that a single value
+      # is handled only once.
+      # - Since 'Name' is a substring of 'PipeName' the more prescriptive branch must appear first,
+      # otherwise the wrong branch will be taken; If 'Name' case appears before 'PipeName' case, then
+      # when $column is 'PipeName' could be handled by the 'Name' case which is not what we intended,
+      # which is why the order of the cases matters.
+      #
+      # So, be careful using -Regex on switch statements.
+      #
       switch -Regex ($column) {
+        'Mandatory|PipeValue|PipeName' {
+          [string]$coreValue = $value.Trim() -eq 'True' ? $Options.Values.True : $Options.Values.False;
+          [string]$padded = Get-PaddedLabel -Label $coreValue -Width $value.Length -Align $Options.Align.Cell;
+          $null = $builder.Append("$($Options.Snippets.Reset)$($padded)");
+
+          break;
+        }
+
         'Name' {
           [System.Management.Automation.CommandParameterInfo]$parameterInfo = `
             $Options.Custom.ParameterSetInfo.Parameters | Where-Object Name -eq $value.Trim();
@@ -45,17 +63,15 @@ function Show-ParameterSetInfo {
           else {
             $Options.Custom.Snippets.Cell;
           }
-          $null = $builder.Append("$($nameSnippet)$value");
+          $null = $builder.Append("$($nameSnippet)$($value)");
+
+          break;
         }
 
         'Type' {
-          $null = $builder.Append("$($Options.Custom.Snippets.Type)$value");
-        }
+          $null = $builder.Append("$($Options.Custom.Snippets.Type)$($value)");
 
-        'Mandatory|PipeValue' {
-          [string]$coreValue = $value.Trim() -eq 'True' ? $Options.Values.True : $Options.Values.False;
-          [string]$padded = Get-PaddedLabel -Label $coreValue -Width $value.Length -Align $Options.Align.Cell;
-          $null = $builder.Append("$($Options.Snippets.Reset)$($padded)");
+          break;
         }
 
         default {
@@ -156,7 +172,7 @@ function Show-ParameterSetInfo {
           $("$($resetSnippet)$($structuredSummaryStmt)$($lnSnippet)$($lnSnippet)")
         );
       }
-
+      Write-Debug "'$($builder.ToString())'";
       $krayon.ScribbleLn($builder.ToString()).End();
     }
   }

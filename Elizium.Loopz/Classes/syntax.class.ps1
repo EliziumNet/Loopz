@@ -150,7 +150,7 @@ class Syntax {
       ParameterSetInfo = $null;
     }
 
-    [string[]]$columns = @('Name', 'Type', 'Mandatory', 'Pos', 'PipeValue', 'Alias');
+    [string[]]$columns = @('Name', 'Type', 'Mandatory', 'Pos', 'PipeValue', 'PipeName', 'Alias');
     $this.TableOptions = Get-TableDisplayOptions -Select $columns  `
       -Signals $signals -Krayon $this.Krayon -Custom $custom;
 
