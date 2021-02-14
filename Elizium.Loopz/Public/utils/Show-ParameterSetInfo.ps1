@@ -4,7 +4,7 @@ function Show-ParameterSetInfo {
   # https://docs.microsoft.com/en-us/powershell/scripting/developer/cmdlet/cmdlet-parameter-sets?view=powershell-7.1
   #
   [CmdletBinding()]
-  [Alias('sips')]
+  [Alias('ships')]
   param(
     [Parameter(Mandatory, Position = 0, ValueFromPipeline, ValueFromPipelineByPropertyName)]
     [ValidateNotNullOrEmpty()]
@@ -19,76 +19,11 @@ function Show-ParameterSetInfo {
     [hashtable]$theme = $krayon.Theme;
     [hashtable]$signals = Get-Signals;
     [System.Text.StringBuilder]$builder = [System.Text.StringBuilder]::new();
-
-    [scriptblock]$renderParSetCell = {
-      [OutputType([boolean])]
-      param(
-        [string]$column,
-        [string]$value,
-        [PSCustomObject]$row,
-        [PSCustomObject]$Options,
-        [System.Text.StringBuilder]$builder
-      )
-      [boolean]$result = $true;
-
-      # A warning about using -Regex option on a switch statement:
-      # - Make sure that each switch branch has a break, this ensures that a single value
-      # is handled only once.
-      # - Since 'Name' is a substring of 'PipeName' the more prescriptive branch must appear first,
-      # otherwise the wrong branch will be taken; If 'Name' case appears before 'PipeName' case, then
-      # when $column is 'PipeName' could be handled by the 'Name' case which is not what we intended,
-      # which is why the order of the cases matters.
-      #
-      # So, be careful using -Regex on switch statements.
-      #
-      switch -Regex ($column) {
-        'Mandatory|PipeValue|PipeName' {
-          [string]$coreValue = $value.Trim() -eq 'True' ? $Options.Values.True : $Options.Values.False;
-          [string]$padded = Get-PaddedLabel -Label $coreValue -Width $value.Length -Align $Options.Align.Cell;
-          $null = $builder.Append("$($Options.Snippets.Reset)$($padded)");
-
-          break;
-        }
-
-        'Name' {
-          [System.Management.Automation.CommandParameterInfo]$parameterInfo = `
-            $Options.Custom.ParameterSetInfo.Parameters | Where-Object Name -eq $value.Trim();
-          [string]$parameterType = $parameterInfo.ParameterType;
-
-          [string]$nameSnippet = if ($parameterInfo.IsMandatory) {
-            $Options.Custom.Snippets.Mandatory;
-          }
-          elseif ($parameterType -eq 'switch') {
-            $Options.Custom.Snippets.Switch;
-          }
-          else {
-            $Options.Custom.Snippets.Cell;
-          }
-          $null = $builder.Append("$($nameSnippet)$($value)");
-
-          break;
-        }
-
-        'Type' {
-          $null = $builder.Append("$($Options.Custom.Snippets.Type)$($value)");
-
-          break;
-        }
-
-        default {
-          # let's not do anything here and revert to default handling
-          #
-          $result = $false;
-        }
-      }
-      # https://devblogs.microsoft.com/scripting/use-the-get-command-powershell-cmdlet-to-find-parameter-set-information/
-      # https://blogs.msmvps.com/jcoehoorn/blog/2017/10/02/powershell-expandproperty-vs-property/
-
-      return $result;
-    } # renderParSetCell
   }
 
   process {
+    $null = $builder.Clear();
+
     if ($_ -isNot [System.Management.Automation.CommandInfo]) {
       if ($PSBoundParameters.ContainsKey('Sets')) {
         Get-Command -Name $_ | Show-ParameterSetInfo -Sets $Sets;
@@ -116,29 +51,11 @@ function Show-ParameterSetInfo {
             ($PSBoundParameters.ContainsKey('Sets') -and ($Sets -contains $parameterSet.Name)))
 
           if ($include) {
-            $parametersToShow = $parameterSet.Parameters | Where-Object Name -NotIn $syntax.CommonParamSet;
-            $parameterGroups = $parametersToShow.where( { $_.Position -ge 0 }, 'split');
-            $parameterGroups[0] = @($parameterGroups[0] | Sort-Object -Property Position);
-            $parametersToShow = $parameterGroups[0] + $parameterGroups[1];
+            [hashtable]$fieldMetaData, [hashtable]$headers, [hashtable]$tableContent = $(
+              get-ParameterSetTableData -CommandInfo $_ -ParamSet $parameterSet -Syntax $syntax
+            );
 
-            [PSCustomObject[]]$resultSet = ($parametersToShow `
-              | Select-Object -Property @( # this is a query statement
-                'Name'
-                @{Name = 'Type'; Expression = { $_.ParameterType.Name }; }
-                @{Name = 'Mandatory'; Expression = { $_.IsMandatory } }
-                @{Name = 'Pos'; Expression = { if ($_.Position -eq [int]::MinValue) { 'named' } else { $_.Position } } }
-                @{Name = 'PipeValue'; Expression = { $_.ValueFromPipeline } }
-                @{Name = 'PipeName'; Expression = { $_.ValueFromPipelineByPropertyName } }
-                @{Name = 'Alias'; Expression = { $_.Aliases -join ',' } }
-              ));
-
-            if (-not($($null -eq $resultSet)) -and ($resultSet.Count -gt 0)) {
-              [hashtable]$fieldMetaData = Get-FieldMetaData -Data $resultSet;
-              $syntax.TableOptions.Custom.ParameterSetInfo = $parameterSet;
-
-              [hashtable]$headers, [hashtable]$tableContent = Get-AsTable -MetaData $fieldMetaData `
-                -TableData $resultSet -Options $syntax.TableOptions;
-
+            if (-not($($null -eq $fieldMetaData)) -and ($fieldMetaData.Count -gt 0)) {
               [string]$structuredParamSetStmt = $syntax.ParamSetStmt($_, $parameterSet);
               [string]$structuredSyntax = $syntax.SyntaxStmt($parameterSet);
 
@@ -149,7 +66,7 @@ function Show-ParameterSetInfo {
                 ));
 
               Show-AsTable -MetaData $fieldMetaData -Headers $headers -Table $tableContent `
-                -Builder $builder -Options $syntax.TableOptions -Render $renderParSetCell;
+                -Builder $builder -Options $syntax.TableOptions -Render $syntax.RenderCell;
 
               $count++;
             }

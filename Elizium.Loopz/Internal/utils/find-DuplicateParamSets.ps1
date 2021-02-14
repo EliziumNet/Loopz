@@ -8,11 +8,11 @@ function find-DuplicateParamSets {
     [System.Management.Automation.CommandInfo]$CommandInfo,
 
     [Parameter(Mandatory)]
-    [Syntax]$syntax
+    [Syntax]$Syntax
   )
   [System.Management.Automation.CommandParameterSetInfo[]]$paramSets = $commandInfo.ParameterSets;
   [string[]]$paramSetNames = $paramSets.Name; 
-  [System.Collections.ArrayList]$duplicates = @{}
+  [array]$duplicates = @()
 
   [hashtable]$paramSetLookup = @{}
   foreach ($paramSet in $paramSets) {
@@ -26,16 +26,20 @@ function find-DuplicateParamSets {
     [System.Management.Automation.CommandParameterSetInfo]$secondParamSet = $paramSetLookup[$pair.Second];
 
     if ($firstParamSet -and $secondParamSet) {
-      Write-Debug ">>> Checking parameter set combination: '$($pair.First), $($pair.Second)'"
-      if (test-AreParamSetsEqual -FirstPsInfo $firstParamSet -SecondPsInfo $secondParamSet -Syntax $syntax) {
-        $duplicates.Add([PSCustomObject]@{
-            First = $firstParamSet;
-            Second = $secondParamSet;
-        });
+      Write-Debug ">>> Checking parameter set combination: '$($pair.First), $($pair.Second)'";
+      if (test-AreParamSetsEqual -FirstPsInfo $firstParamSet -SecondPsInfo $secondParamSet -Syntax $Syntax) {
+        [PSCustomObject]$duplicate = [PSCustomObject]@{
+          First  = $firstParamSet;
+          Second = $secondParamSet;
+        }
+
+        $duplicates += $duplicate;
       }
     }
     else {
       throw "find-DuplicateParamSets: Couldn't recall previously stored parameter set(s). (This should never happen)";
     }
   }
+
+  return $duplicates;
 }

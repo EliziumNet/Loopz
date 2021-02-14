@@ -51,4 +51,16 @@ Describe 'find-DuplicateParamSets' {
       }
     }
   }
+
+  Context 'given: Command with non distinguishable parameter set' {
+    It 'should: return that duplicate' {
+      InModuleScope Elizium.Loopz {
+        [string]$commandName = 'test-WithDuplicatePs'
+        [Syntax]$script:_syntax = [Syntax]::new($commandName, $_theme, $_signals, $_krayon);
+        [System.Management.Automation.CommandInfo]$CommandInfo = $(Get-Command $commandName);
+        [array]$result = find-DuplicateParamSets -CommandInfo $CommandInfo -Syntax $_syntax;
+        $result.Count | Should -Be 1;
+      }
+    }
+  }
 }
