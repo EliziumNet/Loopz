@@ -1,5 +1,5 @@
 
-function test-WithDuplicatePs {
+function test-WithDuplicatePs { # this should be an internal function
   [CmdletBinding()]
   param(
     [Parameter(Mandatory, ValueFromPipeline = $true)]
@@ -74,10 +74,6 @@ function test-WithDuplicatePs {
     [Parameter(ParameterSetName = 'Append', Mandatory)]
     [string]$Append,
 
-    # Defining parameter sets for File and Directory, just to ensure both of these switches
-    # are mutually exclusive makes the whole parameter set definition exponentially more
-    # complex. It's easier just to enforce this with a ValidateScript.
-    #
     [Parameter()]
     [ValidateScript( { -not($PSBoundParameters.ContainsKey('Directory')); })]
     [switch]$File,

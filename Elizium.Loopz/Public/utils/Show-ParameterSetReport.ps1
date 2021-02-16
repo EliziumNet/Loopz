@@ -5,7 +5,10 @@ function Show-ParameterSetReport {
   param(
     [Parameter(Mandatory, Position = 0, ValueFromPipeline, ValueFromPipelineByPropertyName)]
     [ValidateNotNullOrEmpty()]
-    [string[]]$Name
+    [string[]]$Name,
+
+    [Parameter()]
+    [System.Text.StringBuilder]$Builder = [System.Text.StringBuilder]::new()
   )
 
   begin {
@@ -17,7 +20,9 @@ function Show-ParameterSetReport {
   }
 
   process {
-    $null = $builder.Clear();
+    if (-not($PSBoundParameters.ContainsKey('Builder'))) {
+      $null = $Builder.Clear();
+    }
 
     # Reminder: $_ is commandInfo
     # 
@@ -28,6 +33,7 @@ function Show-ParameterSetReport {
       [syntax]$syntax = [syntax]::new($Name, $theme, $signals, $krayon);
       [string]$lnSnippet = $syntax.TableOptions.Snippets.Ln;
       [string]$punctuationSnippet = $syntax.TableOptions.Snippets.Punct;
+      [rules]$rules = [rules]::New($_);
 
       $null = $builder.Append(
         "$($lnSnippet)" +
@@ -68,7 +74,10 @@ function Show-ParameterSetReport {
             -Builder $builder -Options $syntax.TableOptions -Render $syntax.RenderCell;
         }
 
-        $krayon.ScribbleLn($builder.ToString()).End();
+        if (-not($PSBoundParameters.ContainsKey('Builder'))) {
+          Write-Debug "'$($Builder.ToString())'";
+          $krayon.ScribbleLn($Builder.ToString()).End();
+        }
       }
     }
   }

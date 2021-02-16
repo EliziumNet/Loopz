@@ -50,11 +50,11 @@ function Get-TableDisplayOptions {
     }
 
     Snippets = [PSCustomObject]@{
-      Reset = $($Krayon.snippets('Reset'));
-      Ln    = $($Krayon.snippets('Ln'));
+      Reset   = $($Krayon.snippets('Reset'));
+      Ln      = $($Krayon.snippets('Ln'));
     }
 
-    Custom = $Custom;
+    Custom   = $Custom;
   }
 
   return $tableOptions;

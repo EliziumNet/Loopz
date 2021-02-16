@@ -11,18 +11,22 @@ function Show-ParameterSetInfo {
     [string[]]$Name,
 
     [Parameter(Position = 1)]
-    [string[]]$Sets
+    [string[]]$Sets,
+
+    [Parameter()]
+    [System.Text.StringBuilder]$Builder = [System.Text.StringBuilder]::new()
   )
 
   begin {
     [Krayon]$krayon = Get-Krayon
     [hashtable]$theme = $krayon.Theme;
     [hashtable]$signals = Get-Signals;
-    [System.Text.StringBuilder]$builder = [System.Text.StringBuilder]::new();
   }
 
   process {
-    $null = $builder.Clear();
+    if (-not($PSBoundParameters.ContainsKey('Builder'))) {
+      $null = $Builder.Clear();
+    }
 
     if ($_ -isNot [System.Management.Automation.CommandInfo]) {
       if ($PSBoundParameters.ContainsKey('Sets')) {
@@ -59,14 +63,14 @@ function Show-ParameterSetInfo {
               [string]$structuredParamSetStmt = $syntax.ParamSetStmt($_, $parameterSet);
               [string]$structuredSyntax = $syntax.SyntaxStmt($parameterSet);
 
-              $null = $builder.Append($(
+              $null = $Builder.Append($(
                   "$($lnSnippet)" +
                   "$($structuredParamSetStmt)$($lnSnippet)$($structuredSyntax)$($lnSnippet)" +
                   "$($lnSnippet)"
                 ));
 
               Show-AsTable -MetaData $fieldMetaData -Headers $headers -Table $tableContent `
-                -Builder $builder -Options $syntax.TableOptions -Render $syntax.RenderCell;
+                -Builder $Builder -Options $syntax.TableOptions -Render $syntax.RenderCell;
 
               $count++;
             }
@@ -75,7 +79,7 @@ function Show-ParameterSetInfo {
             }
           }
         } # foreach
-        $null = $builder.Append("$($lnSnippet)");
+        $null = $Builder.Append("$($lnSnippet)");
 
         ($total -gt 0) `
           ? "Command: $($commandSnippet)$($Name)$($resetSnippet); Showed $count of $total parameter set(s)." `
@@ -86,12 +90,15 @@ function Show-ParameterSetInfo {
       }
 
       if (-not([string]::IsNullOrEmpty($structuredSummaryStmt))) {
-        $null = $builder.Append(
+        $null = $Builder.Append(
           $("$($resetSnippet)$($structuredSummaryStmt)$($lnSnippet)$($lnSnippet)")
         );
       }
-      Write-Debug "'$($builder.ToString())'";
-      $krayon.ScribbleLn($builder.ToString()).End();
+
+      if (-not($PSBoundParameters.ContainsKey('Builder'))) {
+        Write-Debug "'$($Builder.ToString())'";
+        $krayon.ScribbleLn($Builder.ToString()).End();
+      }
     }
   }
 }

@@ -7,67 +7,111 @@ function Show-InvokeReport {
     [ValidateNotNullOrEmpty()]
     [string[]]$Name,
 
+    [Parameter(Mandatory)]
+    [string[]]$Params,
+
     [Parameter()]
-    [string[]]$Params
+    [System.Text.StringBuilder]$Builder = [System.Text.StringBuilder]::new()
   )
 
   begin {
     [Krayon]$krayon = Get-Krayon
     [hashtable]$theme = $krayon.Theme;
     [hashtable]$signals = Get-Signals;
-    [System.Text.StringBuilder]$builder = [System.Text.StringBuilder]::new();
+    [System.Text.StringBuilder]$Builder = [System.Text.StringBuilder]::new();
   }
 
   process {
-    $null = $builder.Clear();
+    if (-not($PSBoundParameters.ContainsKey('Builder'))) {
+      $null = $Builder.Clear();
+    }
 
     if ($_ -isNot [System.Management.Automation.CommandInfo]) {
-      if ($PSBoundParameters.ContainsKey('Params')) {
-        Get-Command -Name $_ | Show-InvokeReport -Params $Params;
-      }
-      else {
-        Get-Command -Name $_ | Show-InvokeReport;
-      }
+      Get-Command -Name $_ | Show-InvokeReport -Params $Params;
     }
     else {
       [syntax]$syntax = [syntax]::new($Name, $theme, $signals, $krayon);
+      [string]$paramSetSnippet = $syntax.TableOptions.Snippets.ParamSetName;
+      [string]$resetSnippet = $syntax.TableOptions.Snippets.Reset;
       [string]$lnSnippet = $syntax.TableOptions.Snippets.Ln;
+      [string]$punctSnippet = $syntax.TableOptions.Snippets.Punct;
+      [string]$commandSnippet = $syntax.TableOptions.Snippets.Command;
+      [string]$hiLightSnippet = $syntax.TableOptions.Snippets.HiLight;
+      [rules]$rules = [rules]::New($_);
+      [PSCustomObject]$informInfo = [PSCustomObject]@{
+        AllCommonParamSet = $syntax.AllCommonParamSet;
+      }
 
-      $null = $builder.Append(
+      [informer]$informer = [informer]::new($rules, $informInfo);
+
+      $null = $Builder.Append(
         "$($lnSnippet)" +
         "---> Invoke Report ..." +
         "$($lnSnippet)"
       );
 
-      # The following rules must be applied
-      #
-      # - Each parameter set must have at least one unique parameter (make mandatory if possible).
-      # - Unique position numbers
-      # - Only 1 parameter can be ValueFromPipeline = true
-      #
-
-      # First restrict the parameter sets to those which contain where every p in Params
-      # TODO: define a rules class
-      #
-      $candidateSets = $_.ParameterSets | Where-Object { (
-          # ($_.Name -NotIn $syntax.CommonParamSet) -and
-          # Intersect $Params parameter sets' parameters
-          #
-          ($_.Parameters.Name | Where-Object { ($Params -contains $_) }) # => too permissive
-        )
-      };
-
-      # Next remove those parameter sets where any mandatory parameter in the parameter set
-      # which are missing from Params
-      #
+      [System.Management.Automation.CommandParameterSetInfo[]]$candidateSets = $informer.Resolve($Params);
 
       [string[]]$candidateNames = $candidateSets.Name
+      [string]$candidateNamesCSV = $candidateNames -join ', ';
+      [string]$paramsCSV = $Params -join ', ';
 
-      Write-Host ">>> Found $($candidateSets.Count) of $($_.ParameterSets.Count) candidate parameter sets:";
-      Write-Host ">>> Candidates: '$($candidateNames -join ', ')'"
+      [string]$structuredParamNames = $syntax.QuotedNameStmt($hiLightSnippet);
+      [string]$unresolvedStructuredParams = $syntax.NamesRegex.Replace($paramsCSV, $structuredParamNames);
 
-      Write-Debug "'$($builder.ToString())'";
-      $krayon.ScribbleLn($builder.ToString()).End();
+      [string]$commonInvokeFormat = $(
+        $lnSnippet + $resetSnippet + '   {0}Command: ' +
+        $punctSnippet + '''' + $commandSnippet + $Name + $punctSnippet + '''' +
+        $resetSnippet + ' invoked with parameters: ' +
+        $unresolvedStructuredParams +
+        ' {1}' + $lnSnippet
+      );
+
+      [string]$doubleIndent = [string]::new(' ', $syntax.TableOptions.Chrome.Indent * 2);
+
+      if ($candidateNames.Length -eq 0) {
+        [string]$message = "$($resetSnippet)does not resolve to a parameter set and is therefore invalid.";
+        $null = $Builder.Append(
+          $($commonInvokeFormat -f $(Get-FormattedSignal -Name 'INVALID' -EmojiOnly), $message)
+        );
+      }
+      elseif ($candidateNames.Length -eq 1) {
+        [string]$message = $(
+          "$($lnSnippet)$($doubleIndent)$($punctSnippet)=> $($resetSnippet)resolves to parameter set: " +
+          "$($punctSnippet)'$($paramSetSnippet)$($candidateNamesCSV)$($punctSnippet)'"
+        );
+        [string]$resolvedStructuredParams = $syntax.InvokeWithParamsStmt($candidateSets[0], $params);
+
+        # Colour in resolved parameters
+        #
+        $commonInvokeFormat = $commonInvokeFormat.Replace($unresolvedStructuredParams,
+          $resolvedStructuredParams);
+
+        $null = $Builder.Append(
+          $($commonInvokeFormat -f $(Get-FormattedSignal -Name 'OK-A' -EmojiOnly), $message)
+        );
+
+        $_ | Show-ParameterSetInfo -Sets $candidateNames -Builder $Builder;
+      }
+      else {
+        [string]$structuredName = $syntax.QuotedNameStmt($paramSetSnippet);
+        [string]$compoundStructuredNames = $syntax.NamesRegex.Replace($candidateNamesCSV, $structuredName);
+        [string]$message = $(
+          "$($lnSnippet)$($doubleIndent)$($punctSnippet)=> $($resetSnippet)resolves to parameter sets: " +
+          "$($compoundStructuredNames)"
+        );
+
+        $null = $Builder.Append(
+          $($commonInvokeFormat -f $(Get-FormattedSignal -Name 'FAILED-A' -EmojiOnly), $message)
+        );
+
+        $_ | Show-ParameterSetInfo -Sets $candidateNames -Builder $Builder;
+      }
+
+      if (-not($PSBoundParameters.ContainsKey('Builder'))) {
+        Write-Debug "'$($Builder.ToString())'";
+        $krayon.ScribbleLn($Builder.ToString()).End();
+      }
     }
   }
 }

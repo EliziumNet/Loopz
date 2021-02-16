@@ -142,6 +142,7 @@ $global:Loopz = [PSCustomObject]@{
     'WARNING-B'    = (New-Pair(@('Warning', '👻')));
     'SWITCH-ON'    = (New-Pair(@('On', '✔️')));
     'SWITCH-OFF'   = (New-Pair(@('Off', '✖️')));
+    'INVALID'      = (New-Pair(@('Invalid', '❌')));
     'OK-A'         = (New-Pair(@('🆗', '🚀')));
     'OK-B'         = (New-Pair(@('🆗', '🌟')));
     'BAD-A'        = (New-Pair(@('Bad', '💥')));

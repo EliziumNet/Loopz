@@ -7,8 +7,8 @@ Describe 'Show-ParameterSetReport' {
   }
 
   Context 'given: test-WithDuplicatePs' {
-    It 'should: show duplicate parameter sets' -Tag 'Current' {
-      InModuleScope ELizium.Loopz {
+    It 'should: show duplicate parameter sets' {
+      InModuleScope Elizium.Loopz {
         'test-WithDuplicatePs' | Show-ParameterSetReport
       }
     }

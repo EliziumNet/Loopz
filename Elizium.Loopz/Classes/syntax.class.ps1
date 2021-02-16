@@ -14,6 +14,7 @@ class Syntax {
   [PSCustomObject]$Snippets;
   [PSCustomObject]$Formats;
   [PSCustomObject]$TableOptions;
+  [regex]$NamesRegex;
 
   [string[]]$CommonParamSet = @('Verbose', 'Debug', 'ErrorAction', 'WarningAction',
     'InformationAction', 'VerboseAction', 'DebugAction', 'ProgressAction',
@@ -61,7 +62,7 @@ class Syntax {
         [string]$nameSnippet = if ($parameterInfo.IsMandatory) {
           $Options.Custom.Snippets.Mandatory;
         }
-        elseif ($parameterType -eq 'switch') {
+        elseif ($parameterType.Name -eq 'SwitchParameter') {
           $Options.Custom.Snippets.Switch;
         }
         else {
@@ -140,6 +141,7 @@ class Syntax {
       Reset        = $($this.Krayon.snippets('Reset'));
       Space        = $($this.Krayon.snippets('Reset')) + ' ';
       Ln           = $($this.Krayon.snippets('Ln'));
+      HiLight      = $($this.Krayon.snippets('white'));
     }
 
     $this.Formats = @{
@@ -224,6 +226,9 @@ class Syntax {
     $this.TableOptions = Get-TableDisplayOptions -Select $columns  `
       -Signals $signals -Krayon $this.Krayon -Custom $custom;
 
+    $this.TableOptions.Snippets = $this.Snippets;
+
+    $this.NamesRegex = New-RegularExpression -Expression '(?<name>\w+)';
   } # ctor
 
   [string] ParamSetStmt(
@@ -321,5 +326,55 @@ class Syntax {
       "$($this.Snippets.Ln)"
     );
     return $structuredDuplicateParamSetStmt;
+  }
+
+  [string] QuotedNameStmt([string]$nameSnippet) {
+    [string]$nameStmt = $(
+      $($this.Snippets.Punct) + "'" + $nameSnippet + '${name}' + $($this.Snippets.Punct) + "'"
+    );
+    return $nameStmt;
+  }
+
+  [string] QuotedNameStmt([string]$nameSnippet, [string]$name) {
+    [string]$nameStmt = $(
+      $($this.Snippets.Punct) + "'" + $nameSnippet + $name + $($this.Snippets.Punct) + "'"
+    );
+    return $nameStmt;
+  }
+
+  [string] InvokeWithParamsStmt (
+    [System.Management.Automation.CommandParameterSetInfo]$paramSet,
+    [string[]]$invokeParams
+  ) {
+    [string]$paramsStmt = [string]::Empty;
+
+    [int]$count = 0;
+    $invokeParams | ForEach-Object {
+      [string]$paramName = $_;
+      [array]$params = $paramSet.Parameters | Where-Object Name -eq $paramName;
+
+      if ($params.Count -eq 1) {
+        [System.Management.Automation.CommandParameterInfo]$parameterInfo = $params[0];
+        [string]$paramSnippet = if ($parameterInfo.IsMandatory) {
+          $this.TableOptions.Custom.Snippets.Mandatory;
+        }
+        elseif ($parameterInfo.ParameterType.Name -eq 'SwitchParameter') {
+
+          $this.TableOptions.Custom.Snippets.Switch;
+        }
+        else {
+          $this.TableOptions.Custom.Snippets.Cell;
+        }
+
+        $paramsStmt += $this.QuotedNameStmt($paramSnippet, $parameterInfo.Name);
+
+        if ($count -lt ($invokeParams.Count - 1)) {
+          $paramsStmt += ', '
+        }
+      }
+      $count++;
+    }
+
+    return $paramsStmt;
   }
 }
