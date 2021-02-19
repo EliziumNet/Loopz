@@ -6,10 +6,10 @@ Describe 'Show-ParameterSetReport' {
       -ErrorAction 'stop' -DisableNameChecking;
   }
 
-  Context 'given: test-WithDuplicatePs' {
-    It 'should: show duplicate parameter sets' {
+  Context 'given: Invoke-Command' {
+    It 'should: show duplicate parameter sets' -Skip {
       InModuleScope Elizium.Loopz {
-        'test-WithDuplicatePs' | Show-ParameterSetReport
+        'Invoke-Command' | Show-ParameterSetReport
       }
     }
   }

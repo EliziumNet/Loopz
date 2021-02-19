@@ -11,9 +11,21 @@ function get-ParameterSetTableData {
     [System.Management.Automation.CommandParameterSetInfo]$ParamSet,
 
     [Parameter()]
-    [Syntax]$Syntax
+    [Syntax]$Syntax,
+
+    [Parameter()]
+    [scriptblock]$Where = $([scriptblock] {
+        [OutputType([boolean])]
+        param (
+          [Parameter()]
+          [PSCustomObject]$row
+        )
+        return $true;
+      })
   )
 
+  # NB: This sorting and grouping should probably be thrown away as it is not persistent
+  #
   $parametersToShow = $ParamSet.Parameters | Where-Object Name -NotIn $syntax.CommonParamSet;
   $parameterGroups = $parametersToShow.where( { $CommandInfo.Position -ge 0 }, 'split');
   $parameterGroups[0] = @($parameterGroups[0] | Sort-Object -Property Position);
@@ -31,6 +43,8 @@ function get-ParameterSetTableData {
     ));
 
   [array]$result = if (-not($($null -eq $resultSet)) -and ($resultSet.Count -gt 0)) {
+    $resultSet = $resultSet | Where-Object { $Where.InvokeReturnAsIs($_); }
+
     [hashtable]$fieldMetaData = Get-FieldMetaData -Data $resultSet;
     $Syntax.TableOptions.Custom.ParameterSetInfo = $ParamSet;
 

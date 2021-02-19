@@ -1,5 +1,5 @@
 
-class Syntax {
+class Syntax { # PsSyntax
   [string]$CommandName;
   [hashtable]$Theme;
   [hashtable]$Signals
@@ -91,9 +91,9 @@ class Syntax {
     return $result;
   } # RenderCell
 
-  Syntax([string]$commandName, [hashtable]$theme, [hashtable]$signals, [object]$krayon) {
+  Syntax([string]$commandName, [hashtable]$signals, [object]$krayon) {
     $this.CommandName = $commandName;
-    $this.Theme = $theme;
+    $this.Theme = $krayon.Theme;
     $this.Signals = $signals;
     $this.Krayon = $krayon;
 
@@ -117,13 +117,13 @@ class Syntax {
     }
 
     $this.Scheme = @{
-      'COLS.PUNCTUATION'    = $theme['META-COLOURS'];
+      'COLS.PUNCTUATION'    = $this.Theme['META-COLOURS'];
       'COLS.HEADER'         = 'black', 'bgYellow';
-      'COLS.UNDERLINE'      = $theme['META-COLOURS'];
+      'COLS.UNDERLINE'      = $this.Theme['META-COLOURS'];
       'COLS.CELL'           = 'gray';
       'COLS.TYPE'           = 'darkCyan';
-      'COLS.MAN-PARAM'      = $theme['AFFIRM-COLOURS'];
-      'COLS.OPT-PARAM'      = 'blue' # $theme['VALUE-COLOURS'];
+      'COLS.MAN-PARAM'      = $this.Theme['AFFIRM-COLOURS'];
+      'COLS.OPT-PARAM'      = 'blue' # $this.Theme['VALUE-COLOURS'];
       'COLS.CMD-NAME'       = 'darkGreen';
       'COLS.PARAM-SET-NAME' = 'green';
       'COLS.SWITCH'         = 'cyan'; # magenta
@@ -142,6 +142,8 @@ class Syntax {
       Space        = $($this.Krayon.snippets('Reset')) + ' ';
       Ln           = $($this.Krayon.snippets('Ln'));
       HiLight      = $($this.Krayon.snippets('white'));
+      Heading      = $($this.Krayon.snippets(@('black', 'bgDarkYellow')));
+      HeadingUL    = $($this.Krayon.snippets('darkYellow'));
     }
 
     $this.Formats = @{
@@ -230,6 +232,15 @@ class Syntax {
 
     $this.NamesRegex = New-RegularExpression -Expression '(?<name>\w+)';
   } # ctor
+
+  [string] TitleStmt([string]$title) {
+    [string]$titleStmt = $(
+      "$($this.Snippets.Reset)$($this.Snippets.Ln)" +
+      "---> $($title) ..." +
+      "$($this.Snippets.Ln)"
+    );
+    return $titleStmt;
+  }
 
   [string] ParamSetStmt(
     [System.Management.Automation.CommandInfo]$commandInfo,

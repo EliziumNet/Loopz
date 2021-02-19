@@ -10,7 +10,10 @@ function find-DuplicateParamSets {
     [Parameter(Mandatory)]
     [Syntax]$Syntax
   )
-  [System.Management.Automation.CommandParameterSetInfo[]]$paramSets = $commandInfo.ParameterSets;
+  [System.Management.Automation.CommandParameterSetInfo[]]$paramSets = $(
+    $commandInfo.ParameterSets | Where-Object { $_.Name -ne '__AllParameterSets' }
+  );
+
   [string[]]$paramSetNames = $paramSets.Name; 
   [array]$duplicates = @()
 
@@ -19,27 +22,28 @@ function find-DuplicateParamSets {
     $paramSetLookup[$paramSet.Name] = $paramSet;
   }
 
-  [PSCustomObject[]]$paramSetPairs = Get-UniqueCrossPairs -First $paramSetNames;
+  if ($paramSetNames -and ($paramSetNames.Count -gt 0)) {
+    [PSCustomObject[]]$paramSetPairs = Get-UniqueCrossPairs -First $paramSetNames;
 
-  foreach ($pair in $paramSetPairs) {
-    [System.Management.Automation.CommandParameterSetInfo]$firstParamSet = $paramSetLookup[$pair.First];
-    [System.Management.Automation.CommandParameterSetInfo]$secondParamSet = $paramSetLookup[$pair.Second];
+    foreach ($pair in $paramSetPairs) {
+      [System.Management.Automation.CommandParameterSetInfo]$firstParamSet = $paramSetLookup[$pair.First];
+      [System.Management.Automation.CommandParameterSetInfo]$secondParamSet = $paramSetLookup[$pair.Second];
 
-    if ($firstParamSet -and $secondParamSet) {
-      Write-Debug ">>> Checking parameter set combination: '$($pair.First), $($pair.Second)'";
-      if (test-AreParamSetsEqual -FirstPsInfo $firstParamSet -SecondPsInfo $secondParamSet -Syntax $Syntax) {
-        [PSCustomObject]$duplicate = [PSCustomObject]@{
-          First  = $firstParamSet;
-          Second = $secondParamSet;
+      if ($firstParamSet -and $secondParamSet) {
+        if (test-AreParamSetsEqual -FirstPsInfo $firstParamSet -SecondPsInfo $secondParamSet -Syntax $Syntax) {
+          [PSCustomObject]$duplicate = [PSCustomObject]@{
+            First  = $firstParamSet;
+            Second = $secondParamSet;
+          }
+
+          $duplicates += $duplicate;
         }
-
-        $duplicates += $duplicate;
       }
-    }
-    else {
-      throw "find-DuplicateParamSets: Couldn't recall previously stored parameter set(s). (This should never happen)";
+      else {
+        throw "find-DuplicateParamSets: Couldn't recall previously stored parameter set(s). (This should never happen)";
+      }
     }
   }
 
-  return $duplicates;
+  return ($duplicates.Count -gt 0) ? $duplicates : $null;
 }

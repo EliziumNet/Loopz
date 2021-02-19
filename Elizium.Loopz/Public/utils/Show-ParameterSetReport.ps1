@@ -13,10 +13,8 @@ function Show-ParameterSetReport {
 
   begin {
     [Krayon]$krayon = Get-Krayon
-    [hashtable]$theme = $krayon.Theme;
     [hashtable]$signals = Get-Signals;
-    [System.Text.StringBuilder]$builder = [System.Text.StringBuilder]::new();
-    [string]$duplicateSeparator = '.............';
+    # [string]$duplicateSeparator = '.............';
   }
 
   process {
@@ -30,54 +28,23 @@ function Show-ParameterSetReport {
       Get-Command -Name $_ | Show-ParameterSetReport;
     }
     else {
-      [syntax]$syntax = [syntax]::new($Name, $theme, $signals, $krayon);
-      [string]$lnSnippet = $syntax.TableOptions.Snippets.Ln;
-      [string]$punctuationSnippet = $syntax.TableOptions.Snippets.Punct;
+      [syntax]$syntax = New-Syntax -CommandName $_.Name -Signals $signals -Krayon $krayon;
+      # [string]$lnSnippet = $syntax.TableOptions.Snippets.Ln;
+      # [string]$punctuationSnippet = $syntax.TableOptions.Snippets.Punct;
       [rules]$rules = [rules]::New($_);
 
-      $null = $builder.Append(
-        "$($lnSnippet)" +
-        "---> Parameter Set Report ..." +
-        "$($lnSnippet)"
-      );
+      $null = $builder.Append($syntax.TitleStmt('Parameter Set Report'));
 
-      [array]$duplicates = find-DuplicateParamSets -CommandInfo $_ -Syntax $syntax;
+      [PSCustomObject]$verifyInfo = [PSCustomObject]@{
+        CommandInfo = $_;
+        Syntax      = $syntax;
+        Builder     = $builder;
+      }
+      $rules.ReportAll($verifyInfo);
 
-      if ($duplicates.Count -gt 0) {
-        $null = $builder.Append("$($punctuationSnippet)$($duplicateSeparator)$($lnSnippet)");
-
-        foreach ($dup in $duplicates) {
-          [string]$duplicateParamSetStmt = $syntax.DuplicateParamSetStmt(
-            $dup.First, $dup.Second
-          );
-          $null = $builder.Append($duplicateParamSetStmt);
-
-          [string]$firstParamSetStmt = $syntax.ParamSetStmt($_, $dup.First);
-          [string]$secondParamSetStmt = $syntax.ParamSetStmt($_, $dup.Second);
-
-          [string]$firstSyntax = $syntax.SyntaxStmt($dup.First);
-          [string]$secondSyntax = $syntax.SyntaxStmt($dup.Second);
-
-          $null = $builder.Append($(
-              "$($lnSnippet)" +
-              "$($firstParamSetStmt)$($lnSnippet)$($firstSyntax)$($lnSnippet)" +
-              "$($lnSnippet)" +
-              "$($secondParamSetStmt)$($lnSnippet)$($secondSyntax)$($lnSnippet)" +
-              "$($punctuationSnippet)$($duplicateSeparator)$($lnSnippet)"
-            ));
-
-          [hashtable]$fieldMetaData, [hashtable]$headers, [hashtable]$tableContent = $(
-            get-ParameterSetTableData -CommandInfo $_ -ParamSet $dup.First -Syntax $Syntax
-          );
-
-          Show-AsTable -MetaData $fieldMetaData -Headers $headers -Table $tableContent `
-            -Builder $builder -Options $syntax.TableOptions -Render $syntax.RenderCell;
-        }
-
-        if (-not($PSBoundParameters.ContainsKey('Builder'))) {
-          Write-Debug "'$($Builder.ToString())'";
-          $krayon.ScribbleLn($Builder.ToString()).End();
-        }
+      if (-not($PSBoundParameters.ContainsKey('Builder'))) {
+        Write-Debug "'$($Builder.ToString())'";
+        $krayon.ScribbleLn($Builder.ToString()).End();
       }
     }
   }

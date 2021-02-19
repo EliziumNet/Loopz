@@ -11,22 +11,44 @@ Describe 'test-AreParamSetsEqual' {
   BeforeEach {
     InModuleScope Elizium.Loopz {
       [string]$script:_commandName = 'Rename-Many';
-      [Krayon]$krayon = Get-Krayon;
-      [hashtable]$theme = $krayon.Theme;
-      [hashtable]$signals = Get-Signals;
-      [Syntax]$script:_syntax = [Syntax]::new($_commandName, $theme, $signals, $krayon);
-
-      [CommandInfo]$commandInfo = Get-Command $_commandName;
-      [CommandParameterSetInfo]$script:_appendPsi = $commandInfo.ParameterSets | Where-Object Name -eq 'Append';
-      [CommandParameterSetInfo]$script:_prependPsi = $commandInfo.ParameterSets | Where-Object Name -eq 'Prepend';
+      [Krayon]$script:_krayon = Get-Krayon;
+      [hashtable]$script:_signals = Get-Signals;
     }
   }
 
   Context 'given: parameter sets which are different' {
     It 'should: return false' {
       InModuleScope Elizium.Loopz {
-        test-AreParamSetsEqual -FirstPsInfo $_prependPsi -SecondPsInfo $_appendPsi `
-          -Syntax $_syntax | Should -BeFalse;
+        function test-WithMultipleParamSets {
+          param(
+            [parameter()]
+            [object]$Chaff,
+
+            [Parameter(ParameterSetName = 'Alpha', Mandatory, Position = 1)]
+            [object]$DuplicatePosA,
+
+            [Parameter(ParameterSetName = 'Alpha', Position = 2)]
+            [object]$DuplicatePosB,
+
+            [Parameter(ParameterSetName = 'Alpha', Position = 3)]
+            [object]$DuplicatePosC,
+
+            [Parameter(ParameterSetName = 'Beta', Mandatory, Position = 1)]
+            [object]$SameA,
+
+            [Parameter(ParameterSetName = 'Beta', Position = 2)]
+            [object]$SameB
+          )
+        }
+
+        [string]$commandName = 'test-WithMultipleParamSets';
+        [CommandInfo]$commandInfo = Get-Command $commandName;
+        [CommandParameterSetInfo]$alphaPsi = $commandInfo.ParameterSets | Where-Object Name -eq 'Alpha';
+        [CommandParameterSetInfo]$betaPsi = $commandInfo.ParameterSets | Where-Object Name -eq 'Beta';
+        [Syntax]$syntax = [Syntax]::new($_commandName, $_signals, $_krayon);
+
+        test-AreParamSetsEqual -FirstPsInfo $alphaPsi -SecondPsInfo $betaPsi `
+          -Syntax $syntax | Should -BeFalse;
       }
     }
   }
@@ -34,8 +56,32 @@ Describe 'test-AreParamSetsEqual' {
   Context 'given: parameter sets which are the same' {
     It 'should: return true' {
       InModuleScope Elizium.Loopz {
-        test-AreParamSetsEqual -FirstPsInfo $_prependPsi -SecondPsInfo $_prependPsi `
-          -Syntax $_syntax | Should -BeTrue;
+        function test-WithDuplicateParamSets {
+          param(
+            [Parameter()]
+            [object]$Chaff,
+
+            [Parameter(ParameterSetName = 'Alpha', Mandatory, Position = 1)]
+            [Parameter(ParameterSetName = 'Beta', Mandatory, Position = 1)]
+            [object]$DuplicatePosA,
+
+            [Parameter(ParameterSetName = 'Alpha', Position = 2)]
+            [Parameter(ParameterSetName = 'Beta', Position = 2)]
+            [object]$DuplicatePosB,
+
+            [Parameter(ParameterSetName = 'Alpha', Position = 3)]
+            [Parameter(ParameterSetName = 'Beta', Position = 3)]
+            [object]$DuplicatePosC
+          )
+        }
+        [string]$commandName = 'test-WithDuplicateParamSets';
+        [CommandInfo]$commandInfo = Get-Command $commandName;
+        [CommandParameterSetInfo]$alphaPsi = $commandInfo.ParameterSets | Where-Object Name -eq 'Alpha';
+        [CommandParameterSetInfo]$betaPsi = $commandInfo.ParameterSets | Where-Object Name -eq 'Beta';
+        [Syntax]$syntax = [Syntax]::new($commandName, $_signals, $_krayon);
+
+        test-AreParamSetsEqual -FirstPsInfo $alphaPsi -SecondPsInfo $betaPsi `
+          -Syntax $syntax | Should -BeTrue;
       }
     }
   }

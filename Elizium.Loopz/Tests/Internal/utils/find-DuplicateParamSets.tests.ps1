@@ -1,4 +1,5 @@
 using module Elizium.Krayola;
+using namespace System.Management.Automation;
 
 Describe 'find-DuplicateParamSets' {
   BeforeAll {
@@ -32,10 +33,10 @@ Describe 'find-DuplicateParamSets' {
         }
 
         [string]$commandName = 'test-FnWithDuplicateParamSets';
-        [Syntax]$script:_syntax = [Syntax]::new($commandName, $_theme, $_signals, $_krayon);
-        [System.Management.Automation.CommandInfo]$CommandInfo = $(Get-Command $commandName);
-        [array]$result = find-DuplicateParamSets -CommandInfo $CommandInfo -Syntax $_syntax;
-        $result.Count | Should -Be 1;
+        [Syntax]$script:_syntax = [Syntax]::new($commandName, $_signals, $_krayon);
+        [CommandInfo]$CommandInfo = $(Get-Command $commandName);
+        [array]$duplicates = find-DuplicateParamSets -CommandInfo $CommandInfo -Syntax $_syntax;
+        $duplicates.Count | Should -Be 1;
       }
     }
   }
@@ -44,22 +45,42 @@ Describe 'find-DuplicateParamSets' {
     It 'should: not find amy duplicates' {
       InModuleScope Elizium.Loopz {
         [string]$commandName = 'Rename-Many'
-        [Syntax]$script:_syntax = [Syntax]::new($commandName, $_theme, $_signals, $_krayon);
-        [System.Management.Automation.CommandInfo]$CommandInfo = $(Get-Command $commandName);
-        [array]$result = find-DuplicateParamSets -CommandInfo $CommandInfo -Syntax $_syntax;
-        $result.Count | Should -Be 0;
+        [Syntax]$script:_syntax = [Syntax]::new($commandName, $_signals, $_krayon);
+        [CommandInfo]$CommandInfo = $(Get-Command $commandName);
+        [array]$duplicates = find-DuplicateParamSets -CommandInfo $CommandInfo -Syntax $_syntax;
+        $duplicates | Should -BeNullOrEmpty;
       }
     }
   }
 
   Context 'given: Command with non distinguishable parameter set' {
-    It 'should: return that duplicate' {
+    It 'should: return that duplicate' -Tag 'Current' {
       InModuleScope Elizium.Loopz {
-        [string]$commandName = 'test-WithDuplicatePs'
-        [Syntax]$script:_syntax = [Syntax]::new($commandName, $_theme, $_signals, $_krayon);
-        [System.Management.Automation.CommandInfo]$CommandInfo = $(Get-Command $commandName);
-        [array]$result = find-DuplicateParamSets -CommandInfo $CommandInfo -Syntax $_syntax;
-        $result.Count | Should -Be 1;
+        function test-WithDuplicateParamSets {
+          param(
+            [Parameter()]
+            [object]$Chaff,
+
+            [Parameter(ParameterSetName = 'Alpha', Mandatory, Position = 1)]
+            [Parameter(ParameterSetName = 'Beta', Mandatory, Position = 1)]
+            [object]$DuplicatePosA,
+
+            [Parameter(ParameterSetName = 'Alpha', Position = 2)]
+            [Parameter(ParameterSetName = 'Beta', Position = 2)]
+            [object]$DuplicatePosB,
+
+            [Parameter(ParameterSetName = 'Alpha', Position = 3)]
+            [Parameter(ParameterSetName = 'Beta', Position = 3)]
+            [object]$DuplicatePosC
+          )
+        }
+
+        [string]$commandName = 'test-WithDuplicateParamSets'
+        [Syntax]$script:_syntax = [Syntax]::new($commandName, $_signals, $_krayon);
+        [CommandInfo]$CommandInfo = $(Get-Command $commandName);
+        [array]$duplicates = find-DuplicateParamSets -CommandInfo $CommandInfo -Syntax $_syntax;
+
+        $duplicates.Count | Should -Be 1;
       }
     }
   }

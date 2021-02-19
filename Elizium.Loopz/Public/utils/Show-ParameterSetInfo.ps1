@@ -14,7 +14,10 @@ function Show-ParameterSetInfo {
     [string[]]$Sets,
 
     [Parameter()]
-    [System.Text.StringBuilder]$Builder = [System.Text.StringBuilder]::new()
+    [System.Text.StringBuilder]$Builder = [System.Text.StringBuilder]::new(),
+
+    [Parameter()]
+    [string]$Title = 'Parameter Set Info'
   )
 
   begin {
@@ -37,11 +40,12 @@ function Show-ParameterSetInfo {
       }
     }
     else {
-      [syntax]$syntax = [syntax]::new($Name, $theme, $signals, $krayon);
+      [syntax]$syntax = New-Syntax -CommandName $_.Name -Signals $signals -Krayon $krayon;
 
       [string]$commandSnippet = $syntax.TableOptions.Custom.Snippets.Command;
       [string]$resetSnippet = $syntax.TableOptions.Snippets.Reset;
       [string]$lnSnippet = $syntax.TableOptions.Snippets.Ln;
+      $null = $builder.Append($syntax.TitleStmt($Title));
 
       # Since we're inside a process block $_ refers to a CommandInfo (the result of get-command) and
       # one property is ParameterSets.
@@ -55,6 +59,10 @@ function Show-ParameterSetInfo {
             ($PSBoundParameters.ContainsKey('Sets') -and ($Sets -contains $parameterSet.Name)))
 
           if ($include) {
+            # TODO: we need to fnd out what the unique parameters are for each set.
+            # We could add an extra boolean column to the table which indicates
+            # if it is unique.
+            #
             [hashtable]$fieldMetaData, [hashtable]$headers, [hashtable]$tableContent = $(
               get-ParameterSetTableData -CommandInfo $_ -ParamSet $parameterSet -Syntax $syntax
             );

@@ -1,4 +1,9 @@
 
+# NB The table returned, uses the 'Name' as the row's key, and implies 2 things
+# 1) the table must have a Name column
+# 2) no 2 rows can have the same Name
+# This could be improved upon in the future to remove these 2 limitations
+#
 function Get-AsTable {
   [OutputType([hashtable])]
   param(

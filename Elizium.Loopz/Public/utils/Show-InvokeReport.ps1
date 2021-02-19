@@ -16,7 +16,6 @@ function Show-InvokeReport {
 
   begin {
     [Krayon]$krayon = Get-Krayon
-    [hashtable]$theme = $krayon.Theme;
     [hashtable]$signals = Get-Signals;
     [System.Text.StringBuilder]$Builder = [System.Text.StringBuilder]::new();
   }
@@ -30,7 +29,7 @@ function Show-InvokeReport {
       Get-Command -Name $_ | Show-InvokeReport -Params $Params;
     }
     else {
-      [syntax]$syntax = [syntax]::new($Name, $theme, $signals, $krayon);
+      [syntax]$syntax = New-Syntax -CommandName $_.Name -Signals $signals -Krayon $krayon;
       [string]$paramSetSnippet = $syntax.TableOptions.Snippets.ParamSetName;
       [string]$resetSnippet = $syntax.TableOptions.Snippets.Reset;
       [string]$lnSnippet = $syntax.TableOptions.Snippets.Ln;
@@ -43,12 +42,7 @@ function Show-InvokeReport {
       }
 
       [informer]$informer = [informer]::new($rules, $informInfo);
-
-      $null = $Builder.Append(
-        "$($lnSnippet)" +
-        "---> Invoke Report ..." +
-        "$($lnSnippet)"
-      );
+      $null = $builder.Append($syntax.TitleStmt('Invoke Report'));
 
       [System.Management.Automation.CommandParameterSetInfo[]]$candidateSets = $informer.Resolve($Params);
 
