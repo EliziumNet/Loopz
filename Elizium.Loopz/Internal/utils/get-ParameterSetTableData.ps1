@@ -45,13 +45,18 @@ function get-ParameterSetTableData {
   [array]$result = if (-not($($null -eq $resultSet)) -and ($resultSet.Count -gt 0)) {
     $resultSet = $resultSet | Where-Object { $Where.InvokeReturnAsIs($_); }
 
-    [hashtable]$fieldMetaData = Get-FieldMetaData -Data $resultSet;
-    $Syntax.TableOptions.Custom.ParameterSetInfo = $ParamSet;
+    if ($resultSet) {
+      [hashtable]$fieldMetaData = Get-FieldMetaData -Data $resultSet;
+      $Syntax.TableOptions.Custom.ParameterSetInfo = $ParamSet;
 
-    [hashtable]$headers, [hashtable]$tableContent = Get-AsTable -MetaData $fieldMetaData `
-      -TableData $resultSet -Options $Syntax.TableOptions;
+      [hashtable]$headers, [hashtable]$tableContent = Get-AsTable -MetaData $fieldMetaData `
+        -TableData $resultSet -Options $Syntax.TableOptions;
 
-    @($fieldMetaData, $headers, $tableContent);
+      @($fieldMetaData, $headers, $tableContent);
+    }
+    else {
+      @()
+    }
   }
   else {
     @()

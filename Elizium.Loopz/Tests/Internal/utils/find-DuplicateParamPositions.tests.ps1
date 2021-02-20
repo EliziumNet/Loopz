@@ -1,6 +1,6 @@
 using namespace System.Management.Automation;
 
-Describe 'find-DuplicateParamPositions' -Tag 'Current' {
+Describe 'find-DuplicateParamPositions' {
   BeforeAll {
     Get-Module Elizium.Loopz | Remove-Module;
     Import-Module .\Output\Elizium.Loopz\Elizium.Loopz.psm1 `

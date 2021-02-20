@@ -1,5 +1,5 @@
 
-Describe 'Show-InvokeReport' -Tag 'Current' {
+Describe 'Show-InvokeReport' {
   BeforeAll {
     Get-Module Elizium.Loopz | Remove-Module;
     Import-Module .\Output\Elizium.Loopz\Elizium.Loopz.psm1 `

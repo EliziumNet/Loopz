@@ -24,8 +24,6 @@ Describe 'Syntax' {
           foreach ($paramSet in $commandInfo.ParameterSets) {
             [string]$paramSetStmt = $syntax.ParamSetStmt($commandInfo, $paramSet);
             $_krayon.Scribble($paramSetStmt).Ln().End();
-
-            # Write-Host ">>> Syntax: $($paramSet.ToString())";
           }
         }
       }

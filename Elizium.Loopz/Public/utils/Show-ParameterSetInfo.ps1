@@ -21,8 +21,7 @@ function Show-ParameterSetInfo {
   )
 
   begin {
-    [Krayon]$krayon = Get-Krayon
-    [hashtable]$theme = $krayon.Theme;
+    [Krayon]$krayon = Get-Krayon;
     [hashtable]$signals = Get-Signals;
   }
 

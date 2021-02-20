@@ -135,13 +135,15 @@ Describe 'Rules' {
           $alphaDuplicate = $($vo.Violations | Where-Object { $_.ParamSet.Name -eq 'Alpha' })[0];
           $alphaDuplicate | Should -Not -BeNullOrEmpty;
           $resultA = $alphaDuplicate.Params | Sort-Object | Compare-Object @(
-            'DuplicatePosA', 'DuplicatePosB', 'DuplicatePosC');
+            'DuplicatePosA', 'DuplicatePosB', 'DuplicatePosC'
+          );
           $resultA | Should -BeNullOrEmpty;
 
           $betaDuplicate = $($vo.Violations | Where-Object { $_.ParamSet.Name -eq 'Beta' })[0];
           $betaDuplicate | Should -Not -BeNullOrEmpty;
           $resultB = $betaDuplicate.Params | Sort-Object | Compare-Object @(
-            'SameA', 'SameB');
+            'SameA', 'SameB'
+          );
           $resultB | Should -BeNullOrEmpty;
 
           # Now check the statement execution doesn't fail in some way

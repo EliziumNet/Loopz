@@ -261,7 +261,7 @@ class Rules {
       [string]$ruleNameKey = $_;
       [ParameterSetRule]$rule = $this.Rules[$ruleNameKey];
 
-      [PSCustomObject[]]$vo = $rule.Violations($verifyInfo);
+      [PSCustomObject[]]$vo = $rule.Violation($verifyInfo);
       [PSCustomObject[]]$vs = $vo.Violations;
       if ($vs -and ($vs.Count -gt 0)) {
 

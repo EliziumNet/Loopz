@@ -36,6 +36,8 @@ function Show-ParameterSetReport {
       $null = $builder.Append($syntax.TitleStmt('Parameter Set Report'));
 
       [PSCustomObject]$verifyInfo = [PSCustomObject]@{
+        # Argh, we shouldn't need to pass in command info here, because rules get it in ctor
+        #
         CommandInfo = $_;
         Syntax      = $syntax;
         Builder     = $builder;

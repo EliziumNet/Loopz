@@ -54,7 +54,7 @@ Describe 'find-DuplicateParamSets' {
   }
 
   Context 'given: Command with non distinguishable parameter set' {
-    It 'should: return that duplicate' -Tag 'Current' {
+    It 'should: return that duplicate' {
       InModuleScope Elizium.Loopz {
         function test-WithDuplicateParamSets {
           param(

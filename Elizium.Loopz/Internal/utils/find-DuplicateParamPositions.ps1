@@ -28,24 +28,29 @@ function find-DuplicateParamPositions {
       get-ParameterSetTableData -CommandInfo $CommandInfo `
       -ParamSet $paramSet -Syntax $Syntax -Where $paramIsPositional;
 
-    [hashtable]$partitioned = Get-PartitionedPcoHash -Hash $tableContent -Field 'Pos';
-    # partitioned is indexed by the Pos value, not 'Pos'
+    # We might encounter a parameter set which does not contain positional parameters,
+    # in which case, we should ignore.
     #
-    if ($partitioned.Count -gt -0) {
-      $partitioned.GetEnumerator() | ForEach-Object {
-        [hashtable]$positional = $_.Value;
+    if ($tableContent -and ($tableContent.Count -gt 0)) {
+      [hashtable]$partitioned = Get-PartitionedPcoHash -Hash $tableContent -Field 'Pos';
+      # partitioned is indexed by the Pos value, not 'Pos'
+      #
+      if ($partitioned.Count -gt -0) {
+        $partitioned.GetEnumerator() | ForEach-Object {
+          [hashtable]$positional = $_.Value;
 
-        if ($positional -and ($positional.Count -gt 1)) {
-          # found duplicate positions
-          #
-          [string[]]$params = $($positional.GetEnumerator() | ForEach-Object { $_.Key } | Sort-Object);
+          if ($positional -and ($positional.Count -gt 1)) {
+            # found duplicate positions
+            #
+            [string[]]$params = $($positional.GetEnumerator() | ForEach-Object { $_.Key } | Sort-Object);
 
-          [PSCustomObject]$duplicate = [PSCustomObject]@{
-            ParamSet = $paramSet;
-            Params   = $params;
+            [PSCustomObject]$duplicate = [PSCustomObject]@{
+              ParamSet = $paramSet;
+              Params   = $params;
+            }
+
+            $duplicates += $duplicate;
           }
-
-          $duplicates += $duplicate;
         }
       }
     }
