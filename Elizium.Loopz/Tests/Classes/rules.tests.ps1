@@ -49,7 +49,7 @@ Describe 'Rules' {
     }
 
     Context 'given: function with duplicate parameter sets' {
-      It 'should: return violation' -Tag 'What' {
+      It 'should: return violation' -Tag 'Current!' {
         InModuleScope Elizium.Loopz {
           [string]$commandName = 'test-WithDuplicateParamSets';
           [CommandInfo]$commandInfo = Get-Command $commandName;
@@ -63,7 +63,7 @@ Describe 'Rules' {
           }
 
           [MustContainUniqueSetOfParams]$rule = [MustContainUniqueSetOfParams]::new($ruleName);
-          [PSCustomObject]$vo = $rule.Violation($verifyInfo);
+          [PSCustomObject]$vo = $rule.Query($verifyInfo);
 
           $vo | Should -Not -BeNullOrEmpty;
           $vo.Violations.Count | Should -Be 1;
@@ -127,7 +127,7 @@ Describe 'Rules' {
           }
 
           [MustContainUniquePositions]$rule = [MustContainUniquePositions]::new($ruleName);
-          [PSCustomObject]$vo = $rule.Violation($verifyInfo);
+          [PSCustomObject]$vo = $rule.Query($verifyInfo);
 
           $vo | Should -Not -BeNullOrEmpty;
           $vo.Violations.Count | Should -Be 2;

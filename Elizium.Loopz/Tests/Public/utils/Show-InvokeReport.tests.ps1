@@ -15,11 +15,9 @@ Describe 'Show-InvokeReport' {
           [Parameter(ParameterSetName = 'ReplaceWith', Mandatory, Position = 1)]
           [Parameter(ParameterSetName = 'MoveToStart', Mandatory, Position = 1)]
           [Parameter(ParameterSetName = 'MoveToEnd', Mandatory, Position = 1)]
-          [ValidateScript( { { $(test-ValidPatternArrayParam -Arg $_ -AllowWildCard ) } })]
           [array]$Pattern,
 
           [Parameter(ParameterSetName = 'MoveToAnchor', Mandatory, Position = 2)]
-          [ValidateScript( { $(test-ValidPatternArrayParam -Arg $_) })]
           [array]$Anchor,
 
           [Parameter(ParameterSetName = 'MoveToAnchor', Position = 3)]
@@ -31,13 +29,6 @@ Describe 'Show-InvokeReport' {
           [Parameter(ParameterSetName = 'Prepend')]
           [Parameter(ParameterSetName = 'Append')]
           [Parameter(ParameterSetName = 'PrependDuplicate')]
-
-          # Commented out so we can test ambiguity that this invocation causes:
-          # -Pattern 'hi' -Anchor '~' -Start -Paste 'Hello' -Copy 'a'
-          #
-          # [Parameter(ParameterSetName = 'HybridStart')]
-          # [Parameter(ParameterSetName = 'HybridEnd')]
-          [ValidateScript( { { $(test-ValidPatternArrayParam -Arg $_) } })]
           [array]$Copy,
 
           [Parameter(ParameterSetName = 'MoveToAnchor')]

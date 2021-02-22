@@ -44,7 +44,7 @@ function Show-ParameterSetInfo {
       [string]$commandSnippet = $syntax.TableOptions.Custom.Snippets.Command;
       [string]$resetSnippet = $syntax.TableOptions.Snippets.Reset;
       [string]$lnSnippet = $syntax.TableOptions.Snippets.Ln;
-      $null = $builder.Append($syntax.TitleStmt($Title));
+      $null = $builder.Append($syntax.TitleStmt($Title, $_.Name));
 
       # Since we're inside a process block $_ refers to a CommandInfo (the result of get-command) and
       # one property is ParameterSets.

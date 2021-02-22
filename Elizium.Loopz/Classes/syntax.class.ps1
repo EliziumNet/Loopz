@@ -1,5 +1,6 @@
 
-class Syntax { # PsSyntax
+class Syntax {
+  # PsSyntax
   [string]$CommandName;
   [hashtable]$Theme;
   [hashtable]$Signals
@@ -14,6 +15,8 @@ class Syntax { # PsSyntax
   [PSCustomObject]$Snippets;
   [PSCustomObject]$Formats;
   [PSCustomObject]$TableOptions;
+  [PSCustomObject]$Labels;
+  [PSCustomObject]$Fragments;
   [regex]$NamesRegex;
 
   [string[]]$CommonParamSet = @('Verbose', 'Debug', 'ErrorAction', 'WarningAction',
@@ -21,6 +24,13 @@ class Syntax { # PsSyntax
     'ErrorVariable', 'WarningVariable', 'InformationVariable', 'DebugVariable',
     'VerboseVariable', 'ProgressVariable', 'OutVariable', 'OutBuffer',
     'PipelineVariable');
+
+  static [hashtable]$CloseBracket = @{
+    '(' = ')';
+    '[' = ']';
+    '{' = '}';
+    '<' = '>';
+  }
 
   [string[]]$AllCommonParamSet = $this.CommonParamSet + @('WhatIf', 'Confirm');
 
@@ -144,6 +154,9 @@ class Syntax { # PsSyntax
       HiLight      = $($this.Krayon.snippets('white'));
       Heading      = $($this.Krayon.snippets(@('black', 'bgDarkYellow')));
       HeadingUL    = $($this.Krayon.snippets('darkYellow'));
+      Special      = $($this.Krayon.snippets('darkYellow'));
+      Error        = $($this.Krayon.snippets('red'));
+      Ok           = $($this.Krayon.snippets('green'));
     }
 
     $this.Formats = @{
@@ -230,13 +243,26 @@ class Syntax { # PsSyntax
 
     $this.TableOptions.Snippets = $this.Snippets;
 
+    $this.Labels = [PSCustomObject]@{
+      ParamSet           = '===> Parameter Set: ';
+      DuplicatePositions = '===> Duplicate Positions for Parameter Set: ';
+      ParamsDuplicatePos = $(
+        "$([string]::new(' ', $this.TableOptions.Chrome.Indent))" +
+        "$($signals['BULLET-POINT'].Value) Params: "
+      );
+    }
+
+    $this.Fragments = [PSCustomObject]@{
+    }
+
     $this.NamesRegex = New-RegularExpression -Expression '(?<name>\w+)';
   } # ctor
 
-  [string] TitleStmt([string]$title) {
+  [string] TitleStmt([string]$title, [string]$commandName) {
+    [string]$commandStmt = $this.QuotedNameStmt($this.Snippets.Command, $commandName, '[');
     [string]$titleStmt = $(
       "$($this.Snippets.Reset)$($this.Snippets.Ln)" +
-      "---> $($title) ..." +
+      "---> $($title) $($commandStmt)$($this.Snippets.Reset) ..." +
       "$($this.Snippets.Ln)"
     );
     return $titleStmt;
@@ -252,12 +278,58 @@ class Syntax { # PsSyntax
 
     [string]$structuredParamSetStmt = `
     $(
-      "$($this.Snippets.Reset)===> Parameter Set: '" +
+      "$($this.Snippets.Reset)$($this.Labels.ParamSet)'" +
       "$($this.Snippets.ParamSetName)$($paramSet.Name)$($this.Snippets.Reset)'" +
       "$defaultLabel"
     );
 
     return $structuredParamSetStmt;
+  }
+
+  [string] ParamsDuplicatePosStmt (
+    [string[]]$params,
+    [System.Management.Automation.CommandParameterSetInfo]$paramSet,
+    [string]$positionNumber
+  ) {
+    [string]$quotedPosition = $this.QuotedNameStmt($this.Snippets.Special, $positionNumber, '(');
+    [string]$structuredStmt = $(
+      "$($this.Snippets.Reset)$($this.Labels.DuplicatePositions)" +
+      "$($this.QuotedNameStmt($($this.Snippets.ParamSetName), $paramSet.Name))" +
+      "$($this.Snippets.Ln)" +
+      "$($this.Snippets.Reset)$($this.Labels.ParamsDuplicatePos) " +
+      "$($quotedPosition) "
+    );
+
+    [int]$count = 0;
+    foreach ($paramName in $params) {
+      [System.Management.Automation.CommandParameterInfo[]]$paramResult = $(
+        $paramSet.Parameters | Where-Object { $_.Name -eq $paramName }
+      );
+
+      if ($paramResult -and ($paramResult.Count -eq 1)) {
+        [System.Management.Automation.CommandParameterInfo]$paramInfo = $paramResult[0];
+        [string]$paramSnippet = if ($paramInfo.IsMandatory) {
+          $this.TableOptions.Custom.Snippets.Mandatory;
+        }
+        elseif ($paramInfo.ParameterType.Name -eq 'SwitchParameter') {
+          $this.TableOptions.Custom.Snippets.Switch;
+        }
+        else {
+          $this.TableOptions.Custom.Snippets.Cell;
+        }
+
+        $structuredStmt += $(
+          $this.QuotedNameStmt($paramSnippet, $paramName)
+        );
+
+        if ($count -lt ($params.Count - 1)) {
+          $structuredStmt += "$($this.Snippets.Punct), ";
+        }
+      }
+      $count++;
+    }
+
+    return $structuredStmt;
   }
 
   [string] SyntaxStmt(
@@ -327,7 +399,8 @@ class Syntax { # PsSyntax
     # ---> Parameter sets [command-name]: 'first' and 'second' have identical sets of parameters
     #
     [string]$structuredDuplicateParamSetStmt = $(
-      "$($this.Snippets.Reset)---> Parameter Sets " +
+      "$($this.Snippets.Reset)$([string]::new(' ', $this.TableOptions.Chrome.Indent))" +
+      "$($this.Signals['BULLET-POINT'].Value) Parameter Sets " +
       "$($this.Snippets.Reset)[$($this.Snippets.Command)$($this.CommandName)$($this.Snippets.Reset)]: " +
       "$($this.Snippets.Punct)'" +
       "$($this.Snippets.ParamSetName)$($firstSet.Name)$($this.Snippets.Punct)'$($this.Snippets.Reset) and " +
@@ -340,15 +413,23 @@ class Syntax { # PsSyntax
   }
 
   [string] QuotedNameStmt([string]$nameSnippet) {
-    [string]$nameStmt = $(
-      $($this.Snippets.Punct) + "'" + $nameSnippet + '${name}' + $($this.Snippets.Punct) + "'"
-    );
-    return $nameStmt;
+    return $this.QuotedNameStmt($nameSnippet, '${name}', "'");
   }
 
   [string] QuotedNameStmt([string]$nameSnippet, [string]$name) {
+    return $this.QuotedNameStmt($nameSnippet, $name, "'");
+  }
+
+  [string] QuotedNameStmt([string]$nameSnippet, [string]$name, [string]$open) {
+    [string]$close = if ([syntax]::CloseBracket.ContainsKey($open)) {
+      [syntax]::CloseBracket[$open];
+    }
+    else {
+      $open;
+    }
+
     [string]$nameStmt = $(
-      $($this.Snippets.Punct) + "'" + $nameSnippet + $name + $($this.Snippets.Punct) + "'"
+      $($this.Snippets.Punct) + $open + $nameSnippet + $name + $($this.Snippets.Punct) + $close
     );
     return $nameStmt;
   }
@@ -387,5 +468,9 @@ class Syntax { # PsSyntax
     }
 
     return $paramsStmt;
+  }
+
+  [string] Indent ([int]$units) {
+    return [string]::new(' ', $this.TableOptions.Chrome.Indent * $units);
   }
 }

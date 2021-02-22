@@ -17,7 +17,6 @@ function Show-InvokeReport {
   begin {
     [Krayon]$krayon = Get-Krayon
     [hashtable]$signals = Get-Signals;
-    [System.Text.StringBuilder]$Builder = [System.Text.StringBuilder]::new();
   }
 
   process {
@@ -42,7 +41,7 @@ function Show-InvokeReport {
       }
 
       [informer]$informer = [informer]::new($rules, $informInfo);
-      $null = $builder.Append($syntax.TitleStmt('Invoke Report'));
+      $null = $builder.Append($syntax.TitleStmt('Invoke Report', $_.Name));
 
       [System.Management.Automation.CommandParameterSetInfo[]]$candidateSets = $informer.Resolve($Params);
 

@@ -47,6 +47,7 @@ function find-DuplicateParamPositions {
             [PSCustomObject]$duplicate = [PSCustomObject]@{
               ParamSet = $paramSet;
               Params   = $params;
+              Number   = $_.Key;
             }
 
             $duplicates += $duplicate;

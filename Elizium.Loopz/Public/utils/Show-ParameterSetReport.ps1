@@ -14,7 +14,6 @@ function Show-ParameterSetReport {
   begin {
     [Krayon]$krayon = Get-Krayon
     [hashtable]$signals = Get-Signals;
-    # [string]$duplicateSeparator = '.............';
   }
 
   process {
@@ -29,15 +28,11 @@ function Show-ParameterSetReport {
     }
     else {
       [syntax]$syntax = New-Syntax -CommandName $_.Name -Signals $signals -Krayon $krayon;
-      # [string]$lnSnippet = $syntax.TableOptions.Snippets.Ln;
-      # [string]$punctuationSnippet = $syntax.TableOptions.Snippets.Punct;
       [rules]$rules = [rules]::New($_);
 
-      $null = $builder.Append($syntax.TitleStmt('Parameter Set Report'));
+      $null = $builder.Append($syntax.TitleStmt('Parameter Set Report', $_.Name));
 
       [PSCustomObject]$verifyInfo = [PSCustomObject]@{
-        # Argh, we shouldn't need to pass in command info here, because rules get it in ctor
-        #
         CommandInfo = $_;
         Syntax      = $syntax;
         Builder     = $builder;

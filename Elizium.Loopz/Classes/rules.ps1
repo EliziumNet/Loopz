@@ -8,15 +8,7 @@ class ParameterSetRule {
     $this.RuleName = $name;
   }
 
-  # TODO: define the return type
-  #
-  # Violations returns violations of the rule. If no violation, then return null.
-  # If there are violations, then return a single PSCustomObject which wraps:
-  # - RuleName
-  # - Violations as an array of free-form PSCustomObjects
-  # - Reasons: array of strings identifying the contributors to the failures.
-  #
-  [PSCustomObject] Violation([PSCustomObject]$verifyInfo) {
+  [PSCustomObject] Query([PSCustomObject]$verifyInfo) {
     throw [System.Management.Automation.MethodInvocationException]::new(
       'Abstract method not implemented (ParameterSetRule.Violations)');
   }
@@ -35,7 +27,7 @@ class MustContainUniqueSetOfParams : ParameterSetRule {
     'Each parameter set must have at least one unique parameter. If possible, make this parameter a mandatory parameter.';
   }
 
-  [PSCustomObject] Violation([PSCustomObject]$verifyInfo) {
+  [PSCustomObject] Query([PSCustomObject]$verifyInfo) {
 
     [PSCustomObject[]]$duplicates = find-DuplicateParamSets -CommandInfo $verifyInfo.CommandInfo `
       -Syntax $verifyInfo.Syntax;
@@ -63,6 +55,7 @@ class MustContainUniqueSetOfParams : ParameterSetRule {
     [System.Text.StringBuilder]$builder = $verifyInfo.Builder;
     [PSCustomObject]$options = $syntax.TableOptions;
     [string]$lnSnippet = $options.Snippets.Ln;
+    [string]$resetSnippet = $options.Snippets.Reset;
     [string]$punctuationSnippet = $options.Snippets.Punct;
     [string]$duplicateSeparator = '.............';
 
@@ -87,9 +80,16 @@ class MustContainUniqueSetOfParams : ParameterSetRule {
             "$($punctuationSnippet)$($duplicateSeparator)$($lnSnippet)"
           ));
 
+        [string]$subTitle = $syntax.QuotedNameStmt(
+          $syntax.TableOptions.Snippets.ParamSetName,
+          $duplicate.First.Name, '('
+        );
+
         $verifyInfo.CommandInfo | Show-ParameterSetInfo `
           -Sets @($duplicate.First.Name) -Builder $builder `
-          -Title "FIRST ('$($duplicate.First.Name)') Parameter Set Report";
+          -Title $(
+            "FIRST $($subTitle)$($resetSnippet) Parameter Set Report"
+          );
       }
     }
   }
@@ -102,7 +102,7 @@ class MustContainUniquePositions : ParameterSetRule {
     'A parameter set that contains multiple positional parameters must define unique positions for each parameter. No two positional parameters can specify the same position.';
   }
 
-  [PSCustomObject] Violation([PSCustomObject]$verifyInfo) {
+  [PSCustomObject] Query([PSCustomObject]$verifyInfo) {
 
     [PSCustomObject[]]$duplicates = find-DuplicateParamPositions -CommandInfo $verifyInfo.CommandInfo `
       -Syntax $verifyInfo.Syntax;
@@ -128,38 +128,15 @@ class MustContainUniquePositions : ParameterSetRule {
     [System.Text.StringBuilder]$builder = $verifyInfo.Builder;
     [PSCustomObject]$options = $syntax.TableOptions;
     [string]$lnSnippet = $options.Snippets.Ln;
-    [string]$punctuationSnippet = $options.Snippets.Punct;
-    [string]$duplicateSeparator = '.............';
-
     if ($violations -and ($violations.Count -gt 0)) {
-      $null = $builder.Append("$($lnSnippet)");
-
       foreach ($duplicate in $violations) {
         [string]$duplicateParamPositionsStmt = $(
-          "DUPLICATED POSITIONS: $($duplicate.ParamSet.Name), Params: [$($duplicate.Params -join ', ')]" +
-          "$($lnSnippet)"
+          "$($syntax.ParamsDuplicatePosStmt($duplicate.Params, $duplicate.ParamSet, $duplicate.Number))" +
+          "$($lnSnippet)$($lnSnippet)"
         );
+
         $null = $builder.Append($duplicateParamPositionsStmt);
-
-        # [string]$firstParamSetStmt = $syntax.ParamSetStmt($verifyInfo.CommandInfo, $duplicate.First);
-        # [string]$secondParamSetStmt = $syntax.ParamSetStmt($verifyInfo.CommandInfo, $duplicate.Second);
-
-        # [string]$firstSyntax = $syntax.SyntaxStmt($duplicate.First);
-        # [string]$secondSyntax = $syntax.SyntaxStmt($duplicate.Second);
-
-        # $null = $builder.Append($(
-        #     "$($lnSnippet)" +
-        #     "$($firstParamSetStmt)$($lnSnippet)$($firstSyntax)$($lnSnippet)" +
-        #     "$($lnSnippet)" +
-        #     "$($secondParamSetStmt)$($lnSnippet)$($secondSyntax)$($lnSnippet)" +
-        #     "$($punctuationSnippet)$($duplicateSeparator)$($lnSnippet)"
-        #   ));
-
-        # $verifyInfo.CommandInfo | Show-ParameterSetInfo `
-        #   -Sets @($duplicate.First.Name) -Builder $builder `
-        #   -Title "FIRST ('$($duplicate.First.Name)') Parameter Set Report";
       }
-      $null = $builder.Append("$($lnSnippet)");
     }
   }
 } # MustContainUniquePositions
@@ -171,7 +148,7 @@ class MustNotHaveMultiplePipelineParams : ParameterSetRule {
     'Only one parameter in a set can declare the ValueFromPipeline keyword with a value of true.';
   }
 
-  [PSCustomObject] Violation([PSCustomObject]$verifyInfo) {
+  [PSCustomObject] Query([PSCustomObject]$verifyInfo) {
 
     return $null;
   }
@@ -237,12 +214,37 @@ class Rules {
     [object]$syntax = $verifyInfo.Syntax;
     [System.Text.StringBuilder]$builder = $verifyInfo.Builder;
     [PSCustomObject]$options = $syntax.TableOptions;
+    [string]$resetSnippet = $options.Snippets.Reset;
     [string]$lnSnippet = $options.Snippets.Ln;
+    [string]$indentation = $syntax.Indent(1);
+
+    [string]$summaryStmt = if ($violationsByRule.Count -eq 0) {
+      "$($options.Snippets.Ok) No violations found.";
+    } else {
+      [int]$total = 0;
+      [string]$violationsByRuleStmt = [string]::Empty;
+      $violationsByRule.GetEnumerator() | ForEach-Object {
+        $total += $_.Value.Count;
+
+        [string]$shortName = $this.Rules[$_.Key].Short;
+        $violationsByRuleStmt += $(
+          "$($indentation)$($signals['BULLET-POINT'].Value) '$($shortName)', Count: $($_.Value.Count)$($lnSnippet)"
+        );
+      }
+      [string]$plural = ($total -eq 1) ? 'violation' : 'violations';
+      $violationsByRuleStmt = $(
+        "$($options.Snippets.Error) Found the following $($total) $($plural):$($lnSnippet)" +
+        "$($resetSnippet)$($violationsByRuleStmt)"
+      );
+
+      $violationsByRuleStmt;
+    }
 
     $null = $builder.Append(
+      "$($resetSnippet)" +
       "$($lnSnippet)$($global:LoopzUI.EqualsLine)" +
-      "$($lnSnippet)>>> SUMMARY" +
-      "$($lnSnippet)$($global:LoopzUI.EqualsLine)" +
+      "$($lnSnippet)>>> SUMMARY: $($summaryStmt)$($resetSnippet)" +
+      "$($global:LoopzUI.EqualsLine)" +
       "$($lnSnippet)"
     );
   }
@@ -261,7 +263,7 @@ class Rules {
       [string]$ruleNameKey = $_;
       [ParameterSetRule]$rule = $this.Rules[$ruleNameKey];
 
-      [PSCustomObject[]]$vo = $rule.Violation($verifyInfo);
+      [PSCustomObject]$vo = $rule.Query($verifyInfo);
       [PSCustomObject[]]$vs = $vo.Violations;
       if ($vs -and ($vs.Count -gt 0)) {
 
