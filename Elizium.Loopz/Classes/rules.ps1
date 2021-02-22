@@ -143,26 +143,45 @@ class MustContainUniquePositions : ParameterSetRule {
 
 class MustNotHaveMultiplePipelineParams : ParameterSetRule {
   MustNotHaveMultiplePipelineParams([string]$name):base($name) {
-    $this.Short = 'Single Pipeline Param';
+    $this.Short = 'Multiple Claims to Pipeline item';
     $this.Description =
     'Only one parameter in a set can declare the ValueFromPipeline keyword with a value of true.';
   }
 
   [PSCustomObject] Query([PSCustomObject]$verifyInfo) {
 
-    return $null;
+    [PSCustomObject[]]$multiples = find-MultipleValueFromPipeline -CommandInfo $verifyInfo.CommandInfo `
+      -Syntax $verifyInfo.Syntax;
+
+    [PSCustomObject]$vo = if ($multiples -and $multiples.Count -gt 0) {
+
+      [string[]]$reasons = $multiples | ForEach-Object { $("{$($_.ParamSet.Name) => $($_.Params -join ', ')}"); }
+      [PSCustomObject]@{
+        Rule       = $this.RuleName;
+        Violations = $multiples;
+        Reasons    = $reasons;
+      }
+    }
+    else {
+      $null;
+    }
+
+    return $vo;
   }
 
   [void] ViolationStmt ([PSCustomObject[]]$violations, [PSCustomObject]$verifyInfo) {
-    # [object]$syntax = $verifyInfo.Syntax;
-    # [System.Text.StringBuilder]$builder = $verifyInfo.Builder;
-    # [PSCustomObject]$options = $syntax.TableOptions;
-    # [string]$lnSnippet = $options.Snippets.Ln;
-    # [string]$punctuationSnippet = $options.Snippets.Punct;
-
+    [object]$syntax = $verifyInfo.Syntax;
+    [System.Text.StringBuilder]$builder = $verifyInfo.Builder;
+    [PSCustomObject]$options = $syntax.TableOptions;
+    [string]$lnSnippet = $options.Snippets.Ln;
     if ($violations -and ($violations.Count -gt 0)) {
-      foreach ($duplicate in $violations) {
+      foreach ($pipelineClaim in $violations) {
+        [string]$multipleClaimsStmt = $(
+          "$($syntax.MultiplePipelineItemClaimStmt($pipelineClaim.Params, $pipelineClaim.ParamSet))" +
+          "$($lnSnippet)$($lnSnippet)"
+        );
 
+        $null = $builder.Append($multipleClaimsStmt);
       }
     }
   }
@@ -219,7 +238,7 @@ class Rules {
     [string]$indentation = $syntax.Indent(1);
 
     [string]$summaryStmt = if ($violationsByRule.Count -eq 0) {
-      "$($options.Snippets.Ok) No violations found.";
+      "$($options.Snippets.Ok) No violations found.$($lnSnippet)";
     } else {
       [int]$total = 0;
       [string]$violationsByRuleStmt = [string]::Empty;

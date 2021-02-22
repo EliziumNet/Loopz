@@ -60,11 +60,11 @@ Describe 'Show-ParameterSetReport' -Tag 'Current' {
           [Parameter()]
           [object]$Chaff,
 
-          [Parameter(ParameterSetName = 'Alpha', Mandatory, Position = 1)]
+          [Parameter(ParameterSetName = 'Alpha', Mandatory, Position = 1, ValueFromPipeline = $true)]
           [Parameter(ParameterSetName = 'Beta', Mandatory, Position = 11)]
           [object]$DuplicatePosA,
 
-          [Parameter(ParameterSetName = 'Alpha', Position = 2)]
+          [Parameter(ParameterSetName = 'Alpha', Position = 2, ValueFromPipeline = $true)]
           [Parameter(ParameterSetName = 'Beta', Position = 12)]
           [Parameter(ParameterSetName = 'Delta', Position = 21)]
           [object]$DuplicatePosB,
@@ -73,6 +73,28 @@ Describe 'Show-ParameterSetReport' -Tag 'Current' {
           [Parameter(ParameterSetName = 'Beta', Position = 13)]
           [Parameter(ParameterSetName = 'Delta', Position = 22)]
           [object]$DuplicatePosC
+        )
+      }
+
+      function script:test-MultipleClaimsToPipelineValue {
+        param(
+          [parameter(ValueFromPipeline = $true)]
+          [object]$Chaff,
+
+          [Parameter(ParameterSetName = 'Alpha', Mandatory, Position = 1, ValueFromPipeline = $true)]
+          [object]$ClaimA,
+
+          [Parameter(ParameterSetName = 'Alpha', Position = 2, ValueFromPipeline = $true)]
+          [object]$ClaimB,
+
+          [Parameter(ParameterSetName = 'Alpha', Position = 3, ValueFromPipeline = $true)]
+          [object]$ClaimC,
+
+          [Parameter(ParameterSetName = 'Beta', Position = 1, ValueFromPipeline = $true)]
+          [object]$ClaimD,
+
+          [Parameter(ParameterSetName = 'Beta', Position = 2, ValueFromPipeline = $true)]
+          [object]$ClaimE
         )
       }
     }
@@ -96,6 +118,14 @@ Describe 'Show-ParameterSetReport' -Tag 'Current' {
     It 'should: report UNIQUE-PARAM-SET violation' {
       InModuleScope Elizium.Loopz {
         'test-WithDuplicateParamSets' | Show-ParameterSetReport;
+      }
+    }
+  }
+
+  Context 'given: a command containing a duplicated Param Sets' {
+    It 'should: report SINGLE-PIPELINE-PARAM violation' {
+      InModuleScope Elizium.Loopz {
+        'test-MultipleClaimsToPipelineValue' | Show-ParameterSetReport;
       }
     }
   }

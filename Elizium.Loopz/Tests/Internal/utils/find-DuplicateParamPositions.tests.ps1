@@ -15,7 +15,7 @@ Describe 'find-DuplicateParamPositions' {
   }
 
   Context 'given: a command containing no parameter sets with duplicated positions' {
-    It 'should: nothing' {
+    It 'should: report no violations' {
       InModuleScope Elizium.Loopz {
         function test-NoDuplicatedPositions {
           param(

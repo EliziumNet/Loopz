@@ -244,9 +244,10 @@ class Syntax {
     $this.TableOptions.Snippets = $this.Snippets;
 
     $this.Labels = [PSCustomObject]@{
-      ParamSet           = '===> Parameter Set: ';
-      DuplicatePositions = '===> Duplicate Positions for Parameter Set: ';
-      ParamsDuplicatePos = $(
+      ParamSet                  = '===> Parameter Set: ';
+      DuplicatePositions        = '===> Duplicate Positions for Parameter Set: ';
+      MultipleValueFromPipeline = '===> Multiple ValueFromPipeline claims for Parameter Set: ';
+      Params        = $(
         "$([string]::new(' ', $this.TableOptions.Chrome.Indent))" +
         "$($signals['BULLET-POINT'].Value) Params: "
       );
@@ -286,20 +287,12 @@ class Syntax {
     return $structuredParamSetStmt;
   }
 
-  [string] ParamsDuplicatePosStmt (
+  [string] ResolvedParamStmt(
     [string[]]$params,
-    [System.Management.Automation.CommandParameterSetInfo]$paramSet,
-    [string]$positionNumber
+    [System.Management.Automation.CommandParameterSetInfo]$paramSet
   ) {
-    [string]$quotedPosition = $this.QuotedNameStmt($this.Snippets.Special, $positionNumber, '(');
-    [string]$structuredStmt = $(
-      "$($this.Snippets.Reset)$($this.Labels.DuplicatePositions)" +
-      "$($this.QuotedNameStmt($($this.Snippets.ParamSetName), $paramSet.Name))" +
-      "$($this.Snippets.Ln)" +
-      "$($this.Snippets.Reset)$($this.Labels.ParamsDuplicatePos) " +
-      "$($quotedPosition) "
-    );
-
+    [string]$paramStmt = [string]::Empty;
+    
     [int]$count = 0;
     foreach ($paramName in $params) {
       [System.Management.Automation.CommandParameterInfo[]]$paramResult = $(
@@ -318,16 +311,49 @@ class Syntax {
           $this.TableOptions.Custom.Snippets.Cell;
         }
 
-        $structuredStmt += $(
+        $paramStmt += $(
           $this.QuotedNameStmt($paramSnippet, $paramName)
         );
 
         if ($count -lt ($params.Count - 1)) {
-          $structuredStmt += "$($this.Snippets.Punct), ";
+          $paramStmt += "$($this.Snippets.Punct), ";
         }
       }
       $count++;
     }
+
+    return $paramStmt;
+  }
+
+  [string] ParamsDuplicatePosStmt(
+    [string[]]$params,
+    [System.Management.Automation.CommandParameterSetInfo]$paramSet,
+    [string]$positionNumber
+  ) {
+    [string]$quotedPosition = $this.QuotedNameStmt($this.Snippets.Special, $positionNumber, '(');
+    [string]$structuredStmt = $(
+      "$($this.Snippets.Reset)$($this.Labels.DuplicatePositions)" +
+      "$($this.QuotedNameStmt($($this.Snippets.ParamSetName), $paramSet.Name))" +
+      "$($this.Snippets.Ln)" +
+      "$($this.Snippets.Reset)$($this.Labels.Params) " +
+      "$($quotedPosition) "
+    );
+    $structuredStmt += $this.ResolvedParamStmt($params, $paramSet);
+
+    return $structuredStmt;
+  }
+
+  [string] MultiplePipelineItemClaimStmt(
+    [string[]]$params,
+    [System.Management.Automation.CommandParameterSetInfo]$paramSet
+  ) {
+    [string]$structuredStmt = $(
+      "$($this.Snippets.Reset)$($this.Labels.MultipleValueFromPipeline)" +
+      "$($this.QuotedNameStmt($($this.Snippets.ParamSetName), $paramSet.Name))" +
+      "$($this.Snippets.Ln)" +
+      "$($this.Snippets.Reset)$($this.Labels.Params) "
+    );
+    $structuredStmt += $this.ResolvedParamStmt($params, $paramSet);
 
     return $structuredStmt;
   }

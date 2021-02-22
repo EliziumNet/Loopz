@@ -1,7 +1,7 @@
 using namespace System.Text;
 using namespace System.Management.Automation;
 
-Describe 'Rules' {
+Describe 'Rules' -Tag 'Current' {
   BeforeAll {
     Get-Module Elizium.Loopz | Remove-Module
     Import-Module .\Output\Elizium.Loopz\Elizium.Loopz.psm1 `
@@ -49,7 +49,7 @@ Describe 'Rules' {
     }
 
     Context 'given: function with duplicate parameter sets' {
-      It 'should: return violation' -Tag 'Current!' {
+      It 'should: return violation' {
         InModuleScope Elizium.Loopz {
           [string]$commandName = 'test-WithDuplicateParamSets';
           [CommandInfo]$commandInfo = Get-Command $commandName;
@@ -113,7 +113,7 @@ Describe 'Rules' {
     }
 
     Context 'given: function with Parameter Sets containing parameters with same position' {
-      It 'should: return violation' -Tag 'What' {
+      It 'should: return violation' {
         InModuleScope Elizium.Loopz {
           [string]$commandName = 'test-MultipleSetsWithDuplicatedPositions';
           [CommandInfo]$commandInfo = Get-Command $commandName;
