@@ -1,5 +1,5 @@
 
-Describe 'Show-ParameterSetReport' -Tag '!Current' {
+Describe 'Show-ParameterSetReport' -Tag 'Current' {
   BeforeAll {
     Get-Module Elizium.Loopz | Remove-Module;
     Import-Module .\Output\Elizium.Loopz\Elizium.Loopz.psm1 `
@@ -154,7 +154,7 @@ Describe 'Show-ParameterSetReport' -Tag '!Current' {
   }
 
   Context 'given: a command containing a duplicated Param Sets' {
-    It 'should: report ACCIDENTAL-ALL-SETS violation' -Tag 'Current' {
+    It 'should: report ACCIDENTAL-ALL-SETS violation' -Tag '!Current' {
       InModuleScope Elizium.Loopz {
         'test-MultipleInAllParameterSetsByAccident' | Show-ParameterSetReport;
       }

@@ -244,18 +244,23 @@ class Syntax {
 
     $this.TableOptions.Snippets = $this.Snippets;
 
+    [string]$bulletedPoint = $(
+      "$([string]::new(' ', $this.TableOptions.Chrome.Indent))" +
+      "$($signals['BULLET-POINT'].Value)"
+    );
     $this.Labels = [PSCustomObject]@{
       ParamSet                  = "===> Parameter Set: ";
       DuplicatePositions        = "===> Duplicate Positions for Parameter Set: ";
       MultipleValueFromPipeline = "===> Multiple ValueFromPipeline claims for Parameter Set: ";
-      AccidentallyInAllSets     = "===> Parameter '{0}', accidentally in all Parameter Sets: ";
+      AccidentallyInAllSets     = "===> Parameter '{0}' (of {1}), accidentally in all Parameter Sets: ";
       Params                    = $(
-        "$([string]::new(' ', $this.TableOptions.Chrome.Indent))" +
-        "$($signals['BULLET-POINT'].Value) Params: "
+        "$($bulletedPoint) Params: "
       );
       Param                     = $(
-        "$([string]::new(' ', $this.TableOptions.Chrome.Indent))" +
-        "$($signals['BULLET-POINT'].Value) Param: "
+        "$($bulletedPoint) Param: "
+      );
+      OtherParamSets            = $(
+        "$($bulletedPoint) Other Parameter Sets: "
       );
     }
 
@@ -293,6 +298,19 @@ class Syntax {
     return $structuredParamSetStmt;
   }
 
+  [string] ResolveParameterSnippet([System.Management.Automation.CommandParameterInfo]$paramInfo) {
+    [string]$paramSnippet = if ($paramInfo.IsMandatory) {
+      $this.TableOptions.Custom.Snippets.Mandatory;
+    }
+    elseif ($paramInfo.ParameterType.Name -eq 'SwitchParameter') {
+      $this.TableOptions.Custom.Snippets.Switch;
+    }
+    else {
+      $this.TableOptions.Custom.Snippets.Cell;
+    }
+    return $paramSnippet;
+  }
+
   [string] ResolvedParamStmt(
     [string[]]$params,
     [System.Management.Automation.CommandParameterSetInfo]$paramSet
@@ -307,15 +325,7 @@ class Syntax {
 
       if ($paramResult -and ($paramResult.Count -eq 1)) {
         [System.Management.Automation.CommandParameterInfo]$paramInfo = $paramResult[0];
-        [string]$paramSnippet = if ($paramInfo.IsMandatory) {
-          $this.TableOptions.Custom.Snippets.Mandatory;
-        }
-        elseif ($paramInfo.ParameterType.Name -eq 'SwitchParameter') {
-          $this.TableOptions.Custom.Snippets.Switch;
-        }
-        else {
-          $this.TableOptions.Custom.Snippets.Cell;
-        }
+        [string]$paramSnippet = $this.ResolveParameterSnippet($paramInfo)
 
         $paramStmt += $(
           $this.QuotedNameStmt($paramSnippet, $paramName)
@@ -365,18 +375,29 @@ class Syntax {
   }
 
   [string] InAllParameterSetsByAccidentStmt([PSCustomObject]$seed) {
-    # [string[]]$params,
-    # [System.Management.Automation.CommandParameterSetInfo]$paramSet
+    [string]$paramName = $seed.Param;
+    [System.Management.Automation.CommandParameterSetInfo]$paramSet = $seed.ParamSet;
+    [System.Management.Automation.CommandParameterInfo]$paramInfo = $($paramSet.Parameters | Where-Object {
+        $_.Name -eq $paramName
+      })[0];
 
-    # ===> Multiple ValueFromPipeline claims for Parameter Set: 'Alpha' 
-    # 🔶 Params:  'ClaimA', 'ClaimB', 'Chaff', 'ClaimC'
-    #
-    # param name -> in set; vs the others
-    # ===> 
-    # '===> Accidentally in all Parameter Sets; Parameter: '
-    # 🔶 Param: 'blah'
+    [string]$structuredParamName = $(
+      "$($this.ResolveParameterSnippet($paramInfo))$($paramName)$($this.Snippets.Reset)"
+    );
+
+    [string[]]$others = ($seed.Others | ForEach-Object {
+        $this.QuotedNameStmt($this.Snippets.ParamSetName, $_.Name)
+      }) -join "$($this.Snippets.Punct), ";
+
+    [string]$quotedParamSetName = $(
+      "$($this.QuotedNameStmt($this.Snippets.ParamSetName, $paramSet.Name))" +
+      "$($this.Snippets.Reset)"
+    );
+
     [string]$accidentsStmt = $(
-      "$($this.Snippets.Reset)$($this.Labels.AccidentallyInAllSets -f '<param-name>')"
+      "$($this.Snippets.Reset)" +
+      "$($this.Labels.AccidentallyInAllSets -f $structuredParamName, $quotedParamSetName)" +
+      "$($this.Snippets.Reset)$($this.Snippets.Ln)$($this.Labels.OtherParamSets)$($others)"
     );
 
     return $accidentsStmt;

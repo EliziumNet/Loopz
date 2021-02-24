@@ -26,7 +26,7 @@ function find-InAllParameterSetsByAccident {
       foreach ($candidate in $candidates) {
         [string[]]$otherParamSetNames = $candidate.Attributes.ParameterSetName;
         [System.Management.Automation.CommandParameterSetInfo[]]$others = `
-          $paramSets | Where-Object { $_ -in $otherParamSetNames }
+          $paramSets | Where-Object { ($_.Name -in $otherParamSetNames) -and ($_.Name -ne $paramSet.Name) }
 
         [PSCustomObject]$seed = [PSCustomObject]@{
           Param    = $candidate.Name;
