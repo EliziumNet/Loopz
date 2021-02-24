@@ -33,6 +33,7 @@ class Syntax {
   }
 
   [string[]]$AllCommonParamSet = $this.CommonParamSet + @('WhatIf', 'Confirm');
+  static [string] $AllParameterSets = '__AllParameterSets';
 
   [scriptblock]$RenderCell = {
     [OutputType([boolean])]
@@ -244,12 +245,17 @@ class Syntax {
     $this.TableOptions.Snippets = $this.Snippets;
 
     $this.Labels = [PSCustomObject]@{
-      ParamSet                  = '===> Parameter Set: ';
-      DuplicatePositions        = '===> Duplicate Positions for Parameter Set: ';
-      MultipleValueFromPipeline = '===> Multiple ValueFromPipeline claims for Parameter Set: ';
-      Params        = $(
+      ParamSet                  = "===> Parameter Set: ";
+      DuplicatePositions        = "===> Duplicate Positions for Parameter Set: ";
+      MultipleValueFromPipeline = "===> Multiple ValueFromPipeline claims for Parameter Set: ";
+      AccidentallyInAllSets     = "===> Parameter '{0}', accidentally in all Parameter Sets: ";
+      Params                    = $(
         "$([string]::new(' ', $this.TableOptions.Chrome.Indent))" +
         "$($signals['BULLET-POINT'].Value) Params: "
+      );
+      Param                     = $(
+        "$([string]::new(' ', $this.TableOptions.Chrome.Indent))" +
+        "$($signals['BULLET-POINT'].Value) Param: "
       );
     }
 
@@ -325,11 +331,11 @@ class Syntax {
     return $paramStmt;
   }
 
-  [string] ParamsDuplicatePosStmt(
-    [string[]]$params,
-    [System.Management.Automation.CommandParameterSetInfo]$paramSet,
-    [string]$positionNumber
-  ) {
+  [string] ParamsDuplicatePosStmt([PSCustomObject]$seed) {
+    [string[]]$params = $seed.Params;
+    [System.Management.Automation.CommandParameterSetInfo]$paramSet = $seed.ParamSet;
+    [string]$positionNumber = $seed.Number;
+
     [string]$quotedPosition = $this.QuotedNameStmt($this.Snippets.Special, $positionNumber, '(');
     [string]$structuredStmt = $(
       "$($this.Snippets.Reset)$($this.Labels.DuplicatePositions)" +
@@ -343,10 +349,10 @@ class Syntax {
     return $structuredStmt;
   }
 
-  [string] MultiplePipelineItemClaimStmt(
-    [string[]]$params,
-    [System.Management.Automation.CommandParameterSetInfo]$paramSet
-  ) {
+  [string] MultiplePipelineItemClaimStmt([PSCustomObject]$seed) {
+    [string[]]$params = $seed.Params;
+    [System.Management.Automation.CommandParameterSetInfo]$paramSet = $seed.ParamSet;
+
     [string]$structuredStmt = $(
       "$($this.Snippets.Reset)$($this.Labels.MultipleValueFromPipeline)" +
       "$($this.QuotedNameStmt($($this.Snippets.ParamSetName), $paramSet.Name))" +
@@ -356,6 +362,24 @@ class Syntax {
     $structuredStmt += $this.ResolvedParamStmt($params, $paramSet);
 
     return $structuredStmt;
+  }
+
+  [string] InAllParameterSetsByAccidentStmt([PSCustomObject]$seed) {
+    # [string[]]$params,
+    # [System.Management.Automation.CommandParameterSetInfo]$paramSet
+
+    # ===> Multiple ValueFromPipeline claims for Parameter Set: 'Alpha' 
+    # 🔶 Params:  'ClaimA', 'ClaimB', 'Chaff', 'ClaimC'
+    #
+    # param name -> in set; vs the others
+    # ===> 
+    # '===> Accidentally in all Parameter Sets; Parameter: '
+    # 🔶 Param: 'blah'
+    [string]$accidentsStmt = $(
+      "$($this.Snippets.Reset)$($this.Labels.AccidentallyInAllSets -f '<param-name>')"
+    );
+
+    return $accidentsStmt;
   }
 
   [string] SyntaxStmt(

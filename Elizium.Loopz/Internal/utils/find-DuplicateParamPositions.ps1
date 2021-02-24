@@ -12,7 +12,7 @@ function find-DuplicateParamPositions {
   )
 
   [System.Management.Automation.CommandParameterSetInfo[]]$paramSets = $commandInfo.ParameterSets;
-  [array]$duplicates = @();
+  [array]$pods = @();
 
   [scriptblock]$paramIsPositional = [scriptblock] {
     [OutputType([boolean])]
@@ -44,17 +44,17 @@ function find-DuplicateParamPositions {
             #
             [string[]]$params = $($positional.GetEnumerator() | ForEach-Object { $_.Key } | Sort-Object);
 
-            [PSCustomObject]$duplicate = [PSCustomObject]@{
+            [PSCustomObject]$seed = [PSCustomObject]@{
               ParamSet = $paramSet;
               Params   = $params;
               Number   = $_.Key;
             }
 
-            $duplicates += $duplicate;
+            $pods += $seed;
           }
         }
       }
     }
   }
-  return ($duplicates.Count -gt 0) ? $duplicates : $null;
+  return ($pods.Count -gt 0) ? $pods : $null;
 }

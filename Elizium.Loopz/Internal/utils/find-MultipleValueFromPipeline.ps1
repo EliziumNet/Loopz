@@ -12,7 +12,7 @@ function find-MultipleValueFromPipeline {
   )
 
   [System.Management.Automation.CommandParameterSetInfo[]]$paramSets = $commandInfo.ParameterSets;
-  [array]$multiples = @();
+  [array]$pods = @();
 
   [scriptblock]$paramIsValueFromPipeline = [scriptblock] {
     [OutputType([boolean])]
@@ -29,12 +29,12 @@ function find-MultipleValueFromPipeline {
       -ParamSet $paramSet -Syntax $Syntax -Where $paramIsValueFromPipeline;
 
     if ($tableContent -and ($tableContent.Count -gt 1)) {
-      [PSCustomObject]$pipelineClaim = [PSCustomObject]@{
+      [PSCustomObject]$seed = [PSCustomObject]@{
         ParamSet = $paramSet;
         Params   = $tableContent.Keys;
       }
-      $multiples += $pipelineClaim;
+      $pods += $seed;
     }
   }
-  return ($multiples.Count -gt 0) ? $multiples : $null;
+  return ($pods.Count -gt 0) ? $pods : $null;
 }

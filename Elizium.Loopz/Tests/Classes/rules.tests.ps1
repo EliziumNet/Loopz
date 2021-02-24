@@ -1,7 +1,7 @@
 using namespace System.Text;
 using namespace System.Management.Automation;
 
-Describe 'Rules' -Tag 'Current' {
+Describe 'Rules' -Tag '!Current' {
   BeforeAll {
     Get-Module Elizium.Loopz | Remove-Module
     Import-Module .\Output\Elizium.Loopz\Elizium.Loopz.psm1 `
@@ -157,4 +157,77 @@ Describe 'Rules' -Tag 'Current' {
       }
     }
   } # MustContainUniquePositions
+
+  Describe 'MustNotHaveMultiplePipelineParams' {
+    BeforeAll {
+      InModuleScope Elizium.Loopz {
+        function script:test-MultipleClaimsToPipelineValue {
+          param(
+            [parameter(ValueFromPipeline = $true)]
+            [object]$Chaff,
+
+            [Parameter(ParameterSetName = 'Alpha', Mandatory, Position = 1, ValueFromPipeline = $true)]
+            [object]$ClaimA,
+
+            [Parameter(ParameterSetName = 'Alpha', Position = 2, ValueFromPipeline = $true)]
+            [object]$ClaimB,
+
+            [Parameter(ParameterSetName = 'Alpha', Position = 3, ValueFromPipeline = $true)]
+            [object]$ClaimC,
+
+            [Parameter(ParameterSetName = 'Beta', Position = 1, ValueFromPipeline = $true)]
+            [object]$ClaimD,
+
+            [Parameter(ParameterSetName = 'Beta', Position = 2, ValueFromPipeline = $true)]
+            [object]$ClaimE
+          )
+        }
+      }
+    }
+
+    Context 'given: multiple claims to pipeline item' {
+      It 'should: report violations' {
+        InModuleScope Elizium.Loopz {
+          [string]$commandName = 'test-MultipleClaimsToPipelineValue';
+          [CommandInfo]$commandInfo = Get-Command $commandName;
+          [Syntax]$syntax = New-Syntax -CommandName $commandName -Signals $_signals -Krayon $_krayon;
+          [string]$ruleName = 'SINGLE-PIPELINE-PARAM';
+
+          [PSCustomObject]$verifyInfo = [PSCustomObject]@{
+            CommandInfo = $commandInfo;
+            Syntax      = $syntax;
+            Builder     = $_builder;
+          }
+
+          [MustNotHaveMultiplePipelineParams]$rule = [MustNotHaveMultiplePipelineParams]::new($ruleName);
+          [PSCustomObject]$vo = $rule.Query($verifyInfo);
+
+          $vo | Should -Not -BeNullOrEmpty;
+          $vo.Violations.Count | Should -Be 2;
+
+          $alphaClaims = $($vo.Violations | Where-Object { $_.ParamSet.Name -eq 'Alpha' })[0];
+          $alphaClaims | Should -Not -BeNullOrEmpty;
+          $resultA = $alphaClaims.Params | Sort-Object | Compare-Object @(
+            'Chaff', 'ClaimA', 'ClaimB', 'ClaimC'
+          );
+          $resultA | Should -BeNullOrEmpty;
+
+          $betaClaims = $($vo.Violations | Where-Object { $_.ParamSet.Name -eq 'Beta' })[0];
+          $betaClaims | Should -Not -BeNullOrEmpty;
+          $resultB = $betaClaims.Params | Sort-Object | Compare-Object @(
+            'Chaff', 'ClaimD', 'ClaimE'
+          );
+          $resultB | Should -BeNullOrEmpty;
+
+          # Now check the statement execution doesn't fail in some way
+          #
+          $rule.ViolationStmt($vo.Violations, $verifyInfo);
+
+          if ($DebugPreference -ne [ActionPreference]::SilentlyContinue) {
+            $_krayon.ScribbleLn($_builder.ToString());
+          }
+        }
+      }
+    }
+  } # MustNotHaveMultiplePipelineParams
 } # Rules

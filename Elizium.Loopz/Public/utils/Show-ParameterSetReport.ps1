@@ -30,7 +30,7 @@ function Show-ParameterSetReport {
       [syntax]$syntax = New-Syntax -CommandName $_.Name -Signals $signals -Krayon $krayon;
       [rules]$rules = [rules]::New($_);
 
-      $null = $builder.Append($syntax.TitleStmt('Parameter Set Report', $_.Name));
+      $null = $builder.Append($syntax.TitleStmt('Parameter Set Violations Report', $_.Name));
 
       [PSCustomObject]$verifyInfo = [PSCustomObject]@{
         CommandInfo = $_;

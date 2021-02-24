@@ -15,7 +15,7 @@ function find-DuplicateParamSets {
   );
 
   [string[]]$paramSetNames = $paramSets.Name; 
-  [array]$duplicates = @()
+  [array]$pods = @()
 
   [hashtable]$paramSetLookup = @{}
   foreach ($paramSet in $paramSets) {
@@ -31,12 +31,12 @@ function find-DuplicateParamSets {
 
       if ($firstParamSet -and $secondParamSet) {
         if (test-AreParamSetsEqual -FirstPsInfo $firstParamSet -SecondPsInfo $secondParamSet -Syntax $Syntax) {
-          [PSCustomObject]$duplicate = [PSCustomObject]@{
+          [PSCustomObject]$seed = [PSCustomObject]@{
             First  = $firstParamSet;
             Second = $secondParamSet;
           }
 
-          $duplicates += $duplicate;
+          $pods += $seed;
         }
       }
       else {
@@ -45,5 +45,5 @@ function find-DuplicateParamSets {
     }
   }
 
-  return ($duplicates.Count -gt 0) ? $duplicates : $null;
+  return ($pods.Count -gt 0) ? $pods : $null;
 }
