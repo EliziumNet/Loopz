@@ -13,8 +13,8 @@ function test-AreParamSetsEqual {
   )
 
   if ($FirstPsInfo -and $SecondPsInfo) {
-    [array]$firstPsParams = $FirstPsInfo.Parameters | Where-Object Name -NotIn $syntax.AllCommonParamSet;
-    [array]$secondPsParams = $SecondPsInfo.Parameters | Where-Object Name -NotIn $syntax.AllCommonParamSet;
+    [array]$firstPsParams = $FirstPsInfo.Parameters | Where-Object Name -NotIn $Syntax.AllCommonParamSet;
+    [array]$secondPsParams = $SecondPsInfo.Parameters | Where-Object Name -NotIn $Syntax.AllCommonParamSet;
 
     [string[]]$paramNamesFirst = $($firstPsParams).Name | Sort-Object;
     [string[]]$paramNamesSecond = $($secondPsParams).Name | Sort-Object;

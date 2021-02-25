@@ -33,6 +33,7 @@ function Show-InvokeReport {
       [string]$resetSnippet = $syntax.TableOptions.Snippets.Reset;
       [string]$lnSnippet = $syntax.TableOptions.Snippets.Ln;
       [string]$punctSnippet = $syntax.TableOptions.Snippets.Punct;
+      [string]$commaSnippet = $syntax.TableOptions.Snippets.Comma;
       [string]$commandSnippet = $syntax.TableOptions.Snippets.Command;
       [string]$hiLightSnippet = $syntax.TableOptions.Snippets.HiLight;
       [rules]$rules = [rules]::New($_);
@@ -46,8 +47,8 @@ function Show-InvokeReport {
       [System.Management.Automation.CommandParameterSetInfo[]]$candidateSets = $informer.Resolve($Params);
 
       [string[]]$candidateNames = $candidateSets.Name
-      [string]$candidateNamesCSV = $candidateNames -join ', ';
-      [string]$paramsCSV = $Params -join ', ';
+      [string]$candidateNamesCSV = $candidateNames -join $commaSnippet;
+      [string]$paramsCSV = $Params -join $commaSnippet;
 
       [string]$structuredParamNames = $syntax.QuotedNameStmt($hiLightSnippet);
       [string]$unresolvedStructuredParams = $syntax.NamesRegex.Replace($paramsCSV, $structuredParamNames);

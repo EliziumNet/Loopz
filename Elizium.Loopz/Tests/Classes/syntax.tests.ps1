@@ -51,20 +51,18 @@ Describe 'Syntax' {
     It 'blah' {
       InModuleScope Elizium.Loopz {
         [string]$command = 'Rename-Many';
-
-        [syntax]$syntax = New-Syntax -CommandName $command -Signals $_signals -Krayon $_krayon;
         [CommandInfo]$commandInfo = Get-Command $command;
 
         foreach ($paramSet in $commandInfo.ParameterSets) {
           if ($paramSet.Name -in @('MoveToStart', 'MoveToEnd')) {
             Write-Host ">>> '$($paramSet.Name)'"
             [string[]]$names = ($paramSet.Parameters | Where-Object {
-                ($_.Name -NotIn $syntax.CommonParamSet) -and
+                ($_.Name -NotIn $Syntax.CommonParamSet) -and
                 ($_.IsMandatory) -and ($_.ParameterType.Name -eq 'SwitchParameter')
               }).Name;
 
             [PSCustomObject[]]$resultSet = $($paramSet.Parameters | Where-Object {
-                ($_.Name -NotIn $syntax.CommonParamSet) -and
+                ($_.Name -NotIn $Syntax.CommonParamSet) -and
                 ($_.IsMandatory) -and ($_.ParameterType.Name -eq 'SwitchParameter')
               });
 

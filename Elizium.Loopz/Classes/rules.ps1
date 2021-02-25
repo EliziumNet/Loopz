@@ -22,19 +22,27 @@ class ParameterSetRule {
 class MustContainUniqueSetOfParams : ParameterSetRule {
 
   MustContainUniqueSetOfParams([string]$name):base($name) {
-    $this.Short = 'Unique Parameter Set';
+    $this.Short = 'Non Unique Parameter Set';
     $this.Description =
     'Each parameter set must have at least one unique parameter. If possible, make this parameter a mandatory parameter.';
   }
 
   [PSCustomObject] Query([PSCustomObject]$verifyInfo) {
-
+    [object]$syntax = $verifyInfo.Syntax;
     [PSCustomObject[]]$pods = find-DuplicateParamSets -CommandInfo $verifyInfo.CommandInfo `
-      -Syntax $verifyInfo.Syntax;
+      -Syntax $syntax;
+
+    [string]$paramSetNameSnippet = $syntax.TableOptions.Snippets.ParamSetName;
+    [string]$resetSnippet = $syntax.TableOptions.Snippets.Reset;
 
     [PSCustomObject]$vo = if ($pods -and $pods.Count -gt 0) {
 
-      [string[]]$reasons = $pods | ForEach-Object { $("{$($_.First.Name)/$($_.Second.Name)}"); }
+      [string[]]$reasons = $pods | ForEach-Object {
+        $(
+          "{$($paramSetNameSnippet)$($_.First.Name)$($resetSnippet)/" +
+          "$($paramSetNameSnippet)$($_.Second.Name)$($resetSnippet)}"
+        );
+      }
       [PSCustomObject]@{
         Rule       = $this.RuleName;
         Violations = $pods;
@@ -97,19 +105,25 @@ class MustContainUniqueSetOfParams : ParameterSetRule {
 
 class MustContainUniquePositions : ParameterSetRule {
   MustContainUniquePositions([string]$name):base($name) {
-    $this.Short = 'Unique Positions';
+    $this.Short = 'Non Unique Positions';
     $this.Description =
     'A parameter set that contains multiple positional parameters must define unique positions for each parameter. No two positional parameters can specify the same position.';
   }
 
   [PSCustomObject] Query([PSCustomObject]$verifyInfo) {
-
+    [object]$syntax = $verifyInfo.Syntax;
     [PSCustomObject[]]$pods = find-DuplicateParamPositions -CommandInfo $verifyInfo.CommandInfo `
-      -Syntax $verifyInfo.Syntax;
+      -Syntax $syntax;
+
+    [string]$paramSetNameSnippet = $syntax.TableOptions.Snippets.ParamSetName;
+    [string]$resetSnippet = $syntax.TableOptions.Snippets.Reset;
 
     [PSCustomObject]$vo = if ($pods -and $pods.Count -gt 0) {
 
-      [string[]]$reasons = $pods | ForEach-Object { $("{$($_.ParamSet.Name) => $($_.Params -join ', ')}"); }
+      [string[]]$reasons = $pods | ForEach-Object {
+        [string]$resolvedParamStmt = $syntax.ResolvedParamStmt($_.Params, $_.ParamSet);
+        $("{$($paramSetNameSnippet)$($_.ParamSet.Name)$($resetSnippet) => $resolvedParamStmt$($resetSnippet)}");
+      }
       [PSCustomObject]@{
         Rule       = $this.RuleName;
         Violations = $pods;
@@ -149,13 +163,21 @@ class MustNotHaveMultiplePipelineParams : ParameterSetRule {
   }
 
   [PSCustomObject] Query([PSCustomObject]$verifyInfo) {
-
+    [object]$syntax = $verifyInfo.Syntax;
     [PSCustomObject[]]$pods = find-MultipleValueFromPipeline -CommandInfo $verifyInfo.CommandInfo `
-      -Syntax $verifyInfo.Syntax;
+      -Syntax $syntax;
+
+    [string]$paramSetNameSnippet = $syntax.TableOptions.Snippets.ParamSetName;
+    [string]$resetSnippet = $syntax.TableOptions.Snippets.Reset;
 
     [PSCustomObject]$vo = if ($pods -and $pods.Count -gt 0) {
 
-      [string[]]$reasons = $pods | ForEach-Object { $("{$($_.ParamSet.Name) => $($_.Params -join ', ')}"); }
+      [string[]]$reasons = $pods | ForEach-Object {
+        [string]$resolvedParamStmt = $syntax.ResolvedParamStmt($_.Params, $_.ParamSet);
+        $(
+          "{$($paramSetNameSnippet)$($_.ParamSet.Name)$($resetSnippet) => $resolvedParamStmt$($resetSnippet)}"
+        );
+      }
       [PSCustomObject]@{
         Rule       = $this.RuleName;
         Violations = $pods;
@@ -195,15 +217,24 @@ class MustNotBeInAllParameterSetsByAccident : ParameterSetRule {
   }
 
   [PSCustomObject] Query([PSCustomObject]$verifyInfo) {
-
+    [object]$syntax = $verifyInfo.Syntax;
     [PSCustomObject[]]$pods = find-InAllParameterSetsByAccident -CommandInfo $verifyInfo.CommandInfo `
-      -Syntax $verifyInfo.Syntax;
+      -Syntax $syntax;
+
+    [string]$paramSetNameSnippet = $syntax.TableOptions.Snippets.ParamSetName;
+    [string]$resetSnippet = $syntax.TableOptions.Snippets.Reset;
+    [string]$commaSnippet = $syntax.TableOptions.Snippets.Comma;
 
     [PSCustomObject]$vo = if ($pods -and $pods.Count -gt 0) {
 
       [string[]]$reasons = $pods | ForEach-Object {
-        [string[]]$otherParamSetNames = $_.Others | ForEach-Object { $_.Name };
-        $("{$($_.Param) of $($_.ParamSet) => $($otherParamSetNames -join ', ')}");
+        [string[]]$otherParamSetNames = $_.Others | ForEach-Object { "$($paramSetNameSnippet)$($_.Name)" };
+        [string]$resolvedParam = $syntax.ResolvedParamStmt(@($_.Param), $_.ParamSet);
+        $(
+          "{$($resetSnippet)$($resolvedParam)$($resetSnippet) of " +
+          "$($paramSetNameSnippet)$($_.ParamSet.Name)" +
+          "$($resetSnippet) => $($otherParamSetNames -join $commaSnippet)$($resetSnippet)}"
+        );
       }
       [PSCustomObject]@{
         Rule       = $this.RuleName;
@@ -260,7 +291,11 @@ class Rules {
     [PSCustomObject]$options = $syntax.TableOptions;
     [string]$resetSnippet = $options.Snippets.Reset;
     [string]$lnSnippet = $options.Snippets.Ln;
+    [string]$punctSnippet = $options.Snippets.Punct;
+    [string]$ruleSnippet = $options.Snippets.HeadingUL;
     [string]$indentation = $syntax.Indent(1);
+    [string]$doubleIndentation = $syntax.Indent(2);
+    [string]$tripleIndentation = $syntax.Indent(3);
 
     [string]$summaryStmt = if ($violationsByRule.Count -eq 0) {
       "$($options.Snippets.Ok) No violations found.$($lnSnippet)";
@@ -268,15 +303,28 @@ class Rules {
     else {
       [int]$total = 0;
       [string]$violationsByRuleStmt = [string]::Empty;
+
       $violationsByRule.GetEnumerator() | ForEach-Object {
         [PSCustomObject]$vo = $_.Value;
         [PSCustomObject[]]$pods = $vo.Violations;
         $total += $pods.Count;
 
         [string]$shortName = [Rules]::Rules[$_.Key].Short;
+        [string]$quotedShortName = $syntax.QuotedNameStmt($ruleSnippet, $shortName);
         $violationsByRuleStmt += $(
-          "$($indentation)$($signals['BULLET-POINT'].Value) '$($shortName)', Count: $($pods.Count)$($lnSnippet)"
+          "$($indentation)$($signals['BULLET-POINT'].Value) " +
+          "$($quotedShortName)$($resetSnippet), Count: $($pods.Count)$($lnSnippet)"
         );
+
+        $violationsByRuleStmt += $(
+          "$($doubleIndentation)$($punctSnippet)+$($resetSnippet) Reasons: $($lnSnippet)"
+        );
+
+        $vo.Reasons | ForEach-Object {
+          $violationsByRuleStmt += $(
+            "$($tripleIndentation)$($punctSnippet)- $($resetSnippet)$($_)$($lnSnippet)"
+          );
+        }
       }
       [string]$plural = ($total -eq 1) ? 'violation' : 'violations';
       $violationsByRuleStmt = $(
@@ -290,7 +338,7 @@ class Rules {
     $null = $builder.Append(
       "$($resetSnippet)" +
       "$($lnSnippet)$($global:LoopzUI.EqualsLine)" +
-      "$($lnSnippet)>>> SUMMARY: $($summaryStmt)$($resetSnippet)" +
+      "$($lnSnippet)>>>>> SUMMARY: $($summaryStmt)$($resetSnippet)" +
       "$($global:LoopzUI.EqualsLine)" +
       "$($lnSnippet)"
     );
@@ -313,6 +361,9 @@ class Rules {
       [PSCustomObject]$vo = $rule.Query($verifyInfo);
       [PSCustomObject[]]$pods = $vo.Violations;
       if ($pods -and ($pods.Count -gt 0)) {
+        [string]$description = $verifyInfo.Syntax.Fold(
+          $rule.Description, $headingULSnippet, 80, $options.Chrome.Indent * 2
+        );
 
         # Show the rule violation title
         #
@@ -323,13 +374,14 @@ class Rules {
           "$($indentation)$($headingSnippet)$($rule.Short)$($resetSnippet)" +
           "$($lnSnippet)" +
           "$($indentation)$($resetSnippet)$($headingULSnippet)$($underline)$($resetSnippet)" +
+          "$($lnSnippet)$($lnSnippet)" +
+          "$($resetSnippet)$($description)$($resetSnippet)" +
           "$($lnSnippet)$($lnSnippet)"
         );
         $null = $builder.Append($ruleTitle);
 
         # Show the violations for this rule
         #
-        # $violationsByRule[$ruleNameKey] = $pods;
         $violationsByRule[$ruleNameKey] = $vo;
         $rule.ViolationStmt($pods, $verifyInfo);
       }

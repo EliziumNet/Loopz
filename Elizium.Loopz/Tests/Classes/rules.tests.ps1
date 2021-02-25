@@ -1,7 +1,7 @@
 using namespace System.Text;
 using namespace System.Management.Automation;
 
-Describe 'Rules' -Tag '!Current' {
+Describe 'Rules' -Tag 'Current' {
   BeforeAll {
     Get-Module Elizium.Loopz | Remove-Module
     Import-Module .\Output\Elizium.Loopz\Elizium.Loopz.psm1 `

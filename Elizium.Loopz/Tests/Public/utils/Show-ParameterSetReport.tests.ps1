@@ -107,6 +107,7 @@ Describe 'Show-ParameterSetReport' -Tag 'Current' {
 
           [Parameter()]
           [Parameter(ParameterSetName = 'Alpha', Mandatory, Position = 1)]
+          [Parameter(ParameterSetName = 'Another', Mandatory, Position = 1)]
           [Parameter(ParameterSetName = 'Ok', Mandatory, Position = 1)]
           [object]$AccidentalA,
 

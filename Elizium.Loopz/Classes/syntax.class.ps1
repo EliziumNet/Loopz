@@ -24,6 +24,7 @@ class Syntax {
     'ErrorVariable', 'WarningVariable', 'InformationVariable', 'DebugVariable',
     'VerboseVariable', 'ProgressVariable', 'OutVariable', 'OutBuffer',
     'PipelineVariable');
+  [string[]]$AllCommonParamSet = $this.CommonParamSet + @('WhatIf', 'Confirm');
 
   static [hashtable]$CloseBracket = @{
     '(' = ')';
@@ -32,7 +33,6 @@ class Syntax {
     '<' = '>';
   }
 
-  [string[]]$AllCommonParamSet = $this.CommonParamSet + @('WhatIf', 'Confirm');
   static [string] $AllParameterSets = '__AllParameterSets';
 
   [scriptblock]$RenderCell = {
@@ -151,13 +151,14 @@ class Syntax {
       Command      = $($this.Krayon.snippets($this.Scheme['COLS.CMD-NAME']));
       Reset        = $($this.Krayon.snippets('Reset'));
       Space        = $($this.Krayon.snippets('Reset')) + ' ';
+      Comma        = $($this.Krayon.snippets('Reset')) + ', ';
       Ln           = $($this.Krayon.snippets('Ln'));
       HiLight      = $($this.Krayon.snippets('white'));
       Heading      = $($this.Krayon.snippets(@('black', 'bgDarkYellow')));
       HeadingUL    = $($this.Krayon.snippets('darkYellow'));
       Special      = $($this.Krayon.snippets('darkYellow'));
-      Error        = $($this.Krayon.snippets('red'));
-      Ok           = $($this.Krayon.snippets('green'));
+      Error        = $($this.Krayon.snippets(@('black', 'bgRed')));
+      Ok           = $($this.Krayon.snippets(@('black', 'bgGreen')));
     }
 
     $this.Formats = @{
@@ -249,10 +250,10 @@ class Syntax {
       "$($signals['BULLET-POINT'].Value)"
     );
     $this.Labels = [PSCustomObject]@{
-      ParamSet                  = "===> Parameter Set: ";
-      DuplicatePositions        = "===> Duplicate Positions for Parameter Set: ";
-      MultipleValueFromPipeline = "===> Multiple ValueFromPipeline claims for Parameter Set: ";
-      AccidentallyInAllSets     = "===> Parameter '{0}' (of {1}), accidentally in all Parameter Sets: ";
+      ParamSet                  = "====> Parameter Set: ";
+      DuplicatePositions        = "  *** Duplicate Positions for Parameter Set: ";
+      MultipleValueFromPipeline = "  *** Multiple ValueFromPipeline claims for Parameter Set: ";
+      AccidentallyInAllSets     = "  *** Parameter '{0}' (of {1}), accidentally in all Parameter Sets: ";
       Params                    = $(
         "$($bulletedPoint) Params: "
       );
@@ -274,7 +275,7 @@ class Syntax {
     [string]$commandStmt = $this.QuotedNameStmt($this.Snippets.Command, $commandName, '[');
     [string]$titleStmt = $(
       "$($this.Snippets.Reset)$($this.Snippets.Ln)" +
-      "---> $($title) $($commandStmt)$($this.Snippets.Reset) ..." +
+      "----> $($title) $($commandStmt)$($this.Snippets.Reset) ..." +
       "$($this.Snippets.Ln)"
     );
     return $titleStmt;
@@ -316,7 +317,8 @@ class Syntax {
     [System.Management.Automation.CommandParameterSetInfo]$paramSet
   ) {
     [string]$paramStmt = [string]::Empty;
-    
+    [string]$commaSnippet = $this.Snippets.Comma;
+
     [int]$count = 0;
     foreach ($paramName in $params) {
       [System.Management.Automation.CommandParameterInfo[]]$paramResult = $(
@@ -332,7 +334,7 @@ class Syntax {
         );
 
         if ($count -lt ($params.Count - 1)) {
-          $paramStmt += "$($this.Snippets.Punct), ";
+          $paramStmt += "$($commaSnippet)";
         }
       }
       $count++;
@@ -387,7 +389,7 @@ class Syntax {
 
     [string[]]$others = ($seed.Others | ForEach-Object {
         $this.QuotedNameStmt($this.Snippets.ParamSetName, $_.Name)
-      }) -join "$($this.Snippets.Punct), ";
+      }) -join "$($this.Snippets.Comma)";
 
     [string]$quotedParamSetName = $(
       "$($this.QuotedNameStmt($this.Snippets.ParamSetName, $paramSet.Name))" +
@@ -436,7 +438,7 @@ class Syntax {
     # set's parameters to find them and colourise them directly.
     #
     [PSCustomObject[]]$resultSet = $($paramSet.Parameters | Where-Object {
-        ($_.Name -NotIn $syntax.CommonParamSet) -and
+        ($_.Name -NotIn $this.CommonParamSet) -and
         ($_.IsMandatory) -and ($_.ParameterType.Name -eq 'SwitchParameter')
       });
 
@@ -467,7 +469,7 @@ class Syntax {
     [System.Management.Automation.CommandParameterSetInfo]$firstSet,
     [System.Management.Automation.CommandParameterSetInfo]$secondSet
   ) {
-    # ---> Parameter sets [command-name]: 'first' and 'second' have identical sets of parameters
+    # ----> Parameter sets [command-name]: 'first' and 'second' have equivalent sets of parameters
     #
     [string]$structuredDuplicateParamSetStmt = $(
       "$($this.Snippets.Reset)$([string]::new(' ', $this.TableOptions.Chrome.Indent))" +
@@ -477,7 +479,7 @@ class Syntax {
       "$($this.Snippets.ParamSetName)$($firstSet.Name)$($this.Snippets.Punct)'$($this.Snippets.Reset) and " +
       "$($this.Snippets.Punct)'" +
       "$($this.Snippets.ParamSetName)$($secondSet.Name)$($this.Snippets.Punct)' " +
-      "$($this.Snippets.Reset) have identical sets of parameters:" +
+      "$($this.Snippets.Reset) have equivalent sets of parameters:" +
       "$($this.Snippets.Ln)"
     );
     return $structuredDuplicateParamSetStmt;
@@ -518,21 +520,12 @@ class Syntax {
 
       if ($params.Count -eq 1) {
         [System.Management.Automation.CommandParameterInfo]$parameterInfo = $params[0];
-        [string]$paramSnippet = if ($parameterInfo.IsMandatory) {
-          $this.TableOptions.Custom.Snippets.Mandatory;
-        }
-        elseif ($parameterInfo.ParameterType.Name -eq 'SwitchParameter') {
-
-          $this.TableOptions.Custom.Snippets.Switch;
-        }
-        else {
-          $this.TableOptions.Custom.Snippets.Cell;
-        }
+        [string]$paramSnippet = $this.ResolveParameterSnippet($parameterInfo);
 
         $paramsStmt += $this.QuotedNameStmt($paramSnippet, $parameterInfo.Name);
 
         if ($count -lt ($invokeParams.Count - 1)) {
-          $paramsStmt += ', '
+          $paramsStmt += ', ' #!!!!!!!
         }
       }
       $count++;
@@ -541,7 +534,44 @@ class Syntax {
     return $paramsStmt;
   }
 
-  [string] Indent ([int]$units) {
+  [string] Indent([int]$units) {
     return [string]::new(' ', $this.TableOptions.Chrome.Indent * $units);
+  }
+
+  [string] Fold([string]$text, [string]$textSnippet, [int]$width, [int]$margin) {
+    [string]$alignedStmt = $textSnippet;
+
+    [string[]]$split = $text -split ' ';
+    [int]$tokenNoCurrentLine = 0;
+    [string]$line = [string]::new(' ', $margin);
+    foreach ($token in $split) {
+      if ((($line.Length + $token.Length + 1) -lt ($width - $margin)) -or ($tokenNoCurrentLine -eq 0)) {
+        # Current token will fit on the current line so let's add it. The only exception is
+        # if the current token is very large and breaches the width/margin limit by itself
+        # (ie tokenNo is 0), then we have no choice other than to breach the limit anyway.
+        # I suppose an alternative would be just to fold this token by inserting a dash.
+        # NB: The +1 is to account for adding in a space.
+        #
+        $line += "$token ";
+        $tokenNoCurrentLine++;
+      }
+      else {
+        # Current token doesn't fit, so let's start a new line
+        #
+        $alignedStmt += $(
+          "$($line)$($this.Snippets.Ln)"
+        );
+        $line = [string]::new(' ', $margin);
+        $line += "$token ";
+        $tokenNoCurrentLine = ($tokenNoCurrentLine -eq 0) ? 1 : 0;
+      }
+    }
+    $alignedStmt += $(
+      "$($line)$($this.Snippets.Ln)"
+    );
+
+    $alignedStmt += $this.Snippets.Reset;
+
+    return $alignedStmt;
   }
 }
