@@ -157,7 +157,10 @@ $global:Loopz = [PSCustomObject]@{
     'LOCKED'       = (New-Pair(@('Locked', '🔐')));
     'NOVICE'       = (New-Pair(@('Novice', '🔰')));
     'TRANSFORM'    = (New-Pair(@('Transform', '🤖')));
-    'BULLET-POINT' = (New-Pair(@('Bullet Point', '🔶')));
+    'BULLET-A'     = (New-Pair(@('Bullet Point', '🔶')));
+    'BULLET-B'     = (New-Pair(@('Bullet Point', '🟢')));
+    'BULLET-C'     = (New-Pair(@('Bullet Point', '🟨')));
+    'BULLET-D'     = (New-Pair(@('Bullet Point', '💠')));
 
     # Outcomes
     #

@@ -47,8 +47,8 @@ function Show-InvokeReport {
       [System.Management.Automation.CommandParameterSetInfo[]]$candidateSets = $informer.Resolve($Params);
 
       [string[]]$candidateNames = $candidateSets.Name
-      [string]$candidateNamesCSV = $candidateNames -join $commaSnippet;
-      [string]$paramsCSV = $Params -join $commaSnippet;
+      [string]$candidateNamesCSV = $candidateNames -join ', ';
+      [string]$paramsCSV = $Params -join ', ';
 
       [string]$structuredParamNames = $syntax.QuotedNameStmt($hiLightSnippet);
       [string]$unresolvedStructuredParams = $syntax.NamesRegex.Replace($paramsCSV, $structuredParamNames);

@@ -66,10 +66,15 @@ class MustContainUniqueSetOfParams : ParameterSetRule {
     [string]$resetSnippet = $options.Snippets.Reset;
     [string]$punctuationSnippet = $options.Snippets.Punct;
     [string]$duplicateSeparator = '.............';
+    [string]$doubleIndentation = $syntax.Indent(2);
 
     if ($pods -and ($pods.Count -gt 0)) {
+      $null = $builder.Append(
+        "$($doubleIndentation)$($punctuationSnippet)$($duplicateSeparator)$($lnSnippet)"
+      );
+
       foreach ($seed in $pods) {
-        [string]$duplicateParamSetStmt = $syntax.DuplicateParamSetStmt(
+        [string]$duplicateParamSetStmt = $syntax.DuplicateParamSetStmt( # BULLET-B/SEED
           $seed.First, $seed.Second
         );
         $null = $builder.Append($duplicateParamSetStmt);
@@ -85,7 +90,7 @@ class MustContainUniqueSetOfParams : ParameterSetRule {
             "$($firstParamSetStmt)$($lnSnippet)$($firstSyntax)$($lnSnippet)" +
             "$($lnSnippet)" +
             "$($secondParamSetStmt)$($lnSnippet)$($secondSyntax)$($lnSnippet)" +
-            "$($punctuationSnippet)$($duplicateSeparator)$($lnSnippet)"
+            "$($doubleIndentation)$($punctuationSnippet)$($duplicateSeparator)$($lnSnippet)"
           ));
 
         [string]$subTitle = $syntax.QuotedNameStmt(
@@ -144,7 +149,7 @@ class MustContainUniquePositions : ParameterSetRule {
     [string]$lnSnippet = $options.Snippets.Ln;
     if ($pods -and ($pods.Count -gt 0)) {
       foreach ($seed in $pods) {
-        [string]$duplicateParamPositionsStmt = $(
+        [string]$duplicateParamPositionsStmt = $( # BULLET-C/SEED
           "$($syntax.ParamsDuplicatePosStmt($seed))" +
           "$($lnSnippet)$($lnSnippet)"
         );
@@ -256,7 +261,7 @@ class MustNotBeInAllParameterSetsByAccident : ParameterSetRule {
     [string]$lnSnippet = $options.Snippets.Ln;
     if ($pods -and ($pods.Count -gt 0)) {
       foreach ($seed in $pods) {
-        [string]$accidentsStmt = $(
+        [string]$accidentsStmt = $( # BULLET-C/SEED
           "$($syntax.InAllParameterSetsByAccidentStmt($seed))" +
           "$($lnSnippet)$($lnSnippet)"
         );
@@ -291,7 +296,6 @@ class Rules {
     [PSCustomObject]$options = $syntax.TableOptions;
     [string]$resetSnippet = $options.Snippets.Reset;
     [string]$lnSnippet = $options.Snippets.Ln;
-    [string]$punctSnippet = $options.Snippets.Punct;
     [string]$ruleSnippet = $options.Snippets.HeadingUL;
     [string]$indentation = $syntax.Indent(1);
     [string]$doubleIndentation = $syntax.Indent(2);
@@ -312,17 +316,18 @@ class Rules {
         [string]$shortName = [Rules]::Rules[$_.Key].Short;
         [string]$quotedShortName = $syntax.QuotedNameStmt($ruleSnippet, $shortName);
         $violationsByRuleStmt += $(
-          "$($indentation)$($signals['BULLET-POINT'].Value) " +
+          "$($indentation)$($signals['BULLET-A'].Value) " +
           "$($quotedShortName)$($resetSnippet), Count: $($pods.Count)$($lnSnippet)"
         );
 
+        
         $violationsByRuleStmt += $(
-          "$($doubleIndentation)$($punctSnippet)+$($resetSnippet) Reasons: $($lnSnippet)"
+          "$($doubleIndentation)$($signals['BULLET-C'].Value)$($resetSnippet) Reasons: $($lnSnippet)"
         );
 
         $vo.Reasons | ForEach-Object {
           $violationsByRuleStmt += $(
-            "$($tripleIndentation)$($punctSnippet)- $($resetSnippet)$($_)$($lnSnippet)"
+            "$($tripleIndentation)$($signals['BULLET-D'].Value) $($resetSnippet)$($_)$($lnSnippet)"
           );
         }
       }

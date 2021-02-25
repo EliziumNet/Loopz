@@ -58,12 +58,12 @@ Describe 'Syntax' {
             Write-Host ">>> '$($paramSet.Name)'"
             [string[]]$names = ($paramSet.Parameters | Where-Object {
                 ($_.Name -NotIn $Syntax.CommonParamSet) -and
-                ($_.IsMandatory) -and ($_.ParameterType.Name -eq 'SwitchParameter')
+                ($_.IsMandatory) -and ($_.ParameterType -eq 'switch')
               }).Name;
 
             [PSCustomObject[]]$resultSet = $($paramSet.Parameters | Where-Object {
                 ($_.Name -NotIn $Syntax.CommonParamSet) -and
-                ($_.IsMandatory) -and ($_.ParameterType.Name -eq 'SwitchParameter')
+                ($_.IsMandatory) -and ($_.ParameterType -eq 'switch')
               });
 
             if ($resultSet) {

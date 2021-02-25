@@ -73,7 +73,7 @@ class Syntax {
         [string]$nameSnippet = if ($parameterInfo.IsMandatory) {
           $Options.Custom.Snippets.Mandatory;
         }
-        elseif ($parameterType.Name -eq 'SwitchParameter') {
+        elseif ($parameterType -eq 'switch') {
           $Options.Custom.Snippets.Switch;
         }
         else {
@@ -247,7 +247,7 @@ class Syntax {
 
     [string]$bulletedPoint = $(
       "$([string]::new(' ', $this.TableOptions.Chrome.Indent))" +
-      "$($signals['BULLET-POINT'].Value)"
+      "$($signals['BULLET-B'].Value)"
     );
     $this.Labels = [PSCustomObject]@{
       ParamSet                  = "====> Parameter Set: ";
@@ -303,7 +303,7 @@ class Syntax {
     [string]$paramSnippet = if ($paramInfo.IsMandatory) {
       $this.TableOptions.Custom.Snippets.Mandatory;
     }
-    elseif ($paramInfo.ParameterType.Name -eq 'SwitchParameter') {
+    elseif ($paramInfo.ParameterType -eq 'switch') {
       $this.TableOptions.Custom.Snippets.Switch;
     }
     else {
@@ -439,7 +439,7 @@ class Syntax {
     #
     [PSCustomObject[]]$resultSet = $($paramSet.Parameters | Where-Object {
         ($_.Name -NotIn $this.CommonParamSet) -and
-        ($_.IsMandatory) -and ($_.ParameterType.Name -eq 'SwitchParameter')
+        ($_.IsMandatory) -and ($_.ParameterType -eq 'switch')
       });
 
     if ($resultSet -and ($resultSet.Count -gt 0)) {
@@ -473,7 +473,7 @@ class Syntax {
     #
     [string]$structuredDuplicateParamSetStmt = $(
       "$($this.Snippets.Reset)$([string]::new(' ', $this.TableOptions.Chrome.Indent))" +
-      "$($this.Signals['BULLET-POINT'].Value) Parameter Sets " +
+      "$($this.Signals['BULLET-B'].Value) Parameter Sets " +
       "$($this.Snippets.Reset)[$($this.Snippets.Command)$($this.CommandName)$($this.Snippets.Reset)]: " +
       "$($this.Snippets.Punct)'" +
       "$($this.Snippets.ParamSetName)$($firstSet.Name)$($this.Snippets.Punct)'$($this.Snippets.Reset) and " +
@@ -525,7 +525,7 @@ class Syntax {
         $paramsStmt += $this.QuotedNameStmt($paramSnippet, $parameterInfo.Name);
 
         if ($count -lt ($invokeParams.Count - 1)) {
-          $paramsStmt += ', ' #!!!!!!!
+          $paramsStmt += $this.Snippets.Comma;
         }
       }
       $count++;
