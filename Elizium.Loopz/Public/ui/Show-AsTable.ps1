@@ -43,7 +43,7 @@ function Show-AsTable {
   
   $null = $Builder.Append("$($resetSnippet)$($lnSnippet)");
 
-  if (($MetaData.Count -gt 0) -and ($Table.Count -gt 0)) {
+  if (($MetaData.Keys.Count -gt 0) -and ($Table.Keys.Count -gt 0)) {
     # Establish field selection
     #
     [string[]]$selection = Get-PsObjectField -Object $Options -Field 'Select';
