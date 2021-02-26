@@ -43,13 +43,13 @@ function Show-AsTable {
   
   $null = $Builder.Append("$($resetSnippet)$($lnSnippet)");
 
-  if (($MetaData.Keys.Count -gt 0) -and ($Table.Keys.Count -gt 0)) {
+  if (($MetaData.PSBase.Count -gt 0) -and ($Table.PSBase.Count -gt 0)) {
     # Establish field selection
     #
     [string[]]$selection = Get-PsObjectField -Object $Options -Field 'Select';
 
     if (-not($selection)) {
-      $selection = $Headers.Keys;
+      $selection = $Headers.PSBase.Keys;
     }
 
     # Display column titles

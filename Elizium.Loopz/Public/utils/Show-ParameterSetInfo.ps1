@@ -39,6 +39,7 @@ function Show-ParameterSetInfo {
       }
     }
     else {
+      Write-Debug "    --- Show-ParameterSetInfo - Command: [$($_.Name)] ---";
       [syntax]$syntax = New-Syntax -CommandName $_.Name -Signals $signals -Krayon $krayon;
 
       [string]$commandSnippet = $syntax.TableOptions.Custom.Snippets.Command;
@@ -66,7 +67,7 @@ function Show-ParameterSetInfo {
               get-ParameterSetTableData -CommandInfo $_ -ParamSet $parameterSet -Syntax $syntax
             );
 
-            if (-not($($null -eq $fieldMetaData)) -and ($fieldMetaData.Count -gt 0)) {
+            if (-not($($null -eq $fieldMetaData)) -and ($fieldMetaData.Keys.Count -gt 0)) {
               [string]$structuredParamSetStmt = $syntax.ParamSetStmt($_, $parameterSet);
               [string]$structuredSyntax = $syntax.SyntaxStmt($parameterSet);
 

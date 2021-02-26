@@ -28,6 +28,8 @@ function Show-InvokeReport {
       Get-Command -Name $_ | Show-InvokeReport -Params $Params;
     }
     else {
+      Write-Debug "    --- Show-InvokeReport - Command: [$($_.Name)] ---";
+
       [syntax]$syntax = New-Syntax -CommandName $_.Name -Signals $signals -Krayon $krayon;
       [string]$paramSetSnippet = $syntax.TableOptions.Snippets.ParamSetName;
       [string]$resetSnippet = $syntax.TableOptions.Snippets.Reset;

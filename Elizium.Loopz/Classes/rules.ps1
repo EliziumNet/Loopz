@@ -24,7 +24,8 @@ class MustContainUniqueSetOfParams : ParameterSetRule {
   MustContainUniqueSetOfParams([string]$name):base($name) {
     $this.Short = 'Non Unique Parameter Set';
     $this.Description =
-    'Each parameter set must have at least one unique parameter. If possible, make this parameter a mandatory parameter.';
+    "Each parameter set must have at least one unique parameter. " +
+    "If possible, make this parameter a mandatory parameter.";
   }
 
   [PSCustomObject] Query([PSCustomObject]$verifyInfo) {
@@ -57,7 +58,6 @@ class MustContainUniqueSetOfParams : ParameterSetRule {
   }
 
   [void] ViolationStmt([PSCustomObject[]]$pods, [PSCustomObject]$verifyInfo) {
-    # Each violation reported must have the rule name and the parameter set
 
     [object]$syntax = $verifyInfo.Syntax;
     [System.Text.StringBuilder]$builder = $verifyInfo.Builder;
@@ -74,7 +74,7 @@ class MustContainUniqueSetOfParams : ParameterSetRule {
       );
 
       foreach ($seed in $pods) {
-        [string]$duplicateParamSetStmt = $syntax.DuplicateParamSetStmt( # BULLET-B/SEED
+        [string]$duplicateParamSetStmt = $syntax.DuplicateParamSetStmt(
           $seed.First, $seed.Second
         );
         $null = $builder.Append($duplicateParamSetStmt);
@@ -112,7 +112,9 @@ class MustContainUniquePositions : ParameterSetRule {
   MustContainUniquePositions([string]$name):base($name) {
     $this.Short = 'Non Unique Positions';
     $this.Description =
-    'A parameter set that contains multiple positional parameters must define unique positions for each parameter. No two positional parameters can specify the same position.';
+    "A parameter set that contains multiple positional parameters must " +
+    "define unique positions for each parameter. No two positional parameters " +
+    "can specify the same position.";
   }
 
   [PSCustomObject] Query([PSCustomObject]$verifyInfo) {
@@ -127,7 +129,10 @@ class MustContainUniquePositions : ParameterSetRule {
 
       [string[]]$reasons = $pods | ForEach-Object {
         [string]$resolvedParamStmt = $syntax.ResolvedParamStmt($_.Params, $_.ParamSet);
-        $("{$($paramSetNameSnippet)$($_.ParamSet.Name)$($resetSnippet) => $resolvedParamStmt$($resetSnippet)}");
+        $(
+          "{$($paramSetNameSnippet)$($_.ParamSet.Name)$($resetSnippet)" +
+          " => $resolvedParamStmt$($resetSnippet)}"
+        );
       }
       [PSCustomObject]@{
         Rule       = $this.RuleName;
@@ -164,7 +169,8 @@ class MustNotHaveMultiplePipelineParams : ParameterSetRule {
   MustNotHaveMultiplePipelineParams([string]$name):base($name) {
     $this.Short = 'Multiple Claims to Pipeline item';
     $this.Description =
-    'Only one parameter in a set can declare the ValueFromPipeline keyword with a value of true.';
+    "Only one parameter in a set can declare the ValueFromPipeline " +
+    "keyword with a value of true.";
   }
 
   [PSCustomObject] Query([PSCustomObject]$verifyInfo) {
@@ -180,7 +186,8 @@ class MustNotHaveMultiplePipelineParams : ParameterSetRule {
       [string[]]$reasons = $pods | ForEach-Object {
         [string]$resolvedParamStmt = $syntax.ResolvedParamStmt($_.Params, $_.ParamSet);
         $(
-          "{$($paramSetNameSnippet)$($_.ParamSet.Name)$($resetSnippet) => $resolvedParamStmt$($resetSnippet)}"
+          "{$($paramSetNameSnippet)$($_.ParamSet.Name)$($resetSnippet)" +
+          " => $resolvedParamStmt$($resetSnippet)}"
         );
       }
       [PSCustomObject]@{
@@ -218,7 +225,8 @@ class MustNotBeInAllParameterSetsByAccident : ParameterSetRule {
   MustNotBeInAllParameterSetsByAccident([string]$name):base($name) {
     $this.Short = 'In All Parameter Sets By Accident';
     $this.Description =
-    'Defining a parameter with multiple "Parameter Blocks", where some with and some without a parameter set, is invalid.';
+    "Defining a parameter with multiple 'Parameter Blocks', some with " +
+    "and some without a parameter set, is invalid.";
   }
 
   [PSCustomObject] Query([PSCustomObject]$verifyInfo) {
@@ -233,7 +241,9 @@ class MustNotBeInAllParameterSetsByAccident : ParameterSetRule {
     [PSCustomObject]$vo = if ($pods -and $pods.Count -gt 0) {
 
       [string[]]$reasons = $pods | ForEach-Object {
-        [string[]]$otherParamSetNames = $_.Others | ForEach-Object { "$($paramSetNameSnippet)$($_.Name)" };
+        [string[]]$otherParamSetNames = $_.Others | ForEach-Object {
+          "$($paramSetNameSnippet)$($_.Name)"
+        };
         [string]$resolvedParam = $syntax.ResolvedParamStmt(@($_.Param), $_.ParamSet);
         $(
           "{$($resetSnippet)$($resolvedParam)$($resetSnippet) of " +
@@ -306,7 +316,7 @@ class Rules {
     }
     else {
       [int]$total = 0;
-      [string]$violationsByRuleStmt = [string]::Empty;
+      [System.Text.StringBuilder]$buildR = [System.Text.StringBuilder]::new();
 
       $violationsByRule.GetEnumerator() | ForEach-Object {
         [PSCustomObject]$vo = $_.Value;
@@ -315,26 +325,26 @@ class Rules {
 
         [string]$shortName = [Rules]::Rules[$_.Key].Short;
         [string]$quotedShortName = $syntax.QuotedNameStmt($ruleSnippet, $shortName);
-        $violationsByRuleStmt += $(
-          "$($indentation)$($signals['BULLET-A'].Value) " +
-          "$($quotedShortName)$($resetSnippet), Count: $($pods.Count)$($lnSnippet)"
-        );
+        $null = $buildR.Append($(
+            "$($indentation)$($signals['BULLET-A'].Value) " +
+            "$($quotedShortName)$($resetSnippet), Count: $($pods.Count)$($lnSnippet)"
+          ));
 
-        
-        $violationsByRuleStmt += $(
-          "$($doubleIndentation)$($signals['BULLET-C'].Value)$($resetSnippet) Reasons: $($lnSnippet)"
-        );
+        $null = $buildR.Append($(
+            "$($doubleIndentation)$($signals['BULLET-C'].Value)$($resetSnippet) Reasons: $($lnSnippet)"
+          ));
 
         $vo.Reasons | ForEach-Object {
-          $violationsByRuleStmt += $(
-            "$($tripleIndentation)$($signals['BULLET-D'].Value) $($resetSnippet)$($_)$($lnSnippet)"
-          );
+          $null = $buildR.Append($(
+              "$($tripleIndentation)$($signals['BULLET-D'].Value) $($resetSnippet)$($_)$($lnSnippet)"
+            ));
         }
       }
+
       [string]$plural = ($total -eq 1) ? 'violation' : 'violations';
-      $violationsByRuleStmt = $(
+      [string]$violationsByRuleStmt = $(
         "$($options.Snippets.Error) Found the following $($total) $($plural):$($lnSnippet)" +
-        "$($resetSnippet)$($violationsByRuleStmt)"
+        "$($resetSnippet)$($buildR.ToString())"
       );
 
       $violationsByRuleStmt;

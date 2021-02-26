@@ -27,6 +27,8 @@ function Show-ParameterSetReport {
       Get-Command -Name $_ | Show-ParameterSetReport;
     }
     else {
+      Write-Debug "    --- Show-ParameterSetReport - Command: [$($_.Name)] ---";
+
       [syntax]$syntax = New-Syntax -CommandName $_.Name -Signals $signals -Krayon $krayon;
       [rules]$rules = [rules]::New($_);
 

@@ -24,7 +24,7 @@ function find-MultipleValueFromPipeline {
   };
 
   foreach ($paramSet in $paramSets) {
-    [hashtable]$fieldMetaData, [hashtable]$headers, [hashtable]$tableContent = `
+    $null, $null, [hashtable]$tableContent = `
       get-ParameterSetTableData -CommandInfo $CommandInfo `
       -ParamSet $paramSet -Syntax $Syntax -Where $paramIsValueFromPipeline;
 

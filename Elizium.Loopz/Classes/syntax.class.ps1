@@ -316,7 +316,7 @@ class Syntax {
     [string[]]$params,
     [System.Management.Automation.CommandParameterSetInfo]$paramSet
   ) {
-    [string]$paramStmt = [string]::Empty;
+    [System.Text.StringBuilder]$buildR = [System.Text.StringBuilder]::new();
     [string]$commaSnippet = $this.Snippets.Comma;
 
     [int]$count = 0;
@@ -329,18 +329,18 @@ class Syntax {
         [System.Management.Automation.CommandParameterInfo]$paramInfo = $paramResult[0];
         [string]$paramSnippet = $this.ResolveParameterSnippet($paramInfo)
 
-        $paramStmt += $(
-          $this.QuotedNameStmt($paramSnippet, $paramName)
-        );
+        $null = $buildR.Append($(
+            $this.QuotedNameStmt($paramSnippet, $paramName)
+          ));
 
         if ($count -lt ($params.Count - 1)) {
-          $paramStmt += "$($commaSnippet)";
+          $null = $buildR.Append("$($commaSnippet)");
         }
       }
       $count++;
     }
 
-    return $paramStmt;
+    return $buildR.ToString();
   }
 
   [string] ParamsDuplicatePosStmt([PSCustomObject]$seed) {
@@ -511,7 +511,7 @@ class Syntax {
     [System.Management.Automation.CommandParameterSetInfo]$paramSet,
     [string[]]$invokeParams
   ) {
-    [string]$paramsStmt = [string]::Empty;
+    [System.Text.StringBuilder]$buildR = [System.Text.StringBuilder]::new();
 
     [int]$count = 0;
     $invokeParams | ForEach-Object {
@@ -522,16 +522,16 @@ class Syntax {
         [System.Management.Automation.CommandParameterInfo]$parameterInfo = $params[0];
         [string]$paramSnippet = $this.ResolveParameterSnippet($parameterInfo);
 
-        $paramsStmt += $this.QuotedNameStmt($paramSnippet, $parameterInfo.Name);
+        $null = $buildR.Append($this.QuotedNameStmt($paramSnippet, $parameterInfo.Name));
 
         if ($count -lt ($invokeParams.Count - 1)) {
-          $paramsStmt += $this.Snippets.Comma;
+          $null = $buildR.Append($this.Snippets.Comma);
         }
       }
       $count++;
     }
 
-    return $paramsStmt;
+    return $buildR.ToString();
   }
 
   [string] Indent([int]$units) {
@@ -539,7 +539,8 @@ class Syntax {
   }
 
   [string] Fold([string]$text, [string]$textSnippet, [int]$width, [int]$margin) {
-    [string]$alignedStmt = $textSnippet;
+    [System.Text.StringBuilder]$buildR = [System.Text.StringBuilder]::new();
+    $null = $buildR.Append($textSnippet);
 
     [string[]]$split = $text -split ' ';
     [int]$tokenNoCurrentLine = 0;
@@ -558,20 +559,18 @@ class Syntax {
       else {
         # Current token doesn't fit, so let's start a new line
         #
-        $alignedStmt += $(
-          "$($line)$($this.Snippets.Ln)"
-        );
+        $null = $buildR.Append($(
+            "$($line)$($this.Snippets.Ln)"
+          ));
         $line = [string]::new(' ', $margin);
         $line += "$token ";
         $tokenNoCurrentLine = ($tokenNoCurrentLine -eq 0) ? 1 : 0;
       }
     }
-    $alignedStmt += $(
-      "$($line)$($this.Snippets.Ln)"
-    );
+    $null = $buildR.Append($(
+        "$($line)$($this.Snippets.Ln)$($this.Snippets.Reset)"
+      ));
 
-    $alignedStmt += $this.Snippets.Reset;
-
-    return $alignedStmt;
+    return $buildR.ToString();
   }
 }
