@@ -1,7 +1,7 @@
 using module Elizium.Krayola;
 using namespace System.Management.Automation;
 
-Describe 'test-AreParamSetsEqual' {
+Describe 'test-AreParamSetsEqual' -Tag 'PSTools' {
   BeforeAll {
     Get-Module Elizium.Loopz | Remove-Module;
     Import-Module .\Output\Elizium.Loopz\Elizium.Loopz.psm1 `

@@ -1,5 +1,5 @@
 using namespace System.Management.Automation;
-Describe 'find-InAllParameterSetsByAccident' -Tag '!Current' {
+Describe 'find-InAllParameterSetsByAccident' -Tag 'PSTools' {
   BeforeAll {
     Get-Module Elizium.Loopz | Remove-Module;
     Import-Module .\Output\Elizium.Loopz\Elizium.Loopz.psm1 `

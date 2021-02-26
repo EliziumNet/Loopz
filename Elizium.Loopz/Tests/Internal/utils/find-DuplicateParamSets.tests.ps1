@@ -1,7 +1,7 @@
 using module Elizium.Krayola;
 using namespace System.Management.Automation;
 
-Describe 'find-DuplicateParamSets' {
+Describe 'find-DuplicateParamSets' -Tag 'PSTools' {
   BeforeAll {
     Get-Module Elizium.Loopz | Remove-Module
     Import-Module .\Output\Elizium.Loopz\Elizium.Loopz.psm1 `

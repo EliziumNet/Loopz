@@ -1,5 +1,5 @@
 
-Describe 'Show-ParameterSetInfo' {
+Describe 'Show-ParameterSetInfo' -Tag 'PSTools' {
   BeforeAll {
     Get-Module Elizium.Loopz | Remove-Module;
     Import-Module .\Output\Elizium.Loopz\Elizium.Loopz.psm1 `

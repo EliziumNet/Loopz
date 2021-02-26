@@ -1,6 +1,6 @@
 using namespace System.Management.Automation;
 
-Describe 'Syntax' {
+Describe 'Syntax' -Tag 'Current' {
   BeforeAll {
     Get-Module Elizium.Loopz | Remove-Module
     Import-Module .\Output\Elizium.Loopz\Elizium.Loopz.psm1 `
