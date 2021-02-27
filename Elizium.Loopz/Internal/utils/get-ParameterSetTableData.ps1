@@ -32,7 +32,7 @@ function get-ParameterSetTableData {
   $parametersToShow = $parameterGroups[0] + $parameterGroups[1];
 
   [PSCustomObject[]]$resultSet = ($parametersToShow `
-    | Select-Object -Property @( # this is a query statement
+    | Select-Object -Property @(
       'Name'
       @{Name = 'Type'; Expression = { $_.ParameterType.Name }; }
       @{Name = 'Mandatory'; Expression = { $_.IsMandatory } }
@@ -40,6 +40,7 @@ function get-ParameterSetTableData {
       @{Name = 'PipeValue'; Expression = { $_.ValueFromPipeline } }
       @{Name = 'PipeName'; Expression = { $_.ValueFromPipelineByPropertyName } }
       @{Name = 'Alias'; Expression = { $_.Aliases -join ',' } }
+      @{Name = 'Unique'; Expression = { test-IsParameterUnique -Name $_.Name -CommandInfo $CommandInfo } }
     ));
 
   [array]$result = if (-not($($null -eq $resultSet)) -and ($resultSet.Count -gt 0)) {

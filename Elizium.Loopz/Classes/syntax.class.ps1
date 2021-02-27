@@ -57,7 +57,7 @@ class Syntax {
     # So, be careful using -Regex on switch statements.
     #
     switch -Regex ($column) {
-      'Mandatory|PipeValue|PipeName' {
+      'Mandatory|PipeValue|PipeName|Unique' {
         [string]$coreValue = $value.Trim() -eq 'True' ? $Options.Values.True : $Options.Values.False;
         [string]$padded = Get-PaddedLabel -Label $coreValue -Width $value.Length -Align $Options.Align.Cell;
         $null = $builder.Append("$($Options.Snippets.Reset)$($padded)");
@@ -239,7 +239,7 @@ class Syntax {
     # TODO, if we don't pass Select into Get-TableDisplayOptions, we get an error, FIX!
     # (RuntimeException: You cannot call a method on a null-valued expression.)
     #
-    [string[]]$columns = @('Name', 'Type', 'Mandatory', 'Pos', 'PipeValue', 'PipeName', 'Alias');
+    [string[]]$columns = @('Name', 'Type', 'Mandatory', 'Pos', 'PipeValue', 'PipeName', 'Alias', 'Unique');
     $this.TableOptions = Get-TableDisplayOptions -Select $columns  `
       -Signals $signals -Krayon $this.Krayon -Custom $custom;
 
