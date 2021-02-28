@@ -46,32 +46,4 @@ Describe 'Syntax' -Tag 'PSTools' {
       }
     }
   }
-
-  Describe 'query mandatory switch' -Skip {
-    It 'blah' {
-      InModuleScope Elizium.Loopz {
-        [string]$command = 'Rename-Many';
-        [CommandInfo]$commandInfo = Get-Command $command;
-
-        foreach ($paramSet in $commandInfo.ParameterSets) {
-          if ($paramSet.Name -in @('MoveToStart', 'MoveToEnd')) {
-            Write-Host ">>> '$($paramSet.Name)'"
-            [string[]]$names = ($paramSet.Parameters | Where-Object {
-                ($_.Name -NotIn $Syntax.CommonParamSet) -and
-                ($_.IsMandatory) -and ($_.ParameterType -eq 'switch')
-              }).Name;
-
-            [PSCustomObject[]]$resultSet = $($paramSet.Parameters | Where-Object {
-                ($_.Name -NotIn $Syntax.CommonParamSet) -and
-                ($_.IsMandatory) -and ($_.ParameterType -eq 'switch')
-              });
-
-            if ($resultSet) {
-              [string[]]$names = $resultSet.Name;
-            }
-          }
-        }
-      }
-    }
-  }
 }

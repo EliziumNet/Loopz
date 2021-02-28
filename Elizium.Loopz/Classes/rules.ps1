@@ -8,12 +8,12 @@ class ParameterSetRule {
     $this.RuleName = $name;
   }
 
-  [PSCustomObject] Query([PSCustomObject]$verifyInfo) {
+  [PSCustomObject] Query([PSCustomObject]$queryInfo) {
     throw [System.Management.Automation.MethodInvocationException]::new(
       'Abstract method not implemented (ParameterSetRule.Violations)');
   }
 
-  [void] ViolationStmt([PSCustomObject[]]$pods, [PSCustomObject]$verifyInfo) {
+  [void] ViolationStmt([PSCustomObject[]]$pods, [PSCustomObject]$queryInfo) {
     throw [System.Management.Automation.MethodInvocationException]::new(
       'Abstract method not implemented (ParameterSetRule.ViolationStmt)');
   }
@@ -28,9 +28,9 @@ class MustContainUniqueSetOfParams : ParameterSetRule {
     "If possible, make this parameter a mandatory parameter.";
   }
 
-  [PSCustomObject] Query([PSCustomObject]$verifyInfo) {
-    [object]$syntax = $verifyInfo.Syntax;
-    [PSCustomObject[]]$pods = find-DuplicateParamSets -CommandInfo $verifyInfo.CommandInfo `
+  [PSCustomObject] Query([PSCustomObject]$queryInfo) {
+    [object]$syntax = $queryInfo.Syntax;
+    [PSCustomObject[]]$pods = find-DuplicateParamSets -CommandInfo $queryInfo.CommandInfo `
       -Syntax $syntax;
 
     [string]$paramSetNameSnippet = $syntax.TableOptions.Snippets.ParamSetName;
@@ -57,10 +57,10 @@ class MustContainUniqueSetOfParams : ParameterSetRule {
     return $vo;
   }
 
-  [void] ViolationStmt([PSCustomObject[]]$pods, [PSCustomObject]$verifyInfo) {
+  [void] ViolationStmt([PSCustomObject[]]$pods, [PSCustomObject]$queryInfo) {
 
-    [object]$syntax = $verifyInfo.Syntax;
-    [System.Text.StringBuilder]$builder = $verifyInfo.Builder;
+    [object]$syntax = $queryInfo.Syntax;
+    [System.Text.StringBuilder]$builder = $queryInfo.Builder;
     [PSCustomObject]$options = $syntax.TableOptions;
     [string]$lnSnippet = $options.Snippets.Ln;
     [string]$resetSnippet = $options.Snippets.Reset;
@@ -79,8 +79,8 @@ class MustContainUniqueSetOfParams : ParameterSetRule {
         );
         $null = $builder.Append($duplicateParamSetStmt);
 
-        [string]$firstParamSetStmt = $syntax.ParamSetStmt($verifyInfo.CommandInfo, $seed.First);
-        [string]$secondParamSetStmt = $syntax.ParamSetStmt($verifyInfo.CommandInfo, $seed.Second);
+        [string]$firstParamSetStmt = $syntax.ParamSetStmt($queryInfo.CommandInfo, $seed.First);
+        [string]$secondParamSetStmt = $syntax.ParamSetStmt($queryInfo.CommandInfo, $seed.Second);
 
         [string]$firstSyntax = $syntax.SyntaxStmt($seed.First);
         [string]$secondSyntax = $syntax.SyntaxStmt($seed.Second);
@@ -98,7 +98,7 @@ class MustContainUniqueSetOfParams : ParameterSetRule {
           $seed.First.Name, '('
         );
 
-        $verifyInfo.CommandInfo | Show-ParameterSetInfo `
+        $queryInfo.CommandInfo | Show-ParameterSetInfo `
           -Sets @($seed.First.Name) -Builder $builder `
           -Title $(
           "FIRST $($subTitle)$($resetSnippet) Parameter Set Report"
@@ -117,9 +117,9 @@ class MustContainUniquePositions : ParameterSetRule {
     "can specify the same position.";
   }
 
-  [PSCustomObject] Query([PSCustomObject]$verifyInfo) {
-    [object]$syntax = $verifyInfo.Syntax;
-    [PSCustomObject[]]$pods = find-DuplicateParamPositions -CommandInfo $verifyInfo.CommandInfo `
+  [PSCustomObject] Query([PSCustomObject]$queryInfo) {
+    [object]$syntax = $queryInfo.Syntax;
+    [PSCustomObject[]]$pods = find-DuplicateParamPositions -CommandInfo $queryInfo.CommandInfo `
       -Syntax $syntax;
 
     [string]$paramSetNameSnippet = $syntax.TableOptions.Snippets.ParamSetName;
@@ -147,9 +147,9 @@ class MustContainUniquePositions : ParameterSetRule {
     return $vo;
   }
 
-  [void] ViolationStmt([PSCustomObject[]]$pods, [PSCustomObject]$verifyInfo) {
-    [object]$syntax = $verifyInfo.Syntax;
-    [System.Text.StringBuilder]$builder = $verifyInfo.Builder;
+  [void] ViolationStmt([PSCustomObject[]]$pods, [PSCustomObject]$queryInfo) {
+    [object]$syntax = $queryInfo.Syntax;
+    [System.Text.StringBuilder]$builder = $queryInfo.Builder;
     [PSCustomObject]$options = $syntax.TableOptions;
     [string]$lnSnippet = $options.Snippets.Ln;
     if ($pods -and ($pods.Count -gt 0)) {
@@ -173,9 +173,9 @@ class MustNotHaveMultiplePipelineParams : ParameterSetRule {
     "keyword with a value of true.";
   }
 
-  [PSCustomObject] Query([PSCustomObject]$verifyInfo) {
-    [object]$syntax = $verifyInfo.Syntax;
-    [PSCustomObject[]]$pods = find-MultipleValueFromPipeline -CommandInfo $verifyInfo.CommandInfo `
+  [PSCustomObject] Query([PSCustomObject]$queryInfo) {
+    [object]$syntax = $queryInfo.Syntax;
+    [PSCustomObject[]]$pods = find-MultipleValueFromPipeline -CommandInfo $queryInfo.CommandInfo `
       -Syntax $syntax;
 
     [string]$paramSetNameSnippet = $syntax.TableOptions.Snippets.ParamSetName;
@@ -203,9 +203,9 @@ class MustNotHaveMultiplePipelineParams : ParameterSetRule {
     return $vo;
   }
 
-  [void] ViolationStmt([PSCustomObject[]]$pods, [PSCustomObject]$verifyInfo) {
-    [object]$syntax = $verifyInfo.Syntax;
-    [System.Text.StringBuilder]$builder = $verifyInfo.Builder;
+  [void] ViolationStmt([PSCustomObject[]]$pods, [PSCustomObject]$queryInfo) {
+    [object]$syntax = $queryInfo.Syntax;
+    [System.Text.StringBuilder]$builder = $queryInfo.Builder;
     [PSCustomObject]$options = $syntax.TableOptions;
     [string]$lnSnippet = $options.Snippets.Ln;
     if ($pods -and ($pods.Count -gt 0)) {
@@ -229,9 +229,9 @@ class MustNotBeInAllParameterSetsByAccident : ParameterSetRule {
     "and some without a parameter set, is invalid.";
   }
 
-  [PSCustomObject] Query([PSCustomObject]$verifyInfo) {
-    [object]$syntax = $verifyInfo.Syntax;
-    [PSCustomObject[]]$pods = find-InAllParameterSetsByAccident -CommandInfo $verifyInfo.CommandInfo `
+  [PSCustomObject] Query([PSCustomObject]$queryInfo) {
+    [object]$syntax = $queryInfo.Syntax;
+    [PSCustomObject[]]$pods = find-InAllParameterSetsByAccident -CommandInfo $queryInfo.CommandInfo `
       -Syntax $syntax;
 
     [string]$paramSetNameSnippet = $syntax.TableOptions.Snippets.ParamSetName;
@@ -264,9 +264,9 @@ class MustNotBeInAllParameterSetsByAccident : ParameterSetRule {
     return $vo;
   }
 
-  [void] ViolationStmt([PSCustomObject[]]$pods, [PSCustomObject]$verifyInfo) {
-    [object]$syntax = $verifyInfo.Syntax;
-    [System.Text.StringBuilder]$builder = $verifyInfo.Builder;
+  [void] ViolationStmt([PSCustomObject[]]$pods, [PSCustomObject]$queryInfo) {
+    [object]$syntax = $queryInfo.Syntax;
+    [System.Text.StringBuilder]$builder = $queryInfo.Builder;
     [PSCustomObject]$options = $syntax.TableOptions;
     [string]$lnSnippet = $options.Snippets.Ln;
     if ($pods -and ($pods.Count -gt 0)) {
@@ -282,7 +282,7 @@ class MustNotBeInAllParameterSetsByAccident : ParameterSetRule {
   }
 }
 
-class Rules {
+class RuleController {
   [string]$CommandName;
   [System.Management.Automation.CommandInfo]$CommandInfo;
   static [hashtable]$Rules = @{
@@ -292,17 +292,14 @@ class Rules {
     'ACCIDENTAL-ALL-SETS'   = [MustNotBeInAllParameterSetsByAccident]::new('ACCIDENTAL-ALL-SETS');
   }
 
-  Rules([System.Management.Automation.CommandInfo]$commandInfo) {
+  RuleController([System.Management.Automation.CommandInfo]$commandInfo) {
     $this.CommandName = $commandInfo.Name;
     $this.CommandInfo = $commandInfo;
   }
 
-  [void] ViolationSummaryStmt([hashtable]$violationsByRule, [PSCustomObject]$verifyInfo) {
-    # We should compose a summary statement, that shows how many violations occurred
-    # across the different rules.
-    #
-    [object]$syntax = $verifyInfo.Syntax;
-    [System.Text.StringBuilder]$builder = $verifyInfo.Builder;
+  [void] ViolationSummaryStmt([hashtable]$violationsByRule, [PSCustomObject]$queryInfo) {
+    [object]$syntax = $queryInfo.Syntax;
+    [System.Text.StringBuilder]$builder = $queryInfo.Builder;
     [PSCustomObject]$options = $syntax.TableOptions;
     [string]$resetSnippet = $options.Snippets.Reset;
     [string]$lnSnippet = $options.Snippets.Ln;
@@ -323,7 +320,7 @@ class Rules {
         [PSCustomObject[]]$pods = $vo.Violations;
         $total += $pods.Count;
 
-        [string]$shortName = [Rules]::Rules[$_.Key].Short;
+        [string]$shortName = [RuleController]::Rules[$_.Key].Short;
         [string]$quotedShortName = $syntax.QuotedNameStmt($ruleSnippet, $shortName);
         $null = $buildR.Append($(
             "$($indentation)$($signals['BULLET-A'].Value) " +
@@ -359,24 +356,24 @@ class Rules {
     );
   }
 
-  [void] ReportAll([PSCustomObject]$verifyInfo) {
+  [void] ReportAll([PSCustomObject]$queryInfo) {
     [hashtable]$violationsByRule = @{};
-    [object]$syntax = $verifyInfo.Syntax;
-    [System.Text.StringBuilder]$builder = $verifyInfo.Builder;
+    [object]$syntax = $queryInfo.Syntax;
+    [System.Text.StringBuilder]$builder = $queryInfo.Builder;
     [PSCustomObject]$options = $syntax.TableOptions;
     [string]$lnSnippet = $options.Snippets.Ln;
     [string]$resetSnippet = $options.Snippets.Reset;
     [string]$headingSnippet = $options.Snippets.Heading;
     [string]$headingULSnippet = $options.Snippets.HeadingUL;
 
-    [Rules]::Rules.Keys | Sort-Object | ForEach-Object {
+    [RuleController]::Rules.Keys | Sort-Object | ForEach-Object {
       [string]$ruleNameKey = $_;
-      [ParameterSetRule]$rule = [Rules]::Rules[$ruleNameKey];
+      [ParameterSetRule]$rule = [RuleController]::Rules[$ruleNameKey];
 
-      [PSCustomObject]$vo = $rule.Query($verifyInfo);
+      [PSCustomObject]$vo = $rule.Query($queryInfo);
       [PSCustomObject[]]$pods = $vo.Violations;
       if ($pods -and ($pods.Count -gt 0)) {
-        [string]$description = $verifyInfo.Syntax.Fold(
+        [string]$description = $queryInfo.Syntax.Fold(
           $rule.Description, $headingULSnippet, 80, $options.Chrome.Indent * 2
         );
 
@@ -398,20 +395,20 @@ class Rules {
         # Show the violations for this rule
         #
         $violationsByRule[$ruleNameKey] = $vo;
-        $rule.ViolationStmt($pods, $verifyInfo);
+        $rule.ViolationStmt($pods, $queryInfo);
       }
     }
 
-    $this.ViolationSummaryStmt($violationsByRule, $verifyInfo);
+    $this.ViolationSummaryStmt($violationsByRule, $queryInfo);
   }
 
-  [PSCustomObject[]] VerifyAll ([PSCustomObject]$verifyInfo) {
+  [PSCustomObject[]] VerifyAll ([PSCustomObject]$queryInfo) {
     [PSCustomObject[]]$pods = @();
 
-    [Rules]::Rules.GetEnumerator() | ForEach-Object {
+    [RuleController]::Rules.GetEnumerator() | ForEach-Object {
       [ParameterSetRule]$rule = $_.Value;
 
-      [PSCustomObject]$queryResult = $rule.Query($verifyInfo);
+      [PSCustomObject]$queryResult = $rule.Query($queryInfo);
 
       if ($queryResult) {
         $pods += $queryResult;
@@ -422,29 +419,29 @@ class Rules {
   }
 
   [PSCustomObject] Test([object]$syntax) {
-    [PSCustomObject]$verifyInfo = [PSCustomObject]@{
+    [PSCustomObject]$queryInfo = [PSCustomObject]@{
       CommandInfo = $this.CommandInfo;
       Syntax      = $syntax;
     }
 
-    [PSCustomObject[]]$pods = $this.VerifyAll($verifyInfo);
+    [PSCustomObject[]]$pods = $this.VerifyAll($queryInfo);
     [PSCustomObject]$verifyResult = [PSCustomObject]@{
       Result = (-not($pods) -or ($pods.Count -eq 0))
       Violations = $pods;
     }
     return $verifyResult;
   }
-} # Rules
+} # RuleController
 
-class Informer {
-  [Rules]$Rules;
+class DryRunner {
+  [RuleController]$Controller;
   [System.Management.Automation.CommandInfo]$CommandInfo;
-  [PSCustomObject]$InformInfo;
+  [PSCustomObject]$RunnerInfo;
 
-  Informer([Rules]$rules, [PSCustomObject]$informInfo) {
-    $this.Rules = $rules;
-    $this.CommandInfo = $rules.CommandInfo;
-    $this.InformInfo = $informInfo;
+  DryRunner([RuleController]$controller, [PSCustomObject]$runnerInfo) {
+    $this.Controller = $controller;
+    $this.CommandInfo = $controller.CommandInfo;
+    $this.RunnerInfo = $runnerInfo;
   }
 
   [System.Management.Automation.CommandParameterSetInfo[]] Resolve([string[]]$params) {
@@ -457,4 +454,4 @@ class Informer {
     };
     return $candidateSets;
   } # Resolve
-} # Informer
+} # DryRunner

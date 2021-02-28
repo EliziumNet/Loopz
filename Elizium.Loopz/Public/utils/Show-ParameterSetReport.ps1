@@ -30,16 +30,16 @@ function Show-ParameterSetReport {
       Write-Debug "    --- Show-ParameterSetReport - Command: [$($_.Name)] ---";
 
       [syntax]$syntax = New-Syntax -CommandName $_.Name -Signals $signals -Krayon $krayon;
-      [rules]$rules = [rules]::New($_);
+      [RuleController]$controller = [RuleController]::New($_);
 
       $null = $builder.Append($syntax.TitleStmt('Parameter Set Violations Report', $_.Name));
 
-      [PSCustomObject]$verifyInfo = [PSCustomObject]@{
+      [PSCustomObject]$queryInfo = [PSCustomObject]@{
         CommandInfo = $_;
         Syntax      = $syntax;
         Builder     = $builder;
       }
-      $rules.ReportAll($verifyInfo);
+      $controller.ReportAll($queryInfo);
 
       if (-not($PSBoundParameters.ContainsKey('Builder'))) {
         Write-Debug "'$($Builder.ToString())'";

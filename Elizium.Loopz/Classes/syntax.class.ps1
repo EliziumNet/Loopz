@@ -16,7 +16,6 @@ class Syntax {
   [PSCustomObject]$Formats;
   [PSCustomObject]$TableOptions;
   [PSCustomObject]$Labels;
-  [PSCustomObject]$Fragments;
   [regex]$NamesRegex;
 
   [string[]]$CommonParamSet = @('Verbose', 'Debug', 'ErrorAction', 'WarningAction',
@@ -174,8 +173,7 @@ class Syntax {
         # [[-Param] <type>] ... optional, positional parameter
         #
         $this.Snippets.Punct + '[[' + $this.Snippets.Optional + '-${name}' + $this.Snippets.Punct + ']' +
-        $this.Snippets.Space + '<' + $this.Snippets.Type + '${type}' + $this.Snippets.Punct + '>]' +
-        $this.Snippets.Space
+        $this.Snippets.Space + '<' + $this.Snippets.Type + '${type}' + $this.Snippets.Punct + '>]'
       );
 
       OptionalNamed_B  = [string]$(
@@ -236,9 +234,6 @@ class Syntax {
       ParameterSetInfo = $null;
     }
 
-    # TODO, if we don't pass Select into Get-TableDisplayOptions, we get an error, FIX!
-    # (RuntimeException: You cannot call a method on a null-valued expression.)
-    #
     [string[]]$columns = @('Name', 'Type', 'Mandatory', 'Pos', 'PipeValue', 'PipeName', 'Alias', 'Unique');
     $this.TableOptions = Get-TableDisplayOptions -Select $columns  `
       -Signals $signals -Krayon $this.Krayon -Custom $custom;
@@ -263,9 +258,6 @@ class Syntax {
       OtherParamSets            = $(
         "$($bulletedPoint) Other Parameter Sets: "
       );
-    }
-
-    $this.Fragments = [PSCustomObject]@{
     }
 
     $this.NamesRegex = New-RegularExpression -Expression '(?<name>\w+)';
@@ -545,13 +537,13 @@ class Syntax {
     [string[]]$split = $text -split ' ';
     [int]$tokenNoCurrentLine = 0;
     [string]$line = [string]::new(' ', $margin);
+    [int]$space = 1;
     foreach ($token in $split) {
-      if ((($line.Length + $token.Length + 1) -lt ($width - $margin)) -or ($tokenNoCurrentLine -eq 0)) {
+      if ((($line.Length + $token.Length + $space) -lt ($width - $margin)) -or ($tokenNoCurrentLine -eq 0)) {
         # Current token will fit on the current line so let's add it. The only exception is
         # if the current token is very large and breaches the width/margin limit by itself
         # (ie tokenNo is 0), then we have no choice other than to breach the limit anyway.
         # I suppose an alternative would be just to fold this token by inserting a dash.
-        # NB: The +1 is to account for adding in a space.
         #
         $line += "$token ";
         $tokenNoCurrentLine++;

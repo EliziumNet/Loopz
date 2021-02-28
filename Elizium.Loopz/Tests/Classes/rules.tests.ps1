@@ -56,14 +56,14 @@ Describe 'Rules' -Tag 'PSTools' {
           [syntax]$syntax = New-Syntax -CommandName $commandName -Signals $_signals -Krayon $_krayon;
           [string]$ruleName = 'UNIQUE-PARAM-SET';
 
-          [PSCustomObject]$verifyInfo = [PSCustomObject]@{
+          [PSCustomObject]$queryInfo = [PSCustomObject]@{
             CommandInfo = $commandInfo;
             Syntax      = $syntax;
             Builder     = $_builder;
           }
 
           [MustContainUniqueSetOfParams]$rule = [MustContainUniqueSetOfParams]::new($ruleName);
-          [PSCustomObject]$vo = $rule.Query($verifyInfo);
+          [PSCustomObject]$vo = $rule.Query($queryInfo);
 
           $vo | Should -Not -BeNullOrEmpty;
           $vo.Violations.Count | Should -Be 1;
@@ -73,7 +73,7 @@ Describe 'Rules' -Tag 'PSTools' {
 
           # Now check the statement execution doesn't fail in some way
           #
-          $rule.ViolationStmt($vo.Violations, $verifyInfo);
+          $rule.ViolationStmt($vo.Violations, $queryInfo);
 
           if ($DebugPreference -ne [ActionPreference]::SilentlyContinue) {
             $_krayon.ScribbleLn($_builder.ToString());
@@ -120,14 +120,14 @@ Describe 'Rules' -Tag 'PSTools' {
           [syntax]$syntax = New-Syntax -CommandName $commandName -Signals $_signals -Krayon $_krayon;
           [string]$ruleName = 'UNIQUE-POSITIONS';
 
-          [PSCustomObject]$verifyInfo = [PSCustomObject]@{
+          [PSCustomObject]$queryInfo = [PSCustomObject]@{
             CommandInfo = $commandInfo;
             Syntax      = $syntax;
             Builder     = $_builder;
           }
 
           [MustContainUniquePositions]$rule = [MustContainUniquePositions]::new($ruleName);
-          [PSCustomObject]$vo = $rule.Query($verifyInfo);
+          [PSCustomObject]$vo = $rule.Query($queryInfo);
 
           $vo | Should -Not -BeNullOrEmpty;
           $vo.Violations.Count | Should -Be 2;
@@ -148,7 +148,7 @@ Describe 'Rules' -Tag 'PSTools' {
 
           # Now check the statement execution doesn't fail in some way
           #
-          $rule.ViolationStmt($vo.Violations, $verifyInfo);
+          $rule.ViolationStmt($vo.Violations, $queryInfo);
 
           if ($DebugPreference -ne [ActionPreference]::SilentlyContinue) {
             $_krayon.ScribbleLn($_builder.ToString());
@@ -193,14 +193,14 @@ Describe 'Rules' -Tag 'PSTools' {
           [Syntax]$syntax = New-Syntax -CommandName $commandName -Signals $_signals -Krayon $_krayon;
           [string]$ruleName = 'SINGLE-PIPELINE-PARAM';
 
-          [PSCustomObject]$verifyInfo = [PSCustomObject]@{
+          [PSCustomObject]$queryInfo = [PSCustomObject]@{
             CommandInfo = $commandInfo;
             Syntax      = $syntax;
             Builder     = $_builder;
           }
 
           [MustNotHaveMultiplePipelineParams]$rule = [MustNotHaveMultiplePipelineParams]::new($ruleName);
-          [PSCustomObject]$vo = $rule.Query($verifyInfo);
+          [PSCustomObject]$vo = $rule.Query($queryInfo);
 
           $vo | Should -Not -BeNullOrEmpty;
           $vo.Violations.Count | Should -Be 2;
@@ -221,7 +221,7 @@ Describe 'Rules' -Tag 'PSTools' {
 
           # Now check the statement execution doesn't fail in some way
           #
-          $rule.ViolationStmt($vo.Violations, $verifyInfo);
+          $rule.ViolationStmt($vo.Violations, $queryInfo);
 
           if ($DebugPreference -ne [ActionPreference]::SilentlyContinue) {
             $_krayon.ScribbleLn($_builder.ToString());
@@ -263,9 +263,9 @@ Describe 'Rules' -Tag 'PSTools' {
         InModuleScope Elizium.Loopz {
           [string]$commandName = 'test-runTest';
           [CommandInfo]$commandInfo = Get-Command $commandName;
-          [Rules]$rules = [Rules]::new($commandInfo);
+          [RuleController]$controller = [RuleController]::new($commandInfo);
           [syntax]$syntax = New-Syntax -CommandName $commandName -Signals $_signals -Krayon $_krayon;
-          $rules.Test($syntax).Result | Should -Be $false;
+          $controller.Test($syntax).Result | Should -Be $false;
         }
       }
     } # given: functions with violations
@@ -275,9 +275,9 @@ Describe 'Rules' -Tag 'PSTools' {
         InModuleScope Elizium.Loopz {
           [string]$commandName = 'Invoke-Command';
           [CommandInfo]$commandInfo = Get-Command $commandName;
-          [Rules]$rules = [Rules]::new($commandInfo);
+          [RuleController]$controller = [RuleController]::new($commandInfo);
           [syntax]$syntax = New-Syntax -CommandName $commandName -Signals $_signals -Krayon $_krayon;
-          $rules.Test($syntax).Result | Should -Be $true;
+          $controller.Test($syntax).Result | Should -Be $true;
         }
       }
     } # given: functions without violations
@@ -297,9 +297,9 @@ Describe 'Rules' -Tag 'PSTools' {
               [CommandInfo]$commandInfo = Get-Command $command -ErrorAction SilentlyContinue;
 
               if ($commandInfo) {
-                [Rules]$rules = [Rules]::new($commandInfo);
+                [RuleController]$controller = [RuleController]::new($commandInfo);
                 [syntax]$syntax = New-Syntax -CommandName $command -Signals $_signals -Krayon $_krayon;
-                [PSCustomObject]$testResult = $rules.Test($syntax);
+                [PSCustomObject]$testResult = $controller.Test($syntax);
 
                 $testResult.Result | Should -BeTrue;
               }

@@ -155,7 +155,7 @@ Describe 'Show-ParameterSetReport' -Tag 'PSTools' {
   }
 
   Context 'given: a command containing a duplicated Param Sets' {
-    It 'should: report ACCIDENTAL-ALL-SETS violation' -Tag '!Current' {
+    It 'should: report ACCIDENTAL-ALL-SETS violation' {
       InModuleScope Elizium.Loopz {
         'test-MultipleInAllParameterSetsByAccident' | Show-ParameterSetReport;
       }
