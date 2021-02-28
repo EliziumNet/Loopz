@@ -141,7 +141,8 @@ $global:Loopz = [PSCustomObject]@{
     'WARNING-A'    = (New-Pair(@('Warning', '⚠️')));
     'WARNING-B'    = (New-Pair(@('Warning', '👻')));
     'SWITCH-ON'    = (New-Pair(@('On', '✔️')));
-    'SWITCH-OFF'   = (New-Pair(@('Off', '❌')));
+    'SWITCH-OFF'   = (New-Pair(@('Off', '✖️')));
+    'INVALID'      = (New-Pair(@('Invalid', '❌')));
     'OK-A'         = (New-Pair(@('🆗', '🚀')));
     'OK-B'         = (New-Pair(@('🆗', '🌟')));
     'BAD-A'        = (New-Pair(@('Bad', '💥')));
@@ -156,6 +157,10 @@ $global:Loopz = [PSCustomObject]@{
     'LOCKED'       = (New-Pair(@('Locked', '🔐')));
     'NOVICE'       = (New-Pair(@('Novice', '🔰')));
     'TRANSFORM'    = (New-Pair(@('Transform', '🤖')));
+    'BULLET-A'     = (New-Pair(@('Bullet Point', '🔶')));
+    'BULLET-B'     = (New-Pair(@('Bullet Point', '🟢')));
+    'BULLET-C'     = (New-Pair(@('Bullet Point', '🟨')));
+    'BULLET-D'     = (New-Pair(@('Bullet Point', '💠')));
 
     # Outcomes
     #

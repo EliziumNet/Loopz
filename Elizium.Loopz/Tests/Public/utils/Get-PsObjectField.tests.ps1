@@ -1,5 +1,5 @@
 
-Describe 'Get-PsObjectField' -Tag 'Current' {
+Describe 'Get-PsObjectField' {
   BeforeAll {
     Get-Module Elizium.Loopz | Remove-Module;
     Import-Module .\Output\Elizium.Loopz\Elizium.Loopz.psm1 `

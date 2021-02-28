@@ -238,6 +238,70 @@ Describe 'Rename-Many' {
         } # and: Source matches Pattern
       } # and Relation is After
     } # and: TargetType is Anchor
+
+    Context 'and: Hybrid Anchor' -Skip {
+      # Hybrid just means Anchor specified with either Start or End
+      #
+      Context 'and: Anchor matches Pattern' {
+        Context 'and: Start specified' {
+          It 'should: ignore Start and move to Anchor' {
+            $script:expected = @{
+              'loopz.data.t1.txt' = 'data.loopz.t1.txt';
+              'loopz.data.t2.txt' = 'data.loopz.t2.txt';
+              'loopz.data.t3.txt' = 'data.loopz.t3.txt';
+            }
+
+            Get-ChildItem -File -Path $directoryPath | Rename-Many -File `
+              -Pattern 'data.' -Anchor 'loopz' -Start -Relation 'before' -WhatIf;
+          }
+        }
+
+        Context 'and: End specified' {
+          It 'should: ignore End and move to Anchor' {
+            $script:expected = @{
+              'loopz.data.t1.txt' = 'data.loopz.t1.txt';
+              'loopz.data.t2.txt' = 'data.loopz.t2.txt';
+              'loopz.data.t3.txt' = 'data.loopz.t3.txt';
+            }
+
+            Get-ChildItem -File -Path $directoryPath | Rename-Many -File `
+              -Pattern 'data.' -Anchor 'loopz' -End -Relation 'before' -WhatIf;
+          }
+        }
+      } # and: Anchor matches Pattern
+
+      Context 'and: Anchor does NOT match Pattern' {
+        Context 'and: Start specified' {
+          It 'should: move to start' {
+            $script:expected = @{
+              'loopz.application.t1.log' = 't1.loopz.application.log';
+              'loopz.application.t2.log' = 't2.loopz.application.log';
+              'loopz.data.t1.txt'        = 't1.loopz.data.txt';
+              'loopz.data.t2.txt'        = 't2.loopz.data.txt';
+              'loopz.data.t3.txt'        = 't3.loopz.data.txt';
+            }
+
+            Get-ChildItem -File -Path $directoryPath | Rename-Many -File `
+              -Pattern '\.(?<tail>t\d)' -Anchor 'blooper' -Start -Paste '${tail}' -WhatIf;
+          }
+        }
+
+        Context 'and: End specified' {
+          It 'should: move to end' {
+            $script:expected = @{
+              'loopz.application.t1.log' = 'application.t1.loopz.log';
+              'loopz.application.t2.log' = 'application.t2.loopz.log';
+              'loopz.data.t1.txt'        = 'data.t1.loopz.txt';
+              'loopz.data.t2.txt'        = 'data.t2.loopz.txt';
+              'loopz.data.t3.txt'        = 'data.t3.loopz.txt';
+            }
+
+            Get-ChildItem -File -Path $directoryPath | Rename-Many -File `
+              -Pattern '(?<header>loopz)\.' -Anchor 'blooper' -End -Paste '.${header}' -WhatIf;
+          }
+        }
+      } #
+    } # and: Hybrid Anchor
   } # given: MoveToAnchor
 
   Context 'given: MoveToStart' {
@@ -838,6 +902,24 @@ Describe 'Rename-Many' {
               -Condition $successCondition -Relation 'before' -WhatIf:$whatIf; } `
           | Should -Not -Throw;
         }
+
+        Context 'and: Hybrid Anchor' -Skip {
+          It 'should: not throw ParameterBindingException' {
+            {
+              Get-ChildItem -File -Path $sourcePath -Filter $filter | Rename-Many -File `
+                -Whole p -Pattern 'data.' -Anchor 't\d{1}\.' -Start -Copy 'repl' -Except 'fake' `
+                -Condition $successCondition -Relation 'before' -WhatIf:$whatIf; } `
+          | Should -Not -Throw;
+          }
+
+          It 'should: not throw ParameterBindingException' {
+            {
+              Get-ChildItem -File -Path $sourcePath -Filter $filter | Rename-Many -File `
+                -Whole p -Pattern 'data.' -Anchor 't\d{1}\.' -End -Copy 'repl' -Except 'fake' `
+                -Condition $successCondition -Relation 'before' -WhatIf:$whatIf; } `
+          | Should -Not -Throw;
+          }
+        }
       } # MoveToAnchor
 
       Context 'MoveToStart' {
@@ -889,7 +971,7 @@ Describe 'Rename-Many' {
       }
     } # is: valid
 
-    Context 'is not: valid (MoveToAnchor)' {
+    Context 'is not: valid (MoveToAnchor)' { #Is this a valid test, First doesn't exist
       Context 'and: "First" specified' {
         # Since the default behaviour of move, is to move the token after the
         # first match of the pattern, it does not need to be specified for the move token

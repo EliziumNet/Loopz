@@ -212,7 +212,8 @@ Describe 'Move-Match' {
               [RegEx]$anchor = 'blooper';
               [string]$relation = 'before'
 
-              [PSCustomObject]$moveResult = Move-Match -Value $source -Pattern $escapedPattern -Relation $relation -Anchor $anchor;
+              [PSCustomObject]$moveResult = Move-Match -Value $source -Pattern $escapedPattern `
+                -Relation $relation -Anchor $anchor;
               $moveResult.Payload | Should -BeExactly $source;
 
               $moveResult.FailedReason.Contains('Anchor') | Should -BeTrue;
@@ -328,6 +329,78 @@ Describe 'Move-Match' {
         } # and: End specified
       } # and: vanilla move
 
+      Context 'and: Hybrid Anchor' {
+        Context 'and: Anchor does match Pattern' {
+          Context 'and: Hybrid Anchor' {
+            Context 'and: Start specified' {
+              It 'should: ignore Start and move to Anchor' {
+                [string]$source = 'the !@£$%^ frayed ends of sanity';
+                [RegEx]$pattern = new-expr('(?<gibberish>[^\w\s]+)\s');
+                [RegEx]$anchor = new-expr('sanity');
+                [string]$relation = 'before';
+                [string]$paste = '${gibberish} ${_a}';
+                [string]$expectedPayload = 'the frayed ends of !@£$%^ sanity';
+
+                [PSCustomObject]$moveResult = Move-Match -Value $source -Pattern $pattern `
+                  -Relation $relation -Anchor $anchor -Start -Paste $paste;
+
+                $moveResult.Payload | Should -BeExactly $expectedPayload;
+              }
+            }
+
+            Context 'and: End specified' {
+              It 'should: ignore End and move to Anchor' {
+                [string]$source = 'the !@£$%^ frayed ends of sanity';
+                [RegEx]$pattern = new-expr('(?<gibberish>[^\w\s]+)\s');
+                [RegEx]$anchor = new-expr('sanity');
+                [string]$relation = 'before';
+                [string]$paste = '${gibberish} ${_a}';
+                [string]$expectedPayload = 'the frayed ends of !@£$%^ sanity';
+
+                [PSCustomObject]$moveResult = Move-Match -Value $source -Pattern $pattern `
+                  -Relation $relation -Anchor $anchor -End -Paste $paste;
+
+                $moveResult.Payload | Should -BeExactly $expectedPayload;
+              }
+            }
+          }
+        }
+
+        Context 'and: Anchor does NOT match Pattern' {
+          Context 'and: Start specified' {
+            It 'should: move to start' {
+              [string]$source = 'the !@£$%^ frayed ends of sanity';
+              [RegEx]$anchor = new-expr('blooper');
+              [string]$relation = 'before';
+              [RegEx]$pattern = new-expr('(?<gibberish>[^\w\s]+)\s');
+              [string]$paste = '${gibberish} ';
+              [string]$expectedPayload = '!@£$%^ the frayed ends of sanity';
+
+              [PSCustomObject]$moveResult = Move-Match -Value $source -Pattern $pattern `
+                -Relation $relation -Anchor $anchor -Start -Paste $paste;
+
+              $moveResult.Payload | Should -BeExactly $expectedPayload;
+            }
+          }
+
+          Context 'and: End specified' {
+            It 'should: move to end' {
+              [string]$source = 'the !@£$%^ frayed ends of sanity';
+              [RegEx]$anchor = new-expr('blooper');
+              [string]$relation = 'before';
+              [RegEx]$pattern = new-expr('(?<gibberish>[^\w\s]+)\s');
+              [string]$paste = '${gibberish} ';
+              [string]$expectedPayload = '!@£$%^ the frayed ends of sanity';
+
+              [PSCustomObject]$moveResult = Move-Match -Value $source -Pattern $pattern `
+                -Relation $relation -Anchor $anchor -Start -Paste $paste;
+
+              $moveResult.Payload | Should -BeExactly $expectedPayload;
+            }
+          }
+        }
+      } # and: Hybrid Anchor
+
       Context 'and: vanilla move formatted' { # Pattern, Paste
         Context 'and: Anchor matches' {
           It 'should: move the first match before the first anchor' {
@@ -367,7 +440,7 @@ Describe 'Move-Match' {
             [RegEx]$copy = new-expr('\d{2}-\d{2}-\d{4}');
 
             [PSCustomObject]$moveResult = Move-Match -Value $source -Pattern $pattern -Relation $relation -Anchor $anchor `
-              -Copy $copy -CopyOccurrence 'L' -Paste $paste;
+              -Copy $copy -CopyOccurrence 'L';
             $moveResult.Payload | Should -BeExactly 'Judgement 28-02-2727Day [], Judgement Day [28-02-2727], Day: <Friday>';
           }
         } # and: Last Copy
