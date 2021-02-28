@@ -301,7 +301,8 @@ Describe 'Rules' -Tag 'PSTools' {
                 [syntax]$syntax = New-Syntax -CommandName $command -Signals $_signals -Krayon $_krayon;
                 [PSCustomObject]$testResult = $controller.Test($syntax);
 
-                $testResult.Result | Should -BeTrue;
+                [string]$because = $("'{0}' contains violations" -f $command);
+                $testResult.Result | Should -BeTrue -Because $because;
               }
               else {
                 Write-Error "+ --- Couldn't get command info for '$($command)'";

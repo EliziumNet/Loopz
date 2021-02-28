@@ -64,13 +64,13 @@ class MustContainUniqueSetOfParams : ParameterSetRule {
     [PSCustomObject]$options = $syntax.TableOptions;
     [string]$lnSnippet = $options.Snippets.Ln;
     [string]$resetSnippet = $options.Snippets.Reset;
-    [string]$punctuationSnippet = $options.Snippets.Punct;
     [string]$duplicateSeparator = '.............';
+    [string]$underlineSnippet = $options.Snippets.HeaderUL;
     [string]$doubleIndentation = $syntax.Indent(2);
 
     if ($pods -and ($pods.Count -gt 0)) {
       $null = $builder.Append(
-        "$($doubleIndentation)$($punctuationSnippet)$($duplicateSeparator)$($lnSnippet)"
+        "$($doubleIndentation)$($underlineSnippet)$($duplicateSeparator)$($lnSnippet)"
       );
 
       foreach ($seed in $pods) {
@@ -90,7 +90,7 @@ class MustContainUniqueSetOfParams : ParameterSetRule {
             "$($firstParamSetStmt)$($lnSnippet)$($firstSyntax)$($lnSnippet)" +
             "$($lnSnippet)" +
             "$($secondParamSetStmt)$($lnSnippet)$($secondSyntax)$($lnSnippet)" +
-            "$($doubleIndentation)$($punctuationSnippet)$($duplicateSeparator)$($lnSnippet)"
+            "$($doubleIndentation)$($underlineSnippet)$($duplicateSeparator)$($lnSnippet)"
           ));
 
         [string]$subTitle = $syntax.QuotedNameStmt(
@@ -303,7 +303,7 @@ class RuleController {
     [PSCustomObject]$options = $syntax.TableOptions;
     [string]$resetSnippet = $options.Snippets.Reset;
     [string]$lnSnippet = $options.Snippets.Ln;
-    [string]$ruleSnippet = $options.Snippets.HeadingUL;
+    [string]$ruleSnippet = $options.Snippets.HeaderUL;
     [string]$indentation = $syntax.Indent(1);
     [string]$doubleIndentation = $syntax.Indent(2);
     [string]$tripleIndentation = $syntax.Indent(3);
@@ -363,8 +363,8 @@ class RuleController {
     [PSCustomObject]$options = $syntax.TableOptions;
     [string]$lnSnippet = $options.Snippets.Ln;
     [string]$resetSnippet = $options.Snippets.Reset;
-    [string]$headingSnippet = $options.Snippets.Heading;
-    [string]$headingULSnippet = $options.Snippets.HeadingUL;
+    [string]$headerSnippet = $options.Snippets.Heading;
+    [string]$headerULSnippet = $options.Snippets.HeaderUL;
 
     [RuleController]::Rules.Keys | Sort-Object | ForEach-Object {
       [string]$ruleNameKey = $_;
@@ -374,7 +374,7 @@ class RuleController {
       [PSCustomObject[]]$pods = $vo.Violations;
       if ($pods -and ($pods.Count -gt 0)) {
         [string]$description = $queryInfo.Syntax.Fold(
-          $rule.Description, $headingULSnippet, 80, $options.Chrome.Indent * 2
+          $rule.Description, $headerULSnippet, 80, $options.Chrome.Indent * 2
         );
 
         # Show the rule violation title
@@ -383,9 +383,9 @@ class RuleController {
         [string]$underline = [string]::new($options.Chrome.Underline, $($rule.Short.Length));
         [string]$ruleTitle = $(
           "$($lnSnippet)" +
-          "$($indentation)$($headingSnippet)$($rule.Short)$($resetSnippet)" +
+          "$($indentation)$($headerSnippet)$($rule.Short)$($resetSnippet)" +
           "$($lnSnippet)" +
-          "$($indentation)$($resetSnippet)$($headingULSnippet)$($underline)$($resetSnippet)" +
+          "$($indentation)$($resetSnippet)$($headerULSnippet)$($underline)$($resetSnippet)" +
           "$($lnSnippet)$($lnSnippet)" +
           "$($resetSnippet)$($description)$($resetSnippet)" +
           "$($lnSnippet)$($lnSnippet)"

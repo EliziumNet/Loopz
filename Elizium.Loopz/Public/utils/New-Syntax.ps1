@@ -8,7 +8,13 @@ function New-Syntax {
     [hashtable]$Signals = $(Get-Signals),
 
     [Parameter()]
-    [Krayon]$Krayon = $(Get-Krayon)
+    [Krayon]$Krayon = $(Get-Krayon),
+
+    [Parameter()]
+    [Hashtable]$Scheme
   )
-  return [syntax]::new($CommandName, $Signals, $Krayon);
+  if (-not($PSBoundParameters.ContainsKey('Scheme'))) {
+    $Scheme = Get-SyntaxScheme -Theme $($Krayon.Theme);
+  }
+  return [syntax]::new($CommandName, $Signals, $Krayon, $Scheme);
 }

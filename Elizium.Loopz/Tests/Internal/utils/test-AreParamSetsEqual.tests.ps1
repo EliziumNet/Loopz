@@ -13,6 +13,8 @@ Describe 'test-AreParamSetsEqual' -Tag 'PSTools' {
       [string]$script:_commandName = 'Rename-Many';
       [Krayon]$script:_krayon = Get-Krayon;
       [hashtable]$script:_signals = Get-Signals;
+      [hashtable]$theme = $_krayon.Theme;
+      [Hashtable]$script:_scheme = Get-SyntaxScheme -Theme $theme;
     }
   }
 
@@ -45,7 +47,7 @@ Describe 'test-AreParamSetsEqual' -Tag 'PSTools' {
         [CommandInfo]$commandInfo = Get-Command $commandName;
         [CommandParameterSetInfo]$alphaPsi = $commandInfo.ParameterSets | Where-Object Name -eq 'Alpha';
         [CommandParameterSetInfo]$betaPsi = $commandInfo.ParameterSets | Where-Object Name -eq 'Beta';
-        [Syntax]$syntax = [Syntax]::new($_commandName, $_signals, $_krayon);
+        [Syntax]$syntax = [Syntax]::new($_commandName, $_signals, $_krayon, $_scheme);
 
         test-AreParamSetsEqual -FirstPsInfo $alphaPsi -SecondPsInfo $betaPsi `
           -Syntax $syntax | Should -BeFalse;
@@ -78,7 +80,7 @@ Describe 'test-AreParamSetsEqual' -Tag 'PSTools' {
         [CommandInfo]$commandInfo = Get-Command $commandName;
         [CommandParameterSetInfo]$alphaPsi = $commandInfo.ParameterSets | Where-Object Name -eq 'Alpha';
         [CommandParameterSetInfo]$betaPsi = $commandInfo.ParameterSets | Where-Object Name -eq 'Beta';
-        [Syntax]$syntax = [Syntax]::new($commandName, $_signals, $_krayon);
+        [Syntax]$syntax = [Syntax]::new($commandName, $_signals, $_krayon, $_scheme);
 
         test-AreParamSetsEqual -FirstPsInfo $alphaPsi -SecondPsInfo $betaPsi `
           -Syntax $syntax | Should -BeTrue;

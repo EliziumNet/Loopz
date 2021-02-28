@@ -101,11 +101,12 @@ class Syntax {
     return $result;
   } # RenderCell
 
-  Syntax([string]$commandName, [hashtable]$signals, [object]$krayon) {
+  Syntax([string]$commandName, [hashtable]$signals, [object]$krayon, [hashtable]$scheme) {
     $this.CommandName = $commandName;
     $this.Theme = $krayon.Theme;
     $this.Signals = $signals;
     $this.Krayon = $krayon;
+    $this.Scheme = $scheme;
 
     $this.Regex = [PSCustomObject]@{
       Param = [PSCustomObject]@{
@@ -126,19 +127,6 @@ class Syntax {
       }
     }
 
-    $this.Scheme = @{
-      'COLS.PUNCTUATION'    = $this.Theme['META-COLOURS'];
-      'COLS.HEADER'         = 'black', 'bgYellow';
-      'COLS.UNDERLINE'      = $this.Theme['META-COLOURS'];
-      'COLS.CELL'           = 'gray';
-      'COLS.TYPE'           = 'darkCyan';
-      'COLS.MAN-PARAM'      = $this.Theme['AFFIRM-COLOURS'];
-      'COLS.OPT-PARAM'      = 'blue' # $this.Theme['VALUE-COLOURS'];
-      'COLS.CMD-NAME'       = 'darkGreen';
-      'COLS.PARAM-SET-NAME' = 'green';
-      'COLS.SWITCH'         = 'cyan'; # magenta
-    }
-
     $this.Snippets = [PSCustomObject]@{
       Punct        = $($this.Krayon.snippets($this.Scheme['COLS.PUNCTUATION']));
       Type         = $($this.Krayon.snippets($this.Scheme['COLS.TYPE']));
@@ -148,16 +136,18 @@ class Syntax {
       Default      = $($this.Krayon.snippets($this.Scheme['COLS.CELL']));
       ParamSetName = $($this.Krayon.snippets($this.Scheme['COLS.PARAM-SET-NAME']));
       Command      = $($this.Krayon.snippets($this.Scheme['COLS.CMD-NAME']));
+      HiLight      = $($this.Krayon.snippets($this.Scheme['COLS.HI-LIGHT']));
+
+      HeaderUL     = $($this.Krayon.snippets($this.Scheme['COLS.HEADER-UL']));
+      Special      = $($this.Krayon.snippets($this.Scheme['COLS.SPECIAL']));
+      Error        = $($this.Krayon.snippets($this.Scheme['COLS.ERROR']));
+      Ok           = $($this.Krayon.snippets($this.Scheme['COLS.OK']));
+
       Reset        = $($this.Krayon.snippets('Reset'));
       Space        = $($this.Krayon.snippets('Reset')) + ' ';
       Comma        = $($this.Krayon.snippets('Reset')) + ', ';
       Ln           = $($this.Krayon.snippets('Ln'));
-      HiLight      = $($this.Krayon.snippets('white'));
       Heading      = $($this.Krayon.snippets(@('black', 'bgDarkYellow')));
-      HeadingUL    = $($this.Krayon.snippets('darkYellow'));
-      Special      = $($this.Krayon.snippets('darkYellow'));
-      Error        = $($this.Krayon.snippets(@('black', 'bgRed')));
-      Ok           = $($this.Krayon.snippets(@('black', 'bgGreen')));
     }
 
     $this.Formats = @{
