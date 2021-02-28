@@ -57,7 +57,7 @@ Describe 'get-ParameterSetTableData' -Tag 'PSTools' {
           get-ParameterSetTableData -CommandInfo $commandInfo `
           -ParamSet $positionalPsi -Syntax $syntax -Where $paramIsPositional;
 
-        $tableContent.Count | Should -Be 4;
+        $tableContent.PSBase.Count | Should -Be 4;
       }
     }
   }

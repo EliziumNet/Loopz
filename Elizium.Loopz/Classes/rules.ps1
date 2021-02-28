@@ -311,7 +311,7 @@ class Rules {
     [string]$doubleIndentation = $syntax.Indent(2);
     [string]$tripleIndentation = $syntax.Indent(3);
 
-    [string]$summaryStmt = if ($violationsByRule.Count -eq 0) {
+    [string]$summaryStmt = if ($violationsByRule.PSBase.Count -eq 0) {
       "$($options.Snippets.Ok) No violations found.$($lnSnippet)";
     }
     else {
@@ -411,20 +411,28 @@ class Rules {
     [Rules]::Rules.GetEnumerator() | ForEach-Object {
       [ParameterSetRule]$rule = $_.Value;
 
-      $pods += $rule.Violations($verifyInfo);
+      [PSCustomObject]$queryResult = $rule.Query($verifyInfo);
+
+      if ($queryResult) {
+        $pods += $queryResult;
+      }
     }
 
     return $pods;
   }
 
-  [boolean] Test([object]$syntax) {
+  [PSCustomObject] Test([object]$syntax) {
     [PSCustomObject]$verifyInfo = [PSCustomObject]@{
       CommandInfo = $this.CommandInfo;
       Syntax      = $syntax;
     }
 
     [PSCustomObject[]]$pods = $this.VerifyAll($verifyInfo);
-    return (-not($pods) -or ($pods.Count -eq 0));
+    [PSCustomObject]$verifyResult = [PSCustomObject]@{
+      Result = (-not($pods) -or ($pods.Count -eq 0))
+      Violations = $pods;
+    }
+    return $verifyResult;
   }
 } # Rules
 

@@ -28,7 +28,7 @@ function find-MultipleValueFromPipeline {
       get-ParameterSetTableData -CommandInfo $CommandInfo `
       -ParamSet $paramSet -Syntax $Syntax -Where $paramIsValueFromPipeline;
 
-    if ($tableContent -and ($tableContent.Count -gt 1)) {
+    if ($tableContent -and ($tableContent.PSBase.Count -gt 1)) {
       [PSCustomObject]$seed = [PSCustomObject]@{
         ParamSet = $paramSet;
         Params   = $tableContent.Keys;

@@ -31,15 +31,15 @@ function find-DuplicateParamPositions {
     # We might encounter a parameter set which does not contain positional parameters,
     # in which case, we should ignore.
     #
-    if ($tableContent -and ($tableContent.Count -gt 0)) {
+    if ($tableContent -and ($tableContent.PSBase.Count -gt 0)) {
       [hashtable]$partitioned = Get-PartitionedPcoHash -Hash $tableContent -Field 'Pos';
       # partitioned is indexed by the Pos value, not 'Pos'
       #
-      if ($partitioned.Count -gt -0) {
+      if ($partitioned.PSBase.Count -gt -0) {
         $partitioned.GetEnumerator() | ForEach-Object {
           [hashtable]$positional = $_.Value;
 
-          if ($positional -and ($positional.Count -gt 1)) {
+          if ($positional -and ($positional.PSBase.Count -gt 1)) {
             # found duplicate positions
             #
             [string[]]$params = $($positional.GetEnumerator() | ForEach-Object { $_.Key } | Sort-Object);

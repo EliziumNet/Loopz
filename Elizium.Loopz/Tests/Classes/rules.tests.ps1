@@ -230,4 +230,89 @@ Describe 'Rules' -Tag 'PSTools' {
       }
     }
   } # MustNotHaveMultiplePipelineParams
+
+  Describe 'Test' {
+    BeforeAll {
+      InModuleScope Elizium.Loopz {
+        function script:test-runTest {
+          param(
+            [Parameter()]
+            [object]$Chaff,
+
+            [Parameter(ParameterSetName = 'Alpha', Mandatory, Position = 1)]
+            [Parameter(ParameterSetName = 'Beta', Mandatory, Position = 11)]
+            [object]$DuplicatePosA,
+
+            [Parameter(ParameterSetName = 'Alpha', Position = 2)]
+            [Parameter(ParameterSetName = 'Beta', Position = 12)]
+            [Parameter(ParameterSetName = 'Delta', Position = 21)]
+            [object]$DuplicatePosB,
+
+            [Parameter(ParameterSetName = 'Alpha', Position = 3)]
+            [Parameter(ParameterSetName = 'Beta', Position = 13)]
+            [Parameter(ParameterSetName = 'Delta', Position = 22)]
+            [object]$DuplicatePosC
+          )
+        }
+      }
+    }
+    # InModuleScope doesn't work well with -ForEach(TestCases)
+    #
+    Context 'given: functions with violations' {
+      It 'should: report violations' {
+        InModuleScope Elizium.Loopz {
+          [string]$commandName = 'test-runTest';
+          [CommandInfo]$commandInfo = Get-Command $commandName;
+          [Rules]$rules = [Rules]::new($commandInfo);
+          [syntax]$syntax = New-Syntax -CommandName $commandName -Signals $_signals -Krayon $_krayon;
+          $rules.Test($syntax).Result | Should -Be $false;
+        }
+      }
+    } # given: functions with violations
+
+    Context 'given: functions without violations' {
+      It 'should: report no violations' {
+        InModuleScope Elizium.Loopz {
+          [string]$commandName = 'Invoke-Command';
+          [CommandInfo]$commandInfo = Get-Command $commandName;
+          [Rules]$rules = [Rules]::new($commandInfo);
+          [syntax]$syntax = New-Syntax -CommandName $commandName -Signals $_signals -Krayon $_krayon;
+          $rules.Test($syntax).Result | Should -Be $true;
+        }
+      }
+    } # given: functions without violations
+  } # Test
+
+  Describe 'module public functions' {
+    It 'should: report no parameter set violations' {
+      InModuleScope Elizium.Loopz {
+        [string]$directoryPath = './Public/';
+
+        if (Test-Path -Path $directoryPath) {
+          [array]$files = Get-ChildItem -Path $directoryPath -File -Recurse -Filter '*.ps1';
+          [string[]]$except = @(, 'globals')
+          foreach ($file in $files) {
+            [string]$command = [System.IO.Path]::GetFileNameWithoutExtension($file.Name);
+            if ($except -notContains $command) {
+              [CommandInfo]$commandInfo = Get-Command $command -ErrorAction SilentlyContinue;
+
+              if ($commandInfo) {
+                [Rules]$rules = [Rules]::new($commandInfo);
+                [syntax]$syntax = New-Syntax -CommandName $command -Signals $_signals -Krayon $_krayon;
+                [PSCustomObject]$testResult = $rules.Test($syntax);
+
+                $testResult.Result | Should -BeTrue;
+              }
+              else {
+                Write-Error "+ --- Couldn't get command info for '$($command)'";
+              } 
+            }
+          }
+        }
+        else {
+          Write-Host "FAILED: to find public functions to test"
+        }
+      }
+    }
+  }
 } # Rules

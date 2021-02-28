@@ -25,32 +25,32 @@ Describe 'Get-PartitionedPcoHash' {
   Context 'given: hash with fields containing common items' {
     It 'should: partition by unique field' {
       [hashtable]$partitioned = Get-PartitionedPcoHash -Hash $_collection -Field 'Name';
-      $partitioned.Count | Should -Be 11;
+      $partitioned.PSBase.Count | Should -Be 11;
     }
 
     It 'should: partition by non unique field' {
       [hashtable]$partitioned = Get-PartitionedPcoHash -Hash $_collection -Field 'Type';
-      $partitioned.Count | Should -Be 4;
+      $partitioned.PSBase.Count | Should -Be 4;
 
-      $partitioned['Block'].Count | Should -Be 2;
-      $partitioned['Smart'].Count | Should -Be 6;
-      $partitioned['Stable'].Count | Should -Be 2;
-      $partitioned['Cross'].Count | Should -Be 1;
+      $partitioned['Block'].PSBase.Count | Should -Be 2;
+      $partitioned['Smart'].PSBase.Count | Should -Be 6;
+      $partitioned['Stable'].PSBase.Count | Should -Be 2;
+      $partitioned['Cross'].PSBase.Count | Should -Be 1;
     }
 
     It 'should: partition by boolean field' {
       [hashtable]$partitioned = Get-PartitionedPcoHash -Hash $_collection -Field 'Light';
-      $partitioned.Count | Should -Be 2;
+      $partitioned.PSBase.Count | Should -Be 2;
 
-      $partitioned['true'].Count | Should -Be 2;
-      $partitioned['false'].Count | Should -Be 9;
+      $partitioned['true'].PSBase.Count | Should -Be 2;
+      $partitioned['false'].PSBase.Count | Should -Be 9;
     }
   }
 
   Context 'given: Field not defined' {
     It 'should: drop item(s)' {
       [hashtable]$partitioned = Get-PartitionedPcoHash -Hash $_collection -Field 'Currency';
-      $partitioned.Count | Should -Be 0;
+      $partitioned.PSBase.Count | Should -Be 0;
     }
   }
 

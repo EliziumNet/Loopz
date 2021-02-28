@@ -1,6 +1,6 @@
 using namespace System.Management.Automation;
 
-Describe 'test-IsParameterUnique' -Tag 'PSTools', 'Current' {
+Describe 'test-IsParameterUnique' -Tag 'PSTools' {
   BeforeAll {
     Get-Module Elizium.Loopz | Remove-Module;
     Import-Module .\Output\Elizium.Loopz\Elizium.Loopz.psm1 `
