@@ -316,4 +316,131 @@ Describe 'Rules' -Tag 'PSTools' {
       }
     }
   }
+
+  Describe 'DryRunner' {
+    BeforeEach {
+      InModuleScope Elizium.Loopz {
+        function script:test-FakeMany {
+          [CmdletBinding(DefaultParameterSetName = 'ReplaceWith')]
+          param(
+            [Parameter(Mandatory, ValueFromPipeline = $true)]
+            [System.IO.FileSystemInfo]$underscore,
+
+            [Parameter(ParameterSetName = 'MoveToAnchor', Mandatory, Position = 0)]
+            [Parameter(ParameterSetName = 'ReplaceWith', Mandatory, Position = 0)]
+            [Parameter(ParameterSetName = 'MoveToStart', Mandatory, Position = 0)]
+            [Parameter(ParameterSetName = 'MoveToEnd', Mandatory, Position = 0)]
+            [array]$Pattern,
+
+            [Parameter(ParameterSetName = 'MoveToAnchor', Mandatory)]
+            [array]$Anchor,
+
+            [Parameter(ParameterSetName = 'MoveToAnchor')]
+            [string]$Relation = 'after',
+
+            [Parameter(ParameterSetName = 'MoveToAnchor')]
+            [Parameter(ParameterSetName = 'ReplaceWith')]
+            [Parameter(ParameterSetName = 'Prepend')]
+            [Parameter(ParameterSetName = 'Append')]
+            [array]$Copy,
+
+            [Parameter(ParameterSetName = 'MoveToAnchor')]
+            [Parameter(ParameterSetName = 'ReplaceWith')]
+            [Parameter(ParameterSetName = 'MoveToStart')]
+            [Parameter(ParameterSetName = 'MoveToEnd')]
+            [string]$With,
+
+            [Parameter(ParameterSetName = 'ReplaceWith')]
+            [Parameter(ParameterSetName = 'MoveToStart', Mandatory)]
+            [switch]$Start,
+
+            [Parameter(ParameterSetName = 'ReplaceWith')]
+            [Parameter(ParameterSetName = 'MoveToEnd', Mandatory)]
+            [switch]$End,
+
+            [Parameter(ParameterSetName = 'MoveToAnchor')]
+            [Parameter(ParameterSetName = 'ReplaceWith')]
+            [Parameter(ParameterSetName = 'MoveToStart')]
+            [Parameter(ParameterSetName = 'MoveToEnd')]
+            [string]$Paste,
+
+            [Parameter(ParameterSetName = 'MoveToAnchor')]
+            [Parameter(ParameterSetName = 'ReplaceWith')]
+            [Parameter(ParameterSetName = 'MoveToStart')]
+            [Parameter(ParameterSetName = 'MoveToEnd')]
+            [string]$Drop,
+
+            [Parameter(ParameterSetName = 'Prepend', Mandatory)]
+            [string]$Prepend,
+
+            [Parameter(ParameterSetName = 'Append', Mandatory)]
+            [string]$Append,
+
+            [Parameter()]
+            [switch]$File,
+
+            [Parameter()]
+            [switch]$Directory,
+
+            [Parameter()]
+            [string]$Except = [string]::Empty,
+
+            [Parameter()]
+            [string]$Include
+          )
+        } # test-FakeMany
+
+        [string]$commandName = 'test-FakeMany';
+        [DryRunner]$script:_runner = New-DryRunner -CommandName $commandName `
+          -Signals $_signals -Krayon $_krayon;
+      } # InModuleScope Elizium.Loopz
+    } # BeforeEach
+
+    Context 'given: valid parameter list' {
+      It 'should: resolve to parameter set -> "ReplaceWith"' {
+        InModuleScope Elizium.Loopz {
+          [CommandParameterSetInfo[]]$paramSets = $_runner.Resolve(
+            @('underscore', 'Pattern', 'With')
+          );
+          $paramSets.Count | Should -Be 1;
+          $paramSets[0].Name | Should -Be 'ReplaceWith';
+        }
+      }
+    }
+
+    Context 'given: ambiguous parameter list' {
+      It 'should: resolve to multiple parameters' {
+        InModuleScope Elizium.Loopz {
+          [CommandParameterSetInfo[]]$paramSets = $_runner.Resolve(
+            @('underscore', 'Pattern', 'Anchor')
+          );
+          $paramSets.Count | Should -BeGreaterThan 1;
+        }
+      }
+
+      It 'should: resolve to parameter set -> "ReplaceWith"' {
+        InModuleScope Elizium.Loopz {
+          [CommandParameterSetInfo[]]$paramSets = $_runner.Resolve(
+            @('underscore', 'Pattern', 'Anchor', 'Paste')
+          );
+          # Note this is still a valid call scenario. The ambiguity is resolved
+          # by the default parameter set which is 'ReplaceWith'
+          #
+          $paramSets.Count | Should -Be 2;
+          $paramSets[0].Name | Should -Be 'ReplaceWith';
+        }
+      }
+    }
+
+    Context 'given: parameter list that doesnt resolve' {
+      It 'should: return empty list' {
+        InModuleScope Elizium.Loopz {
+          [CommandParameterSetInfo[]]$paramSets = $_runner.Resolve(
+            @('Pattern', 'Anchor', 'Paste')
+          );
+          $paramSets.Count | Should -Be 0;
+        }
+      }
+    }
+  }
 } # Rules
