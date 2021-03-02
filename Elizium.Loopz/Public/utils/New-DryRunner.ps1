@@ -8,7 +8,7 @@ function New-DryRunner {
     [Hashtable]$Signals = $(Get-Signals),
 
     [Parameter()]
-    [Krayon]$Krayon = $(Get-KrayolaTheme)
+    [Krayon]$Krayon = $(Get-Krayon)
   )
 
   [System.Management.Automation.CommandInfo]$commandInfo = Get-Command $commandName;

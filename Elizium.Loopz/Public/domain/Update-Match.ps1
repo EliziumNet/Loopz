@@ -81,10 +81,10 @@ function Update-Match {
   [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', '')]
   [OutputType([string])]
   param(
-    [Parameter()]
+    [Parameter(Mandatory)]
     [string]$Value,
 
-    [Parameter()]
+    [Parameter(Mandatory)]
     [System.Text.RegularExpressions.RegEx]$Pattern,
 
     [Parameter()]
@@ -108,39 +108,73 @@ function Update-Match {
     [switch]$Diagnose
   )
 
+  function update-single {
+    param (
+      [Parameter()]
+      [System.Text.RegularExpressions.Match]$pMatch,
+
+      [Parameter()]
+      [string]$src,
+
+      [Parameter()]
+      [string]$pOcc,
+
+      [Parameter()]
+      [RegEx]$pRegEx
+    )
+  }
+
   [string]$failedReason = [string]::Empty;
-  [PSCustomObject]$groups = [PSCustomObject]@{
+  [PSCustomObject]$diagnostics = [PSCustomObject]@{
     Named = @{}
   }
 
+  [string]$pOccurrence = $PSBoundParameters.ContainsKey('PatternOccurrence') `
+    ? $PatternOccurrence : 'f';
+
   [string]$capturedPattern, $patternRemoved, [System.Text.RegularExpressions.Match]$patternMatch = `
     Split-Match -Source $Value -PatternRegEx $Pattern `
-    -Occurrence ($PSBoundParameters.ContainsKey('PatternOccurrence') ? $PatternOccurrence : 'f');
+    -Occurrence $pOccurrence;
 
   if (-not([string]::IsNullOrEmpty($capturedPattern))) {
-    if ($PSBoundParameters.ContainsKey('Copy')) {
-      [string]$replaceWith, $null, [System.Text.RegularExpressions.Match]$copyMatch = `
+    [Hashtable]$patternCaptures = get-Captures -MatchObject $patternMatch;
+    if ($Diagnose.ToBool()) {
+      $diagnostics.Named['Pattern'] = $patternCaptures;
+    }
+    [Hashtable]$copyCaptures = @{}
+
+    [string]$copyText = if ($PSBoundParameters.ContainsKey('Copy')) {
+      [string]$capturedCopy, $null, [System.Text.RegularExpressions.Match]$copyMatch = `
         Split-Match -Source $patternRemoved -PatternRegEx $Copy `
         -Occurrence ($PSBoundParameters.ContainsKey('CopyOccurrence') ? $CopyOccurrence : 'f');
 
-      if ([string]::IsNullOrEmpty($replaceWith)) {
+      if (-not([string]::IsNullOrEmpty($capturedCopy))) {
+        $copyCaptures = get-Captures -MatchObject $copyMatch;
+        if ($Diagnose.ToBool()) {
+          $diagnostics.Named['Copy'] = $copyCaptures;
+        }
+      }
+      else {
         $failedReason = 'Copy Match';
       }
-      elseif ($Diagnose.ToBool()) {
-        $groups.Named['Copy'] = get-Captures -MatchObject $copyMatch;
-      }
+      $capturedCopy;
     }
-    elseif ($PSBoundParameters.ContainsKey('With')) {
-      [string]$replaceWith = $With;
+
+    [string]$replaceWith = if ($PSBoundParameters.ContainsKey('With')) {
+      # Still need to resolve group references inside With
+      #
+      # [string]$withText = Update-GroupRefs -Source $With -Captures $patternCaptures;
+      # $withText = Update-GroupRefs -Source $withText -Captures $copyCaptures;
+      $With;
     }
     else {
-      [string]$replaceWith = [string]::Empty;
+      [string]::Empty;
     }
 
     if ([string]::IsNullOrEmpty($failedReason)) {
       if ($PSBoundParameters.ContainsKey('Paste')) {
-        [string]$format = $Paste.Replace('${_c}', $replaceWith).Replace(
-          '$0', $capturedPattern);
+        [string]$format = $Paste.Replace('${_c}', $copyText).Replace(
+          '${_w}', $replaceWith).Replace('$0', $capturedPattern);
       }
       else {
         # Just do a straight swap of the pattern match for the replaceWith
@@ -148,13 +182,12 @@ function Update-Match {
         [string]$format = $replaceWith;
       }
 
-      [string]$result = ($PatternOccurrence -eq '*') `
-        ? $Pattern.Replace($Value, $format) `
-        : $Pattern.Replace($Value, $format, 1, $patternMatch.Index);
+      # Resolve all named/numbered group references
+      #
+      $format = Update-GroupRefs -Source $format -Captures $patternCaptures;
+      $format = Update-GroupRefs -Source $format -Captures $copyCaptures;
 
-      if ($Diagnose.ToBool()) {
-        $groups.Named['Pattern'] = get-Captures -MatchObject $patternMatch;
-      }
+      [string]$result = $Pattern.Replace($Value, $format, 1, $patternMatch.Index);
     }
   }
   else {
@@ -176,8 +209,8 @@ function Update-Match {
     $updateResult | Add-Member -MemberType NoteProperty -Name 'FailedReason' -Value $failedReason;
   }
 
-  if ($Diagnose.ToBool() -and ($groups.Named.Count -gt 0)) {
-    $updateResult | Add-Member -MemberType NoteProperty -Name 'Diagnostics' -Value $groups;
+  if ($Diagnose.ToBool() -and ($diagnostics.Named.Count -gt 0)) {
+    $updateResult | Add-Member -MemberType NoteProperty -Name 'Diagnostics' -Value $diagnostics;
   }
 
   return $updateResult;

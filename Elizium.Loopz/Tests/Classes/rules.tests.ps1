@@ -408,30 +408,6 @@ Describe 'Rules' -Tag 'PSTools' {
       }
     }
 
-    Context 'given: ambiguous parameter list' {
-      It 'should: resolve to multiple parameters' {
-        InModuleScope Elizium.Loopz {
-          [CommandParameterSetInfo[]]$paramSets = $_runner.Resolve(
-            @('underscore', 'Pattern', 'Anchor')
-          );
-          $paramSets.Count | Should -BeGreaterThan 1;
-        }
-      }
-
-      It 'should: resolve to parameter set -> "ReplaceWith"' {
-        InModuleScope Elizium.Loopz {
-          [CommandParameterSetInfo[]]$paramSets = $_runner.Resolve(
-            @('underscore', 'Pattern', 'Anchor', 'Paste')
-          );
-          # Note this is still a valid call scenario. The ambiguity is resolved
-          # by the default parameter set which is 'ReplaceWith'
-          #
-          $paramSets.Count | Should -Be 2;
-          $paramSets[0].Name | Should -Be 'ReplaceWith';
-        }
-      }
-    }
-
     Context 'given: parameter list that doesnt resolve' {
       It 'should: return empty list' {
         InModuleScope Elizium.Loopz {
@@ -439,6 +415,20 @@ Describe 'Rules' -Tag 'PSTools' {
             @('Pattern', 'Anchor', 'Paste')
           );
           $paramSets.Count | Should -Be 0;
+        }
+      }
+    }
+
+    Context 'given: ambiguous but should not be' {
+      It 'should: resolve to 1 parameter set (ReplacePaste)' {
+        InModuleScope Elizium.Loopz {
+          [string]$commandName = 'Rename-Many';
+          [DryRunner]$runner = New-DryRunner -CommandName $commandName `
+            -Signals $_signals -Krayon $_krayon;
+
+          [CommandParameterSetInfo[]]$paramSets = $runner.Resolve(
+            @('underscore', 'Pattern', 'Anchor', 'Paste')
+          );
         }
       }
     }

@@ -12,7 +12,9 @@ function Update-GroupRefs {
   exception is $0, meaning the whole match (not required).
 
   .PARAMETER Source
-    The source value containing group references.
+    The source value containing group references. NB This MUST be an un-interpolated string,
+  so if using a literal it should be in single quotes NOT double; this is to prevent the
+  interpolation process from attempting to evaluate the group reference, eg ${count}.
 
   .PARAMETER Captures
     Hashtable mapping named group reference to group capture value.
