@@ -45,5 +45,22 @@ Describe 'Syntax' -Tag 'PSTools' {
         }
       }
     }
+
+    Context 'given: parameter set with mandatory switch parameters' {
+      It 'should: colour correctly' {
+        InModuleScope Elizium.Loopz {
+          [string]$command = 'Rename-Many';
+          [CommandInfo]$commandInfo = Get-Command $command;
+
+          if ([System.Management.Automation.CommandParameterSetInfo]$paramSet = $($commandInfo.ParameterSets | Where-Object Name -eq 'MoveToStart')?[0]) {
+            [syntax]$syntax = New-Syntax -CommandName $command -Signals $_signals -Krayon $_krayon;
+            [string]$syntaxStmt = $syntax.SyntaxStmt($paramSet);
+
+            [string]$colouredMandatoryStartSwitch = '&[cyan]-&[Red]Start ';
+            $syntaxStmt.contains($colouredMandatoryStartSwitch) | Should -BeTrue;
+          }
+        }
+      }
+    }
   }
 }

@@ -421,19 +421,18 @@ class Syntax {
     #
     [PSCustomObject[]]$resultSet = $($paramSet.Parameters | Where-Object {
         ($_.Name -NotIn $this.CommonParamSet) -and
-        ($_.IsMandatory) -and ($_.ParameterType -eq 'switch')
+        ($_.IsMandatory) -and ([string]$_.ParameterType -eq 'switch')
       });
 
     if ($resultSet -and ($resultSet.Count -gt 0)) {
       [string[]]$names = $resultSet.Name;
 
       $names | ForEach-Object {
-        $expression = "\-$_";
-
+        $expression = "\-$_[\s|$]";
         $structuredSyntax = $($structuredSyntax -replace $expression, $(
             # -Param
             #
-            $this.Snippets.Switch + '-' + $this.Snippets.Mandatory + $_
+            $this.Snippets.Switch + '-' + $this.Snippets.Mandatory + $_ + ' '
           ))
       }
     }
