@@ -366,7 +366,7 @@ class RuleController {
     [string]$headerSnippet = $options.Snippets.Heading;
     [string]$headerULSnippet = $options.Snippets.HeaderUL;
 
-    [RuleController]::Rules.Keys | Sort-Object | ForEach-Object {
+    [RuleController]::Rules.PSBase.Keys | Sort-Object | ForEach-Object {
       [string]$ruleNameKey = $_;
       [ParameterSetRule]$rule = [RuleController]::Rules[$ruleNameKey];
 
