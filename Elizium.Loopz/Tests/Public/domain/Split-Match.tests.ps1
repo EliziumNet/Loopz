@@ -1,5 +1,5 @@
 
-Describe 'Split-Match' {
+Describe 'Split-Match' -Tag 'SPLIT' {
   BeforeAll {
     Get-Module Elizium.Loopz | Remove-Module
     Import-Module .\Output\Elizium.Loopz\Elizium.Loopz.psm1 `

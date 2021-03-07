@@ -1,6 +1,6 @@
 using namespace System.Text.RegularExpressions;
 
-Describe 'Update-Match' {
+Describe 'Update-Match' -Tag 'remy' {
   BeforeAll {
     Get-Module Elizium.Loopz | Remove-Module
     Import-Module .\Output\Elizium.Loopz\Elizium.Loopz.psm1 `
@@ -47,18 +47,6 @@ Describe 'Update-Match' {
         }
       }
 
-      Context 'and: multiple matches' {
-        It 'should: replace all matches' {
-          [string]$source = 'We are like the dreamer who dreams and then lives inside the dream';
-          [RegEx]$pattern = new-expr('dream');
-          [string]$with = 'heal';
-
-          [PSCustomObject]$updateResult = Update-Match -Value $source -Pattern $pattern -With $with `
-            -PatternOccurrence '*';
-          $updateResult.Payload | Should -BeExactly 'We are like the healer who heals and then lives inside the heal';
-        }
-      }
-
       Context 'and: Quantity specified' {
         It 'should: replace specified match only' {
           [string]$source = 'We are like the dreamer who dreams and then lives inside the dream';
@@ -83,16 +71,16 @@ Describe 'Update-Match' {
         }
       }
 
-      Context 'and: Paste references With' {
+      Context 'and: Paste references Copy' {
         Context 'and: single Pattern match' {
           It 'should: replace the single match' {
             [string]$source = 'We are like the dreamer';
             [RegEx]$pattern = new-expr('dream');
-            [string]$with = 'heal';
+            [string]$copy = 'like';
             [string]$paste = '==${_c}==';
 
-            [PSCustomObject]$updateResult = Update-Match -Value $source -Pattern $pattern -With $with -Paste $paste;
-            $updateResult.Payload | Should -BeExactly 'We are like the ==heal==er';
+            [PSCustomObject]$updateResult = Update-Match -Value $source -Pattern $pattern -Copy $copy -Paste $paste;
+            $updateResult.Payload | Should -BeExactly 'We are like the ==like==er';
           }
         }
       } # and: Paste references With
@@ -112,7 +100,7 @@ Describe 'Update-Match' {
 
       Context 'and: Paste & Copy' {
         Context 'and: Copy matches' {
-          It 'should: replace the single match' {
+          It 'should: replace the single match' -Tag 'Bug' {
             [string]$source = 'We are like the dreamer 1234';
             [RegEx]$pattern = new-expr('dream');
             [string]$copy = '\d{4}';
@@ -163,7 +151,7 @@ Describe 'Update-Match' {
             [string]$source = 'We are like the dreamer';
             [RegEx]$pattern = new-expr('dream');
             [string]$with = 'heal';
-            [string]$paste = '==${_c}==';
+            [string]$paste = '==${_w}==';
 
             [PSCustomObject]$updateResult = Update-Match -Value $source -Pattern $pattern `
               -With $with -Paste $paste;
@@ -251,9 +239,10 @@ Describe 'Update-Match' {
           [string]$source = '21-04-2000, Party like its 31-12-1999, today is 24-09-2020';
           [RegEx]$pattern = new-expr('(?<day>\d{2})-(?<mon>\d{2})-(?<year>\d{4})');
 
-          [PSCustomObject]$updateResult = Update-Match -Value $source -Pattern $pattern -PatternOccurrence '*' `
+          [PSCustomObject]$updateResult = Update-Match -Value $source -Pattern $pattern -PatternOccurrence 'f' `
             -Paste 'Americanised: ${mon}-${day}-${year}';
-          $updateResult.Payload | Should -BeExactly 'Americanised: 04-21-2000, Party like its Americanised: 12-31-1999, today is Americanised: 09-24-2020';
+
+          $updateResult.Payload | Should -BeExactly 'Americanised: 04-21-2000, Party like its 31-12-1999, today is 24-09-2020';
         }
       }
 
@@ -375,10 +364,22 @@ Describe 'Update-Match' {
           }
         }
       } # and: date
+
+      Context 'and: Pattern defines named captures' {
+        It 'should: rename accessing Pattern defined capture' {
+          [string]$source = '21-04-2000, Party like its 31-12-1999, today is 24-09-2020';
+          [RegEx]$pattern = new-expr('(?<day>\d{2})-(?<mon>\d{2})-(?<year>\d{4})');
+
+          [PSCustomObject]$updateResult = Update-Match -Value $source -Pattern $pattern -PatternOccurrence 'l' `
+            -Paste 'Americanised: ${mon}-${day}-${year}';
+
+          $updateResult.Payload | Should -BeExactly '21-04-2000, Party like its 31-12-1999, today is Americanised: 09-24-2020';
+        }
+      }
     } # given: regex pattern
   } # LAST
 
-  Context 'ALL' {
+  Context 'NTH' {
     Context 'given: plain pattern' {
       It 'should: replace all matches' {
         [string]$source = 'Cyanopsia: blue, Cataract: blue, Moody: blues, Azora: blue, Azul: blue, Hinto: blue';
@@ -386,8 +387,8 @@ Describe 'Update-Match' {
         [string]$with = 'red';
 
         [PSCustomObject]$updateResult = Update-Match -Value $source -Pattern $pattern -With $with `
-          -PatternOccurrence '*';
-        $updateResult.Payload | Should -BeExactly 'Cyanopsia: red, Cataract: red, Moody: reds, Azora: red, Azul: red, Hinto: red';
+          -PatternOccurrence '2';
+        $updateResult.Payload | Should -BeExactly 'Cyanopsia: blue, Cataract: red, Moody: blues, Azora: blue, Azul: blue, Hinto: blue';
       }
 
       It 'should: replace all whole word matches' {
@@ -396,134 +397,43 @@ Describe 'Update-Match' {
         [string]$with = 'red';
 
         [PSCustomObject]$updateResult = Update-Match -Value $source -Pattern $pattern -With $with `
-          -PatternOccurrence '*';
-        $updateResult.Payload | Should -BeExactly 'Cyanopsia: red, Cataract: red, Moody: blues, Azora: red, Azul: red, Hinto: red';
+          -PatternOccurrence '3';
+        $updateResult.Payload | Should -BeExactly 'Cyanopsia: blue, Cataract: blue, Moody: blues, Azora: red, Azul: blue, Hinto: blue';
       }
     }
 
     Context 'given: regex pattern' {
       It 'should: replace all matches' {
-        # NB, character classes like [[:alpha:]] don't work on PowerShell! Apparently (regex101),
-        # [[::]] is posix notation
-        #
         [string]$source = 'Currencies: [GBP], [CHF], [CUC], [CZK], [GHS]';
         [RegEx]$pattern = new-expr('\[(?<ccy>[A-Z]{3})\]');
         [string]$with = '(***)';
 
         [PSCustomObject]$updateResult = Update-Match -Value $source -Pattern $pattern -With $with `
-          -PatternOccurrence '*';
-        $updateResult.Payload | Should -BeExactly 'Currencies: (***), (***), (***), (***), (***)';
+          -PatternOccurrence '4';
+        $updateResult.Payload | Should -BeExactly 'Currencies: [GBP], [CHF], [CUC], (***), [GHS]';
       }
     }
-  } # ALL
 
-  Context 'legacy' -Skip {
-    Context 'given: First Occurrence' {
-      Context 'and: no match' {
-        It 'should: return original value unmodified' {
-          [string]$source = 'We are like the dreamer';
-          [RegEx]$pattern = new-expr('rose');
-          [RegEx]$copy = new-expr('healer');
-          [int]$quantity = 1;
+    Context 'and: Pattern defines named captures' {
+      It 'should: rename accessing Pattern defined capture' {
+        [string]$source = '21-04-2000, Party like its 31-12-1999, today is 24-09-2020';
+        [RegEx]$pattern = new-expr('(?<day>\d{2})-(?<mon>\d{2})-(?<year>\d{4})');
 
-          [PSCustomObject]$updateResult = Update-Match -Occurrence 'FIRST' -Value $source -Pattern $pattern `
-            -Copy $copy -Quantity $quantity;
-          $updateResult.Payload | Should -BeExactly 'We are like the dreamer';
-        } # should: replace the single match
-      } # and: no match
+        [PSCustomObject]$updateResult = Update-Match -Value $source -Pattern $pattern -PatternOccurrence '1' `
+          -Paste 'Americanised: ${mon}-${day}-${year}';
 
-      Context 'and: single match' {
-        It 'should: replace the single match' {
-          [string]$source = 'We are like the dreamer';
-          [RegEx]$pattern = new-expr('dreamer');
-          [RegEx]$copy = new-expr('healer');
-          [int]$quantity = 1;
+        $updateResult.Payload | Should -BeExactly 'Americanised: 04-21-2000, Party like its 31-12-1999, today is 24-09-2020';
+      }
 
-          [PSCustomObject]$updateResult = Update-Match -Occurrence 'FIRST' -Value $source -Pattern $pattern `
-            -Copy $copy -Quantity $quantity;
-          $updateResult.Payload | Should -BeExactly 'We are like the healer';
-        } # should: replace the single match
-      } # and: single match
+      It 'should: rename accessing Pattern defined capture' {
+        [string]$source = '21-04-2000, Party like its 31-12-1999, today is 24-09-2020';
+        [RegEx]$pattern = new-expr('(?<day>\d{2})-(?<mon>\d{2})-(?<year>\d{4})');
 
-      Context 'and: single whole word match' {
-        It 'should: replace the single match' {
-          [string]$source = 'We are like the dreamer dream';
-          [RegEx]$pattern = new-expr('\bdream\b');
-          [RegEx]$copy = new-expr('heal');
-          [int]$quantity = 1;
+        [PSCustomObject]$updateResult = Update-Match -Value $source -Pattern $pattern -PatternOccurrence '2' `
+          -Paste 'Americanised: ${mon}-${day}-${year}';
 
-          [PSCustomObject]$updateResult = Update-Match -Occurrence 'FIRST' -Value $source -Pattern $pattern `
-            -Copy $copy -Quantity $quantity;
-          $updateResult.Payload | Should -BeExactly 'We are like the dreamer heal';
-        } # should: replace the single match
-      } # and: single match
-
-      Context 'and: multiple matches, replace first only' {
-        It 'should: replace the single match' {
-          [string]$source = 'We are like the dreamer, dreamer';
-          [RegEx]$pattern = new-expr('dreamer');
-          [RegEx]$copy = new-expr('healer');
-          [int]$quantity = 1;
-
-          [PSCustomObject]$updateResult = Update-Match -Occurrence 'FIRST' -Value $source -Pattern $pattern `
-            -Copy $copy -Quantity $quantity;
-          $updateResult.Payload | Should -BeExactly 'We are like the healer, dreamer';
-        }
-      } # and: multiple matches, replace first only
-
-      Context 'and: multiple matches, replace first 2' {
-        It 'should: replace the single match' {
-          [string]$source = 'We are like the dreamer, dreamer';
-          [RegEx]$pattern = new-expr('dreamer');
-          [RegEx]$copy = new-expr('healer');
-          [int]$quantity = 2;
-
-          [PSCustomObject]$updateResult = Update-Match -Occurrence 'FIRST' -Value $source -Pattern $pattern `
-            -Copy $copy -Quantity $quantity;
-          $updateResult.Payload | Should -BeExactly 'We are like the healer, healer';
-        }
-      } # and: multiple matches, replace first 2
-    }
-
-    Context 'given: Last Occurrence' {
-      Context 'and: single match' {
-        It 'should: replace the single match' {
-          [string]$source = 'We are like the dreamer';
-          [RegEx]$pattern = new-expr('dreamer');
-          [RegEx]$copy = new-expr('healer');
-          [int]$quantity = 1;
-
-          [PSCustomObject]$updateResult = Update-Match -Occurrence 'LAST' -Value $source -Pattern $pattern `
-            -Copy $copy -Quantity $quantity;
-          $updateResult.Payload | Should -BeExactly 'We are like the healer';
-        } # should: replace the single match
-      } # and: single match
-
-      Context 'and: multiple matches, replace first only' {
-        It 'should: replace the single match' {
-          [string]$source = 'We are like the dreamer, dreamer';
-          [RegEx]$pattern = new-expr('dreamer');
-          [RegEx]$copy = new-expr('healer');
-          [int]$quantity = 1;
-
-          [PSCustomObject]$updateResult = Update-Match -Occurrence 'LAST' -Value $source -Pattern $pattern `
-            -Copy $copy -Quantity $quantity;
-          $updateResult.Payload | Should -BeExactly 'We are like the dreamer, healer';
-        }
-      } # and: multiple matches, replace first only
-    }
-
-    Context 'given: Occurrence not specified (All)' {
-      It 'should: replace the single match' {
-        [string]$source = 'We are like the dreamer, dreamer';
-        [RegEx]$pattern = new-expr('dreamer');
-        [RegEx]$copy = new-expr('healer');
-        [int]$quantity = 1;
-
-        [PSCustomObject]$updateResult = Update-Match -Value $source -Pattern $pattern `
-          -Copy $copy -Quantity $quantity;
-        $updateResult.Payload | Should -BeExactly 'We are like the healer, healer';
+        $updateResult.Payload | Should -BeExactly '21-04-2000, Party like its Americanised: 12-31-1999, today is 24-09-2020';
       }
     }
-  }
+  } # NTH
 } # Update-Match
