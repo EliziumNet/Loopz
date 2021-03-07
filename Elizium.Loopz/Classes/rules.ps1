@@ -403,17 +403,15 @@ class RuleController {
   }
 
   [PSCustomObject[]] VerifyAll ([PSCustomObject]$queryInfo) {
-    [PSCustomObject[]]$pods = @();
-
-    [RuleController]::Rules.GetEnumerator() | ForEach-Object {
+    [PSCustomObject[]]$pods = $([RuleController]::Rules.GetEnumerator() | ForEach-Object {
       [ParameterSetRule]$rule = $_.Value;
 
       [PSCustomObject]$queryResult = $rule.Query($queryInfo);
 
       if ($queryResult) {
-        $pods += $queryResult;
+        $queryResult;
       }
-    }
+    })
 
     return $pods;
   }

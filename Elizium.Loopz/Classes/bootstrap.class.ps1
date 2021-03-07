@@ -59,13 +59,12 @@ class BoundEntity {
   }
 
   [void] RequireOnlyOne([string[]]$fields) {
-    [string[]]$found = @()
     [int]$index = 0;
 
-    foreach ($f in $fields) {
+    [string[]]$found = foreach ($f in $fields) {
       [string]$current = $fields[$index];
       if ($this.Spec.psobject.properties.match($current).Count) {
-        $found += $current;
+        $current;
       }
 
       $index++;

@@ -17,32 +17,31 @@ function Get-UniqueCrossPairs {
       [Parameter(Mandatory, Position = 1)]
       [string[]]$Others
     )
-    [System.Collections.ArrayList]$pairs = @();
 
     if ($Others.Count -gt 0) {
-      foreach ($o in $Others) {
-        $null = $pairs.add([PSCustomObject]@{
-            First  = $Item;
-            Second = $o;
-          });
+      [PSCustomObject[]]$pairs = foreach ($o in $Others) {
+        [PSCustomObject]@{
+          First  = $Item;
+          Second = $o;
+        }
+
       }
     }
     $pairs;
   }
-  [System.Collections.ArrayList]$result = @();
 
   [string[]]$firstCollection = $First.Clone() | Sort-Object -Unique;
   [string[]]$secondCollection = $PSBoundParameters.ContainsKey('Second') ? `
-    $($Second.Clone() | Sort-Object -Unique) : $firstCollection.Clone();
+  $($Second.Clone() | Sort-Object -Unique) : $firstCollection.Clone();
 
   [int]$firstCount = $firstCollection.Count;
   [int]$secondCount = $secondCollection.Count;
 
   if (($firstCount -eq 0) -or ($secondCount -eq 0)) {
-    return $result;
+    return @();
   }
 
-  if ($firstCount -eq 1) {
+  [PSCustomObject[]]$result = if ($firstCount -eq 1) {
     # 1xN
     #
     get-pairsWithItem -Item $firstCollection[0] -Others $($secondCollection -ne $firstCollection[0]);
@@ -60,10 +59,11 @@ function Get-UniqueCrossPairs {
       foreach ($s in $secondCollection) {
         if ($f -ne $s) {
           if (-not($reflections.ContainsKey($("$f->$s")))) {
-            $null = $result.Add([PSCustomObject]@{
-                First  = $f;
-                Second = $s;
-              });
+            [PSCustomObject]@{
+              First  = $f;
+              Second = $s;
+            }
+
             # Now record the reflection and ensure we don't add it again if we encounter it
             #
             $reflections[$("$s->$f")] = $true;

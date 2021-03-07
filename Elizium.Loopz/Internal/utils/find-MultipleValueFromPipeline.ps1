@@ -12,7 +12,6 @@ function find-MultipleValueFromPipeline {
   )
 
   [System.Management.Automation.CommandParameterSetInfo[]]$paramSets = $commandInfo.ParameterSets;
-  [array]$pods = @();
 
   [scriptblock]$paramIsValueFromPipeline = [scriptblock] {
     [OutputType([boolean])]
@@ -23,7 +22,7 @@ function find-MultipleValueFromPipeline {
     return [boolean]$row.PipeValue;
   };
 
-  foreach ($paramSet in $paramSets) {
+  [array]$pods = foreach ($paramSet in $paramSets) {
     $null, $null, [hashtable]$tableContent = `
       get-ParameterSetTableData -CommandInfo $CommandInfo `
       -ParamSet $paramSet -Syntax $Syntax -Where $paramIsValueFromPipeline;
@@ -33,8 +32,9 @@ function find-MultipleValueFromPipeline {
         ParamSet = $paramSet;
         Params   = $tableContent.PSBase.Keys;
       }
-      $pods += $seed;
+      $seed;
     }
   }
+
   return ($pods.Count -gt 0) ? $pods : $null;
 }
