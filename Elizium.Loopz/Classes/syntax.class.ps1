@@ -285,7 +285,7 @@ class Syntax {
     [string]$paramSnippet = if ($paramInfo.IsMandatory) {
       $this.TableOptions.Custom.Snippets.Mandatory;
     }
-    elseif ($paramInfo.ParameterType -eq 'switch') {
+    elseif ([string]$paramInfo.ParameterType -eq 'switch') {
       $this.TableOptions.Custom.Snippets.Switch;
     }
     else {
