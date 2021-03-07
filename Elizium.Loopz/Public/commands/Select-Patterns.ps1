@@ -84,36 +84,36 @@ function Select-Patterns {
       [string]$NotOpSymbol = '!'
     )
     [string]$platform = Get-PlatformName;
-    [string]$builder = [string]::Empty;
+    [System.Text.StringBuilder]$builder = [System.Text.StringBuilder]::new();
 
     if ($Pipe.ToBool()) {
-      $builder += ' | ';
+      $null = $builder.Append(' | ');
     }
 
     if ($platform -eq 'windows') {
-      $builder += 'select-string ';
+      $null = $builder.Append('select-string ');
       if ($pattern.StartsWith($NotOpSymbol)) {
-        $builder += ('-notmatch -pattern "{0}" ' -f $Pattern.Substring(1));
+        $builder.Append($('-notmatch -pattern "{0}" ' -f $Pattern.Substring(1)));
       }
       else {
-        $builder += ('-pattern "{0}" ' -f $Pattern);
+        $builder.Append($('-pattern "{0}" ' -f $Pattern));
       }
     }
     else {
-      $builder += 'grep ';
+      $builder.Append('grep ');
       if ($pattern.StartsWith($NotOpSymbol)) {
-        $builder += ('-v -i "{0}" ' -f $Pattern.Substring(1));
+        $builder.Append($('-v -i "{0}" ' -f $Pattern.Substring(1)));
       }
       else {
-        $builder += ('-i "{0}" ' -f $Pattern);
+        $builder.Append($('-i "{0}" ' -f $Pattern));
       }
     }
 
     if (-not([string]::IsNullOrWhiteSpace($Filter))) {
-      $builder += "$Filter ";
+      $builder.Append("$Filter ");
     }
 
-    return $builder;
+    return $builder.ToString();
   } # build-command
 
   [string]$command = [string]::Empty;

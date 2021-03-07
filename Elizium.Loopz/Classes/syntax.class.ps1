@@ -336,9 +336,9 @@ class Syntax {
       "$($this.QuotedNameStmt($($this.Snippets.ParamSetName), $paramSet.Name))" +
       "$($this.Snippets.Ln)" +
       "$($this.Snippets.Reset)$($this.Labels.Params) " +
-      "$($quotedPosition) "
+      "$($quotedPosition) " +
+      $this.ResolvedParamStmt($params, $paramSet)
     );
-    $structuredStmt += $this.ResolvedParamStmt($params, $paramSet);
 
     return $structuredStmt;
   }
@@ -351,9 +351,9 @@ class Syntax {
       "$($this.Snippets.Reset)$($this.Labels.MultipleValueFromPipeline)" +
       "$($this.QuotedNameStmt($($this.Snippets.ParamSetName), $paramSet.Name))" +
       "$($this.Snippets.Ln)" +
-      "$($this.Snippets.Reset)$($this.Labels.Params) "
+      "$($this.Snippets.Reset)$($this.Labels.Params) " +
+      $this.ResolvedParamStmt($params, $paramSet)
     );
-    $structuredStmt += $this.ResolvedParamStmt($params, $paramSet);
 
     return $structuredStmt;
   }
@@ -534,7 +534,7 @@ class Syntax {
         # (ie tokenNo is 0), then we have no choice other than to breach the limit anyway.
         # I suppose an alternative would be just to fold this token by inserting a dash.
         #
-        $line += "$token ";
+        $line += "$token "; # use of += ok here, because its the core of the algorithm.
         $tokenNoCurrentLine++;
       }
       else {
@@ -544,7 +544,7 @@ class Syntax {
             "$($line)$($this.Snippets.Ln)"
           ));
         $line = [string]::new(' ', $margin);
-        $line += "$token ";
+        $line += "$token "; # use of += ok here, because its the core of the algorithm.
         $tokenNoCurrentLine = ($tokenNoCurrentLine -eq 0) ? 1 : 0;
       }
     }

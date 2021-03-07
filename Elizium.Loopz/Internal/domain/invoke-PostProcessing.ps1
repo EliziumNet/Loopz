@@ -11,30 +11,28 @@ function invoke-PostProcessing {
     [hashtable]$signals
   )
   [string]$transformResult = $InputSource;
-  [string[]]$appliedSignals = @();
   [array]$iterationRules = $Rules.psobject.Members | where-Object MemberType -like 'NoteProperty';
 
-  foreach ($_r in $iterationRules) {
+  [string[]]$appliedSignals = foreach ($_r in $iterationRules) {
     $rule = $_r.Value;
 
     if ($rule['IsApplicable'].InvokeReturnAsIs($transformResult)) {
       $transformResult = $rule['Transform'].InvokeReturnAsIs($transformResult);
-      $appliedSignals += $rule['Signal'];
+      $rule['Signal'];
     }
   }
 
   [PSCustomObject]$result = if ($appliedSignals.Count -gt 0) {
-    [string]$indication = [string]::Empty;
-    [string[]]$labels = @();
+    [System.Collections.Generic.List[string]]$labels = [System.Collections.Generic.List[string]]::new()
 
-    foreach ($name in $appliedSignals) {
-      $indication += $signals[$name].Value;
-      $labels += $signals[$name].Key;
-    }
+    [string]$indication = -join $(foreach ($name in $appliedSignals) {
+      $labels.Add($signals[$name].Key);
+      $signals[$name].Value;
+    })
     $indication = "[{0}]" -f $indication;
 
     [PSCustomObject]@{
-      TransformResult = $transformResult
+      TransformResult = $transformResult;
       Indication      = $indication;
       Signals         = $appliedSignals;
       Label           = 'Post ({0})' -f $($labels -join ', ');

@@ -11,7 +11,8 @@ function find-InAllParameterSetsByAccident {
     [Syntax]$Syntax
   )
   [System.Management.Automation.CommandParameterSetInfo[]]$paramSets = $commandInfo.ParameterSets;
-  [array]$pods = @();
+  [System.Collections.Generic.List[PSCustomObject]]$pods = `
+    [System.Collections.Generic.List[PSCustomObject]]::new();
 
   foreach ($paramSet in $paramSets) {
     [System.Management.Automation.CommandParameterInfo[]]$params = $paramSet.Parameters |`
@@ -33,7 +34,7 @@ function find-InAllParameterSetsByAccident {
           ParamSet = $paramSet;
           Others   = $others;
         }
-        $pods += $seed;
+        $pods.Add($seed);
       }
     }
 

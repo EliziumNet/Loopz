@@ -12,7 +12,6 @@ function find-DuplicateParamPositions {
   )
 
   [System.Management.Automation.CommandParameterSetInfo[]]$paramSets = $commandInfo.ParameterSets;
-  [array]$pods = @();
 
   [scriptblock]$paramIsPositional = [scriptblock] {
     [OutputType([boolean])]
@@ -23,7 +22,7 @@ function find-DuplicateParamPositions {
     return $row.Pos -ne 'named';
   };
 
-  foreach ($paramSet in $paramSets) {
+  [array]$pods = foreach ($paramSet in $paramSets) {
     $null, $null, [hashtable]$tableContent = `
       get-ParameterSetTableData -CommandInfo $CommandInfo `
       -ParamSet $paramSet -Syntax $Syntax -Where $paramIsPositional;
@@ -50,11 +49,12 @@ function find-DuplicateParamPositions {
               Number   = $_.Key;
             }
 
-            $pods += $seed;
+            $seed;
           }
         }
       }
     }
   }
+
   return ($pods.Count -gt 0) ? $pods : $null;
 }

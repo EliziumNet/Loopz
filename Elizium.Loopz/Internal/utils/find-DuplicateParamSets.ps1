@@ -25,7 +25,7 @@ function find-DuplicateParamSets {
   if ($paramSetNames -and ($paramSetNames.Count -gt 0)) {
     [PSCustomObject[]]$paramSetPairs = Get-UniqueCrossPairs -First $paramSetNames;
 
-    foreach ($pair in $paramSetPairs) {
+    $pods = foreach ($pair in $paramSetPairs) {
       [System.Management.Automation.CommandParameterSetInfo]$firstParamSet = $paramSetLookup[$pair.First];
       [System.Management.Automation.CommandParameterSetInfo]$secondParamSet = $paramSetLookup[$pair.Second];
 
@@ -36,7 +36,7 @@ function find-DuplicateParamSets {
             Second = $secondParamSet;
           }
 
-          $pods += $seed;
+          $seed;
         }
       }
       else {
