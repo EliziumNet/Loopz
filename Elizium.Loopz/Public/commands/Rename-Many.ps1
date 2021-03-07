@@ -328,6 +328,8 @@ function Rename-Many {
     [Parameter(Mandatory, ValueFromPipeline = $true)]
     [System.IO.FileSystemInfo]$underscore,
 
+    [Parameter(ParameterSetName = 'HybridStart', Mandatory, Position = 1)]
+    [Parameter(ParameterSetName = 'HybridEnd', Mandatory, Position = 1)]
     [Parameter(ParameterSetName = 'MoveToAnchor', Mandatory, Position = 1)]
     [Parameter(ParameterSetName = 'UpdateInPlace', Mandatory, Position = 1)]
     [Parameter(ParameterSetName = 'MoveToStart', Mandatory, Position = 1)]
@@ -340,10 +342,22 @@ function Rename-Many {
     [ValidateScript( { $(test-ValidPatternArrayParam -Arg $_) })]
     [array]$Anchor,
 
+    [Parameter(ParameterSetName = 'HybridStart', Mandatory, Position = 2)]
+    [ValidateScript( { $(test-ValidPatternArrayParam -Arg $_) })]
+    [array]$AnchorStart,
+
+    [Parameter(ParameterSetName = 'HybridEnd', Mandatory, Position = 2)]
+    [ValidateScript( { $(test-ValidPatternArrayParam -Arg $_) })]
+    [array]$AnchorEnd,
+
+    [Parameter(ParameterSetName = 'HybridStart')]
+    [Parameter(ParameterSetName = 'HybridEnd')]
     [Parameter(ParameterSetName = 'MoveToAnchor')]
     [ValidateSet('before', 'after')]
     [string]$Relation = 'after',
 
+    [Parameter(ParameterSetName = 'HybridStart')]
+    [Parameter(ParameterSetName = 'HybridEnd')]
     [Parameter(ParameterSetName = 'MoveToAnchor')]
     [Parameter(ParameterSetName = 'UpdateInPlace')]
     [Parameter(ParameterSetName = 'Prefix')]
@@ -353,6 +367,8 @@ function Rename-Many {
     [ValidateScript( { { $(test-ValidPatternArrayParam -Arg $_) } })]
     [array]$Copy,
 
+    [Parameter(ParameterSetName = 'HybridStart')]
+    [Parameter(ParameterSetName = 'HybridEnd')]
     [Parameter(ParameterSetName = 'MoveToAnchor', Position = 3)]
     [Parameter(ParameterSetName = 'MoveToStart', Position = 2)]
     [Parameter(ParameterSetName = 'MoveToEnd', Position = 2)]
@@ -368,6 +384,8 @@ function Rename-Many {
     [Parameter(ParameterSetName = 'UpdateInPlace', Mandatory)]
     [string]$Paste,
 
+    [Parameter(ParameterSetName = 'HybridStart')]
+    [Parameter(ParameterSetName = 'HybridEnd')]
     [Parameter(ParameterSetName = 'MoveToAnchor')]
     [Parameter(ParameterSetName = 'MoveToStart')]
     [Parameter(ParameterSetName = 'MoveToEnd')]
@@ -520,6 +538,20 @@ function Rename-Many {
               if ($exchange.ContainsKey('LOOPZ.REMY.RELATION')) {
                 $_params['Relation'] = $exchange['LOOPZ.REMY.RELATION'];
               }
+              break;
+            }
+            'HYBRID-START' {
+              if ($exchange.ContainsKey('LOOPZ.REMY.RELATION')) {
+                $_params['Relation'] = $exchange['LOOPZ.REMY.RELATION'];
+              }
+              $_params['Start'] = $true;
+              break;
+            }
+            'HYBRID-END' {
+              if ($exchange.ContainsKey('LOOPZ.REMY.RELATION')) {
+                $_params['Relation'] = $exchange['LOOPZ.REMY.RELATION'];
+              }
+              $_params['End'] = $true;
               break;
             }
             'START' {
@@ -897,6 +929,44 @@ function Rename-Many {
     }
     $bootStrap.Register($anchorSpec);
 
+    # [AnchorStart]
+    #
+    [PSCustomObject]$anchorStartSpec = [PSCustomObject]@{
+      Activate       = $PSBoundParameters.ContainsKey('AnchorStart') -and `
+        -not([string]::IsNullOrEmpty($AnchorStart));
+      SpecType       = 'regex';
+      Name           = 'AnchorStart';
+      Value          = $AnchorStart;
+      Signal         = 'REMY.ANCHOR';
+      WholeSpecifier = 'a';
+      RegExKey       = 'LOOPZ.REMY.ANCHOR.REGEX';
+      OccurrenceKey  = 'LOOPZ.REMY.ANCHOR-OCC';
+      Keys           = @{
+        'LOOPZ.REMY.ACTION'      = 'Move-Match';
+        'LOOPZ.REMY.ANCHOR-TYPE' = 'HYBRID-START';
+      }
+    }
+    $bootStrap.Register($anchorStartSpec);
+
+    # [AnchorEnd]
+    #
+    [PSCustomObject]$anchorEndSpec = [PSCustomObject]@{
+      Activate       = $PSBoundParameters.ContainsKey('AnchorEnd') -and `
+        -not([string]::IsNullOrEmpty($AnchorEnd));
+      SpecType       = 'regex';
+      Name           = 'AnchorEnd';
+      Value          = $AnchorEnd;
+      Signal         = 'REMY.ANCHOR';
+      WholeSpecifier = 'a';
+      RegExKey       = 'LOOPZ.REMY.ANCHOR.REGEX';
+      OccurrenceKey  = 'LOOPZ.REMY.ANCHOR-OCC';
+      Keys           = @{
+        'LOOPZ.REMY.ACTION'      = 'Move-Match';
+        'LOOPZ.REMY.ANCHOR-TYPE' = 'HYBRID-END';
+      }
+    }
+    $bootStrap.Register($anchorEndSpec);
+
     # [Copy]
     #
     [PSCustomObject]$copySpec = [PSCustomObject]@{
@@ -1204,7 +1274,8 @@ function Rename-Many {
         )
 
         [boolean]$result = $Entities.ContainsKey('Anchor') -or `
-          $Entities.ContainsKey('Start') -or $Entities.ContainsKey('End');
+          $Entities.ContainsKey('Start') -or $Entities.ContainsKey('End') -or `
+          $Entities.ContainsKey('AnchorStart') -or $Entities.ContainsKey('AnchorEnd');
 
         return $result;
       }
