@@ -250,7 +250,7 @@ Describe 'Rename-Many' -Tag 'remy' {
         } # and: First Only
 
         Context 'and: Transform' {
-          It 'should: transform Rename' -Tag 'Bug' {
+          It 'should: transform Rename' {
             $script:_expected = @{
               'loopz.application.t1.log' = '_loopz.@pplication.t1_.log';
               'loopz.application.t2.log' = '_loopz.@pplication.t2_.log';
@@ -520,7 +520,7 @@ Describe 'Rename-Many' -Tag 'remy' {
       } # and Relation is After
     } # and: TargetType is Anchor
 
-    Context 'and: Hybrid Anchor' -Tag 'HYBRID' -Skip {
+    Context 'and: Hybrid Anchor' -Tag 'HYBRID' {
       # Hybrid just means Anchor specified with either Start or End
       # (This feature is not yet supported in rename-many, but is in
       # Move-Match).
@@ -535,7 +535,7 @@ Describe 'Rename-Many' -Tag 'remy' {
             }
 
             Get-ChildItem -File -Path $_directoryPath | Rename-Many -File `
-              -Pattern 'data.' -Anchor 'loopz' -Start -Relation 'before' -WhatIf:$_whatIf;
+              -Pattern 'data.' -AnchorStart 'loopz' -Relation 'before' -WhatIf:$_whatIf;
           }
         }
 
@@ -548,7 +548,7 @@ Describe 'Rename-Many' -Tag 'remy' {
             }
 
             Get-ChildItem -File -Path $_directoryPath | Rename-Many -File `
-              -Pattern 'data.' -Anchor 'loopz' -End -Relation 'before' -WhatIf:$_whatIf;
+              -Pattern 'data.' -AnchorEnd 'loopz' -Relation 'before' -WhatIf:$_whatIf;
           }
         }
       } # and: Anchor matches Pattern
@@ -565,7 +565,7 @@ Describe 'Rename-Many' -Tag 'remy' {
             }
 
             Get-ChildItem -File -Path $_directoryPath | Rename-Many -File `
-              -Pattern '\.(?<tail>t\d)' -Anchor 'blooper' -Start -With '${tail}' -WhatIf:$_whatIf;
+              -Pattern '\.(?<tail>t\d)' -AnchorStart 'blooper' -With '${tail}.' -WhatIf:$_whatIf;
           }
         }
 
@@ -580,7 +580,7 @@ Describe 'Rename-Many' -Tag 'remy' {
             }
 
             Get-ChildItem -File -Path $_directoryPath | Rename-Many -File `
-              -Pattern '(?<header>loopz)\.' -Anchor 'blooper' -End -With '.${header}' -WhatIf:$_whatIf;
+              -Pattern '(?<header>loopz)\.' -AnchorEnd 'blooper' -With '.${header}' -WhatIf:$_whatIf;
           }
         }
       } #
@@ -944,7 +944,7 @@ Describe 'Rename-Many parameter sets' -Tag 'remy' {
           ParamSet    = 'MoveToStart' 
         },
 
-        # MoveToStart
+        # MoveToEnd
         #
         @{ Parameters = 'underscore', 'Pattern', 'End';
           ParamSet    = 'MoveToEnd' 
@@ -953,7 +953,43 @@ Describe 'Rename-Many parameter sets' -Tag 'remy' {
           ParamSet    = 'MoveToEnd' 
         },
         @{ Parameters = 'underscore', 'Pattern', 'End', 'With', 'Copy';
-          ParamSet    = 'MoveToEnd' 
+          ParamSet    = 'MoveToEnd'
+        },
+
+        # HybridStart
+        #
+        @{ Parameters = 'underscore', 'Pattern', 'AnchorStart';
+          ParamSet    = 'HybridStart'
+        },
+        @{ Parameters = 'underscore', 'Pattern', 'AnchorStart', 'Relation';
+          ParamSet    = 'HybridStart'
+        },
+        @{ Parameters = 'underscore', 'Pattern', 'AnchorStart', 'With';
+          ParamSet    = 'HybridStart'
+        },
+        @{ Parameters = 'underscore', 'Pattern', 'AnchorStart', 'With', 'Copy';
+          ParamSet    = 'HybridStart'
+        },
+        @{ Parameters = 'underscore', 'Pattern', 'AnchorStart', 'Drop';
+          ParamSet    = 'HybridStart'
+        },
+
+        # HybridEnd
+        #
+        @{ Parameters = 'underscore', 'Pattern', 'AnchorEnd';
+          ParamSet    = 'HybridEnd'
+        },
+        @{ Parameters = 'underscore', 'Pattern', 'AnchorEnd', 'Relation';
+          ParamSet    = 'HybridEnd'
+        },
+        @{ Parameters = 'underscore', 'Pattern', 'AnchorEnd', 'With';
+          ParamSet    = 'HybridEnd'
+        },
+        @{ Parameters = 'underscore', 'Pattern', 'AnchorEnd', 'With', 'Copy';
+          ParamSet    = 'HybridEnd'
+        },
+        @{ Parameters = 'underscore', 'Pattern', 'AnchorEnd', 'Drop';
+          ParamSet    = 'HybridEnd'
         },
 
         # UpdateInPlace
@@ -964,7 +1000,7 @@ Describe 'Rename-Many parameter sets' -Tag 'remy' {
         @{ Parameters = 'underscore', 'Pattern', 'Paste', 'Copy';
           ParamSet    = 'UpdateInPlace' 
         },
-        @{ Parameters = 'underscore', 'Pattern', 'Paste', 'Copy', 'With'; #!
+        @{ Parameters = 'underscore', 'Pattern', 'Paste', 'Copy', 'With';
           ParamSet    = 'UpdateInPlace' 
         },
 
@@ -1012,9 +1048,15 @@ Describe 'Rename-Many parameter sets' -Tag 'remy' {
     Context 'given: Invalid set of parameters' {
       It '<parameters> should: NOT resolve to a parameter set' -TestCases @(
         @{ Parameters = 'underscore', 'Pattern', 'Anchor', 'Paste' },
+        @{ Parameters = 'underscore', 'Pattern', 'HybridStart', 'Paste' },
+        @{ Parameters = 'underscore', 'Pattern', 'HybridEnd', 'Paste' },
         @{ Parameters = 'underscore', 'Pattern', 'Start', 'End' },
         @{ Parameters = 'underscore', 'Pattern', 'Start', 'Relation' },
         @{ Parameters = 'underscore', 'Pattern', 'End', 'Relation' },
+        @{ Parameters = 'underscore', 'Pattern', 'HybridStart', 'Start' },
+        @{ Parameters = 'underscore', 'Pattern', 'HybridEnd', 'End' },
+        @{ Parameters = 'underscore', 'Pattern', 'HybridStart', 'Anchor' },
+        @{ Parameters = 'underscore', 'Pattern', 'HybridEnd', 'Anchor' },
         @{ Parameters = 'underscore', 'Pattern', 'Prepend' },
         @{ Parameters = 'underscore', 'Pattern', 'Append' },
         @{ Parameters = 'underscore', 'Append', 'Anchor' },
