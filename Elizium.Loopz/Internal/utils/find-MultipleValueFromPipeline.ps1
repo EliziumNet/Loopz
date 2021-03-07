@@ -31,7 +31,7 @@ function find-MultipleValueFromPipeline {
     if ($tableContent -and ($tableContent.PSBase.Count -gt 1)) {
       [PSCustomObject]$seed = [PSCustomObject]@{
         ParamSet = $paramSet;
-        Params   = $tableContent.Keys;
+        Params   = $tableContent.PSBase.Keys;
       }
       $pods += $seed;
     }

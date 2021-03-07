@@ -525,7 +525,7 @@
   else {
     $Exchange['LOOPZ.MIRROR.INVOKEE'] = $Functee;
 
-    if ($FuncteeParams.Count -gt 0) {
+    if ($FuncteeParams.PSBase.Count -gt 0) {
       $Exchange['LOOPZ.MIRROR.INVOKEE.PARAMS'] = $FuncteeParams.Clone();
     }
   }

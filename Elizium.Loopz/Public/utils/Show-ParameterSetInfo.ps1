@@ -67,7 +67,7 @@ function Show-ParameterSetInfo {
               get-ParameterSetTableData -CommandInfo $_ -ParamSet $parameterSet -Syntax $syntax
             );
 
-            if (-not($($null -eq $fieldMetaData)) -and ($fieldMetaData.Keys.Count -gt 0)) {
+            if (-not($($null -eq $fieldMetaData)) -and ($fieldMetaData.PSBase.Keys.Count -gt 0)) {
               [string]$structuredParamSetStmt = $syntax.ParamSetStmt($_, $parameterSet);
               [string]$structuredSyntax = $syntax.SyntaxStmt($parameterSet);
 

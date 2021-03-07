@@ -242,7 +242,7 @@ function Move-Match {
       [System.Text.RegularExpressions.Match]$patternMatch = Split-Match @parameters;
 
     if (-not([string]::IsNullOrEmpty($capturedPattern))) {
-      $patternCaptures = get-Captures -MatchObject $patternMatch;
+      [hashtable]$patternCaptures = get-Captures -MatchObject $patternMatch;
       if ($Diagnose.ToBool()) {
         $diagnostics.Named['Pattern'] = $patternCaptures;
       }
@@ -439,7 +439,7 @@ function Move-Match {
   if ([string]::IsNullOrEmpty($failedReason)) {
     if ($isPattern) {
       [string]$dropText = $Drop;
-      if ($isCopy -and ($copyCaptures.Count -gt 0)) {
+      if ($isCopy -and ($copyCaptures.PSBase.Count -gt 0)) {
         $dropText = $dropText.Replace('${_c}', $copyCaptures['0']);
 
         # Now cross reference the Copy group references
@@ -752,7 +752,7 @@ function Move-MatchLegacy {
             [string]$replaceWith, $null, `
               [System.Text.RegularExpressions.Match]$copyMatch = Split-Match @parameters;
 
-            $copyCaptures = get-Captures -MatchObject $copyMatch;
+            [hashtable]$copyCaptures = get-Captures -MatchObject $copyMatch;
             if ($Diagnose.ToBool()) {
               $groups.Named['Copy'] = $copyCaptures;
             }
@@ -897,7 +897,7 @@ function Move-MatchLegacy {
 
         # Now cross reference the Pattern group references
         #
-        if ($isPattern -and ($patternCaptures.Count -gt 0)) {
+        if ($isPattern -and ($patternCaptures.PSBase.Count -gt 0)) {
           $dropText = Update-GroupRefs -Source $dropText -Captures $patternCaptures;
         }
 

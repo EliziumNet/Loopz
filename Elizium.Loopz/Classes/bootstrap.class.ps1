@@ -104,7 +104,7 @@ class BoundEntity {
 
     # Populate Keys
     #
-    if ($(Get-PsObjectField -Object $this.Spec -Field 'Keys') -and ($this.Spec.Keys.Count -gt 0)) {
+    if ($(Get-PsObjectField -Object $this.Spec -Field 'Keys') -and ($this.Spec.Keys.PSBase.Count -gt 0)) {
       $this.Spec.Keys.GetEnumerator() | ForEach-Object {
         if ($bootstrap.Exchange.ContainsKey($_.Key)) {
           throw [System.Management.Automation.MethodInvocationException]::new(
@@ -415,7 +415,7 @@ class BootStrap {
   [hashtable] Build([array]$relations) {
 
     if (-not($this._built)) {
-      if ($this._entities.Count -gt 0) {
+      if ($this._entities.PSBase.Count -gt 0) {
         $this._entities.GetEnumerator() | ForEach-Object {
           if (-not($_.Value.Executed)) {
             $_.Value.Exec($this);

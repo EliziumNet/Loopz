@@ -715,7 +715,7 @@ function Rename-Many {
       # -------------------------------------------------- [ Do diagnostics ] ---
       #
       if ($performDiagnosis -and $actionResult.Diagnostics.Named -and
-        ($actionResult.Diagnostics.Named.Count -gt 0)) {
+        ($actionResult.Diagnostics.Named.PSBase.Count -gt 0)) {
 
         [string]$diagnosticEmoji = Get-FormattedSignal -Name 'DIAGNOSTICS' -Signals $signals `
           -EmojiOnly;
