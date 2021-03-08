@@ -15,7 +15,7 @@ function New-DryRunner {
   [syntax]$syntax = New-Syntax -CommandName $commandName -Signals $Signals -Krayon $Krayon;
   [RuleController]$controller = [RuleController]::new($commandInfo);
   [PSCustomObject]$runnerInfo = @{
-    AllCommonParamSet = $syntax.AllCommonParamSet;
+    CommonParamSet = $syntax.CommonParamSet;
   }
   return [DryRunner]::new($controller, $runnerInfo);
 }

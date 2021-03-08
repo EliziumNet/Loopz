@@ -21,6 +21,7 @@ function Get-SyntaxScheme {
     'COLS.SPECIAL'        = 'darkYellow';
     'COLS.ERROR'          = 'black', 'bgRed';
     'COLS.OK'             = 'black', 'bgGreen';
+    'COLS.COMMON'         = 'magenta';
   }
 
   if (Get-IsKrayolaLightTerminal) {
