@@ -24,12 +24,8 @@ function get-ParameterSetTableData {
       })
   )
 
-  # NB: This sorting and grouping should probably be thrown away as it is not persistent
-  #
-  $parametersToShow = $ParamSet.Parameters | Where-Object Name -NotIn $Syntax.CommonParamSet;
-  $parameterGroups = $parametersToShow.where( { $CommandInfo.Position -ge 0 }, 'split');
-  $parameterGroups[0] = @($parameterGroups[0] | Sort-Object -Property Position);
-  $parametersToShow = $parameterGroups[0] + $parameterGroups[1];
+  $parametersToShow = $Syntax.TableOptions.Custom.IncludeCommon `
+    ? $ParamSet.Parameters : $($ParamSet.Parameters | Where-Object Name -NotIn $Syntax.CommonParamSet);
 
   [PSCustomObject[]]$resultSet = ($parametersToShow `
     | Select-Object -Property @(

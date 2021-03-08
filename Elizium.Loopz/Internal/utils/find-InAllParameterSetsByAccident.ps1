@@ -16,7 +16,7 @@ function find-InAllParameterSetsByAccident {
 
   foreach ($paramSet in $paramSets) {
     [System.Management.Automation.CommandParameterInfo[]]$params = $paramSet.Parameters |`
-      Where-Object { $_.Name -NotIn $Syntax.AllCommonParamSet };
+      Where-Object { $_.Name -NotIn $Syntax.CommonParamSet };
 
     if ($params -and $params.Count -gt 0) {
       [System.Management.Automation.CommandParameterInfo[]]$candidates = $($params | Where-Object {

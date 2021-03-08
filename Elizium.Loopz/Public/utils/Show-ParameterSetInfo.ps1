@@ -17,7 +17,10 @@ function Show-ParameterSetInfo {
     [System.Text.StringBuilder]$Builder = [System.Text.StringBuilder]::new(),
 
     [Parameter()]
-    [string]$Title = 'Parameter Set Info'
+    [string]$Title = 'Parameter Set Info',
+
+    [Parameter()]
+    [switch]$Common
   )
 
   begin {
@@ -47,6 +50,10 @@ function Show-ParameterSetInfo {
       [string]$lnSnippet = $syntax.TableOptions.Snippets.Ln;
       $null = $builder.Append($syntax.TitleStmt($Title, $_.Name));
 
+      if ($Common) {
+        $syntax.TableOptions.Custom.IncludeCommon = $true;
+      }
+
       # Since we're inside a process block $_ refers to a CommandInfo (the result of get-command) and
       # one property is ParameterSets.
       #
@@ -59,10 +66,6 @@ function Show-ParameterSetInfo {
             ($PSBoundParameters.ContainsKey('Sets') -and ($Sets -contains $parameterSet.Name)))
 
           if ($include) {
-            # TODO: we need to fnd out what the unique parameters are for each set.
-            # We could add an extra boolean column to the table which indicates
-            # if it is unique.
-            #
             [hashtable]$fieldMetaData, [hashtable]$headers, [hashtable]$tableContent = $(
               get-ParameterSetTableData -CommandInfo $_ -ParamSet $parameterSet -Syntax $syntax
             );

@@ -23,7 +23,9 @@ class Syntax {
     'ErrorVariable', 'WarningVariable', 'InformationVariable', 'DebugVariable',
     'VerboseVariable', 'ProgressVariable', 'OutVariable', 'OutBuffer',
     'PipelineVariable');
-  [string[]]$AllCommonParamSet = $this.CommonParamSet + @('WhatIf', 'Confirm');
+
+  [string[]]$ShouldProcessParamSet = @('WhatIf', 'Confirm');
+  [string[]]$AllCommonParamSet;
 
   static [hashtable]$CloseBracket = @{
     '(' = ')';
@@ -65,14 +67,18 @@ class Syntax {
       }
 
       'Name' {
+        [string]$trimmed = $value.Trim();
         [System.Management.Automation.CommandParameterInfo]$parameterInfo = `
-          $Options.Custom.ParameterSetInfo.Parameters | Where-Object Name -eq $value.Trim();
+          $Options.Custom.ParameterSetInfo.Parameters | Where-Object Name -eq $trimmed;
         [string]$parameterType = $parameterInfo.ParameterType;
 
-        [string]$nameSnippet = if ($parameterInfo.IsMandatory) {
+        [string]$nameSnippet = if ($Options.Custom.CommonParamSet.Contains($trimmed)) {
+          $Options.Custom.Snippets.Common;
+        }
+        elseif ($parameterInfo.IsMandatory) {
           $Options.Custom.Snippets.Mandatory;
         }
-        elseif ($parameterType -eq 'switch') {
+        elseif ([string]$parameterType -eq 'switch') {
           $Options.Custom.Snippets.Switch;
         }
         else {
@@ -220,7 +226,10 @@ class Syntax {
         Cell      = $($this.Krayon.snippets($this.Scheme['COLS.OPT-PARAM']));
         Type      = $($this.Krayon.snippets($this.Scheme['COLS.TYPE']));
         Command   = $($this.Krayon.snippets($this.Scheme['COLS.CMD-NAME']));
+        Common    = $($this.Krayon.snippets($this.Scheme['COLS.COMMON']));
       }
+      CommonParamSet   = $this.CommonParamSet;
+      IncludeCommon    = $false;
       ParameterSetInfo = $null;
     }
 
@@ -251,6 +260,8 @@ class Syntax {
     }
 
     $this.NamesRegex = New-RegularExpression -Expression '(?<name>\w+)';
+
+    $this.AllCommonParamSet = $this.CommonParamSet + $this.ShouldProcessParamSet;
   } # ctor
 
   [string] TitleStmt([string]$title, [string]$commandName) {

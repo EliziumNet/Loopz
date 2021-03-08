@@ -5,9 +5,13 @@ Describe 'Show-InvokeReport' -Tag 'PSTools' {
     Import-Module .\Output\Elizium.Loopz\Elizium.Loopz.psm1 `
       -ErrorAction 'stop' -DisableNameChecking;
 
-      InModuleScope Elizium.Loopz {
-        function script:Test-InvokedWithParams {
-          param(
+    InModuleScope Elizium.Loopz {
+      function script:Test-InvokedWithParams {
+        #SupportsShouldProcess
+        [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSShouldProcess', '',
+          Justification = 'This is just a test')]
+        [CmdletBinding(SupportsShouldProcess)]
+        param(
           [Parameter(Mandatory, ValueFromPipeline = $true, Position = 0)]
           [System.IO.FileSystemInfo]$underscore,
 
@@ -118,9 +122,9 @@ Describe 'Show-InvokeReport' -Tag 'PSTools' {
           [Parameter()]
           [Parameter(ParameterSetName = 'InAllSetsByAccident', Position = 777)]
           [object]$Bad
-          )
-        }
+        )
       }
+    }
   }
 
   Context 'given: Test-InvokedWithParams param set missing mandatory' {
@@ -140,9 +144,9 @@ Describe 'Show-InvokeReport' -Tag 'PSTools' {
   }
 
   Context 'given: Test-InvokedWithParams and ambiguous parameter set' {
-    It 'should: show duplicate parameter sets' {
+    It 'should: show duplicate parameter sets' -Tag 'BUG' {
       InModuleScope Elizium.Loopz {
-        'Test-InvokedWithParams' | Show-InvokeReport -Params @('underscore', 'prepend');
+        'Test-InvokedWithParams' | Show-InvokeReport -Params @('underscore', 'prepend') -Common;
 
         # This should only return 2 parameter sets: Prepend and PrependDuplicate
         #

@@ -11,7 +11,10 @@ function Show-InvokeReport {
     [string[]]$Params,
 
     [Parameter()]
-    [System.Text.StringBuilder]$Builder = [System.Text.StringBuilder]::new()
+    [System.Text.StringBuilder]$Builder = [System.Text.StringBuilder]::new(),
+
+    [Parameter()]
+    [switch]$Common
   )
 
   begin {
@@ -39,7 +42,7 @@ function Show-InvokeReport {
       [string]$hiLightSnippet = $syntax.TableOptions.Snippets.HiLight;
       [RuleController]$controller = [RuleController]::New($_);
       [PSCustomObject]$runnerInfo = [PSCustomObject]@{
-        AllCommonParamSet = $syntax.AllCommonParamSet;
+        CommonParamSet = $syntax.CommonParamSet;
       }
 
       [DryRunner]$runner = [DryRunner]::new($controller, $runnerInfo);
@@ -63,6 +66,7 @@ function Show-InvokeReport {
       );
 
       [string]$doubleIndent = [string]::new(' ', $syntax.TableOptions.Chrome.Indent * 2);
+      [boolean]$showCommon = $Common.ToBool();
 
       if ($candidateNames.Length -eq 0) {
         [string]$message = "$($resetSnippet)does not resolve to a parameter set and is therefore invalid.";
@@ -86,7 +90,7 @@ function Show-InvokeReport {
           $($commonInvokeFormat -f $(Get-FormattedSignal -Name 'OK-A' -EmojiOnly), $message)
         );
 
-        $_ | Show-ParameterSetInfo -Sets $candidateNames -Builder $Builder;
+        $_ | Show-ParameterSetInfo -Sets $candidateNames -Builder $Builder -Common:$showCommon;
       }
       else {
         [string]$structuredName = $syntax.QuotedNameStmt($paramSetSnippet);
@@ -100,7 +104,7 @@ function Show-InvokeReport {
           $($commonInvokeFormat -f $(Get-FormattedSignal -Name 'FAILED-A' -EmojiOnly), $message)
         );
 
-        $_ | Show-ParameterSetInfo -Sets $candidateNames -Builder $Builder;
+        $_ | Show-ParameterSetInfo -Sets $candidateNames -Builder $Builder -Common:$showCommon;
       }
 
       if (-not($PSBoundParameters.ContainsKey('Builder'))) {
