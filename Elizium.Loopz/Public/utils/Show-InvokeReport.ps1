@@ -11,29 +11,42 @@ function Show-InvokeReport {
     [string[]]$Params,
 
     [Parameter()]
-    [System.Text.StringBuilder]$Builder = [System.Text.StringBuilder]::new(),
+    [Scribbler]$Scribbler,
 
     [Parameter()]
-    [switch]$Common
+    [switch]$Common,
+
+    [Parameter()]
+    [switch]$Test
   )
 
   begin {
     [Krayon]$krayon = Get-Krayon
     [hashtable]$signals = Get-Signals;
+
+    if ($null -eq $Scribbler) {
+      $Scribbler = New-Scribbler -Krayon $krayon -Test:$Test.IsPresent;
+    }
   }
 
   process {
-    if (-not($PSBoundParameters.ContainsKey('Builder'))) {
-      $null = $Builder.Clear();
-    }
-
     if ($_ -isNot [System.Management.Automation.CommandInfo]) {
-      Get-Command -Name $_ | Show-InvokeReport -Params $Params;
+      [hashtable]$shireParameters = @{
+        'Params' = $Params;
+        'Common' = $Common.IsPresent;
+        'Test'   = $Test.IsPresent;
+      }
+
+      if ($PSBoundParameters.ContainsKey('Scribbler')) {
+        $shireParameters['Scribbler'] = $Scribbler;
+      }      
+
+      Get-Command -Name $_ | Show-InvokeReport @shireParameters;
     }
     else {
       Write-Debug "    --- Show-InvokeReport - Command: [$($_.Name)] ---";
 
-      [syntax]$syntax = New-Syntax -CommandName $_.Name -Signals $signals -Krayon $krayon;
+      [syntax]$syntax = New-Syntax -CommandName $_.Name -Signals $signals -Scribbler $Scribbler;
       [string]$paramSetSnippet = $syntax.TableOptions.Snippets.ParamSetName;
       [string]$resetSnippet = $syntax.TableOptions.Snippets.Reset;
       [string]$lnSnippet = $syntax.TableOptions.Snippets.Ln;
@@ -46,7 +59,7 @@ function Show-InvokeReport {
       }
 
       [DryRunner]$runner = [DryRunner]::new($controller, $runnerInfo);
-      $null = $builder.Append($syntax.TitleStmt('Invoke Report', $_.Name));
+      $Scribbler.Scribble($syntax.TitleStmt('Invoke Report', $_.Name));
 
       [System.Management.Automation.CommandParameterSetInfo[]]$candidateSets = $runner.Resolve($Params);
 
@@ -66,11 +79,11 @@ function Show-InvokeReport {
       );
 
       [string]$doubleIndent = [string]::new(' ', $syntax.TableOptions.Chrome.Indent * 2);
-      [boolean]$showCommon = $Common.ToBool();
+      [boolean]$showCommon = $Common.IsPresent;
 
       if ($candidateNames.Length -eq 0) {
         [string]$message = "$($resetSnippet)does not resolve to a parameter set and is therefore invalid.";
-        $null = $Builder.Append(
+        $Scribbler.Scribble(
           $($commonInvokeFormat -f $(Get-FormattedSignal -Name 'INVALID' -EmojiOnly), $message)
         );
       }
@@ -86,11 +99,12 @@ function Show-InvokeReport {
         $commonInvokeFormat = $commonInvokeFormat.Replace($unresolvedStructuredParams,
           $resolvedStructuredParams);
 
-        $null = $Builder.Append(
+        $Scribbler.Scribble(
           $($commonInvokeFormat -f $(Get-FormattedSignal -Name 'OK-A' -EmojiOnly), $message)
         );
 
-        $_ | Show-ParameterSetInfo -Sets $candidateNames -Builder $Builder -Common:$showCommon;
+        $_ | Show-ParameterSetInfo -Sets $candidateNames -Scribbler $Scribbler `
+          -Common:$showCommon -Test:$Test.IsPresent;
       }
       else {
         [string]$structuredName = $syntax.QuotedNameStmt($paramSetSnippet);
@@ -100,17 +114,15 @@ function Show-InvokeReport {
           "$($compoundStructuredNames)"
         );
 
-        $null = $Builder.Append(
+        $Scribbler.Scribble(
           $($commonInvokeFormat -f $(Get-FormattedSignal -Name 'FAILED-A' -EmojiOnly), $message)
         );
 
-        $_ | Show-ParameterSetInfo -Sets $candidateNames -Builder $Builder -Common:$showCommon;
+        $_ | Show-ParameterSetInfo -Sets $candidateNames -Scribbler $Scribbler `
+          -Common:$showCommon -Test:$Test.IsPresent;
       }
 
-      if (-not($PSBoundParameters.ContainsKey('Builder'))) {
-        Write-Debug "'$($Builder.ToString())'";
-        $krayon.ScribbleLn($Builder.ToString()).End();
-      }
+      $Scribbler.Flush();
     }
   }
 }

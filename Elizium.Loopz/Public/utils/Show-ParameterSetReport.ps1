@@ -8,43 +8,50 @@ function Show-ParameterSetReport {
     [string[]]$Name,
 
     [Parameter()]
-    [System.Text.StringBuilder]$Builder = [System.Text.StringBuilder]::new()
+    [Scribbler]$Scribbler,
+
+    [Parameter()]
+    [switch]$Test
   )
 
   begin {
     [Krayon]$krayon = Get-Krayon
     [hashtable]$signals = Get-Signals;
+    if ($null -eq $Scribbler) {
+      $Scribbler = New-Scribbler -Krayon $krayon -Test:$Test.IsPresent;
+    }
   }
 
   process {
-    if (-not($PSBoundParameters.ContainsKey('Builder'))) {
-      $null = $Builder.Clear();
-    }
-
     # Reminder: $_ is commandInfo
     # 
     if ($_ -isNot [System.Management.Automation.CommandInfo]) {
-      Get-Command -Name $_ | Show-ParameterSetReport;
+      [hashtable]$sharpParameters = @{
+        'Test'   = $Test.IsPresent;
+      }
+
+      if ($PSBoundParameters.ContainsKey('Scribbler')) {
+        $sharpParameters['Scribbler'] = $Scribbler;
+      }     
+
+      Get-Command -Name $_ | Show-ParameterSetReport @sharpParameters;
     }
     else {
       Write-Debug "    --- Show-ParameterSetReport - Command: [$($_.Name)] ---";
 
-      [syntax]$syntax = New-Syntax -CommandName $_.Name -Signals $signals -Krayon $krayon;
+      [syntax]$syntax = New-Syntax -CommandName $_.Name -Signals $signals -Scribbler $Scribbler;
       [RuleController]$controller = [RuleController]::New($_);
 
-      $null = $builder.Append($syntax.TitleStmt('Parameter Set Violations Report', $_.Name));
+      $Scribbler.Scribble($syntax.TitleStmt('Parameter Set Violations Report', $_.Name));
 
       [PSCustomObject]$queryInfo = [PSCustomObject]@{
         CommandInfo = $_;
         Syntax      = $syntax;
-        Builder     = $builder;
+        Scribbler   = $Scribbler;
       }
       $controller.ReportAll($queryInfo);
 
-      if (-not($PSBoundParameters.ContainsKey('Builder'))) {
-        Write-Debug "'$($Builder.ToString())'";
-        $krayon.ScribbleLn($Builder.ToString()).End();
-      }
+      $Scribbler.Flush();
     }
   }
 }

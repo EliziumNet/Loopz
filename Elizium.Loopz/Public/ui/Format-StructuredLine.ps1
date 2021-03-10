@@ -18,9 +18,6 @@ function Format-StructuredLine {
   .PARAMETER Exchange
     The exchange hashtable object.
 
-  .PARAMETER Krayon
-    The writer object which contains the Krayola theme.
-
   .PARAMETER LineKey
     The key used to index into the $Exchange hashtable to denote the core line.
 
@@ -72,9 +69,6 @@ function Format-StructuredLine {
     [switch]$Truncate,
 
     [Parameter()]
-    [Krayon]$Krayon,
-
-    [Parameter()]
     [PSCustomObject]$Options = (@{
         WingLength      = 3;
         MinimumFlexSize = 6;
@@ -82,13 +76,23 @@ function Format-StructuredLine {
         WithLead        = $false;
       })
   )
+  [Scribbler]$scribbler = $Exchange['LOOPZ.SCRIBBLER'];
+  if (-not($scribbler)) {
+    throw [System.Management.Automation.MethodInvocationException]::new(
+      "Format-StructuredLine: Scribbler missing from Exchange under key 'LOOPZ.SCRIBBLER'");
+  }
+  [Krayon]$krayon = $scribbler.Krayon;
+
+  [string]$lnSnippet = $scribbler.Snippets(@('Ln'));
+  [string]$metaSnippet = $scribbler.WithArgSnippet('ThemeColour', 'meta');
+  [string]$messageSnippet = $scribbler.WithArgSnippet('ThemeColour', 'message');
+
   [int]$wingLength = Get-PsObjectField $Options 'WingLength' 3;
   [int]$minimumFlexSize = Get-PsObjectField $Options 'MinimumFlexSize' 6;
   [string]$ellipses = Get-PsObjectField $Options 'Ellipses' ' ...';
   [boolean]$withLead = Get-PsObjectField $Options 'WithLead' $false;
-  [string]$formatWithArg = $Krayon.ApiFormatWithArg;
 
-  [hashtable]$theme = $Krayon.Theme;
+  [hashtable]$theme = $krayon.Theme;
 
   [string]$line = $Exchange.ContainsKey($LineKey) `
     ? $Exchange[$LineKey] : ([string]::new("_", 81));
@@ -113,7 +117,7 @@ function Format-StructuredLine {
   }
 
   [string]$structuredLine = if ([string]::IsNullOrEmpty($message) -and [string]::IsNullOrEmpty($crumb)) {
-    $($formatWithArg -f "ThemeColour", "meta") + $line;
+    $("$($metaSnippet)$($line)$($lnSnippet)");
   }
   else {
     [string]$open = $theme['OPEN'];
@@ -170,9 +174,11 @@ function Format-StructuredLine {
       [string]$mid = [string]::new($char, $midSize);
       $startSnippet = $startSnippet.Replace('*{mid}', $mid);
 
-      $($formatWithArg -f "ThemeColour", "meta") + $startSnippet + `
-      $($formatWithArg -f "ThemeColour", "message") + $message + `
-      $($formatWithArg -f "ThemeColour", "meta") + $endSnippet;
+      $(
+        "$($metaSnippet)$($startSnippet)" +
+        "$($messageSnippet)$($message)" +
+        "$($metaSnippet)$($endSnippet)$($lnSnippet)"
+      );
     }
     elseif (-not([string]::IsNullOrEmpty($message))) {
       # 'lead' + 'open' + 'message' + 'close' + 'tail'
@@ -213,9 +219,11 @@ function Format-StructuredLine {
       [string]$startSnippet = $startFormat.Replace('*{lead}', $lead). `
         Replace('*{open}', $open);
 
-      $($formatWithArg -f "ThemeColour", "meta") + $startSnippet + `
-      $($formatWithArg -f "ThemeColour", "message") + $message + `
-      $($formatWithArg -f "ThemeColour", "meta") + $endSnippet;
+      $(
+        "$($metaSnippet)$($startSnippet)" +
+        "$($messageSnippet)$($message)" +
+        "$($metaSnippet)$($endSnippet)$($lnSnippet)"
+      );
     }
     elseif (-not([string]::IsNullOrEmpty($crumb))) {
       # 'lead' + 'open' + 'crumb' + 'close' + 'tail'
@@ -242,10 +250,9 @@ function Format-StructuredLine {
       [string]$tail = [string]::new($char, $tailSize);
       [string]$lineSnippet = $withTailFormat.Replace('*{tail}', $tail);
 
-      $($formatWithArg -f "ThemeColour", "meta") + $lineSnippet;
+      $("$($metaSnippet)$($lineSnippet)$($lnSnippet)");
     }
   }
 
-  # Write-Host ">>> structuredLine: '$structuredLine'";
   return $structuredLine;
 }

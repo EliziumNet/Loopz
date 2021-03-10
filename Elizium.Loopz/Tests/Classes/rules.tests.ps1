@@ -1,5 +1,6 @@
 using namespace System.Text;
 using namespace System.Management.Automation;
+using module Elizium.Krayola;
 
 Describe 'Rules' -Tag 'PSTools' {
   BeforeAll {
@@ -15,8 +16,8 @@ Describe 'Rules' -Tag 'PSTools' {
 
   BeforeEach {
     InModuleScope Elizium.Loopz {
-      [StringBuilder]$script:_builder = [StringBuilder]::new();
       [krayon]$script:_krayon = New-Krayon -Theme $_theme;
+      [Scribbler]$script:_scribbler = New-Scribbler -Krayon $_krayon -Test;
     }
   }
 
@@ -53,13 +54,14 @@ Describe 'Rules' -Tag 'PSTools' {
         InModuleScope Elizium.Loopz {
           [string]$commandName = 'test-WithDuplicateParamSets';
           [CommandInfo]$commandInfo = Get-Command $commandName;
-          [syntax]$syntax = New-Syntax -CommandName $commandName -Signals $_signals -Krayon $_krayon;
+          [syntax]$syntax = New-Syntax -CommandName $commandName `
+            -Signals $_signals -Scribbler $_scribbler;
           [string]$ruleName = 'UNIQUE-PARAM-SET';
 
           [PSCustomObject]$queryInfo = [PSCustomObject]@{
             CommandInfo = $commandInfo;
             Syntax      = $syntax;
-            Builder     = $_builder;
+            Scribbler   = $_scribbler;
           }
 
           [MustContainUniqueSetOfParams]$rule = [MustContainUniqueSetOfParams]::new($ruleName);
@@ -76,7 +78,7 @@ Describe 'Rules' -Tag 'PSTools' {
           $rule.ViolationStmt($vo.Violations, $queryInfo);
 
           if ($DebugPreference -ne [ActionPreference]::SilentlyContinue) {
-            $_krayon.ScribbleLn($_builder.ToString());
+            $_krayon.ScribbleLn($_scribbler.ToString());
           }
         }
       }
@@ -117,13 +119,13 @@ Describe 'Rules' -Tag 'PSTools' {
         InModuleScope Elizium.Loopz {
           [string]$commandName = 'test-MultipleSetsWithDuplicatedPositions';
           [CommandInfo]$commandInfo = Get-Command $commandName;
-          [syntax]$syntax = New-Syntax -CommandName $commandName -Signals $_signals -Krayon $_krayon;
+          [syntax]$syntax = New-Syntax -CommandName $commandName -Signals $_signals -Scribbler $_scribbler;
           [string]$ruleName = 'UNIQUE-POSITIONS';
 
           [PSCustomObject]$queryInfo = [PSCustomObject]@{
             CommandInfo = $commandInfo;
             Syntax      = $syntax;
-            Builder     = $_builder;
+            Scribbler   = $_scribbler;
           }
 
           [MustContainUniquePositions]$rule = [MustContainUniquePositions]::new($ruleName);
@@ -150,9 +152,7 @@ Describe 'Rules' -Tag 'PSTools' {
           #
           $rule.ViolationStmt($vo.Violations, $queryInfo);
 
-          if ($DebugPreference -ne [ActionPreference]::SilentlyContinue) {
-            $_krayon.ScribbleLn($_builder.ToString());
-          }
+          $_scribbler.Flush();
         }
       }
     }
@@ -190,13 +190,13 @@ Describe 'Rules' -Tag 'PSTools' {
         InModuleScope Elizium.Loopz {
           [string]$commandName = 'test-MultipleClaimsToPipelineValue';
           [CommandInfo]$commandInfo = Get-Command $commandName;
-          [Syntax]$syntax = New-Syntax -CommandName $commandName -Signals $_signals -Krayon $_krayon;
+          [Syntax]$syntax = New-Syntax -CommandName $commandName -Signals $_signals -Scribbler $_scribbler;
           [string]$ruleName = 'SINGLE-PIPELINE-PARAM';
 
           [PSCustomObject]$queryInfo = [PSCustomObject]@{
             CommandInfo = $commandInfo;
             Syntax      = $syntax;
-            Builder     = $_builder;
+            Scribbler   = $_scribbler;
           }
 
           [MustNotHaveMultiplePipelineParams]$rule = [MustNotHaveMultiplePipelineParams]::new($ruleName);
@@ -224,7 +224,7 @@ Describe 'Rules' -Tag 'PSTools' {
           $rule.ViolationStmt($vo.Violations, $queryInfo);
 
           if ($DebugPreference -ne [ActionPreference]::SilentlyContinue) {
-            $_krayon.ScribbleLn($_builder.ToString());
+            $_krayon.ScribbleLn($_scribbler.ToString());
           }
         }
       }
@@ -264,7 +264,7 @@ Describe 'Rules' -Tag 'PSTools' {
           [string]$commandName = 'test-runTest';
           [CommandInfo]$commandInfo = Get-Command $commandName;
           [RuleController]$controller = [RuleController]::new($commandInfo);
-          [syntax]$syntax = New-Syntax -CommandName $commandName -Signals $_signals -Krayon $_krayon;
+          [syntax]$syntax = New-Syntax -CommandName $commandName -Signals $_signals -Scribbler $_scribbler;
           $controller.Test($syntax).Result | Should -Be $false;
         }
       }
@@ -276,7 +276,7 @@ Describe 'Rules' -Tag 'PSTools' {
           [string]$commandName = 'Invoke-Command';
           [CommandInfo]$commandInfo = Get-Command $commandName;
           [RuleController]$controller = [RuleController]::new($commandInfo);
-          [syntax]$syntax = New-Syntax -CommandName $commandName -Signals $_signals -Krayon $_krayon;
+          [syntax]$syntax = New-Syntax -CommandName $commandName -Signals $_signals -Scribbler $_scribbler;
           $controller.Test($syntax).Result | Should -Be $true;
         }
       }
@@ -298,7 +298,7 @@ Describe 'Rules' -Tag 'PSTools' {
 
               if ($commandInfo) {
                 [RuleController]$controller = [RuleController]::new($commandInfo);
-                [syntax]$syntax = New-Syntax -CommandName $command -Signals $_signals -Krayon $_krayon;
+                [syntax]$syntax = New-Syntax -CommandName $command -Signals $_signals -Scribbler $_scribbler;
                 [PSCustomObject]$testResult = $controller.Test($syntax);
 
                 [string]$because = $("'{0}' contains violations" -f $command);
@@ -392,7 +392,7 @@ Describe 'Rules' -Tag 'PSTools' {
 
         [string]$commandName = 'test-FakeMany';
         [DryRunner]$script:_runner = New-DryRunner -CommandName $commandName `
-          -Signals $_signals -Krayon $_krayon;
+          -Signals $_signals -Scribbler $_scribbler;
       } # InModuleScope Elizium.Loopz
     } # BeforeEach
 
@@ -420,15 +420,17 @@ Describe 'Rules' -Tag 'PSTools' {
     }
 
     Context 'given: ambiguous but should not be' {
-      It 'should: resolve to 1 parameter set (ReplacePaste)' {
+      It 'should: resolve to 1 parameter set (ReplacePaste)' -Tag 'FIX-ME' -Skip {
         InModuleScope Elizium.Loopz {
           [string]$commandName = 'Rename-Many';
           [DryRunner]$runner = New-DryRunner -CommandName $commandName `
-            -Signals $_signals -Krayon $_krayon;
+            -Signals $_signals -Scribbler $_scribbler;
 
           [CommandParameterSetInfo[]]$paramSets = $runner.Resolve(
             @('underscore', 'Pattern', 'Anchor', 'Paste')
           );
+
+          $paramSets.Count | Should -Be 999;
         }
       }
     }

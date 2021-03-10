@@ -13,6 +13,7 @@ Describe 'Rename-Many' -Tag 'remy' {
 
     Import-Module Assert;
     [boolean]$script:_whatIf = $false;
+    [boolean]$script:_test = $true;
 
     [string]$script:_directoryPath = './Tests/Data/fefsi/';
 
@@ -86,7 +87,8 @@ Describe 'Rename-Many' -Tag 'remy' {
             $script:_expected = $_noFiles;
 
             Get-ChildItem -Path $_directoryPath | Rename-Many -File `
-              -Pattern 'a', f -Copy 'bar' -Paste '${_c}' -WhatIf:$_whatIf;
+              -Pattern 'a', f -Copy 'bar' -Paste '${_c}' `
+              -WhatIf:$_whatIf -Test:$_test;
           }
         }
 
@@ -101,7 +103,8 @@ Describe 'Rename-Many' -Tag 'remy' {
             }
 
             Get-ChildItem -Path $_directoryPath | Rename-Many -File `
-              -Pattern 'a', f -Copy 't' -Paste '${_c}' -WhatIf:$_whatIf;
+              -Pattern 'a', f -Copy 't' -Paste '${_c}' `
+              -WhatIf:$_whatIf -Test:$_test;
           }
         } # and: First Only
 
@@ -113,7 +116,8 @@ Describe 'Rename-Many' -Tag 'remy' {
             }
 
             Get-ChildItem -Path $_directoryPath | Rename-Many -File `
-              -Pattern 'o', 3 -Copy '0' -Paste '${_c}' -WhatIf:$_whatIf;
+              -Pattern 'o', 3 -Copy '0' -Paste '${_c}' `
+              -WhatIf:$_whatIf -Test:$_test;
           }
         } # and: replace 3rd match
 
@@ -128,7 +132,8 @@ Describe 'Rename-Many' -Tag 'remy' {
             }
 
             Get-ChildItem -Path $_directoryPath | Rename-Many -File `
-              -Pattern 'a', l -Copy 'z' -Paste '(${_c})' -WhatIf:$_whatIf;
+              -Pattern 'a', l -Copy 'z' -Paste '(${_c})' `
+              -WhatIf:$_whatIf -Test:$_test;
           }
         } # and: Last Only
       } # and: Copy is non-regex literal text
@@ -145,7 +150,8 @@ Describe 'Rename-Many' -Tag 'remy' {
             }
 
             Get-ChildItem -Path $_directoryPath | Rename-Many -File `
-              -Pattern 'a', f -Copy 't\d' -Paste '${_c}' -Whole c -WhatIf:$_whatIf;
+              -Pattern 'a', f -Copy 't\d' -Paste '${_c}' -Whole c `
+              -WhatIf:$_whatIf -Test:$_test;
           }
         } # and: Whole Copy
 
@@ -160,7 +166,8 @@ Describe 'Rename-Many' -Tag 'remy' {
             }
 
             Get-ChildItem -File -Path $_directoryPath | Rename-Many -File `
-              -Pattern 'loopz.' -Copy '\wa', l -Paste '$0(${_c})-' -WhatIf:$_whatIf;
+              -Pattern 'loopz.' -Copy '\wa', l -Paste '$0(${_c})-' `
+              -WhatIf:$_whatIf -Test:$_test;
           }
         }
 
@@ -169,7 +176,8 @@ Describe 'Rename-Many' -Tag 'remy' {
             $script:_expected = $_noFiles;
 
             Get-ChildItem -Path $_directoryPath | Rename-Many -File `
-              -Pattern 'a', f -Copy '\d{4}' -Paste '${_c}' -WhatIf:$_whatIf;
+              -Pattern 'a', f -Copy '\d{4}' -Paste '${_c}' `
+              -WhatIf:$_whatIf -Test:$_test;
           }
         }
 
@@ -184,7 +192,8 @@ Describe 'Rename-Many' -Tag 'remy' {
             }
 
             Get-ChildItem -Path $_directoryPath | Rename-Many -File `
-              -Pattern 'a', f -Copy 't\d' -Paste '${_c}' -WhatIf:$_whatIf;
+              -Pattern 'a', f -Copy 't\d' -Paste '${_c}' `
+              -WhatIf:$_whatIf -Test:$_test;
           }
         } # and: First Only
       } # and: Copy is regex
@@ -201,7 +210,8 @@ Describe 'Rename-Many' -Tag 'remy' {
             }
 
             Get-ChildItem -Path $_directoryPath | Rename-Many -File `
-              -Pattern 'a', f -Copy ($(esc('.')) + '\w{3}') -Paste '${_c}' -WhatIf:$_whatIf;
+              -Pattern 'a', f -Copy ($(esc('.')) + '\w{3}') -Paste '${_c}' `
+              -WhatIf:$_whatIf -Test:$_test;
           }
         } # and: First Only
       } # and: Copy needs escapes
@@ -218,7 +228,8 @@ Describe 'Rename-Many' -Tag 'remy' {
             }
 
             Get-ChildItem -Path $_directoryPath | Rename-Many -File `
-              -Pattern 'a', f -Paste '@' -WhatIf:$_whatIf;
+              -Pattern 'a', f -Paste '@' `
+              -WhatIf:$_whatIf -Test:$_test;
           }
 
           Context 'and: replace 3rd match' {
@@ -229,7 +240,8 @@ Describe 'Rename-Many' -Tag 'remy' {
               }
 
               Get-ChildItem -Path $_directoryPath | Rename-Many -File `
-                -Pattern 'o', 3 -Paste '0' -WhatIf:$_whatIf;
+                -Pattern 'o', 3 -Paste '0' `
+                -WhatIf:$_whatIf -Test:$_test;
             }
           } # and: replace 3rd match
 
@@ -244,7 +256,8 @@ Describe 'Rename-Many' -Tag 'remy' {
               }
 
               Get-ChildItem -Path $_directoryPath | Rename-Many -File `
-                -Pattern 'a', l -Paste '@' -WhatIf:$_whatIf;
+                -Pattern 'a', l -Paste '@' `
+                -WhatIf:$_whatIf -Test:$_test;
             }
           } # and: Last Only
         } # and: First Only
@@ -270,7 +283,8 @@ Describe 'Rename-Many' -Tag 'remy' {
             }
 
             Get-ChildItem -Path $_directoryPath | Rename-Many -File `
-              -Pattern 'a', f -Paste '@' -Transform $transform -WhatIf:$_whatIf;
+              -Pattern 'a', f -Paste '@' -Transform $transform `
+              -WhatIf:$_whatIf -Test:$_test;
           }
         }
       } # With
@@ -284,7 +298,8 @@ Describe 'Rename-Many' -Tag 'remy' {
             }
 
             Get-ChildItem -Path $_directoryPath | Rename-Many -File `
-              -Pattern 'loopz' -Except 'data' -Copy 'h00pz' -Paste '${_c}' -WhatIf:$_whatIf;
+              -Pattern 'loopz' -Except 'data' -Copy 'h00pz' -Paste '${_c}' `
+              -WhatIf:$_whatIf -Test:$_test;
           }
         }
       } # and: Except
@@ -299,7 +314,8 @@ Describe 'Rename-Many' -Tag 'remy' {
             }
 
             Get-ChildItem -Path $_directoryPath | Rename-Many -File `
-              -Pattern 'loopz' -Include 'data' -Copy 'h00pz' -Paste '${_c}' -WhatIf:$_whatIf;
+              -Pattern 'loopz' -Include 'data' -Copy 'h00pz' -Paste '${_c}' `
+              -WhatIf:$_whatIf -Test:$_test;
           }
         }
       } # and: Except
@@ -323,7 +339,8 @@ Describe 'Rename-Many' -Tag 'remy' {
           }
 
           Get-ChildItem -Path $_directoryPath | Rename-Many -Context $context -File `
-            -Pattern 'a', l -Paste '@' -WhatIf:$_whatIf;
+            -Pattern 'a', l -Paste '@' `
+            -WhatIf:$_whatIf -Test:$_test;
         }
       }
 
@@ -339,7 +356,8 @@ Describe 'Rename-Many' -Tag 'remy' {
           [string]$plastikmanPath = './Tests/Data/traverse/Audio/MINIMAL/Plastikman';
 
           Get-ChildItem -Path $plastikmanPath | Rename-Many -Directory `
-            -Pattern 'e' -Copy '3' -Paste '${_c}' -WhatIf:$_whatIf;
+            -Pattern 'e' -Copy '3' -Paste '${_c}' `
+            -WhatIf:$_whatIf -Test:$_test;
         }
       }
     } # and: Source matches Pattern
@@ -358,7 +376,8 @@ Describe 'Rename-Many' -Tag 'remy' {
               }
 
               Get-ChildItem -File -Path $_directoryPath | Rename-Many -File `
-                -Pattern 'data.' -Anchor 'loopz' -Relation 'before' -WhatIf:$_whatIf;
+                -Pattern 'data.' -Anchor 'loopz' -Relation 'before' `
+                -WhatIf:$_whatIf -Test:$_test;
             }
 
             It 'should: do rename; move Pattern match before Anchor and Drop' {
@@ -369,7 +388,8 @@ Describe 'Rename-Many' -Tag 'remy' {
               }
 
               Get-ChildItem -File -Path $_directoryPath | Rename-Many -File `
-                -Pattern 'data.' -Anchor 'loopz' -Relation 'before' -Drop '-' -WhatIf:$_whatIf;
+                -Pattern 'data.' -Anchor 'loopz' -Relation 'before' -Drop '-' `
+                -WhatIf:$_whatIf -Test:$_test;
             }
           } # and: Source matches Anchor
 
@@ -382,7 +402,8 @@ Describe 'Rename-Many' -Tag 'remy' {
               }
 
               Get-ChildItem -File -Path $_directoryPath | Rename-Many -File `
-                -Pattern 'data' -Anchor 'loopz' -Relation 'before' -Whole p -WhatIf:$_whatIf;
+                -Pattern 'data' -Anchor 'loopz' -Relation 'before' -Whole p `
+                -WhatIf:$_whatIf -Test:$_test;
             }
           }
 
@@ -397,7 +418,8 @@ Describe 'Rename-Many' -Tag 'remy' {
               }
 
               Get-ChildItem -File -Path $_directoryPath | Rename-Many -File `
-                -Pattern 'loopz.' -Anchor 'a', l -Relation 'before' -WhatIf:$_whatIf;
+                -Pattern 'loopz.' -Anchor 'a', l -Relation 'before' `
+                -WhatIf:$_whatIf -Test:$_test;
             }
 
             Context 'and: top 2' {
@@ -408,7 +430,8 @@ Describe 'Rename-Many' -Tag 'remy' {
                 }
 
                 Get-ChildItem -File -Path $_directoryPath | Rename-Many -File `
-                  -Pattern 'loopz.' -Anchor 'a', l -Relation 'before' -Top 2 -WhatIf:$_whatIf;
+                  -Pattern 'loopz.' -Anchor 'a', l -Relation 'before' -Top 2 `
+                  -WhatIf:$_whatIf -Test:$_test;
               }
             } 
           }
@@ -422,7 +445,8 @@ Describe 'Rename-Many' -Tag 'remy' {
               }
 
               Get-ChildItem -File -Path $_directoryPath | Rename-Many -File `
-                -Pattern 'DATA\./i' -Anchor 'loopz' -Relation 'before' -WhatIf:$_whatIf;
+                -Pattern 'DATA\./i' -Anchor 'loopz' -Relation 'before' `
+                -WhatIf:$_whatIf -Test:$_test;
             }
           }
 
@@ -431,7 +455,8 @@ Describe 'Rename-Many' -Tag 'remy' {
               $script:_expected = $_unchanged;
             
               Get-ChildItem -File -Path $_directoryPath | Rename-Many -File `
-                -Pattern 'data.' -Anchor 'blooper' -Relation 'before' -WhatIf:$_whatIf;
+                -Pattern 'data.' -Anchor 'blooper' -Relation 'before' `
+                -WhatIf:$_whatIf -Test:$_test;
             }
           }
         } # and: Source matches Pattern
@@ -461,7 +486,8 @@ Describe 'Rename-Many' -Tag 'remy' {
             }
 
             Get-ChildItem -File -Path $_directoryPath | Rename-Many -File `
-              -Pattern 'loopz.' -Transform $transform -WhatIf:$_whatIf;
+              -Pattern 'loopz.' -Transform $transform `
+              -WhatIf:$_whatIf -Test:$_test;
           }
         }
       } # and Relation is Before
@@ -477,7 +503,8 @@ Describe 'Rename-Many' -Tag 'remy' {
               }
 
               Get-ChildItem -File -Path $_directoryPath | Rename-Many -File `
-                -Pattern 'loopz.' -Anchor 'data.' -Relation 'after' -WhatIf:$_whatIf;
+                -Pattern 'loopz.' -Anchor 'data.' -Relation 'after' `
+                -WhatIf:$_whatIf -Test:$_test;
             }
 
             Context 'and: Whole Anchor' {
@@ -489,7 +516,8 @@ Describe 'Rename-Many' -Tag 'remy' {
                 }
 
                 Get-ChildItem -File -Path $_directoryPath | Rename-Many -File `
-                  -Pattern 'loopz.' -Anchor 'data' -Relation 'after' -Whole a -WhatIf:$_whatIf;
+                  -Pattern 'loopz.' -Anchor 'data' -Relation 'after' -Whole a `
+                  -WhatIf:$_whatIf -Test:$_test;
               }
             }
           } # and: Source matches Anchor
@@ -505,7 +533,8 @@ Describe 'Rename-Many' -Tag 'remy' {
               }
 
               Get-ChildItem -File -Path $_directoryPath | Rename-Many -File `
-                -Pattern 'loopz.' -Anchor '\.', l -Relation 'after' -WhatIf:$_whatIf;
+                -Pattern 'loopz.' -Anchor '\.', l -Relation 'after' `
+                -WhatIf:$_whatIf -Test:$_test;
             }
           }
 
@@ -513,7 +542,8 @@ Describe 'Rename-Many' -Tag 'remy' {
             It 'should: NOT do rename' {
               $script:_expected = $_noFiles;
               Get-ChildItem -File -Path $_directoryPath | Rename-Many -File `
-                -Pattern 'loopz.' -Anchor 'blooper' -Relation 'after' -WhatIf:$_whatIf;
+                -Pattern 'loopz.' -Anchor 'blooper' -Relation 'after' `
+                -WhatIf:$_whatIf -Test:$_test;
             }
           }
         } # and: Source matches Pattern
@@ -521,10 +551,6 @@ Describe 'Rename-Many' -Tag 'remy' {
     } # and: TargetType is Anchor
 
     Context 'and: Hybrid Anchor' -Tag 'HYBRID' {
-      # Hybrid just means Anchor specified with either Start or End
-      # (This feature is not yet supported in rename-many, but is in
-      # Move-Match).
-      #
       Context 'and: Anchor matches Pattern' {
         Context 'and: Start specified' {
           It 'should: ignore Start and move to Anchor' {
@@ -535,7 +561,8 @@ Describe 'Rename-Many' -Tag 'remy' {
             }
 
             Get-ChildItem -File -Path $_directoryPath | Rename-Many -File `
-              -Pattern 'data.' -AnchorStart 'loopz' -Relation 'before' -WhatIf:$_whatIf;
+              -Pattern 'data.' -AnchorStart 'loopz' -Relation 'before' `
+              -WhatIf:$_whatIf -Test:$_test;
           }
         }
 
@@ -548,7 +575,8 @@ Describe 'Rename-Many' -Tag 'remy' {
             }
 
             Get-ChildItem -File -Path $_directoryPath | Rename-Many -File `
-              -Pattern 'data.' -AnchorEnd 'loopz' -Relation 'before' -WhatIf:$_whatIf;
+              -Pattern 'data.' -AnchorEnd 'loopz' -Relation 'before' `
+              -WhatIf:$_whatIf -Test:$_test;
           }
         }
       } # and: Anchor matches Pattern
@@ -565,7 +593,8 @@ Describe 'Rename-Many' -Tag 'remy' {
             }
 
             Get-ChildItem -File -Path $_directoryPath | Rename-Many -File `
-              -Pattern '\.(?<tail>t\d)' -AnchorStart 'blooper' -With '${tail}.' -WhatIf:$_whatIf;
+              -Pattern '\.(?<tail>t\d)' -AnchorStart 'blooper' -With '${tail}.' `
+              -WhatIf:$_whatIf -Test:$_test;
           }
         }
 
@@ -580,7 +609,8 @@ Describe 'Rename-Many' -Tag 'remy' {
             }
 
             Get-ChildItem -File -Path $_directoryPath | Rename-Many -File `
-              -Pattern '(?<header>loopz)\.' -AnchorEnd 'blooper' -With '.${header}' -WhatIf:$_whatIf;
+              -Pattern '(?<header>loopz)\.' -AnchorEnd 'blooper' -With '.${header}' `
+              -WhatIf:$_whatIf -Test:$_test;
           }
         }
       } #
@@ -593,8 +623,6 @@ Describe 'Rename-Many' -Tag 'remy' {
             It 'should: do rename; move Pattern match with Copy capture' -Tag 'RE-WRITE' -Skip {
               $script:_expected = @{
                 'loopz.application.t1.log' = '.BEGIN-.t1-application.-loopz.-END.application.t1.log';
-                #                            'application.t1application..log'
-                #                            '.BEGIN-.t1-application.-loopz.-END.application.t1.log'
                 'loopz.application.t2.log' = '.BEGIN-.t2-application.-loopz.-END.application.t2.log';
                 'loopz.data.t1.txt'        = '.BEGIN-.t1-data.-loopz.-END.data.t1.txt';
                 'loopz.data.t2.txt'        = '.BEGIN-.t2-data.-loopz.-END.data.t2.txt';
@@ -607,7 +635,8 @@ Describe 'Rename-Many' -Tag 'remy' {
               [string]$with = '.BEGIN-${_a}-${_c}-${header}-END.';
 
               Get-ChildItem -File -Path $_directoryPath | Rename-Many -File `
-                -Pattern $pattern -Copy $copy -Anchor $anchor -Relation 'after' -With $with -WhatIf -Diagnose;
+                -Pattern $pattern -Copy $copy -Anchor $anchor -Relation 'after' -With $with `
+                -WhatIf:$_whatIf -Test:$_test -Diagnose;
             }
 
             Context 'and: Drop' {
@@ -627,7 +656,8 @@ Describe 'Rename-Many' -Tag 'remy' {
 
                 Get-ChildItem -File -Path $_directoryPath | Rename-Many -File `
                   -Pattern $pattern -Copy $copy -Anchor $anchor -Relation 'after' -With $with `
-                  -Diagnose -Drop '[${header}, ${_c}]_';
+                  -Drop '[${header}, ${_c}]_' `
+                  -WhatIf:$_whatIf -Test:$_test -Diagnose;
               }
             }
           }
@@ -641,7 +671,8 @@ Describe 'Rename-Many' -Tag 'remy' {
             [string]$with = '.BEGIN-${_a}-${_c}-${header}-END';
 
             Get-ChildItem -File -Path $_directoryPath | Rename-Many -File `
-              -Pattern $pattern -Copy $copy -Anchor $anchor -Relation 'after' -With $with -WhatIf -Diagnose;
+              -Pattern $pattern -Copy $copy -Anchor $anchor -Relation 'after' -With $with `
+              -WhatIf:$_whatIf -Test:$_test -Diagnose;
           }
         } # and: Source match does NOT match Pattern
       } # and: Source matches with Named Captures
@@ -665,7 +696,8 @@ Describe 'Rename-Many' -Tag 'remy' {
               [string]$paste = 'BEGIN-${_c}-${header}-${body}-END';
 
               Get-ChildItem -File -Path $_directoryPath | Rename-Many -File `
-                -Pattern $pattern -Copy $copy -Paste $paste -WhatIf -Diagnose;
+                -Pattern $pattern -Copy $copy -Paste $paste `
+                -WhatIf:$_whatIf -Test:$_test -Diagnose;
             }
 
             It 'should: do rename; move Pattern match with Copy capture' {
@@ -682,7 +714,8 @@ Describe 'Rename-Many' -Tag 'remy' {
               [string]$paste = 'BEGIN-${_c}-${header}-${body}-END';
 
               Get-ChildItem -File -Path $_directoryPath | Rename-Many -File `
-                -Pattern $pattern -Copy $copy -Paste $paste -WhatIf -Diagnose;
+                -Pattern $pattern -Copy $copy -Paste $paste `
+                -WhatIf:$_whatIf -Test:$_test -Diagnose;
             }
           }
         }
@@ -692,7 +725,8 @@ Describe 'Rename-Many' -Tag 'remy' {
             It 'should: throw' {
               {
                 Get-ChildItem -Path $_directoryPath | Rename-Many -File `
-                  -Pattern 'o', 3 -With $(esc('(name)')) -Anchor 'z' -WhatIf:$_whatIf;
+                  -Pattern 'o', 3 -With $(esc('(name)')) -Anchor 'z' `
+                  -WhatIf:$_whatIf -Test:$_test;
               } | Should -Throw;
             }
           }
@@ -701,7 +735,8 @@ Describe 'Rename-Many' -Tag 'remy' {
             It 'should: throw' {
               {
                 Get-ChildItem -Path $_directoryPath | Rename-Many -File `
-                  -Pattern 'o', 3 -Paste $(esc('(o)')) -WhatIf:$_whatIf;
+                  -Pattern 'o', 3 -Paste $(esc('(o)')) `
+                  -WhatIf:$_whatIf -Test:$_test;
               } | Should -Throw;
             }
           }
@@ -719,7 +754,8 @@ Describe 'Rename-Many' -Tag 'remy' {
           'loopz.data.t3.txt' = 'data.loopz.t3.txt';
         }
         Get-ChildItem -Path $_directoryPath -Filter '*.txt' | Rename-Many -File `
-          -Pattern 'data.' -Start -WhatIf:$_whatIf;
+          -Pattern 'data.' -Start `
+          -WhatIf:$_whatIf -Test:$_test;
       }
     } # and: Source matches Pattern in middle
 
@@ -727,7 +763,8 @@ Describe 'Rename-Many' -Tag 'remy' {
       It 'should: NOT do rename' {
         $script:_expected = $_noFiles;
         Get-ChildItem -Path $_directoryPath -Filter '*.txt' | Rename-Many -File `
-          -Pattern 'loopz.' -Start -WhatIf:$_whatIf;
+          -Pattern 'loopz.' -Start `
+          -WhatIf:$_whatIf -Test:$_test;
       }
     } # and: Source matches Pattern in middle
   } # given: MoveToStart
@@ -741,7 +778,8 @@ Describe 'Rename-Many' -Tag 'remy' {
           'loopz.data.t3.txt' = 'loopz.t3.data.txt';
         }
         Get-ChildItem -Path $_directoryPath -File | Rename-Many -File `
-          -Pattern '.data' -End -WhatIf:$_whatIf;
+          -Pattern '.data' -End `
+          -WhatIf:$_whatIf -Test:$_test;
       }
     }
 
@@ -749,7 +787,8 @@ Describe 'Rename-Many' -Tag 'remy' {
       It 'should: NOT do rename' {
         $script:_expected = $_noFiles;
         Get-ChildItem -Path $_directoryPath | Rename-Many -File `
-          -Pattern 't1' -End -WhatIf:$_whatIf;
+          -Pattern 't1' -End `
+          -WhatIf:$_whatIf -Test:$_test;
       }
     } # and: Source matches Pattern in middle
   } # given: MoveToEnd
@@ -764,7 +803,8 @@ Describe 'Rename-Many' -Tag 'remy' {
         'loopz.data.t3.txt'        = 'PREFIX-loopz.data.t3.txt';
       }
 
-      Get-ChildItem -Path $_directoryPath -File | Rename-Many -Prepend 'PREFIX-' -WhatIf:$_whatIf;
+      Get-ChildItem -Path $_directoryPath -File | Rename-Many -Prepend 'PREFIX-' `
+        -WhatIf:$_whatIf -Test:$_test;
     }
 
     It 'should: prepend literal text' {
@@ -778,7 +818,8 @@ Describe 'Rename-Many' -Tag 'remy' {
 
       [string]$copy = '(?<header>[\w]+)\.(?<mid>[\w]+).(?<tail>[\w]+)';
       Get-ChildItem -Path $_directoryPath -File | Rename-Many -Prepend '${tail}_PREFIX-' `
-        -Copy $copy -Diagnose;
+        -Copy $copy `
+        -WhatIf:$_whatIf -Test:$_test -Diagnose;
     }
 
     Context 'and: Copy does not match' {
@@ -787,7 +828,8 @@ Describe 'Rename-Many' -Tag 'remy' {
 
         [string]$copy = 'blah';
         Get-ChildItem -Path $_directoryPath -File | Rename-Many -Prepend '${tail}_PREFIX-' `
-          -Copy $copy -Diagnose;
+          -Copy $copy `
+          -WhatIf:$_whatIf -Test:$_test -Diagnose;
       }
     }
   }
@@ -802,7 +844,8 @@ Describe 'Rename-Many' -Tag 'remy' {
         'loopz.data.t3.txt'        = 'loopz.data.t3-POSTFIX.txt';
       }
 
-      Get-ChildItem -Path $_directoryPath -File | Rename-Many -Append '-POSTFIX' -WhatIf:$_whatIf;
+      Get-ChildItem -Path $_directoryPath -File | Rename-Many -Append '-POSTFIX' `
+        -WhatIf:$_whatIf -Test:$_test;
     }
 
     It 'should: append literal text' {
@@ -816,7 +859,8 @@ Describe 'Rename-Many' -Tag 'remy' {
 
       [string]$copy = '(?<header>[\w]+)\.(?<mid>[\w]+).(?<tail>[\w]+)';
       Get-ChildItem -Path $_directoryPath -File | Rename-Many -Append '-POSTFIX_${tail}' `
-        -Copy $copy -Diagnose;
+        -Copy $copy `
+        -WhatIf:$_whatIf -Test:$_test -Diagnose;
     }
 
     Context 'and: Copy does not match' {
@@ -825,7 +869,8 @@ Describe 'Rename-Many' -Tag 'remy' {
 
         [string]$copy = 'foo';
         Get-ChildItem -Path $_directoryPath -File | Rename-Many -Append '-POSTFIX_${tail}' `
-          -Copy $copy -Diagnose;
+          -Copy $copy `
+          -WhatIf:$_whatIf -Test:$_test -Diagnose;
       }
     }
   }
@@ -842,7 +887,8 @@ Describe 'Rename-Many' -Tag 'remy' {
         }
 
         Get-ChildItem -Path $_directoryPath | Rename-Many -File `
-          -Cut $(esc('loopz.')) -Diagnose;
+          -Cut $(esc('loopz.')) `
+          -WhatIf:$_whatIf -Test:$_test -Diagnose;
       }
     }
 
@@ -851,7 +897,8 @@ Describe 'Rename-Many' -Tag 'remy' {
         $script:_expected = $_unchanged;
 
         Get-ChildItem -Path $_directoryPath | Rename-Many -File `
-          -Cut $(esc('wobble')) -Diagnose;
+          -Cut $(esc('wobble')) `
+          -WhatIf:$_whatIf -Test:$_test -Diagnose;
       }
     }
   } # and: NoReplacement
@@ -861,7 +908,8 @@ Describe 'Rename-Many' -Tag 'remy' {
       {
         [string]$badPattern = '(((';
         Get-ChildItem -File -Path $_directoryPath | Rename-Many -File `
-          -Pattern $badPattern -Anchor 'loopz' -Relation 'before' -WhatIf:$_whatIf;
+          -Pattern $badPattern -Anchor 'loopz' -Relation 'before' `
+          -WhatIf:$_whatIf -Test:$_test;
       } | Should -Throw;
     }
   } # given: invalid Pattern expression
@@ -871,7 +919,8 @@ Describe 'Rename-Many' -Tag 'remy' {
       {
         [string]$badWith = '(((';
         Get-ChildItem -Path $_directoryPath | Rename-Many -File `
-          -Pattern 'o', 3 -Copy $badWith -Paste '${_c}' -WhatIf:$_whatIf;
+          -Pattern 'o', 3 -Copy $badWith -Paste '${_c}' `
+          -WhatIf:$_whatIf -Test:$_test;
       } | Should -Throw;
     }
   } # given: invalid Copy expression
@@ -881,7 +930,8 @@ Describe 'Rename-Many' -Tag 'remy' {
       {
         [string]$badAnchor = '(((';
         Get-ChildItem -File -Path $_directoryPath | Rename-Many -File `
-          -Pattern 'data.' -Anchor $badAnchor -Relation 'before' -WhatIf:$_whatIf;
+          -Pattern 'data.' -Anchor $badAnchor -Relation 'before' `
+          -WhatIf:$_whatIf -Test:$_test;
 
       } | Should -Throw;
     }
@@ -904,10 +954,11 @@ Describe 'Rename-Many parameter sets' -Tag 'remy' {
     InModuleScope Elizium.Loopz {
       [StringBuilder]$script:_builder = [StringBuilder]::new();
       [krayon]$script:_krayon = New-Krayon -Theme $_theme;
+      [Scribbler]$_scribbler = New-Scribbler -Krayon $_krayon -Test;
 
       [string]$commandName = 'Rename-Many';
       [DryRunner]$script:_runner = New-DryRunner -CommandName $commandName `
-        -Signals $_signals -Krayon $_krayon;
+        -Signals $_signals -Scribbler $_scribbler;
     }
   } # BeforeEach
 

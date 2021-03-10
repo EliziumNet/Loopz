@@ -1,4 +1,4 @@
-using module ELizium.Krayola;
+using module Elizium.Krayola;
 
 Describe 'Show-AsTable' {
   BeforeAll {
@@ -12,6 +12,7 @@ Describe 'Show-AsTable' {
       [krayon]$krayon = Get-Krayon;
       [string]$api = $krayon.ApiFormat;
       [hashtable]$signals = Get-Signals;
+      [Scribbler]$scribbler = New-Scribbler -Krayon $krayon -Test;
 
       [PSCustomObject]$custom = [PSCustomObject]@{
         Colours  = [PSCustomObject]@{
@@ -26,7 +27,7 @@ Describe 'Show-AsTable' {
       [string[]]$columnSelection = @('Name', 'Colour', 'Shape');
 
       [PSCustomObject]$tableOptions = Get-TableDisplayOptions -Select $columnSelection `
-        -Signals $signals -Krayon $krayon -Custom $custom;
+        -Signals $signals -Scribbler $scribbler -Custom $custom;
 
       [PSCustomObject[]]$source = @(
         @{ Name = 'dice '; Colour = 'white'; Shape = 'cube' },
@@ -46,10 +47,9 @@ Describe 'Show-AsTable' {
 
       [hashtable]$headers, [hashtable]$tableContent = Get-AsTable -MetaData $fieldMetaData `
         -TableData $resultSet -Options $tableOptions;
-      [System.Text.StringBuilder]$builder = [System.Text.StringBuilder]::new();
 
       Show-AsTable -MetaData $fieldMetaData -Headers $headers -Table $tableContent `
-        -Builder $builder -Options $tableOptions;
+        -Scribbler $scribbler -Options $tableOptions;
     }
   }
 }

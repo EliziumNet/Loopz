@@ -38,7 +38,8 @@ Describe 'get-ParameterSetTableData' -Tag 'PSTools' {
         [string]$commandName = 'test-TableDataWhereClause';
         [Krayon]$krayon = Get-Krayon;
         [hashtable]$signals = Get-Signals;
-        [Syntax]$syntax = New-Syntax -CommandName $commandName -Signals $signals -Krayon $krayon;
+        [Scribbler]$scribbler = New-Scribbler -Krayon $krayon -Test;
+        [Syntax]$syntax = New-Syntax -CommandName $commandName -Signals $signals -Scribbler $scribbler;
 
         [CommandInfo]$commandInfo = Get-Command $commandName;
         [CommandParameterSetInfo]$positionalPsi = `

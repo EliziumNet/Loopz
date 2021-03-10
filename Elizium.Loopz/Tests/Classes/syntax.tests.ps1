@@ -13,17 +13,32 @@ Describe 'Syntax' -Tag 'PSTools' {
     }
   }
 
+  BeforeEach {
+    InModuleScope Elizium.Loopz {
+      [Scribbler]$script:_scribbler = New-Scribbler -Krayon $_krayon -Test;
+      [string]$script:_lnSnippet = $_scribbler.Snippets(@('Ln'));
+    }    
+  }
+
+  AfterEach {
+    InModuleScope Elizium.Loopz {
+      $_scribbler.Flush();
+    }
+  }
+
   Describe 'ParamSetStmt' {
     Context 'given: Rename-Many' {
       It 'should: show parameter set statements' {
         InModuleScope Elizium.Loopz {
           [string]$command = 'Rename-Many';
-          [syntax]$syntax = New-Syntax -CommandName $command -Signals $_signals -Krayon $_krayon;
+          [syntax]$syntax = New-Syntax -CommandName $command -Signals $_signals -Scribbler $_scribbler;
           [CommandInfo]$commandInfo = Get-Command $command;
 
           foreach ($paramSet in $commandInfo.ParameterSets) {
-            [string]$paramSetStmt = $syntax.ParamSetStmt($commandInfo, $paramSet);
-            $_krayon.Scribble($paramSetStmt).Ln().End();
+            [string]$paramSetStmt = $(
+              "$($syntax.ParamSetStmt($commandInfo, $paramSet))$($_lnSnippet)"
+            );
+            $_scribbler.Scribble($paramSetStmt);
           }
         }
       }
@@ -35,12 +50,14 @@ Describe 'Syntax' -Tag 'PSTools' {
       It 'should: show parameter set statements' {
         InModuleScope Elizium.Loopz {
           [string]$command = 'Rename-Many';
-          [syntax]$syntax = New-Syntax -CommandName $command -Signals $_signals -Krayon $_krayon;
+          [syntax]$syntax = New-Syntax -CommandName $command -Signals $_signals -Scribbler $_scribbler;
           [CommandInfo]$commandInfo = Get-Command $command;
 
           foreach ($paramSet in $commandInfo.ParameterSets) {
-            [string]$syntaxStmt = $syntax.SyntaxStmt($paramSet);
-            $_krayon.Scribble($syntaxStmt).Ln().Ln().End();
+            [string]$syntaxStmt = $(
+              "$($syntax.SyntaxStmt($paramSet))$($_lnSnippet)$($_lnSnippet)"
+            );
+            $_scribbler.Scribble($syntaxStmt);
           }
         }
       }
@@ -52,12 +69,21 @@ Describe 'Syntax' -Tag 'PSTools' {
           [string]$command = 'Rename-Many';
           [CommandInfo]$commandInfo = Get-Command $command;
 
-          if ([System.Management.Automation.CommandParameterSetInfo]$paramSet = $($commandInfo.ParameterSets | Where-Object Name -eq 'MoveToStart')?[0]) {
-            [syntax]$syntax = New-Syntax -CommandName $command -Signals $_signals -Krayon $_krayon;
+          if ([System.Management.Automation.CommandParameterSetInfo]$paramSet = `
+            $($commandInfo.ParameterSets | Where-Object Name -eq 'MoveToStart')?[0]) {
+
+            [syntax]$syntax = New-Syntax -CommandName $command -Signals $_signals -Scribbler $_scribbler;
             [string]$syntaxStmt = $syntax.SyntaxStmt($paramSet);
 
-            [string]$colouredMandatoryStartSwitch = '&[cyan]-&[Red]Start ';
-            $syntaxStmt.contains($colouredMandatoryStartSwitch) | Should -BeTrue;
+            [string]$cyanSnippet = $_scribbler.Snippets(@('cyan'));
+            [string]$redSnippet = $_scribbler.Snippets(@('red'));
+            [string]$lnSnippet = $_scribbler.Snippets(@('Ln'));
+            [string]$colouredMandatoryStartSwitch = "$($cyanSnippet)-$($redSnippet)Start ";
+
+            $_scribbler.Scribble(
+              "$($syntaxStmt)$($lnSnippet)"
+            );
+            $syntaxStmt.ToLower().contains($colouredMandatoryStartSwitch.ToLower()) | Should -BeTrue;
           }
         }
       }

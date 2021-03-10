@@ -11,6 +11,13 @@ Describe 'Show-Summary' {
     InModuleScope Elizium.Loopz {
       [hashtable]$theme = $(Get-KrayolaTheme);
       [Krayon]$script:_krayon = New-Krayon($theme);
+      [Scribbler]$script:_scribbler = New-Scribbler -Krayon $_krayon -Test;
+    }
+  }
+
+  AfterEach {
+    InModuleScope Elizium.Loopz {
+      $_scribbler.Flush();
     }
   }
 
@@ -19,7 +26,7 @@ Describe 'Show-Summary' {
       InModuleScope Elizium.Loopz {
         [hashtable]$exchange = @{
           'LOOPZ.SUMMARY-BLOCK.LINE' = $LoopzUI.DashLine;
-          'LOOPZ.KRAYON'             = $_krayon;
+          'LOOPZ.SCRIBBLER'          = $_scribbler;
         }
         Show-Summary -Count 999 -Skipped 0 -Triggered $false -Exchange $exchange;
       }
@@ -30,7 +37,7 @@ Describe 'Show-Summary' {
     It 'should: display summary' {
       InModuleScope Elizium.Loopz {
         [hashtable]$exchange = @{
-          'LOOPZ.KRAYON' = $_krayon;
+          'LOOPZ.SCRIBBLER' = $_scribbler;
         }
         Show-Summary -Count 101 -Skipped 0 -Triggered $true -Exchange $exchange;
       }
@@ -44,7 +51,7 @@ Describe 'Show-Summary' {
         [hashtable]$exchange = @{
           'LOOPZ.SUMMARY-BLOCK.LINE'       = $LoopzUI.DashLine;
           'LOOPZ.SUMMARY-BLOCK.WIDE-ITEMS' = $wideItems;
-          'LOOPZ.KRAYON'                   = $_krayon;
+          'LOOPZ.SCRIBBLER'                = $_scribbler;
         }
         Show-Summary -Count 999 -Skipped 0 -Triggered $false -Exchange $exchange;
       }
@@ -57,7 +64,7 @@ Describe 'Show-Summary' {
           'LOOPZ.SUMMARY-BLOCK.LINE'             = $LoopzUI.DashLine;
           'LOOPZ.SUMMARY-BLOCK.WIDE-ITEMS'       = $wideItems;
           'LOOPZ.SUMMARY-BLOCK.GROUP-WIDE-ITEMS' = $true;
-          'LOOPZ.KRAYON'                         = $_krayon;
+          'LOOPZ.SCRIBBLER'                      = $_scribbler;
         }
         Show-Summary -Count 999 -Skipped 0 -Triggered $false -Exchange $exchange;
       }
@@ -71,7 +78,7 @@ Describe 'Show-Summary' {
         [hashtable]$exchange = @{
           'LOOPZ.SUMMARY-BLOCK.LINE' = $LoopzUI.DashLine;
           'LOOPZ.SUMMARY.PROPERTIES' = $wideItems;
-          'LOOPZ.KRAYON'             = $_krayon;
+          'LOOPZ.SCRIBBLER'          = $_scribbler;
         }
         Show-Summary -Count 999 -Skipped 0 -Triggered $false -Exchange $exchange;
       }

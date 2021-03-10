@@ -9,7 +9,7 @@ function Show-Summary {
 
   .DESCRIPTION
     Behaviour can be customised by the following entries in the Exchange:
-  * 'LOOPZ.KRAYON' (mandatory): the Krayola Krayon writer object.
+  * 'LOOPZ.SCRIBBLER' (mandatory): the Krayola Scribbler writer object.
   * 'LOOPZ.SUMMARY-BLOCK.MESSAGE': The custom message to be displayed as
   part of the summary.
   * 'LOOPZ.SUMMARY.PROPERTIES': A Krayon [line] instance contain a collection
@@ -68,24 +68,25 @@ function Show-Summary {
     [hashtable]$Exchange = @{}
   )
 
-  [Krayon]$krayon = $Exchange['LOOPZ.KRAYON'];
-  if (-not($krayon)) {
-    throw "Writer missing from Exchange under key 'LOOPZ.KRAYON'"
+  [Scribbler]$scribbler = $Exchange['LOOPZ.SCRIBBLER'];
+  if (-not($scribbler)) {
+    throw [System.Management.Automation.MethodInvocationException]::new(
+      "Show-Summary: Scribbler missing from Exchange under key 'LOOPZ.SCRIBBLER'");
   }
 
-  [string]$writerFormatWithArg = $krayon.ApiFormatWithArg;
+  [string]$resetSnippet = $scribbler.Snippets(@('Reset'));
+  [string]$lnSnippet = $scribbler.Snippets(@('Ln'));
+  [string]$metaSnippet = $scribbler.WithArgSnippet('ThemeColour', 'meta');
+
+  $scribbler.Scribble("$($resetSnippet)");
 
   # First line
   #
   if ($Exchange.ContainsKey('LOOPZ.SUMMARY-BLOCK.LINE')) {
     [string]$line = $Exchange['LOOPZ.SUMMARY-BLOCK.LINE'];
+    [string]$structuredBorderLine = $metaSnippet + $line;
 
-    # Assuming writerFormatWithArg is &[{0},{1}]
-    # => generates &[ThemeColour,meta] which is an instruction to set the
-    # colours to the krayola theme's 'META-COLOURS'
-    #
-    [string]$structuredBorderLine = $($writerFormatWithArg -f 'ThemeColour', 'meta') + $line;
-    $null = $krayon.ScribbleLn($structuredBorderLine);
+    $scribbler.Scribble("$($structuredBorderLine)$($lnSnippet)");
   }
   else {
     $structuredBorderLine = [string]::Empty;
@@ -93,17 +94,18 @@ function Show-Summary {
 
   # Inner detail
   #
-  [line]$properties = New-Line(@(
-      $(New-Pair('Count', $Count)),
-      $(New-Pair('Skipped', $Skipped)),
-      $(New-Pair('Errors', $Errors)),
-      $(New-Pair('Triggered', $Triggered))
-    ));
 
   [string]$message = $Exchange.ContainsKey('LOOPZ.SUMMARY-BLOCK.MESSAGE') `
     ? $Exchange['LOOPZ.SUMMARY-BLOCK.MESSAGE'] : 'Summary';
+    
+  [string]$structuredPropsWithMessage = $(
+    "$message;Count,$Count;Skipped,$Skipped;Errors,$Errors;Triggered,$Triggered"
+  );
+  [string]$lineSnippet = $scribbler.WithArgSnippet(
+    'Line', $structuredPropsWithMessage
+  )
+  $scribbler.Scribble("$($lineSnippet)");
 
-  $null = $krayon.Line($message, $properties);
   [string]$blank = [string]::new(' ', $message.Length);
 
   # Custom properties
@@ -112,7 +114,7 @@ function Show-Summary {
     'LOOPZ.SUMMARY.PROPERTIES') ? $Exchange['LOOPZ.SUMMARY.PROPERTIES'] : [line]::new(@());
 
   if ($summaryProperties.Line.Length -gt 0) {
-    $null = $krayon.Line($blank, $summaryProperties);
+    $scribbler.ScribbleLine($blank, $summaryProperties);
   }
 
   # Wide items
@@ -124,12 +126,13 @@ function Show-Summary {
       $Exchange['LOOPZ.SUMMARY-BLOCK.GROUP-WIDE-ITEMS']);
 
     if ($group) {
-      $null = $krayon.Line($blank, $wideItems);
+      $scribbler.ScribbleLine($blank, $wideItems);
     }
     else {
       foreach ($couplet in $wideItems.Line) {
         [line]$syntheticLine = New-Line($couplet);
-        $null = $krayon.Line($blank, $syntheticLine);
+
+        $scribbler.ScribbleLine($blank, $syntheticLine);
       }
     }
   }
@@ -137,6 +140,6 @@ function Show-Summary {
   # Second line
   #
   if (-not([string]::IsNullOrEmpty($structuredBorderLine))) {
-    $null = $krayon.ScribbleLn($structuredBorderLine);
+    $scribbler.Scribble("$($structuredBorderLine)$($lnSnippet)");
   }
 }

@@ -15,7 +15,13 @@ Describe 'Bootstrap' {
 
   BeforeEach {
     InModuleScope Elizium.Loopz {
-      [hashtable]$exchange = @{}
+      [Krayon]$krayon = New-Krayon($_theme);
+      [Scribbler]$scribbler = New-Scribbler -Krayon $krayon -Test;
+
+      [hashtable]$exchange = @{
+        'LOOPZ.SCRIBBLER' = $scribbler;
+        'LOOPZ.SIGNALS'   = $_signals;
+      }
       [PSCustomObject]$script:_containers = @{
         Wide  = [line]::new();
         Props = [line]::new();
@@ -24,7 +30,7 @@ Describe 'Bootstrap' {
       [PSCustomObject]$options = [PSCustomObject]@{
       }
       [bootstrap]$script:_bootStrapper = [bootstrap]::new($exchange,
-        $_containers, $_signals, $_theme, $options);
+        $_containers, $options);
 
       [string]$script:_patternExpression = '\d{2,3}';
       [PSCustomObject]$script:_patternSpec = [PSCustomObject]@{

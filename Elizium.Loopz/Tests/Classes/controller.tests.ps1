@@ -15,19 +15,32 @@ Describe 'controller' {
 
       [scriptblock]$script:_Summary = {
         param(
-          [int]$_count,
-          [int]$_skipped,
-          [int]$_errors,
-          [boolean]$_trigger,
-          [hashtable]$_exchange
+          [int]$count,
+          [int]$skipped,
+          [int]$errors,
+          [boolean]$trigger,
+          [hashtable]$exchange
         )
       };
 
       [scriptblock]$script:_SessionHeader = {
         param(
-          [hashtable]$_exchange
+          [hashtable]$exchange
         )
       };
+
+      [hashtable]$script:_theme = Get-KrayolaTheme;
+    }
+  }
+
+  BeforeEach {
+    InModuleScope Elizium.Loopz {
+      [Krayon]$krayon = New-Krayon($_theme);
+      [Scribbler]$script:scribbler = New-Scribbler -Krayon $krayon -Test;
+
+      [hashtable]$script:_exchange = @{
+        'LOOPZ.SCRIBBLER' = $scribbler;
+      }
     }
   }
 
@@ -41,19 +54,17 @@ Describe 'controller' {
         InModuleScope Elizium.Loopz {
           [scriptblock]$summary = {
             param(
-              [int]$_count,
-              [int]$_skipped,
-              [int]$_errors,
-              [boolean]$_trigger,
-              [hashtable]$_exchange
+              [int]$count,
+              [int]$skipped,
+              [int]$errors,
+              [boolean]$trigger,
+              [hashtable]$exchange
             )
-            $_count | Should -Be 1;
-            $_skipped | Should -Be 0;
+            $count | Should -Be 1;
+            $skipped | Should -Be 0;
           };
 
-          [hashtable]$exchange = @{}
-
-          $controller = New-Controller -Type ForeachCtrl -Exchange $exchange -Header $_Header -Summary $summary;
+          $controller = New-Controller -Type ForeachCtrl -Exchange $_exchange -Header $_Header -Summary $summary;
           $controller.ForeachBegin();
           $controller.RequestIndex();
           $controller.HandleResult(@{
@@ -75,18 +86,17 @@ Describe 'controller' {
         InModuleScope Elizium.Loopz {
           [scriptblock]$summary = {
             param(
-              [int]$_count,
-              [int]$_skipped,
-              [int]$_errors,
-              [boolean]$_trigger,
-              [hashtable]$_exchange
+              [int]$count,
+              [int]$skipped,
+              [int]$errors,
+              [boolean]$trigger,
+              [hashtable]$exchange
             )
-            $_count | Should -Be 2;
-            $_skipped | Should -Be 3;
+            $count | Should -Be 2;
+            $skipped | Should -Be 3;
           };
-          [hashtable]$exchange = @{}
 
-          $controller = New-Controller -Type ForeachCtrl -Exchange $exchange -Header $_Header -Summary $summary;
+          $controller = New-Controller -Type ForeachCtrl -Exchange $_exchange -Header $_Header -Summary $summary;
           $controller.ForeachBegin();
           0..4 | Foreach-Object {
             if ($_ -gt 2 ) {
@@ -112,18 +122,17 @@ Describe 'controller' {
         InModuleScope Elizium.Loopz {
           [scriptblock]$sessionSummary = {
             param(
-              [int]$_count,
-              [int]$_skipped,
-              [int]$_errors,
-              [boolean]$_trigger,
-              [hashtable]$_exchange
+              [int]$count,
+              [int]$skipped,
+              [int]$errors,
+              [boolean]$trigger,
+              [hashtable]$exchange
             )
-            $_count | Should -Be 2;
-            $_skipped | Should -Be 3;
+            $count | Should -Be 2;
+            $skipped | Should -Be 3;
           };
-          [hashtable]$exchange = @{}
 
-          $controller = New-Controller -Type TraverseCtrl -Exchange $exchange `
+          $controller = New-Controller -Type TraverseCtrl -Exchange $_exchange `
             -Header $_Header -Summary $_Summary -SessionHeader $_SessionHeader -SessionSummary $sessionSummary;
           $controller.BeginSession();
           $controller.ForeachBegin();
@@ -150,18 +159,16 @@ Describe 'controller' {
         InModuleScope Elizium.Loopz {
           [scriptblock]$sessionSummary = {
             param(
-              [int]$_count,
-              [int]$_skipped,
-              [int]$_errors,
-              [boolean]$_trigger,
-              [hashtable]$_exchange
+              [int]$count,
+              [int]$skipped,
+              [int]$errors,
+              [boolean]$trigger,
+              [hashtable]$exchange
             )
-            $_count | Should -Be 12;
-            $_skipped | Should -Be 0;
+            $count | Should -Be 12;
+            $skipped | Should -Be 0;
           };
-          [hashtable]$exchange = @{}
-
-          $controller = New-Controller -Type TraverseCtrl -Exchange $exchange `
+          $controller = New-Controller -Type TraverseCtrl -Exchange $_exchange `
             -Header $_Header -Summary $_Summary -SessionHeader $_SessionHeader -SessionSummary $sessionSummary;
 
           $controller.BeginSession();
@@ -182,8 +189,8 @@ Describe 'controller' {
                         Product = "$_ Deeper Widget(s)"
                       });
                   }
-                  $exchange['LOOPZ.CONTROLLER.STACK'].Peek().Value() | Should -Be 3;
-                  $exchange['LOOPZ.CONTROLLER.DEPTH'] | Should -Be 4;
+                  $_exchange['LOOPZ.CONTROLLER.STACK'].Peek().Value() | Should -Be 3;
+                  $_exchange['LOOPZ.CONTROLLER.DEPTH'] | Should -Be 4;
 
                   $controller.ForeachEnd();
                 }
@@ -192,8 +199,8 @@ Describe 'controller' {
                     Product = "$_ Inner Widget(s)"
                   });
               }
-              $exchange['LOOPZ.CONTROLLER.STACK'].Peek().Value() | should -Be 4;
-              $exchange['LOOPZ.CONTROLLER.DEPTH'] | Should -Be 3;
+              $_exchange['LOOPZ.CONTROLLER.STACK'].Peek().Value() | should -Be 4;
+              $_exchange['LOOPZ.CONTROLLER.DEPTH'] | Should -Be 3;
 
               $controller.ForeachEnd();
             }
@@ -202,16 +209,16 @@ Describe 'controller' {
                 Product = "$_ Widget(s)"
               });
           }
-          $exchange['LOOPZ.CONTROLLER.STACK'].Peek().Value() | Should -Be 5;
-          $exchange['LOOPZ.CONTROLLER.DEPTH'] | Should -Be 2;
+          $_exchange['LOOPZ.CONTROLLER.STACK'].Peek().Value() | Should -Be 5;
+          $_exchange['LOOPZ.CONTROLLER.DEPTH'] | Should -Be 2;
 
           $controller.ForeachEnd();
 
-          $exchange['LOOPZ.CONTROLLER.DEPTH'] | Should -Be 1;
+          $_exchange['LOOPZ.CONTROLLER.DEPTH'] | Should -Be 1;
           $controller.EndSession();
 
-          $exchange['LOOPZ.CONTROLLER.DEPTH'] | Should -Be 0;
-          $exchange['LOOPZ.CONTROLLER.STACK'] | Should -BeNullOrEmpty;
+          $_exchange['LOOPZ.CONTROLLER.DEPTH'] | Should -Be 0;
+          $_exchange['LOOPZ.CONTROLLER.STACK'] | Should -BeNullOrEmpty;
         }
       } # should: traverse multiple depths
     } # and: multiple depth iteration

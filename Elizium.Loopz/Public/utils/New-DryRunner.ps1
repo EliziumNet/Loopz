@@ -8,11 +8,11 @@ function New-DryRunner {
     [Hashtable]$Signals = $(Get-Signals),
 
     [Parameter()]
-    [Krayon]$Krayon = $(Get-Krayon)
+    [Scribbler]$Scribbler
   )
 
   [System.Management.Automation.CommandInfo]$commandInfo = Get-Command $commandName;
-  [syntax]$syntax = New-Syntax -CommandName $commandName -Signals $Signals -Krayon $Krayon;
+  [syntax]$syntax = New-Syntax -CommandName $commandName -Signals $Signals -Scribbler $Scribbler;
   [RuleController]$controller = [RuleController]::new($commandInfo);
   [PSCustomObject]$runnerInfo = @{
     CommonParamSet = $syntax.CommonParamSet;

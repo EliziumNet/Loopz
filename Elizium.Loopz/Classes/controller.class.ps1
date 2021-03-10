@@ -46,6 +46,7 @@ class BaseController {
   [int]hidden $_index = 0;
   [boolean]$_trigger = $false;
   [boolean]hidden $_broken = $false;
+  [object]$_scribbler;
 
   BaseController([hashtable]$exchange,
     [scriptblock]$header,
@@ -53,6 +54,14 @@ class BaseController {
     $this._exchange = $exchange;
     $this._header = $header;
     $this._summary = $summary;
+
+    $this._scribbler = $Exchange['LOOPZ.SCRIBBLER'];
+    if (-not($this._scribbler)) {
+      [object]$krayon = $(Get-Krayon);
+
+      $this._scribbler = New-Scribbler -Krayon $krayon -Silent;
+      $Exchange['LOOPZ.SCRIBBLER'] = $this._scribbler;
+    }
   }
 
   [int] RequestIndex() {
@@ -133,6 +142,8 @@ class BaseController {
         $this.ErrorItem();
       }
     }
+
+    $this._scribbler.Flush();
   }
 }
 
@@ -169,6 +180,8 @@ class ForeachController : BaseController {
 
     $this._summary.InvokeReturnAsIs($this._index, $this._skipped, $this._errors,
       $this._trigger, $this._exchange);
+
+    $this._scribbler.Flush();
   }
 }
 
@@ -261,6 +274,8 @@ class TraverseController : BaseController {
       $this._session.Trigger,
       $this._exchange
     );
+
+    $this._scribbler.Flush();
   }
 }
 

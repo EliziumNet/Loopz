@@ -438,7 +438,10 @@ function Rename-Many {
     [PSCustomObject]$Context = $Loopz.Defaults.Remy.Context,
 
     [Parameter()]
-    [switch]$Diagnose
+    [switch]$Diagnose,
+
+    [Parameter()]
+    [switch]$Test
   )
 
   begin {
@@ -642,6 +645,10 @@ function Rename-Many {
 
         if ($transform) {
           [string]$transformed = $transform.InvokeReturnAsIs(
+            # Transform function needs the exchange and a new PSCustomObject
+            # which contains the user parameters to Rename-Many (maybe
+            # populated from $PSBoundParameters).
+            #
             $_underscore.Name, $newItemName, $actionResult.CapturedPattern);
 
           if (-not([string]::IsNullOrEmpty($transformed))) {
@@ -707,7 +714,8 @@ function Rename-Many {
       [string]$message = Get-FormattedSignal -Name $signalName `
         -Signals $signals -CustomLabel $messageLabel -Format '   [{1}] {0}';
 
-      [int]$indent = $_exchange['LOOPZ.REMY.FIXED-INDENT'] + $message.Length;
+      [int]$magic = 5;
+      [int]$indent = $_exchange['LOOPZ.REMY.FIXED-INDENT'] + $message.Length - $magic;
       $_exchange['LOOPZ.WH-FOREACH-DECORATOR.INDENT'] = $indent;
       $_exchange['LOOPZ.WH-FOREACH-DECORATOR.MESSAGE'] = $message;
       $_exchange['LOOPZ.WH-FOREACH-DECORATOR.PRODUCT-LABEL'] = $(Get-PaddedLabel -Label $(
@@ -806,6 +814,9 @@ function Rename-Many {
     }
 
     [System.IO.FileSystemInfo[]]$collection = @();
+
+    [Krayon]$_krayon = Get-Krayon
+    [Scribbler]$_scribbler = New-Scribbler -Krayon $_krayon -Test:$Test.IsPresent;
   } # begin
 
   process {
@@ -820,7 +831,7 @@ function Rename-Many {
     # ------------------------------------------------------ [ Init Phase ] ---
     #
     [hashtable]$signals = $(Get-Signals);
-    [hashtable]$theme = $(Get-KrayolaTheme);
+    [hashtable]$theme = $_scribbler.Krayon.Theme;
     [boolean]$locked = Get-IsLocked -Variable $(
       [string]::IsNullOrEmpty($Context.Locked) ? 'LOOPZ_REMY_LOCKED' : $Context.Locked
     );
@@ -850,6 +861,9 @@ function Rename-Many {
     $summaryMessage = Get-FormattedSignal -Name 'SUMMARY-A' -Signals $signals -CustomLabel $summaryMessage;
 
     [hashtable]$rendezvous = @{
+      'LOOPZ.SCRIBBLER'                       = $_scribbler;
+      'LOOPZ.SIGNALS'                         = $signals;
+
       'LOOPZ.WH-FOREACH-DECORATOR.BLOCK'      = $doRenameFsItems;
       'LOOPZ.WH-FOREACH-DECORATOR.GET-RESULT' = $getResult;
 
@@ -881,8 +895,6 @@ function Rename-Many {
     [BootStrap]$bootStrap = New-BootStrap `
       -Exchange $rendezvous `
       -Containers @{ Wide = [line]::new(); Props = [line]::new(); } `
-      -Signals $signals `
-      -Theme $theme `
       -Options $bootStrapOptions;
 
     # ------------------------------------------------ [ Primary Entities ] ---
@@ -1315,6 +1327,9 @@ function Rename-Many {
 
     [RegexEntity]$patternEntity = $bootStrap.Get('Pattern');
     if ($bootStrap.Contains('IsMove')) {
+      # !!! This is now redundant; replace-all functionality can no longer be invoked.
+      # This will be implemented as a separate derivative command that uses Transform.
+      # 
       if ($patternEntity -and $patternEntity.Occurrence -eq '*') {
         [string]$errorMessage = "'Pattern' wildcard prohibited for move operation (Anchor/Start/End).`r`n";
         $errorMessage += "Please use a digit, 'f' (first) or 'l' (last) for Pattern Occurrence";

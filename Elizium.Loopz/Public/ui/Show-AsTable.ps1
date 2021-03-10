@@ -16,7 +16,7 @@ function Show-AsTable {
     [hashtable]$Table,
 
     [Parameter()]
-    [System.Text.StringBuilder]$Builder,
+    [Scribbler]$Scribbler,
 
     [Parameter()]
     [scriptblock]$Render = $([scriptblock] {
@@ -26,7 +26,7 @@ function Show-AsTable {
           [string]$Value,
           [PSCustomObject]$row,
           [PSCustomObject]$Options,
-          [System.Text.StringBuilder]$Builder
+          [Scribbler]$Scribbler
         )
         return $false;
       }),
@@ -41,7 +41,7 @@ function Show-AsTable {
   [string]$resetSnippet = $($Options.Snippets.Reset);
   [string]$lnSnippet = $($Options.Snippets.Ln);
   
-  $null = $Builder.Append("$($resetSnippet)$($lnSnippet)");
+  $Scribbler.Scribble("$($resetSnippet)$($lnSnippet)");
 
   if (($MetaData.PSBase.Count -gt 0) -and ($Table.PSBase.Count -gt 0)) {
     # Establish field selection
@@ -54,37 +54,36 @@ function Show-AsTable {
 
     # Display column titles
     #
-    $null = $Builder.Append($indentation);
+    $Scribbler.Scribble($indentation);
 
     foreach ($col in $selection) {
       [string]$paddedValue = $Headers[$col.Trim()];
-      $null = $Builder.Append("$($headerSnippet)$($paddedValue)$($resetSnippet)$($inter)");
+      $Scribbler.Scribble("$($headerSnippet)$($paddedValue)$($resetSnippet)$($inter)");
     }
-    $null = $Builder.Append("$($lnSnippet)$($resetSnippet)");
+    $Scribbler.Scribble("$($lnSnippet)$($resetSnippet)");
 
     # Display column underlines
     #
-    $null = $Builder.Append($indentation);
+    $Scribbler.Scribble($indentation);
     foreach ($col in $selection) {
       $underline = [string]::new($Options.Chrome.Underline, $MetaData[$col].Max);
-      $null = $Builder.Append("$($underlineSnippet)$($underline)$($inter)").Append(
-        $resetSnippet);
+      $Scribbler.Scribble("$($underlineSnippet)$($underline)$($inter)$($resetSnippet)");
     }
-    $null = $Builder.Append($lnSnippet);
+    $Scribbler.Scribble($lnSnippet);
 
     # Display field values
     #
     $Table.GetEnumerator() | Sort-Object Name | ForEach-Object {
-      $null = $Builder.Append($indentation);
+      $Scribbler.Scribble($indentation);
 
       foreach ($col in $selection) {
-        if (-not($Render.InvokeReturnAsIs($col, $_.Value.$col, $_.Value, $Options, $Builder))) {
-          $null = $Builder.Append("$($resetSnippet)$($_.Value.$col)");
+        if (-not($Render.InvokeReturnAsIs($col, $_.Value.$col, $_.Value, $Options, $Scribbler))) {
+          $Scribbler.Scribble("$($resetSnippet)$($_.Value.$col)");
         }
-        $null = $Builder.Append($inter);
+        $Scribbler.Scribble($inter);
       }
 
-      $null = $Builder.Append($lnSnippet);
+      $Scribbler.Scribble($lnSnippet);
     }
   }
 }

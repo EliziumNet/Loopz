@@ -22,7 +22,19 @@ Describe 'Invoke-TraverseDirectory' {
 
     [string]$script:sourcePath = '.\Tests\Data\traverse\';
     [string]$script:resolvedSourcePath = Convert-Path $sourcePath;
+
+    [hashtable]$theme = $(Get-KrayolaTheme);
+    [Krayon]$script:_krayon = New-Krayon($theme);
   }
+
+  BeforeEach {
+    [Scribbler]$script:_scribbler = New-Scribbler -Krayon $_krayon -Test;
+  }
+
+  AfterEach {
+    $_scribbler.Flush();
+  }
+
   Context 'given: custom scriptblock specified' {
     Context 'and: directory tree' {
       It 'should: traverse' {
@@ -80,12 +92,10 @@ Describe 'Invoke-TraverseDirectory' {
             @{ Product = $_underscore }
           }
 
-          [hashtable]$theme = $(Get-KrayolaTheme);
-          [Krayon]$krayon = New-Krayon -Theme $theme;
           [hashtable]$exchange = @{
             'LOOPZ.SUMMARY-BLOCK.LINE'    = $LoopzUI.EqualsLine;
             'LOOPZ.SUMMARY-BLOCK.MESSAGE' = 'Test Summary';
-            'LOOPZ.KRAYON'                 = $krayon;
+            'LOOPZ.SCRIBBLER'             = $_scribbler;
           }
 
           Invoke-TraverseDirectory -Path $resolvedSourcePath -Exchange $exchange `
@@ -506,7 +516,6 @@ Describe 'Invoke-TraverseDirectory' {
           Write-Host "  [-] Test-FireBreakOnFirstItem(index: $Index): directory: $($Underscore.Name)";
           @{ Product = $Underscore; Break = $true }
         }
-
       }
 
       It 'should: stop iterating' -Skip {

@@ -360,24 +360,19 @@ class BootStrap {
   [hashtable]$Signals;
   [int]$Threshold = 6;
   [PSCustomObject]$Options;
-  [hashtable]$Theme;
   [hashtable]$_entities;
   [hashtable]$_relations;
   [boolean]$_built = $false;
 
-  BootStrap([hashtable]$exchange, [PSCustomObject]$containers, [hashtable]$signals,
-    [hashtable]$theme, [PSCustomObject]$options) {
+  BootStrap([hashtable]$exchange, [PSCustomObject]$containers,
+    [PSCustomObject]$options) {
 
     $this.Exchange = $exchange;
     $this.Containers = $containers;
-    $this.Signals = $signals;
-    $this.Theme = $theme;
+    $this.Signals = $exchange['LOOPZ.SIGNALS'];
     $this.Options = $options;
     $this._entities = [ordered]@{};
     $this._relations = [ordered]@{};
-
-    $this.Exchange['LOOPZ.KRAYON'] = New-Krayon -Theme $this.Theme;
-    $this.Exchange['LOOPZ.SIGNALS'] = $signals;
   }
 
   [BoundEntity] Create([PSCustomObject]$spec) {
