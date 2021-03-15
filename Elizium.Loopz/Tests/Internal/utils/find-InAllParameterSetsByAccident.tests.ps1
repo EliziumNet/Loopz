@@ -10,6 +10,7 @@ Describe 'find-InAllParameterSetsByAccident' -Tag 'PSTools' {
     InModuleScope Elizium.Loopz {
       [Krayon]$script:_krayon = Get-Krayon;
       [hashtable]$script:_signals = Get-Signals;
+      [Scribbler]$script:_scribbler = New-Scribbler -Krayon $_krayon -Test;
     }
   }
 
@@ -18,9 +19,11 @@ Describe 'find-InAllParameterSetsByAccident' -Tag 'PSTools' {
       InModuleScope Elizium.Loopz {
         [string]$commandName = 'Invoke-Command';
         [CommandInfo]$commandInfo = Get-Command $commandName;
-        [Syntax]$syntax = New-Syntax -CommandName $commandName -Signals $_signals -Krayon $_krayon;
+        [Syntax]$syntax = New-Syntax -CommandName $commandName -Signals $_signals `
+          -Scribbler $_scribbler;
 
-        [PSCustomObject[]]$accidents = find-InAllParameterSetsByAccident -CommandInfo $commandInfo -Syntax $syntax;
+        [PSCustomObject[]]$accidents = find-InAllParameterSetsByAccident -CommandInfo $commandInfo `
+          -Syntax $syntax;
         $accidents | Should -BeNullOrEmpty;
       }
     }
@@ -51,9 +54,11 @@ Describe 'find-InAllParameterSetsByAccident' -Tag 'PSTools' {
         }
         [string]$commandName = 'test-SingleInAllParameterSetsByAccident';
         [CommandInfo]$commandInfo = Get-Command $commandName;
-        [Syntax]$syntax = New-Syntax -CommandName $commandName -Signals $_signals -Krayon $_krayon;
+        [Syntax]$syntax = New-Syntax -CommandName $commandName -Signals $_signals `
+          -Scribbler $_scribbler;
 
-        [PSCustomObject[]]$accidents = find-InAllParameterSetsByAccident -CommandInfo $commandInfo -Syntax $syntax;
+        [PSCustomObject[]]$accidents = find-InAllParameterSetsByAccident -CommandInfo $commandInfo `
+          -Syntax $syntax;
         $accidents | Should -Not -BeNullOrEmpty;
         $accidents.Count | Should -Be 1;
       }
@@ -87,9 +92,11 @@ Describe 'find-InAllParameterSetsByAccident' -Tag 'PSTools' {
         }
         [string]$commandName = 'test-MultipleInAllParameterSetsByAccident';
         [CommandInfo]$commandInfo = Get-Command $commandName;
-        [Syntax]$syntax = New-Syntax -CommandName $commandName -Signals $_signals -Krayon $_krayon;
+        [Syntax]$syntax = New-Syntax -CommandName $commandName -Signals $_signals `
+          -Scribbler $_scribbler;
 
-        [PSCustomObject[]]$accidents = find-InAllParameterSetsByAccident -CommandInfo $commandInfo -Syntax $syntax;
+        [PSCustomObject[]]$accidents = find-InAllParameterSetsByAccident -CommandInfo $commandInfo `
+          -Syntax $syntax;
         $accidents | Should -Not -BeNullOrEmpty;
         $accidents.Count | Should -Be 3;
       }

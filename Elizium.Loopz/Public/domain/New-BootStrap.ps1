@@ -9,14 +9,8 @@ function New-BootStrap {
     [PSCustomObject]$Containers,
 
     [Parameter()]
-    [hashtable]$Signals,
-
-    [Parameter()]
-    [hashtable]$Theme,
-
-    [Parameter()]
     [PSCustomObject]$Options
   )
 
-  return [BootStrap]::new($Exchange, $Containers, $Signals, $Theme, $Options);
+  return [BootStrap]::new($Exchange, $Containers, $Options);
 }

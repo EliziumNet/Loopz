@@ -564,6 +564,4 @@ function Invoke-TraverseDirectory {
     $controller.SkipItem();
     Write-Error "Path specified '$($Path)' is not a directory";
   }
-
-  $controller.EndSession();
 } # Invoke-TraverseDirectory

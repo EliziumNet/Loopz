@@ -134,13 +134,11 @@
     [Parameter()]
     [boolean]$Trigger
   )
-
+  [Scribbler]$scribbler = $Exchange['LOOPZ.SCRIBBLER'];
   [scriptblock]$defaultGetResult = {
     param($result)
     $result.ToString();
   }
-
-  [Krayon]$krayon = $_exchange['LOOPZ.KRAYON'];
 
   [scriptblock]$decorator = {
     param ($_underscore, $_index, $_exchange, $_trigger)
@@ -204,43 +202,28 @@
       $themedPairs.append($invokeResult.Pairs);
     }
 
-    [hashtable]$krayolaTheme = $krayon.Theme;
-
     # Write the primary line
     #
     if (-not([string]::IsNullOrEmpty($message))) {
-      $null = $krayon.Message($message);
+      [string]$messageSnippet = $scribbler.WithArgSnippet('Message', $message);
+      $scribbler.Scribble("$($messageSnippet)");
     }
-    $null = $krayon.Line($themedPairs);
+    $scribbler.ScribbleLine($themedPairs);
 
-    # Write additional lines
-    #
     if ($invokeResult -and $invokeResult.psobject.properties.match('Lines') -and $invokeResult.Lines) {
-      [int]$indent = $Exchange.ContainsKey('LOOPZ.WH-FOREACH-DECORATOR.INDENT') `
-        ? $Exchange['LOOPZ.WH-FOREACH-DECORATOR.INDENT'] : 3;
+      [int]$indent = $($Exchange.ContainsKey('LOOPZ.WH-FOREACH-DECORATOR.INDENT') `
+          ? $Exchange['LOOPZ.WH-FOREACH-DECORATOR.INDENT'] : 3);
       [string]$blank = [string]::new(' ', $indent);
-
-      [Krayon]$adjustedWriter = if ($Exchange.ContainsKey('LOOPZ.WH-FOREACH-DECORATOR.WRITER')) {
-        $Exchange['LOOPZ.WH-FOREACH-DECORATOR.WRITER'];
-      }
-      else {
-        [hashtable]$adjustedTheme = $krayolaTheme.Clone();
-        $adjustedTheme['MESSAGE-SUFFIX'] = [string]::Empty;
-        $adjustedTheme['OPEN'] = [string]::Empty;
-        $adjustedTheme['CLOSE'] = [string]::Empty;
-        $Exchange['LOOPZ.WH-FOREACH-DECORATOR.WRITER'] = New-Krayon -Theme $adjustedTheme;
-
-        $Exchange['LOOPZ.WH-FOREACH-DECORATOR.WRITER'];
-      }
 
       [line[]]$additionalLines = if ([string]::IsNullOrEmpty($invokeResult.ErrorReason)) {
         $invokeResult.Lines;
-      } else {
+      }
+      else {
         $( New-Line( $(New-Pair('Error', $invokeResult.ErrorReason)) ) ) + $invokeResult.Lines;
       }
 
       foreach ($line in $additionalLines) {
-        $null = $adjustedWriter.Message($blank).Line($line);
+        $scribbler.ScribbleNakedLine($blank, $line);
       }
     }
   }

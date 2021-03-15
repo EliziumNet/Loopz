@@ -6,7 +6,7 @@ function Get-TableDisplayOptions {
     [hashtable]$Signals,
 
     [Parameter()]
-    [Object]$Krayon,
+    [Object]$Scribbler,
 
     [Parameter()]
     [string[]]$Select,
@@ -50,8 +50,8 @@ function Get-TableDisplayOptions {
     }
 
     Snippets = [PSCustomObject]@{
-      Reset   = $($Krayon.snippets('Reset'));
-      Ln      = $($Krayon.snippets('Ln'));
+      Reset   = $($Scribbler.snippets('Reset'));
+      Ln      = $($Scribbler.snippets('Ln'));
     }
 
     Custom   = $Custom;

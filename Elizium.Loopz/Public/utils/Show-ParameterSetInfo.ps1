@@ -14,41 +14,53 @@ function Show-ParameterSetInfo {
     [string[]]$Sets,
 
     [Parameter()]
-    [System.Text.StringBuilder]$Builder = [System.Text.StringBuilder]::new(),
+    [Scribbler]$Scribbler,
 
     [Parameter()]
     [string]$Title = 'Parameter Set Info',
 
     [Parameter()]
-    [switch]$Common
+    [switch]$Common,
+
+    [Parameter()]
+    [switch]$Test
   )
 
   begin {
     [Krayon]$krayon = Get-Krayon;
     [hashtable]$signals = Get-Signals;
+
+    if ($null -eq $Scribbler) {
+      $Scribbler = New-Scribbler -Krayon $krayon -Test:$Test.IsPresent;
+    }
   }
 
   process {
-    if (-not($PSBoundParameters.ContainsKey('Builder'))) {
-      $null = $Builder.Clear();
-    }
-
     if ($_ -isNot [System.Management.Automation.CommandInfo]) {
+      [hashtable]$shipsParameters = @{
+        'Title' = $Title;
+        'Common' = $Common.IsPresent;
+        'Test' = $Test.IsPresent;
+      }
+
       if ($PSBoundParameters.ContainsKey('Sets')) {
-        Get-Command -Name $_ | Show-ParameterSetInfo -Sets $Sets;
+        $shipsParameters['Sets'] = $Sets;
       }
-      else {
-        Get-Command -Name $_ | Show-ParameterSetInfo;
+
+      if ($PSBoundParameters.ContainsKey('Scribbler')) {
+        $shipsParameters['Scribbler'] = $Scribbler;
       }
+
+      Get-Command -Name $_ | Show-ParameterSetInfo @shipsParameters;
     }
     else {
       Write-Debug "    --- Show-ParameterSetInfo - Command: [$($_.Name)] ---";
-      [syntax]$syntax = New-Syntax -CommandName $_.Name -Signals $signals -Krayon $krayon;
+      [syntax]$syntax = New-Syntax -CommandName $_.Name -Signals $signals -Scribbler $Scribbler;
 
       [string]$commandSnippet = $syntax.TableOptions.Custom.Snippets.Command;
       [string]$resetSnippet = $syntax.TableOptions.Snippets.Reset;
       [string]$lnSnippet = $syntax.TableOptions.Snippets.Ln;
-      $null = $builder.Append($syntax.TitleStmt($Title, $_.Name));
+      $Scribbler.Scribble($syntax.TitleStmt($Title, $_.Name));
 
       if ($Common) {
         $syntax.TableOptions.Custom.IncludeCommon = $true;
@@ -74,14 +86,14 @@ function Show-ParameterSetInfo {
               [string]$structuredParamSetStmt = $syntax.ParamSetStmt($_, $parameterSet);
               [string]$structuredSyntax = $syntax.SyntaxStmt($parameterSet);
 
-              $null = $Builder.Append($(
+              $Scribbler.Scribble($(
                   "$($lnSnippet)" +
                   "$($structuredParamSetStmt)$($lnSnippet)$($structuredSyntax)$($lnSnippet)" +
                   "$($lnSnippet)"
                 ));
 
               Show-AsTable -MetaData $fieldMetaData -Headers $headers -Table $tableContent `
-                -Builder $Builder -Options $syntax.TableOptions -Render $syntax.RenderCell;
+                -Scribbler $Scribbler -Options $syntax.TableOptions -Render $syntax.RenderCell;
 
               $count++;
             }
@@ -90,7 +102,7 @@ function Show-ParameterSetInfo {
             }
           }
         } # foreach
-        $null = $Builder.Append("$($lnSnippet)");
+        $Scribbler.Scribble("$($lnSnippet)");
 
         ($total -gt 0) `
           ? "Command: $($commandSnippet)$($Name)$($resetSnippet); Showed $count of $total parameter set(s)." `
@@ -101,15 +113,12 @@ function Show-ParameterSetInfo {
       }
 
       if (-not([string]::IsNullOrEmpty($structuredSummaryStmt))) {
-        $null = $Builder.Append(
+        $Scribbler.Scribble(
           $("$($resetSnippet)$($structuredSummaryStmt)$($lnSnippet)$($lnSnippet)")
         );
       }
 
-      if (-not($PSBoundParameters.ContainsKey('Builder'))) {
-        Write-Debug "'$($Builder.ToString())'";
-        $krayon.ScribbleLn($Builder.ToString()).End();
-      }
+      $Scribbler.Flush();
     }
   }
 }

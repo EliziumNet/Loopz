@@ -11,6 +11,7 @@ Describe 'find-MultipleValueFromPipeline' -Tag 'PSTools' {
     InModuleScope Elizium.Loopz {
       [Krayon]$script:_krayon = Get-Krayon;
       [hashtable]$script:_signals = Get-Signals;
+      [Scribbler]$script:_scribbler = New-Scribbler -Krayon $_krayon -Test;
     }
   }
 
@@ -35,16 +36,18 @@ Describe 'find-MultipleValueFromPipeline' -Tag 'PSTools' {
 
         [string]$commandName = 'test-WithoutMultipleClaimsToPipelineValue';
         [CommandInfo]$commandInfo = Get-Command $commandName;
-        [Syntax]$syntax = New-Syntax -CommandName $commandName -Signals $_signals -Krayon $_krayon;
+        [Syntax]$syntax = New-Syntax -CommandName $commandName -Signals $_signals `
+          -Scribbler $_scribbler;
 
-        [array]$multiples = find-MultipleValueFromPipeline -CommandInfo $commandInfo -Syntax $syntax;
+        [array]$multiples = find-MultipleValueFromPipeline -CommandInfo $commandInfo `
+          -Syntax $syntax;
         $multiples | Should -BeNullOrEmpty;
       }
     }
   }
 
   Context 'given: multiple claims to pipeline item' {
-    It 'should: report violations'  {
+    It 'should: report violations' {
       InModuleScope Elizium.Loopz {
         function test-MultipleClaimsToPipelineValue {
           param(
@@ -70,9 +73,11 @@ Describe 'find-MultipleValueFromPipeline' -Tag 'PSTools' {
 
         [string]$commandName = 'test-MultipleClaimsToPipelineValue';
         [CommandInfo]$commandInfo = Get-Command $commandName;
-        [Syntax]$syntax = New-Syntax -CommandName $commandName -Signals $_signals -Krayon $_krayon;
+        [Syntax]$syntax = New-Syntax -CommandName $commandName -Signals $_signals `
+          -Scribbler $_scribbler;
 
-        [array]$multiples = find-MultipleValueFromPipeline -CommandInfo $commandInfo -Syntax $syntax;
+        [array]$multiples = find-MultipleValueFromPipeline -CommandInfo $commandInfo `
+          -Syntax $syntax;
         $multiples.Count | Should -Be 2;
       }
     }

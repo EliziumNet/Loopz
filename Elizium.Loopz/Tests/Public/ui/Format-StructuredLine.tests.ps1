@@ -19,8 +19,10 @@ Describe 'Format-StructuredLine' {
           [string]$Ruler,
           [string]$StructuredLine
         )
-        Write-Host "$Ruler";
-        $_krayon.ScribbleLn($StructuredLine);
+        [string]$lnSnippet = $_scribbler.Snippets(@('Ln'));
+
+        $_scribbler.Scribble("$($Ruler)$($lnSnippet)");
+        $_scribbler.Scribble($StructuredLine);
       }
     }
   }
@@ -30,6 +32,17 @@ Describe 'Format-StructuredLine' {
       [string]$script:_ruler = $LoopzUI.DotsLine;
       [string]$script:_structuredLine = [string]::Empty;
       [Krayon]$script:_krayon = New-Krayon($_theme);
+      [Scribbler]$script:_scribbler = New-Scribbler -Krayon $_krayon -Test;
+
+      [string]$script:_lnSnippet = $_scribbler.Snippets(@('Ln'));
+      [string]$script:_ThemeColourMessageSnippet = $_scribbler.WithArgSnippet('ThemeColour', 'message');
+      [string]$script:_ThemeColourMetaSnippet = $_scribbler.WithArgSnippet('ThemeColour', 'meta');
+    }
+  }
+
+  AfterEach {
+    InModuleScope Elizium.Loopz {
+      $_scribbler.Flush();
     }
   }
 
@@ -41,10 +54,11 @@ Describe 'Format-StructuredLine' {
       InModuleScope Elizium.Loopz {
         [hashtable]$exchange = @{
           'LOOPZ.HEADER-BLOCK.LINE' = $LoopzUI.EqualsLine;
+          'LOOPZ.SCRIBBLER'         = $_scribbler;
         }
 
         $_structuredLine = Format-StructuredLine -Exchange $exchange `
-          -LineKey $LineKey -CrumbKey $CrumbKey -Krayon $_krayon;
+          -LineKey $LineKey -CrumbKey $CrumbKey;
 
         show-result -Ruler $_ruler -StructuredLine $_structuredLine;
       }
@@ -61,6 +75,7 @@ Describe 'Format-StructuredLine' {
           'LOOPZ.SIGNALS'                   = $signals;
           'LOOPZ.HEADER-BLOCK.CRUMB-SIGNAL' = 'CRUMB-B';
           'LOOPZ.HEADER-BLOCK.LINE'         = $LoopzUI.EqualsLine;
+          'LOOPZ.SCRIBBLER'                 = $_scribbler;
         }
       }
     }
@@ -70,11 +85,13 @@ Describe 'Format-StructuredLine' {
         $exchange['LOOPZ.HEADER-BLOCK.MESSAGE'] = 'Children of the Damned';
 
         $_structuredLine = Format-StructuredLine -Exchange $exchange `
-          -LineKey $LineKey -CrumbKey $CrumbKey -MessageKey $MessageKey -Krayon $_krayon;
+          -LineKey $LineKey -CrumbKey $CrumbKey -MessageKey $MessageKey;
 
         show-result -Ruler $_ruler -StructuredLine $_structuredLine;
-        [string]$expected = '&[ThemeColour,meta][🚀] ===================================================================================== [ ' + `
-          '&[ThemeColour,message]Children of the Damned&[ThemeColour,meta] ] ===';
+        [string]$expected = $(
+          "$($_ThemeColourMetaSnippet)[🚀] " +
+          "===================================================================================== [ " +
+          "$($_ThemeColourMessageSnippet)Children of the Damned$($_ThemeColourMetaSnippet) ] ===$($_lnSnippet)");
         $_structuredLine | Should -BeExactly $expected;
       }
     }
@@ -87,12 +104,15 @@ Describe 'Format-StructuredLine' {
           $exchange['LOOPZ.HEADER-BLOCK.MESSAGE'] = $longMessage;
 
           $_structuredLine = Format-StructuredLine -Exchange $exchange `
-            -LineKey $LineKey -CrumbKey $CrumbKey -MessageKey $MessageKey -Krayon $_krayon;
+            -LineKey $LineKey -CrumbKey $CrumbKey -MessageKey $MessageKey;
       
           show-result -Ruler $_ruler -StructuredLine $_structuredLine;
-          [string]$expected = '&[ThemeColour,meta][🚀] ====== [ ' + `
-            '&[ThemeColour,message]The Number of the Beast (No Truncation) The Number of the Beast (No Truncation) The Number of the Beast (No Truncation) !&[ThemeColour,meta]' + `
-            ' ] ===';
+          [string]$expected = $(
+            "$($_ThemeColourMetaSnippet)[🚀] ====== [ " +
+            "$($_ThemeColourMessageSnippet)" +
+            "The Number of the Beast (No Truncation) The Number of the Beast (No Truncation) The Number of the Beast (No Truncation) !" +
+            "$($_ThemeColourMetaSnippet) ] ===$($_lnSnippet)"
+          );
           $_structuredLine | Should -BeExactly $expected;
         }
       }
@@ -110,12 +130,13 @@ Describe 'Format-StructuredLine' {
             InModuleScope Elizium.Loopz {
               $_structuredLine = Format-StructuredLine -Exchange $exchange `
                 -LineKey $LineKey -CrumbKey $CrumbKey -MessageKey $MessageKey -Truncate `
-                -Options @{ Ellipses = ' ***' } -Krayon $_krayon;
+                -Options @{ Ellipses = ' ***' };
 
               show-result -Ruler $_ruler -StructuredLine $_structuredLine;
-              [string]$expected = '&[ThemeColour,meta][🚀] ====== [ ' + `
-                '&[ThemeColour,message]Hallowed by thy Name Hallowed by thy Name Hallowed by thy Name Hallowed by thy Name Hallowed by t ***&[ThemeColour,meta]' + `
-                ' ] ===';
+              [string]$expected = "$($_ThemeColourMetaSnippet)[🚀] ====== [ " +
+                "$($_ThemeColourMessageSnippet)" +
+                "Hallowed by thy Name Hallowed by thy Name Hallowed by thy Name Hallowed by thy Name Hallowed by t ***" +
+                "$($_ThemeColourMetaSnippet) ] ===$($_lnSnippet)";
               $_structuredLine | Should -BeExactly $expected;
             }
           }
@@ -126,12 +147,12 @@ Describe 'Format-StructuredLine' {
             InModuleScope Elizium.Loopz {
               $_structuredLine = Format-StructuredLine -Exchange $exchange `
                 -LineKey $LineKey -CrumbKey $CrumbKey -MessageKey $MessageKey -Truncate `
-                -Options @{ MinimumFlexSize = 12 } -Krayon $_krayon;
+                -Options @{ MinimumFlexSize = 12 };
 
               show-result -Ruler $_ruler -StructuredLine $_structuredLine;
-              [string]$expected = '&[ThemeColour,meta][🚀] ============ [ ' + `
-                '&[ThemeColour,message]Hallowed by thy Name Hallowed by thy Name Hallowed by thy Name Hallowed by thy Name Hallowe ...&[ThemeColour,meta]' + `
-                ' ] ===';
+              [string]$expected = "$($_ThemeColourMetaSnippet)[🚀] ============ [ " +
+                "$($_ThemeColourMessageSnippet)Hallowed by thy Name Hallowed by thy Name Hallowed by thy Name Hallowed by thy Name Hallowe ...$($_ThemeColourMetaSnippet)" +
+                " ] ===$($_lnSnippet)";
               $_structuredLine | Should -BeExactly $expected;
             }
           }
@@ -140,12 +161,15 @@ Describe 'Format-StructuredLine' {
             InModuleScope Elizium.Loopz {
               $_structuredLine = Format-StructuredLine -Exchange $exchange `
                 -LineKey $LineKey -CrumbKey $CrumbKey -MessageKey $MessageKey -Truncate `
-                -Options @{ MinimumFlexSize = 3 } -Krayon $_krayon;
+                -Options @{ MinimumFlexSize = 3 };
 
               show-result -Ruler $_ruler -StructuredLine $_structuredLine;
-              [string]$expected = '&[ThemeColour,meta][🚀] === [ ' + `
-                '&[ThemeColour,message]Hallowed by thy Name Hallowed by thy Name Hallowed by thy Name Hallowed by thy Name Hallowed by thy  ...&[ThemeColour,meta]' + `
-                ' ] ===';
+              [string]$expected = $(
+                "$($_ThemeColourMetaSnippet)[🚀] === [ " +
+                "$($_ThemeColourMessageSnippet)" +
+                "Hallowed by thy Name Hallowed by thy Name Hallowed by thy Name Hallowed by thy Name Hallowed by thy  ..." +
+                "$($_ThemeColourMetaSnippet) ] ===$($_lnSnippet)"
+              );
               $_structuredLine | Should -BeExactly $expected;
             }
           }
@@ -160,12 +184,15 @@ Describe 'Format-StructuredLine' {
               $exchange['LOOPZ.HEADER-BLOCK.MESSAGE'] = $longMessage;
 
               $_structuredLine = Format-StructuredLine -Exchange $exchange `
-                -LineKey $LineKey -CrumbKey $CrumbKey -MessageKey $MessageKey -Truncate -Krayon $_krayon;
+                -LineKey $LineKey -CrumbKey $CrumbKey -MessageKey $MessageKey -Truncate;
 
               show-result -Ruler $_ruler -StructuredLine $_structuredLine;
-              [string]$expected = '&[ThemeColour,meta][🚀] ______ [ ' `
-                + '&[ThemeColour,message]Hallowed by thy Fame Hallowed by thy Fame Hallowed by thy ...&[ThemeColour,meta]' + `
-                ' ] ___';
+              [string]$expected = $(
+                "$($_ThemeColourMetaSnippet)[🚀] ______ [ " +
+                "$($_ThemeColourMessageSnippet)" +
+                "Hallowed by thy Fame Hallowed by thy Fame Hallowed by thy ...$($_ThemeColourMetaSnippet)" +
+                " ] ___$($_lnSnippet)"
+              );
               $_structuredLine | Should -BeExactly $expected;
             }
           }
@@ -179,6 +206,7 @@ Describe 'Format-StructuredLine' {
       InModuleScope Elizium.Loopz {
         [hashtable]$script:exchange = @{
           'LOOPZ.HEADER-BLOCK.LINE' = $LoopzUI.EqualsLine;
+          'LOOPZ.SCRIBBLER'         = $_scribbler;
         }
       }
     }
@@ -188,11 +216,14 @@ Describe 'Format-StructuredLine' {
         $exchange['LOOPZ.HEADER-BLOCK.MESSAGE'] = '22 Acacia Avenue';
 
         $_structuredLine = Format-StructuredLine -Exchange $exchange `
-          -LineKey $LineKey -CrumbKey $CrumbKey -MessageKey $MessageKey -Krayon $_krayon;
+          -LineKey $LineKey -CrumbKey $CrumbKey -MessageKey $MessageKey;
 
         show-result -Ruler $_ruler -StructuredLine $_structuredLine;
-        [string]$expected = '&[ThemeColour,meta]================================================================================================ [ ' + `
-          '&[ThemeColour,message]22 Acacia Avenue&[ThemeColour,meta] ] ===';
+        [string]$expected = $(
+          "$($_ThemeColourMetaSnippet)" +
+          "================================================================================================ [ " +
+          "$($_ThemeColourMessageSnippet)22 Acacia Avenue$($_ThemeColourMetaSnippet) ] ===$($_lnSnippet)"
+        );
         $_structuredLine | Should -BeExactly $expected;
       }
     }
@@ -206,12 +237,15 @@ Describe 'Format-StructuredLine' {
           $exchange['LOOPZ.HEADER-BLOCK.MESSAGE'] = $longMessage;
 
           $_structuredLine = Format-StructuredLine -Exchange $exchange `
-            -LineKey $LineKey -CrumbKey $CrumbKey -MessageKey $MessageKey -Krayon $_krayon;
+            -LineKey $LineKey -CrumbKey $CrumbKey -MessageKey $MessageKey;
 
           show-result -Ruler $_ruler -StructuredLine $_structuredLine;
-          [string]$expected = '&[ThemeColour,meta]====== [ ' + `
-            '&[ThemeColour,message]Stranger in a Strange Land (No Truncation) Stranger in a Strange Land (No Truncation) Stranger in a Strange Land (No Truncation) !&[ThemeColour,meta]' + `
-            ' ] ===';
+          [string]$expected = $(
+            "$($_ThemeColourMetaSnippet)====== [ " +
+            "$($_ThemeColourMessageSnippet)" +
+            "Stranger in a Strange Land (No Truncation) Stranger in a Strange Land (No Truncation) Stranger in a Strange Land (No Truncation) !" +
+            "$($_ThemeColourMetaSnippet) ] ===$($_lnSnippet)"
+          );
 
           $_structuredLine | Should -BeExactly $expected;
         }
@@ -231,13 +265,16 @@ Describe 'Format-StructuredLine' {
       It 'should: Create coloured line with Truncated message' {
         InModuleScope Elizium.Loopz {
           $_structuredLine = Format-StructuredLine -Exchange $exchange `
-            -LineKey $LineKey -CrumbKey $CrumbKey -MessageKey $MessageKey -Truncate -Krayon $_krayon;
+            -LineKey $LineKey -CrumbKey $CrumbKey -MessageKey $MessageKey -Truncate;
 
           $script:_ruler = $LoopzUI.SmallDotsLine;
           show-result -Ruler $_ruler -StructuredLine $_structuredLine;
-          [string]$expected = '&[ThemeColour,meta]====== [ ' + `
-            '&[ThemeColour,message]Heaven Can Wait Heaven Can Wait Heaven Can Wait Heaven Can Wai ...&[ThemeColour,meta]' + `
-            ' ] ===';
+          [string]$expected = $(
+            "$($_ThemeColourMetaSnippet)====== [ " +
+            "$($_ThemeColourMessageSnippet)" +
+            "Heaven Can Wait Heaven Can Wait Heaven Can Wait Heaven Can Wai ..." +
+            "$($_ThemeColourMetaSnippet) ] ===$($_lnSnippet)"
+          );
           $_structuredLine | Should -BeExactly $expected;
         }
       }
@@ -247,13 +284,16 @@ Describe 'Format-StructuredLine' {
           InModuleScope Elizium.Loopz {
             $_structuredLine = Format-StructuredLine -Exchange $exchange `
               -LineKey $LineKey -CrumbKey $CrumbKey -MessageKey $MessageKey -Truncate `
-              -Options @{ MinimumFlexSize = 3 } -Krayon $_krayon;
+              -Options @{ MinimumFlexSize = 3 };
 
             $script:_ruler = $LoopzUI.SmallDotsLine;
             show-result -Ruler $_ruler -StructuredLine $_structuredLine;
-            [string]$expected = '&[ThemeColour,meta]=== [ ' + `
-              '&[ThemeColour,message]Heaven Can Wait Heaven Can Wait Heaven Can Wait Heaven Can Wait H ...&[ThemeColour,meta]' + `
-              ' ] ===';
+            [string]$expected = $(
+              "$($_ThemeColourMetaSnippet)=== [ " +
+              "$($_ThemeColourMessageSnippet)" +
+              "Heaven Can Wait Heaven Can Wait Heaven Can Wait Heaven Can Wait H ..." +
+              "$($_ThemeColourMetaSnippet) ] ===$($_lnSnippet)"
+            );
             $_structuredLine | Should -BeExactly $expected;
           }
         }
@@ -262,13 +302,16 @@ Describe 'Format-StructuredLine' {
           InModuleScope Elizium.Loopz {
             $_structuredLine = Format-StructuredLine -Exchange $exchange `
               -LineKey $LineKey -CrumbKey $CrumbKey -MessageKey $MessageKey -Truncate `
-              -Options @{ MinimumFlexSize = 9 } -Krayon $_krayon;
+              -Options @{ MinimumFlexSize = 9 };
 
             $script:_ruler = $LoopzUI.SmallDotsLine;
             show-result -Ruler $_ruler -StructuredLine $_structuredLine;
-            [string]$expected = '&[ThemeColour,meta]========= [ ' + `
-              '&[ThemeColour,message]Heaven Can Wait Heaven Can Wait Heaven Can Wait Heaven Can  ...&[ThemeColour,meta]' + `
-              ' ] ===';
+            [string]$expected = $(
+              "$($_ThemeColourMetaSnippet)========= [ " +
+              "$($_ThemeColourMessageSnippet)" +
+              "Heaven Can Wait Heaven Can Wait Heaven Can Wait Heaven Can  ..." +
+              "$($_ThemeColourMetaSnippet) ] ===$($_lnSnippet)"
+            );
             $_structuredLine | Should -BeExactly $expected;
           }
         }
@@ -283,13 +326,16 @@ Describe 'Format-StructuredLine' {
             $exchange['LOOPZ.HEADER-BLOCK.MESSAGE'] = $longMessage;
 
             $_structuredLine = Format-StructuredLine -Exchange $exchange `
-              -LineKey $LineKey -CrumbKey $CrumbKey -MessageKey $MessageKey -Truncate -Krayon $_krayon;
+              -LineKey $LineKey -CrumbKey $CrumbKey -MessageKey $MessageKey -Truncate;
 
             $script:_ruler = $LoopzUI.SmallDotsLine;
             show-result -Ruler $_ruler -StructuredLine $_structuredLine;
-            [string]$expected = '&[ThemeColour,meta]______ [ ' + `
-              '&[ThemeColour,message]Heaven Can Bait Heaven Can Bait Heaven Can Bait Heaven Can Bai ...&[ThemeColour,meta]' + `
-              ' ] ___';
+            [string]$expected = $(
+              "$($_ThemeColourMetaSnippet)______ [ " +
+              "$($_ThemeColourMessageSnippet)" +
+              "Heaven Can Bait Heaven Can Bait Heaven Can Bait Heaven Can Bai ..." +
+              "$($_ThemeColourMetaSnippet) ] ___$($_lnSnippet)"
+            );
             $_structuredLine | Should -BeExactly $expected;
           }
         }
@@ -307,14 +353,18 @@ Describe 'Format-StructuredLine' {
           'LOOPZ.SIGNALS'                   = $signals;
           'LOOPZ.HEADER-BLOCK.CRUMB-SIGNAL' = 'CRUMB-B';
           'LOOPZ.HEADER-BLOCK.LINE'         = $LoopzUI.TildeLine;
+          'LOOPZ.SCRIBBLER'                 = $_scribbler;
         }
 
         $_structuredLine = Format-StructuredLine -Exchange $exchange `
-          -LineKey $LineKey -CrumbKey $CrumbKey -Krayon $_krayon;
+          -LineKey $LineKey -CrumbKey $CrumbKey;
 
         show-result -Ruler $_ruler -StructuredLine $_structuredLine;
-        [string]$expected = '&[ThemeColour,meta][🔥] ' + `
-          '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
+        [string]$expected = $(
+          "$($_ThemeColourMetaSnippet)[🔥] " +
+          "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" +
+          "$($_lnSnippet)"
+        );
         $_structuredLine | Should -BeExactly $expected;
       }
     }

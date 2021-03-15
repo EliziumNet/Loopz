@@ -11,6 +11,7 @@ Describe 'find-DuplicateParamPositions' -Tag 'PSTools' {
     InModuleScope Elizium.Loopz {
       [Krayon]$script:_krayon = Get-Krayon;
       [hashtable]$script:_signals = Get-Signals;
+      [Scribbler]$script:_scribbler = New-Scribbler -Krayon $_krayon -Test;
     }
   }
 
@@ -35,9 +36,11 @@ Describe 'find-DuplicateParamPositions' -Tag 'PSTools' {
 
         [string]$commandName = 'test-NoDuplicatedPositions';
         [CommandInfo]$commandInfo = Get-Command $commandName;
-        [Syntax]$syntax = New-Syntax -CommandName $commandName -Signals $_signals -Krayon $_krayon;
+        [Syntax]$syntax = New-Syntax -CommandName $commandName -Signals $_signals `
+          -Scribbler $_scribbler;
 
-        [array]$duplicates = find-DuplicateParamPositions -CommandInfo $commandInfo -Syntax $syntax;
+        [array]$duplicates = find-DuplicateParamPositions -CommandInfo $commandInfo `
+          -Syntax $syntax;
         $duplicates | Should -BeNullOrEmpty;
       }
     }
@@ -64,9 +67,11 @@ Describe 'find-DuplicateParamPositions' -Tag 'PSTools' {
 
         [string]$commandName = 'test-SingleSetWithDuplicatedPositions';
         [CommandInfo]$commandInfo = Get-Command $commandName;
-        [Syntax]$syntax = New-Syntax -CommandName $commandName -Signals $_signals -Krayon $_krayon;
+        [Syntax]$syntax = New-Syntax -CommandName $commandName -Signals $_signals `
+          -Scribbler $_scribbler;
 
-        [array]$duplicates = find-DuplicateParamPositions -CommandInfo $commandInfo -Syntax $syntax;
+        [array]$duplicates = find-DuplicateParamPositions -CommandInfo $commandInfo `
+          -Syntax $syntax;
         $duplicates.Count | Should -Be 1;
 
         ($duplicates | Where-Object { $_.ParamSet.Name -eq 'Alpha' }) | `
@@ -102,9 +107,11 @@ Describe 'find-DuplicateParamPositions' -Tag 'PSTools' {
 
         [string]$commandName = 'test-MultipleSetsWithDuplicatedPositions';
         [CommandInfo]$commandInfo = Get-Command $commandName;
-        [Syntax]$syntax = New-Syntax -CommandName $commandName -Signals $_signals -Krayon $_krayon;
+        [Syntax]$syntax = New-Syntax -CommandName $commandName -Signals $_signals `
+          -Scribbler $_scribbler;
 
-        [array]$duplicates = find-DuplicateParamPositions -CommandInfo $commandInfo -Syntax $syntax;
+        [array]$duplicates = find-DuplicateParamPositions -CommandInfo $commandInfo `
+          -Syntax $syntax;
         $duplicates.Count | Should -Be 2;
 
         ($duplicates | Where-Object { $_.ParamSet.Name -eq 'Alpha' }) | `

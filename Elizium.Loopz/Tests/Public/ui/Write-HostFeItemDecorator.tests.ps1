@@ -51,8 +51,15 @@ Describe 'Write-HostFeItemDecorator' {
   BeforeEach {
     InModuleScope Elizium.Loopz {
       [hashtable]$theme = $(Get-KrayolaTheme);
-      [Krayon]$krayon = New-Krayon -Theme $theme;
-      $_exchange['LOOPZ.KRAYON'] = $krayon;
+      [Krayon]$script:_krayon = New-Krayon -Theme $theme;
+      [Scribbler]$script:_scribbler = New-Scribbler -Krayon $_krayon -Test;
+      $_exchange['LOOPZ.SCRIBBLER'] = $_scribbler;
+    }
+  }
+
+  AfterEach {
+    InModuleScope Elizium.Loopz {
+      $_scribbler.Flush();
     }
   }
 
@@ -174,7 +181,6 @@ Describe 'Write-HostFeItemDecorator' {
             }
           }
 
-          [hashtable]$theme = $(Get-KrayolaTheme);
           [hashtable]$exchange = @{
             'LOOPZ.WH-FOREACH-DECORATOR.FUNCTION-NAME' = 'get-AnswerAdvancedFnWithTrigger';
             'ANSWER'                                   = 'Fourty Two';
@@ -182,7 +188,7 @@ Describe 'Write-HostFeItemDecorator' {
             'LOOPZ.WH-FOREACH-DECORATOR.PRODUCT-LABEL' = 'Test product';
             'WHAT-IF'                                  = $false;
             'LOOPZ.WH-FOREACH-DECORATOR.IF-TRIGGERED'  = $true;
-            'LOOPZ.KRAYON'                             = New-Krayon -Theme $theme;
+            'LOOPZ.SCRIBBLER'                          = $_scribbler;
           }
 
           $underscore = 'What is the answer to life, love and unity';
@@ -194,7 +200,6 @@ Describe 'Write-HostFeItemDecorator' {
     Context 'and: an item does not sets the Trigger' {
       It 'should: NOT invoke writer' {
         InModuleScope Elizium.Loopz {
-          [hashtable]$theme = $(Get-KrayolaTheme);
           [hashtable]$exchange = @{
             'LOOPZ.WH-FOREACH-DECORATOR.FUNCTION-NAME' = 'get-AnswerAdvancedFn';
             'ANSWER'                                   = 'Fourty Two';
@@ -202,7 +207,7 @@ Describe 'Write-HostFeItemDecorator' {
             'LOOPZ.WH-FOREACH-DECORATOR.PRODUCT-LABEL' = 'Test product';
             'WHAT-IF'                                  = $false;
             'LOOPZ.WH-FOREACH-DECORATOR.IF-TRIGGERED'  = $true;
-            'LOOPZ.KRAYON'                             = New-Krayon -Theme $theme;
+            'LOOPZ.SCRIBBLER'                          = $_scribbler;
           }
 
           $underscore = 'What is the answer to the universe';

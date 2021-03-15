@@ -126,14 +126,14 @@ Describe 'Show-ParameterSetReport' -Tag 'PSTools' {
 
   Context 'given: Invoke-Command' {
     It 'should: not report any violations' {
-      'Invoke-Command' | Show-ParameterSetReport;
+      'Invoke-Command' | Show-ParameterSetReport -Test;
     }
   }
 
   Context 'given: a command containing a Param Set with duplicated position numbers' {
     It 'should: report UNIQUE-POSITIONS violation' {
       InModuleScope Elizium.Loopz {
-        'test-MultipleSetsWithDuplicatedPositions' | Show-ParameterSetReport;
+        'test-MultipleSetsWithDuplicatedPositions' | Show-ParameterSetReport -Test;
       }
     }
   }
@@ -141,7 +141,7 @@ Describe 'Show-ParameterSetReport' -Tag 'PSTools' {
   Context 'given: a command containing a duplicated Param Sets' {
     It 'should: report UNIQUE-PARAM-SET violation' {
       InModuleScope Elizium.Loopz {
-        'test-WithDuplicateParamSets' | Show-ParameterSetReport;
+        'test-WithDuplicateParamSets' | Show-ParameterSetReport -Test;
       }
     }
   }
@@ -149,7 +149,7 @@ Describe 'Show-ParameterSetReport' -Tag 'PSTools' {
   Context 'given: a command containing a duplicated Param Sets' {
     It 'should: report SINGLE-PIPELINE-PARAM violation' {
       InModuleScope Elizium.Loopz {
-        'test-MultipleClaimsToPipelineValue' | Show-ParameterSetReport;
+        'test-MultipleClaimsToPipelineValue' | Show-ParameterSetReport -Test;
       }
     }
   }
@@ -157,7 +157,7 @@ Describe 'Show-ParameterSetReport' -Tag 'PSTools' {
   Context 'given: a command containing a duplicated Param Sets' {
     It 'should: report ACCIDENTAL-ALL-SETS violation' {
       InModuleScope Elizium.Loopz {
-        'test-MultipleInAllParameterSetsByAccident' | Show-ParameterSetReport;
+        'test-MultipleInAllParameterSetsByAccident' | Show-ParameterSetReport -Test;
       }
     }
   }
@@ -165,7 +165,7 @@ Describe 'Show-ParameterSetReport' -Tag 'PSTools' {
   Context 'given: a command with multiple rule violations' {
     It 'should: report all violation types' {
       InModuleScope Elizium.Loopz {
-        'test-WithMultipleRuleViolations' | Show-ParameterSetReport;
+        'test-WithMultipleRuleViolations' | Show-ParameterSetReport -Test;
       }
     }
   }

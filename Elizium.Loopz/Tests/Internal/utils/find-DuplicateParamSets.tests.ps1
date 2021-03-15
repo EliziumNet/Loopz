@@ -14,6 +14,7 @@ Describe 'find-DuplicateParamSets' -Tag 'PSTools' {
       [hashtable]$script:_theme = $_krayon.Theme;
       [hashtable]$script:_signals = Get-Signals;
       [Hashtable]$script:_scheme = Get-SyntaxScheme -Theme $_theme;
+      [Scribbler]$script:_scribbler = New-Scribbler -Krayon $_krayon -Test;
     }
   }
 
@@ -34,7 +35,7 @@ Describe 'find-DuplicateParamSets' -Tag 'PSTools' {
         }
 
         [string]$commandName = 'test-FnWithDuplicateParamSets';
-        [Syntax]$script:_syntax = [Syntax]::new($commandName, $_signals, $_krayon, $_scheme);
+        [Syntax]$script:_syntax = [Syntax]::new($commandName, $_signals, $_scribbler, $_scheme);
         [CommandInfo]$CommandInfo = $(Get-Command $commandName);
         [array]$duplicates = find-DuplicateParamSets -CommandInfo $CommandInfo -Syntax $_syntax;
         $duplicates.Count | Should -Be 1;
@@ -46,7 +47,7 @@ Describe 'find-DuplicateParamSets' -Tag 'PSTools' {
     It 'should: not find amy duplicates' {
       InModuleScope Elizium.Loopz {
         [string]$commandName = 'Rename-Many'
-        [Syntax]$script:_syntax = [Syntax]::new($commandName, $_signals, $_krayon, $_scheme);
+        [Syntax]$script:_syntax = [Syntax]::new($commandName, $_signals, $_scribbler, $_scheme);
         [CommandInfo]$CommandInfo = $(Get-Command $commandName);
         [array]$duplicates = find-DuplicateParamSets -CommandInfo $CommandInfo -Syntax $_syntax;
         $duplicates | Should -BeNullOrEmpty;
@@ -77,7 +78,7 @@ Describe 'find-DuplicateParamSets' -Tag 'PSTools' {
         }
 
         [string]$commandName = 'test-WithDuplicateParamSets'
-        [Syntax]$script:_syntax = [Syntax]::new($commandName, $_signals, $_krayon, $_scheme);
+        [Syntax]$script:_syntax = [Syntax]::new($commandName, $_signals, $_scribbler, $_scheme);
         [CommandInfo]$CommandInfo = $(Get-Command $commandName);
         [array]$duplicates = find-DuplicateParamSets -CommandInfo $CommandInfo -Syntax $_syntax;
 

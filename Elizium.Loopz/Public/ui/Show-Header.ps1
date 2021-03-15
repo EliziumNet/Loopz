@@ -9,7 +9,7 @@ function Show-Header {
 
   .DESCRIPTION
     Behaviour can be customised by the following entries in the Exchange:
-  * 'LOOPZ.KRAYON' (mandatory): the Krayola Krayon writer object.
+  * 'LOOPZ.SCRIBBLER' (mandatory): the Krayola Scribbler writer object.
   * 'LOOPZ.HEADER-BLOCK.MESSAGE': The custom message to be displayed as
   part of the header.
   * 'LOOPZ.HEADER.PROPERTIES': A Krayon [line] instance contain a collection
@@ -26,14 +26,18 @@ function Show-Header {
     [Parameter()]
     [hashtable]$Exchange
   )
-
-  [Krayon]$krayon = $Exchange['LOOPZ.KRAYON'];
-
-  if (-not($krayon)) {
-    throw "Writer missing from Exchange under key 'LOOPZ.KRAYON'"
+  [Scribbler]$scribbler = $Exchange['LOOPZ.SCRIBBLER'];
+  if (-not($scribbler)) {
+    throw [System.Management.Automation.MethodInvocationException]::new(
+      "Show-Header: Scribbler missing from Exchange under key 'LOOPZ.SCRIBBLER'");
   }
-  $null = $krayon.Reset();
-  [string]$writerFormatWithArg = $krayon.ApiFormatWithArg;
+
+  [string]$resetSnippet = $scribbler.Snippets(@('Reset'));
+  [string]$lnSnippet = $scribbler.Snippets(@('Ln'));
+  [string]$metaSnippet = $scribbler.WithArgSnippet('ThemeColour', 'meta');
+
+  $scribbler.Scribble("$($resetSnippet)");
+
   [string]$message = $Exchange.ContainsKey(
     'LOOPZ.HEADER-BLOCK.MESSAGE') ? $Exchange['LOOPZ.HEADER-BLOCK.MESSAGE'] : [string]::Empty;
 
@@ -51,23 +55,30 @@ function Show-Header {
     # First line
     #
     [string]$line = $Exchange.ContainsKey('LOOPZ.HEADER-BLOCK.LINE') `
-      ? $Exchange['LOOPZ.HEADER-BLOCK.LINE'] : ([string]::new('_', $_LineLength)); # $_LineLength ??? (oops my bad)
+      ? $Exchange['LOOPZ.HEADER-BLOCK.LINE'] : ([string]::new('_', 80));
 
-    [string]$structuredLine = $($writerFormatWithArg -f 'ThemeColour', 'meta') + $line;
-
-    $null = $krayon.ScribbleLn($structuredLine);
+    [string]$structuredLine = $metaSnippet + $line;
+    $scribbler.Scribble("$($structuredLine)$($lnSnippet)");
 
     # Inner detail
     #
     if (-not([string]::IsNullOrEmpty($message))) {
-      $null = $krayon.Message($message);
+      [string]$messageSnippet = $scribbler.WithArgSnippet('Message', $message);
+      $scribbler.Scribble("$($messageSnippet)");
     }
-    $null = $krayon.Line($properties);
 
+    [string]$structuredProps = ($properties.Line | ForEach-Object {
+        "$($_.Key),$($_.Value),$($_.Affirm)"
+      }) -join ';'
+
+    [string]$lineSnippet = $scribbler.WithArgSnippet(
+      'Line', $structuredProps
+    )
+    $scribbler.Scribble("$($lineSnippet)");
+          
     # Second line
     #
-    [string]$structuredLine = $($writerFormatWithArg -f 'ThemeColour', 'meta') + $line;
-    $null = $krayon.ScribbleLn($structuredLine);
+    $scribbler.Scribble("$($structuredLine)$($lnSnippet)");
   }
   else {
     # Alternative line
@@ -77,7 +88,8 @@ function Show-Header {
     [string]$messageKey = 'LOOPZ.HEADER-BLOCK.MESSAGE';
 
     [string]$structuredLine = Format-StructuredLine -Exchange $exchange `
-      -LineKey $LineKey -CrumbKey $CrumbKey -MessageKey $messageKey -Krayon $krayon -Truncate;
-    $null = $krayon.ScribbleLn($structuredLine);
+      -LineKey $LineKey -CrumbKey $CrumbKey -MessageKey $messageKey -Truncate;
+
+    $scribbler.Scribble("$($structuredLine)");
   }
 }

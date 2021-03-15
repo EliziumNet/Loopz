@@ -5,6 +5,7 @@ class Syntax {
   [hashtable]$Theme;
   [hashtable]$Signals
   [object]$Krayon;
+  [object]$Scribbler;
   [hashtable]$Scheme;
 
   [string]$ParamNamePattern = "\-(?<name>\w+)";
@@ -42,8 +43,8 @@ class Syntax {
       [string]$column,
       [string]$value,
       [PSCustomObject]$row,
-      [PSCustomObject]$Options,
-      [System.Text.StringBuilder]$builder
+      [PSCustomObject]$options,
+      [object]$scribbler
     )
     [boolean]$result = $true;
 
@@ -59,9 +60,9 @@ class Syntax {
     #
     switch -Regex ($column) {
       'Mandatory|PipeValue|PipeName|Unique' {
-        [string]$coreValue = $value.Trim() -eq 'True' ? $Options.Values.True : $Options.Values.False;
-        [string]$padded = Get-PaddedLabel -Label $coreValue -Width $value.Length -Align $Options.Align.Cell;
-        $null = $builder.Append("$($Options.Snippets.Reset)$($padded)");
+        [string]$coreValue = $value.Trim() -eq 'True' ? $options.Values.True : $options.Values.False;
+        [string]$padded = Get-PaddedLabel -Label $coreValue -Width $value.Length -Align $options.Align.Cell;
+        $null = $scribbler.Scribble("$($options.Snippets.Reset)$($padded)");
 
         break;
       }
@@ -69,28 +70,28 @@ class Syntax {
       'Name' {
         [string]$trimmed = $value.Trim();
         [System.Management.Automation.CommandParameterInfo]$parameterInfo = `
-          $Options.Custom.ParameterSetInfo.Parameters | Where-Object Name -eq $trimmed;
+          $options.Custom.ParameterSetInfo.Parameters | Where-Object Name -eq $trimmed;
         [string]$parameterType = $parameterInfo.ParameterType;
 
-        [string]$nameSnippet = if ($Options.Custom.CommonParamSet.Contains($trimmed)) {
-          $Options.Custom.Snippets.Common;
+        [string]$nameSnippet = if ($options.Custom.CommonParamSet.Contains($trimmed)) {
+          $options.Custom.Snippets.Common;
         }
         elseif ($parameterInfo.IsMandatory) {
-          $Options.Custom.Snippets.Mandatory;
+          $options.Custom.Snippets.Mandatory;
         }
         elseif ([string]$parameterType -eq 'switch') {
-          $Options.Custom.Snippets.Switch;
+          $options.Custom.Snippets.Switch;
         }
         else {
-          $Options.Custom.Snippets.Cell;
+          $options.Custom.Snippets.Cell;
         }
-        $null = $builder.Append("$($nameSnippet)$($value)");
+        $null = $scribbler.Scribble("$($nameSnippet)$($value)");
 
         break;
       }
 
       'Type' {
-        $null = $builder.Append("$($Options.Custom.Snippets.Type)$($value)");
+        $null = $scribbler.Scribble("$($options.Custom.Snippets.Type)$($value)");
 
         break;
       }
@@ -107,11 +108,12 @@ class Syntax {
     return $result;
   } # RenderCell
 
-  Syntax([string]$commandName, [hashtable]$signals, [object]$krayon, [hashtable]$scheme) {
+  Syntax([string]$commandName, [hashtable]$signals, [object]$scribbler, [hashtable]$scheme) {
     $this.CommandName = $commandName;
-    $this.Theme = $krayon.Theme;
     $this.Signals = $signals;
-    $this.Krayon = $krayon;
+    $this.Scribbler = $scribbler;
+    $this.Krayon = $scribbler.Krayon;
+    $this.Theme = $this.Krayon.Theme;
     $this.Scheme = $scheme;
 
     $this.Regex = [PSCustomObject]@{
@@ -134,26 +136,26 @@ class Syntax {
     }
 
     $this.Snippets = [PSCustomObject]@{
-      Punct        = $($this.Krayon.snippets($this.Scheme['COLS.PUNCTUATION']));
-      Type         = $($this.Krayon.snippets($this.Scheme['COLS.TYPE']));
-      Mandatory    = $($this.Krayon.snippets($this.Scheme['COLS.MAN-PARAM']));
-      Optional     = $($this.Krayon.snippets($this.Scheme['COLS.OPT-PARAM']));
-      Switch       = $($this.Krayon.snippets($this.Scheme['COLS.SWITCH']));
-      Default      = $($this.Krayon.snippets($this.Scheme['COLS.CELL']));
-      ParamSetName = $($this.Krayon.snippets($this.Scheme['COLS.PARAM-SET-NAME']));
-      Command      = $($this.Krayon.snippets($this.Scheme['COLS.CMD-NAME']));
-      HiLight      = $($this.Krayon.snippets($this.Scheme['COLS.HI-LIGHT']));
+      Punct        = $($this.Scribbler.Snippets($this.Scheme['COLS.PUNCTUATION']));
+      Type         = $($this.Scribbler.Snippets($this.Scheme['COLS.TYPE']));
+      Mandatory    = $($this.Scribbler.Snippets($this.Scheme['COLS.MAN-PARAM']));
+      Optional     = $($this.Scribbler.Snippets($this.Scheme['COLS.OPT-PARAM']));
+      Switch       = $($this.Scribbler.Snippets($this.Scheme['COLS.SWITCH']));
+      Default      = $($this.Scribbler.Snippets($this.Scheme['COLS.CELL']));
+      ParamSetName = $($this.Scribbler.Snippets($this.Scheme['COLS.PARAM-SET-NAME']));
+      Command      = $($this.Scribbler.Snippets($this.Scheme['COLS.CMD-NAME']));
+      HiLight      = $($this.Scribbler.Snippets($this.Scheme['COLS.HI-LIGHT']));
 
-      HeaderUL     = $($this.Krayon.snippets($this.Scheme['COLS.HEADER-UL']));
-      Special      = $($this.Krayon.snippets($this.Scheme['COLS.SPECIAL']));
-      Error        = $($this.Krayon.snippets($this.Scheme['COLS.ERROR']));
-      Ok           = $($this.Krayon.snippets($this.Scheme['COLS.OK']));
+      HeaderUL     = $($this.Scribbler.Snippets($this.Scheme['COLS.HEADER-UL']));
+      Special      = $($this.Scribbler.Snippets($this.Scheme['COLS.SPECIAL']));
+      Error        = $($this.Scribbler.Snippets($this.Scheme['COLS.ERROR']));
+      Ok           = $($this.Scribbler.Snippets($this.Scheme['COLS.OK']));
 
-      Reset        = $($this.Krayon.snippets('Reset'));
-      Space        = $($this.Krayon.snippets('Reset')) + ' ';
-      Comma        = $($this.Krayon.snippets('Reset')) + ', ';
-      Ln           = $($this.Krayon.snippets('Ln'));
-      Heading      = $($this.Krayon.snippets(@('black', 'bgDarkYellow')));
+      Reset        = $($this.Scribbler.Snippets('Reset'));
+      Space        = $($this.Scribbler.Snippets('Reset')) + ' ';
+      Comma        = $($this.Scribbler.Snippets('Reset')) + ', ';
+      Ln           = $($this.Scribbler.Snippets('Ln'));
+      Heading      = $($this.Scribbler.Snippets(@('black', 'bgDarkYellow')));
     }
 
     $this.Formats = @{
@@ -219,14 +221,14 @@ class Syntax {
       }
 
       Snippets         = [PSCustomObject]@{
-        Header    = $($this.Krayon.snippets($this.Scheme['COLS.HEADER']));
-        Underline = $($this.Krayon.snippets($this.Scheme['COLS.UNDERLINE']));
-        Mandatory = $($this.Krayon.snippets($this.Scheme['COLS.MAN-PARAM']));
-        Switch    = $($this.Krayon.snippets($this.Scheme['COLS.SWITCH']));
-        Cell      = $($this.Krayon.snippets($this.Scheme['COLS.OPT-PARAM']));
-        Type      = $($this.Krayon.snippets($this.Scheme['COLS.TYPE']));
-        Command   = $($this.Krayon.snippets($this.Scheme['COLS.CMD-NAME']));
-        Common    = $($this.Krayon.snippets($this.Scheme['COLS.COMMON']));
+        Header    = $($this.Scribbler.Snippets($this.Scheme['COLS.HEADER']));
+        Underline = $($this.Scribbler.Snippets($this.Scheme['COLS.UNDERLINE']));
+        Mandatory = $($this.Scribbler.Snippets($this.Scheme['COLS.MAN-PARAM']));
+        Switch    = $($this.Scribbler.Snippets($this.Scheme['COLS.SWITCH']));
+        Cell      = $($this.Scribbler.Snippets($this.Scheme['COLS.OPT-PARAM']));
+        Type      = $($this.Scribbler.Snippets($this.Scheme['COLS.TYPE']));
+        Command   = $($this.Scribbler.Snippets($this.Scheme['COLS.CMD-NAME']));
+        Common    = $($this.Scribbler.Snippets($this.Scheme['COLS.COMMON']));
       }
       CommonParamSet   = $this.CommonParamSet;
       IncludeCommon    = $false;
@@ -235,7 +237,7 @@ class Syntax {
 
     [string[]]$columns = @('Name', 'Type', 'Mandatory', 'Pos', 'PipeValue', 'PipeName', 'Alias', 'Unique');
     $this.TableOptions = Get-TableDisplayOptions -Select $columns  `
-      -Signals $signals -Krayon $this.Krayon -Custom $custom;
+      -Signals $signals -Scribbler $this.Scribbler -Custom $custom;
 
     $this.TableOptions.Snippets = $this.Snippets;
 

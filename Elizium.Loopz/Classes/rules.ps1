@@ -60,7 +60,7 @@ class MustContainUniqueSetOfParams : ParameterSetRule {
   [void] ViolationStmt([PSCustomObject[]]$pods, [PSCustomObject]$queryInfo) {
 
     [object]$syntax = $queryInfo.Syntax;
-    [System.Text.StringBuilder]$builder = $queryInfo.Builder;
+    [object]$scribbler = $queryInfo.Scribbler;
     [PSCustomObject]$options = $syntax.TableOptions;
     [string]$lnSnippet = $options.Snippets.Ln;
     [string]$resetSnippet = $options.Snippets.Reset;
@@ -69,7 +69,7 @@ class MustContainUniqueSetOfParams : ParameterSetRule {
     [string]$doubleIndentation = $syntax.Indent(2);
 
     if ($pods -and ($pods.Count -gt 0)) {
-      $null = $builder.Append(
+      $scribbler.Scribble(
         "$($doubleIndentation)$($underlineSnippet)$($duplicateSeparator)$($lnSnippet)"
       );
 
@@ -77,7 +77,7 @@ class MustContainUniqueSetOfParams : ParameterSetRule {
         [string]$duplicateParamSetStmt = $syntax.DuplicateParamSetStmt(
           $seed.First, $seed.Second
         );
-        $null = $builder.Append($duplicateParamSetStmt);
+        $scribbler.Scribble($duplicateParamSetStmt);
 
         [string]$firstParamSetStmt = $syntax.ParamSetStmt($queryInfo.CommandInfo, $seed.First);
         [string]$secondParamSetStmt = $syntax.ParamSetStmt($queryInfo.CommandInfo, $seed.Second);
@@ -85,7 +85,7 @@ class MustContainUniqueSetOfParams : ParameterSetRule {
         [string]$firstSyntax = $syntax.SyntaxStmt($seed.First);
         [string]$secondSyntax = $syntax.SyntaxStmt($seed.Second);
 
-        $null = $builder.Append($(
+        $scribbler.Scribble($(
             "$($lnSnippet)" +
             "$($firstParamSetStmt)$($lnSnippet)$($firstSyntax)$($lnSnippet)" +
             "$($lnSnippet)" +
@@ -99,7 +99,7 @@ class MustContainUniqueSetOfParams : ParameterSetRule {
         );
 
         $queryInfo.CommandInfo | Show-ParameterSetInfo `
-          -Sets @($seed.First.Name) -Builder $builder `
+          -Sets @($seed.First.Name) -Scribbler $scribbler `
           -Title $(
           "FIRST $($subTitle)$($resetSnippet) Parameter Set Report"
         );
@@ -149,7 +149,7 @@ class MustContainUniquePositions : ParameterSetRule {
 
   [void] ViolationStmt([PSCustomObject[]]$pods, [PSCustomObject]$queryInfo) {
     [object]$syntax = $queryInfo.Syntax;
-    [System.Text.StringBuilder]$builder = $queryInfo.Builder;
+    [object]$scribbler = $queryInfo.Scribbler;
     [PSCustomObject]$options = $syntax.TableOptions;
     [string]$lnSnippet = $options.Snippets.Ln;
     if ($pods -and ($pods.Count -gt 0)) {
@@ -159,7 +159,7 @@ class MustContainUniquePositions : ParameterSetRule {
           "$($lnSnippet)$($lnSnippet)"
         );
 
-        $null = $builder.Append($duplicateParamPositionsStmt);
+        $scribbler.Scribble($duplicateParamPositionsStmt);
       }
     }
   }
@@ -205,7 +205,7 @@ class MustNotHaveMultiplePipelineParams : ParameterSetRule {
 
   [void] ViolationStmt([PSCustomObject[]]$pods, [PSCustomObject]$queryInfo) {
     [object]$syntax = $queryInfo.Syntax;
-    [System.Text.StringBuilder]$builder = $queryInfo.Builder;
+    [object]$scribbler = $queryInfo.Scribbler;
     [PSCustomObject]$options = $syntax.TableOptions;
     [string]$lnSnippet = $options.Snippets.Ln;
     if ($pods -and ($pods.Count -gt 0)) {
@@ -215,7 +215,7 @@ class MustNotHaveMultiplePipelineParams : ParameterSetRule {
           "$($lnSnippet)$($lnSnippet)"
         );
 
-        $null = $builder.Append($multipleClaimsStmt);
+        $scribbler.Scribble($multipleClaimsStmt);
       }
     }
   }
@@ -266,7 +266,7 @@ class MustNotBeInAllParameterSetsByAccident : ParameterSetRule {
 
   [void] ViolationStmt([PSCustomObject[]]$pods, [PSCustomObject]$queryInfo) {
     [object]$syntax = $queryInfo.Syntax;
-    [System.Text.StringBuilder]$builder = $queryInfo.Builder;
+    [object]$scribbler = $queryInfo.Scribbler;
     [PSCustomObject]$options = $syntax.TableOptions;
     [string]$lnSnippet = $options.Snippets.Ln;
     if ($pods -and ($pods.Count -gt 0)) {
@@ -276,7 +276,7 @@ class MustNotBeInAllParameterSetsByAccident : ParameterSetRule {
           "$($lnSnippet)$($lnSnippet)"
         );
 
-        $null = $builder.Append($accidentsStmt);
+        $scribbler.Scribble($accidentsStmt);
       }
     }
   }
@@ -299,7 +299,7 @@ class RuleController {
 
   [void] ViolationSummaryStmt([hashtable]$violationsByRule, [PSCustomObject]$queryInfo) {
     [object]$syntax = $queryInfo.Syntax;
-    [System.Text.StringBuilder]$builder = $queryInfo.Builder;
+    [object]$scribbler = $queryInfo.Scribbler;
     [PSCustomObject]$options = $syntax.TableOptions;
     [string]$resetSnippet = $options.Snippets.Reset;
     [string]$lnSnippet = $options.Snippets.Ln;
@@ -347,7 +347,7 @@ class RuleController {
       $violationsByRuleStmt;
     }
 
-    $null = $builder.Append(
+    $scribbler.Scribble(
       "$($resetSnippet)" +
       "$($lnSnippet)$($global:LoopzUI.EqualsLine)" +
       "$($lnSnippet)>>>>> SUMMARY: $($summaryStmt)$($resetSnippet)" +
@@ -359,7 +359,7 @@ class RuleController {
   [void] ReportAll([PSCustomObject]$queryInfo) {
     [hashtable]$violationsByRule = @{};
     [object]$syntax = $queryInfo.Syntax;
-    [System.Text.StringBuilder]$builder = $queryInfo.Builder;
+    [object]$scribbler = $queryInfo.Scribbler;
     [PSCustomObject]$options = $syntax.TableOptions;
     [string]$lnSnippet = $options.Snippets.Ln;
     [string]$resetSnippet = $options.Snippets.Reset;
@@ -390,7 +390,7 @@ class RuleController {
           "$($resetSnippet)$($description)$($resetSnippet)" +
           "$($lnSnippet)$($lnSnippet)"
         );
-        $null = $builder.Append($ruleTitle);
+        $scribbler.Scribble($ruleTitle);
 
         # Show the violations for this rule
         #
