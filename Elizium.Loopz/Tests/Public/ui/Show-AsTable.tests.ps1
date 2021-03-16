@@ -10,18 +10,16 @@ Describe 'Show-AsTable' {
   Context 'given: valid table data' {
     It 'should: show the table' {
       [krayon]$krayon = Get-Krayon;
-      [string]$api = $krayon.ApiFormat;
       [hashtable]$signals = Get-Signals;
       [Scribbler]$scribbler = New-Scribbler -Krayon $krayon -Test;
 
+      [string]$headerSnippet = $scribbler.Snippets(@('blue'));
+      [string]$underlineSnippet = $scribbler.Snippets(@('yellow'));
+
       [PSCustomObject]$custom = [PSCustomObject]@{
-        Colours  = [PSCustomObject]@{
-          Mandatory = 'red';
-          Switch    = 'magenta';
-        }
         Snippets = [PSCustomObject]@{
-          Header    = $($api -f 'blue');
-          Underline = $($api -f 'yellow');
+          Header    = $headerSnippet;
+          Underline = $underlineSnippet;
         }
       }
       [string[]]$columnSelection = @('Name', 'Colour', 'Shape');
@@ -50,6 +48,8 @@ Describe 'Show-AsTable' {
 
       Show-AsTable -MetaData $fieldMetaData -Headers $headers -Table $tableContent `
         -Scribbler $scribbler -Options $tableOptions;
+
+      $scribbler.Flush();
     }
   }
 }

@@ -44,7 +44,7 @@ function Get-AsTable {
   [hashtable]$table = @{}
   foreach ($row in $TableData) {
     [PSCustomObject]$insert = @{}
-    foreach ($field in $row.psobject.properties.name) {
+    foreach ($field in $row.psobject.properties.name) { # .name here should not be assumed; it should be custom ID field
       [string]$raw = $row.$field;
       [string]$cell = $Evaluate.InvokeReturnAsIs($raw, $MetaData[$field], $false, $Options);
       $insert.$field = $cell;

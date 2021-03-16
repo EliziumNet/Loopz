@@ -898,6 +898,7 @@ function Rename-Many {
       -Options $bootStrapOptions;
 
     # ------------------------------------------------ [ Primary Entities ] ---
+    # (Note: Keep Signal Registry up to date)
     #
 
     # [Pattern]

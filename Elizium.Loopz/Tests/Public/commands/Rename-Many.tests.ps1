@@ -12,10 +12,10 @@ Describe 'Rename-Many' -Tag 'remy' {
       -ErrorAction 'stop' -DisableNameChecking
 
     Import-Module Assert;
-    [boolean]$script:_whatIf = $false;
-    [boolean]$script:_test = $true;
+    [boolean]$global:_whatIf = $true;
+    [boolean]$global:_test = $true;
 
-    [string]$script:_directoryPath = './Tests/Data/fefsi/';
+    [string]$global:_directoryPath = './Tests/Data/fefsi/';
 
     Mock -ModuleName Elizium.Loopz rename-FsItem {
       param(
@@ -937,6 +937,48 @@ Describe 'Rename-Many' -Tag 'remy' {
     }
   } # given: invalid Anchor expression
 } # Rename-Many
+
+Describe 'Rename-Many (Internal)' {
+  BeforeAll {
+    InModuleScope Elizium.Loopz { 
+      Get-Module Elizium.Loopz | Remove-Module
+      Import-Module .\Output\Elizium.Loopz\Elizium.Loopz.psm1 `
+        -ErrorAction 'stop' -DisableNameChecking;
+
+      Import-Module Assert;
+
+      Mock -ModuleName Elizium.Loopz rename-FsItem {
+        param(
+          [FileSystemInfo]$From,
+          [string]$To,
+          [UndoRename]$UndoOperant
+        )
+        return $To;
+      }
+
+      Mock -ModuleName Elizium.Loopz Get-IsLocked {
+        return $true;
+      }
+    }
+  }
+
+  Context 'and: Host does not support emojis' {
+    It 'should: render with non unicode signals' {
+      Mock -ModuleName Elizium.Loopz Test-HostSupportsEmojis {
+        return $false;
+      }
+      InModuleScope Elizium.Loopz {
+        $Loopz.Signals = $(Initialize-Signals);
+        [string]$directoryPath = './Tests/Data/fefsi/';
+
+        [string]$copy = '(?<header>[\w]+)\.(?<mid>[\w]+).(?<tail>[\w]+)';
+        Get-ChildItem -Path $DirectoryPath -File | Rename-Many -Append '-POSTFIX_${tail}' `
+          -Copy $copy `
+          -WhatIf -Test -Diagnose;
+      }
+    }
+  }
+}
 
 Describe 'Rename-Many parameter sets' -Tag 'remy' {
   BeforeAll {

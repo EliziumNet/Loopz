@@ -44,7 +44,7 @@ function Invoke-ByPlatform {
   }
 
   if ($invokeInfo -and $invokeInfo.FnInfo) {
-    if ($invokeInfo.psobject.properties.match('Positional') -and $invokeInfo.Positional) {
+    if ($invokeInfo.psobject.properties.match('Positional') -and ($null -ne $invokeInfo.Positional)) {
       [array]$positional = $invokeInfo.Positional;
 
       if ([scriptblock]$block = $invokeInfo.FnInfo.ScriptBlock) {
