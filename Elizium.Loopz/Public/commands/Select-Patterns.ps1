@@ -73,14 +73,17 @@ function Select-Patterns {
     [String[]]$Patterns,
 
     [parameter(Position = 1)]
-    [String]$Filter = $(Get-EnvironmentVariable -Variable 'LOOPZ_GREPS_FILTER' -Default './*.*')
+    [String]$Filter = $(Get-EnvironmentVariable -Variable 'LOOPZ_GREPS_FILTER' -Default './*.*'),
+
+    [Parameter()]
+    [switch]$Test
   )
   function build-command {
     [OutputType([string])]
     param(
-      [String]$Pattern,
-      [String]$Filter,
-      [Switch]$Pipe,
+      [string]$Pattern,
+      [string]$Filter,
+      [switch]$Pipe,
       [string]$NotOpSymbol = '!'
     )
     [string]$platform = Get-PlatformName;
@@ -93,51 +96,56 @@ function Select-Patterns {
     if ($platform -eq 'windows') {
       $null = $builder.Append('select-string ');
       if ($pattern.StartsWith($NotOpSymbol)) {
-        $builder.Append($('-notmatch -pattern "{0}" ' -f $Pattern.Substring(1)));
+        $null = $builder.Append($('-notmatch -pattern "{0}" ' -f $Pattern.Substring(1)));
       }
       else {
-        $builder.Append($('-pattern "{0}" ' -f $Pattern));
+        $null = $builder.Append($('-pattern "{0}" ' -f $Pattern));
       }
     }
     else {
       $builder.Append('grep ');
       if ($pattern.StartsWith($NotOpSymbol)) {
-        $builder.Append($('-v -i "{0}" ' -f $Pattern.Substring(1)));
+        $null = $builder.Append($('-v -i "{0}" ' -f $Pattern.Substring(1)));
       }
       else {
-        $builder.Append($('-i "{0}" ' -f $Pattern));
+        $null = $builder.Append($('-i "{0}" ' -f $Pattern));
       }
     }
 
     if (-not([string]::IsNullOrWhiteSpace($Filter))) {
-      $builder.Append("$Filter ");
+      $null = $builder.Append("$Filter ");
     }
 
     return $builder.ToString();
   } # build-command
 
-  [string]$command = [string]::Empty;
-  [int]$count = 0;
+  [boolean]$first = $true;
+  [string]$command = -join $(foreach ($pat in $Patterns) {
+      ($first) `
+        ? $(build-command -Pattern $Patterns[0] -Filter $Filter) `
+        : $(build-command -Pipe -Pattern $pat);
 
-  foreach ($pat in $Patterns) {
-    $count++;
-
-    if ($count -eq 1) {
-      $command = build-command -Pattern $Patterns[0] -Filter $Filter;
-    }
-    else {
-      $segment = build-command -Pipe -Pattern $pat;
-      $command += $segment;
-    }
-  }
+      $first = $false;
+    });
 
   [hashtable]$signals = $(Get-Signals);
-  [hashtable]$theme = $(Get-KrayolaTheme);
-  [Krayon]$krayon = New-Krayon -Theme $theme;
+  [Scribbler]$scribbler = New-Scribbler -Test:$Test.IsPresent;
+    
   [couplet]$formattedSignal = Get-FormattedSignal -Name 'GREPS' -Value $command -Signals $signals;
+
+  # This is one of those very few situations where we don't re-direct to null the result of executing a
+  # command; this is the command's raison d'etre.
+  #
   Invoke-Expression $command;
 
-  $null = $krayon.blue().Text($formattedSignal.Key). `
-    red().Text(' --> '). `
-    green().Text($formattedSignal.Value);
+  [string]$keySnippet = $scribbler.Snippets('blue');
+  [string]$arrowSnippet = $scribbler.Snippets('red');
+  [string]$signalSnippet = $scribbler.Snippets('green');
+  [string]$lnSnippet = $scribbler.Snippets('Ln');
+
+  $scribbler.Scribble(
+    $("$($keySnippet)$($formattedSignal.Key)$($arrowSnippet) --> $($signalSnippet)$($command)$($lnSnippet)")
+  );
+
+  $scribbler.Flush();
 }
