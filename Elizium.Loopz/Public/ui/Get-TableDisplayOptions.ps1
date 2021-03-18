@@ -23,13 +23,24 @@ function Get-TableDisplayOptions {
     $Signals.ContainsKey('SWITCH-OFF')) `
     ? $signals['SWITCH-OFF'].Value : 'false';
 
+  [string]$titleMainColour = if (${Custom}?.Colours?.Title) {
+    $Custom.Colours.Title;
+  }
+  else {
+    'darkYellow';
+  }
+
+  [string]$titleLoColour = 'black';
+  [string]$titleBackColour = 'bg' + $titleMainColour;
+
   [PSCustomObject]$tableOptions = [PSCustomObject]@{
     Select   = $Select;
 
     Chrome   = [PSCustomObject]@{
-      Indent    = 3;
-      Underline = '=';
-      Inter     = 1;
+      Indent         = 3;
+      Underline      = '=';
+      TitleUnderline = '-<>-';
+      Inter          = 1;
     }
 
     Colours  = [PSCustomObject]@{
@@ -37,6 +48,8 @@ function Get-TableDisplayOptions {
       Cell      = 'white';
       Underline = 'yellow';
       HiLight   = 'green';
+      Title     = $titleMainColour;
+      TitleLo   = $titleLoColour;
     }
 
     Values   = [PSCustomObject]@{
@@ -50,8 +63,10 @@ function Get-TableDisplayOptions {
     }
 
     Snippets = [PSCustomObject]@{
-      Reset   = $($Scribbler.snippets('Reset'));
-      Ln      = $($Scribbler.snippets('Ln'));
+      Reset          = $($Scribbler.Snippets('Reset'));
+      Ln             = $($Scribbler.Snippets('Ln'));
+      Title          = $($Scribbler.Snippets(@($titleLoColour, $titleBackColour)));
+      TitleUnderline = $($Scribbler.Snippets($titleMainColour));
     }
 
     Custom   = $Custom;

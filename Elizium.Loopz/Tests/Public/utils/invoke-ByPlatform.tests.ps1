@@ -107,6 +107,26 @@ Describe 'Invoke-ByPlatform' {
         $result | Should -Be $expected;
       }
     } # and: Unknown platform and Default supplied
+
+    Context 'and: invoke function without parameters' {
+      It 'should: invoke' {
+        Mock -ModuleName Elizium.Loopz Get-PlatformName { return 'windows' }
+        function invoke-ParamLessWinFn {
+          param()
+          "win: param-less";
+        }
+        [hashtable]$script:paramLessPositional = @{
+          'windows' = [PSCustomObject]@{
+            FnInfo     = Get-Command -Name invoke-ParamLessWinFn -CommandType Function;
+            Positional = @();
+          };
+        }
+        [string]$expected = 'win: param-less';
+        $result = Invoke-ByPlatform -Hash $paramLessPositional;
+
+        $result | Should -Be $expected;
+      }
+    }
   } # given: Parameters By Position
 
   Context 'given: Named Parameters' -Skip {

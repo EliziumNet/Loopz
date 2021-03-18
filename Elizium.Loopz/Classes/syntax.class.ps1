@@ -44,7 +44,8 @@ class Syntax {
       [string]$value,
       [PSCustomObject]$row,
       [PSCustomObject]$options,
-      [object]$scribbler
+      [object]$scribbler,
+      [int]$counter
     )
     [boolean]$result = $true;
 
@@ -60,8 +61,7 @@ class Syntax {
     #
     switch -Regex ($column) {
       'Mandatory|PipeValue|PipeName|Unique' {
-        [string]$coreValue = $value.Trim() -eq 'True' ? $options.Values.True : $options.Values.False;
-        [string]$padded = Get-PaddedLabel -Label $coreValue -Width $value.Length -Align $options.Align.Cell;
+        [string]$padded = Format-BooleanCellValue -Value $value -TableOptions $options;
         $null = $scribbler.Scribble("$($options.Snippets.Reset)$($padded)");
 
         break;
@@ -218,6 +218,7 @@ class Syntax {
       Colours          = [PSCustomObject]@{
         Mandatory = $this.Scheme['COLS.MAN-PARAM'];
         Switch    = $this.Scheme['COLS.SWITCH'];
+        Title     = 'green';
       }
 
       Snippets         = [PSCustomObject]@{

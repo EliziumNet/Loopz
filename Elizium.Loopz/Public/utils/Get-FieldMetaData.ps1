@@ -27,6 +27,7 @@ function Get-FieldMetaData {
       Write-Debug "Get-FieldMetaData, ERR: (field length: '$($field.Length)')";
       Write-Debug "Get-FieldMetaData, ERR: (fieldMetaData defined?: $($null -ne $fieldMetaData))";
       Write-Debug "Get-FieldMetaData, ERR: (type: '$($field.GetType())')";
+      Write-Debug "Get-FieldMetaData, ERR: ($($_.Exception.Message))";
       Write-Debug "..."
       # TODO: find out why this is happening
       # Strange error sometimes occurs with Get-LargestLength on boolean fields

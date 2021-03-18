@@ -16,6 +16,12 @@ function Show-AsTable {
     [hashtable]$Table,
 
     [Parameter()]
+    [string]$Title,
+
+    [Parameter()]
+    [string]$TitleFormat = "--- [ {0} ] ---",
+  
+    [Parameter()]
     [Scribbler]$Scribbler,
 
     [Parameter()]
@@ -26,7 +32,8 @@ function Show-AsTable {
           [string]$Value,
           [PSCustomObject]$row,
           [PSCustomObject]$Options,
-          [Scribbler]$Scribbler
+          [Scribbler]$Scribbler,
+          [boolean]$counter
         )
         return $false;
       }),
@@ -44,6 +51,28 @@ function Show-AsTable {
   $Scribbler.Scribble("$($resetSnippet)$($lnSnippet)");
 
   if (($MetaData.PSBase.Count -gt 0) -and ($Table.PSBase.Count -gt 0)) {
+    if ($PSBoundParameters.ContainsKey('Title') -and -not([string]::IsNullOrEmpty($Title))) {
+      [string]$titleSnippet = $($Options.Snippets.Title);
+      [string]$titleUnderlineSnippet = $($Options.Snippets.TitleUnderline);
+      [string]$adornedTitle = $TitleFormat -f $Title;
+      [int]$ulLength = $Options.Chrome.TitleUnderline.Length;
+
+      [string]$underline = $Options.Chrome.TitleUnderline * $(($adornedTitle.Length / $ulLength) + 1);
+
+      if ($underline.Length -gt $adornedTitle.Length) {
+        $underline = $underline.Substring(0, $adornedTitle.Length);
+      }
+
+      [string]$titleFragment = $(
+        "$($lnSnippet)" +
+        "$($indentation)$($titleSnippet)$($adornedTitle)$($resetSnippet)" +
+        "$($lnSnippet)" +
+        "$($indentation)$($titleUnderlineSnippet)$($underline)$($resetSnippet)" +
+        "$($resetSnippet)$($lnSnippet)$($lnSnippet)"
+      );
+      $Scribbler.Scribble($titleFragment);
+    }
+
     # Establish field selection
     #
     [string[]]$selection = Get-PsObjectField -Object $Options -Field 'Select';
@@ -73,17 +102,21 @@ function Show-AsTable {
 
     # Display field values
     #
-    $Table.GetEnumerator() | Sort-Object Name | ForEach-Object {
+    [int]$counter = 1;
+    $Table.GetEnumerator() | Sort-Object Name | ForEach-Object { # Name here should be custom ID field which should probably default to 'ID'
       $Scribbler.Scribble($indentation);
 
       foreach ($col in $selection) {
-        if (-not($Render.InvokeReturnAsIs($col, $_.Value.$col, $_.Value, $Options, $Scribbler))) {
+        if (-not($Render.InvokeReturnAsIs(
+          $col, $_.Value.$col, $_.Value, $Options, $Scribbler, $counter))
+        ) {
           $Scribbler.Scribble("$($resetSnippet)$($_.Value.$col)");
         }
         $Scribbler.Scribble($inter);
       }
 
       $Scribbler.Scribble($lnSnippet);
+      $counter++;
     }
   }
 }
