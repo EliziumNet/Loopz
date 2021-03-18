@@ -10,6 +10,8 @@ PowerShell iteration type utilities.
 
 ## Introduction
 
+:warning: A lot of the documentation here is now out of date, it will be updated in due course and work is currently taking place to produce more comprehensive documentation at github pages.
+
 When writing a suite of utilities/functions it can be difficult to develop them so that they behave in a consistent manner. Along with another dependent Powershell module [Elizium.Krayola](https://github.com/plastikfan/Krayola), Elizium.Loopz can be used to build PowerShell commands that are both more visually appealing and consistent particularly with regards to rendering repetitive content as a result of some kind of iteration process.
 
 The module can be installed using the standard **install-module** command:
