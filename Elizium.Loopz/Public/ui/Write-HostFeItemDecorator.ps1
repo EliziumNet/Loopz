@@ -208,7 +208,7 @@
       [string]$messageSnippet = $scribbler.WithArgSnippet('Message', $message);
       $scribbler.Scribble("$($messageSnippet)");
     }
-    $scribbler.ScribbleLine($themedPairs);
+    $scribbler.Line($themedPairs).End();
 
     if ($invokeResult -and $invokeResult.psobject.properties.match('Lines') -and $invokeResult.Lines) {
       [int]$indent = $($Exchange.ContainsKey('LOOPZ.WH-FOREACH-DECORATOR.INDENT') `
@@ -223,7 +223,7 @@
       }
 
       foreach ($line in $additionalLines) {
-        $scribbler.ScribbleNakedLine($blank, $line);
+        $scribbler.NakedLine($blank, $line).End();
       }
     }
   }
