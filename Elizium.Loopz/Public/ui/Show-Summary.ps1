@@ -114,7 +114,7 @@ function Show-Summary {
     'LOOPZ.SUMMARY.PROPERTIES') ? $Exchange['LOOPZ.SUMMARY.PROPERTIES'] : [line]::new(@());
 
   if ($summaryProperties.Line.Length -gt 0) {
-    $scribbler.ScribbleLine($blank, $summaryProperties);
+    $scribbler.Line($blank, $summaryProperties).End();
   }
 
   # Wide items
@@ -126,13 +126,13 @@ function Show-Summary {
       $Exchange['LOOPZ.SUMMARY-BLOCK.GROUP-WIDE-ITEMS']);
 
     if ($group) {
-      $scribbler.ScribbleLine($blank, $wideItems);
+      $scribbler.Line($blank, $wideItems).End();
     }
     else {
       foreach ($couplet in $wideItems.Line) {
         [line]$syntheticLine = New-Line($couplet);
 
-        $scribbler.ScribbleLine($blank, $syntheticLine);
+        $scribbler.Line($blank, $syntheticLine).End();
       }
     }
   }
