@@ -184,7 +184,45 @@ Describe 'Invoke-TraverseDirectory' {
             -Summary $summaryWithSkip -Condition $filterDirectories -Hoist -Exchange $passThruWithSkip;
           # $passThruWithSkip['LOOPZ.TRAVERSE.SKIPPED'] | Should -Be 5; # this is just the top level invoke
         }
-      }
+      } # and:: Skipped
+
+      Context 'and: Error' {
+        It 'should: increment error' {
+          [scriptblock]$errorBlock = {
+            param(
+              [Parameter(Mandatory)]
+              [System.IO.DirectoryInfo]$_underscore,
+
+              [Parameter(Mandatory)]
+              [int]$_index,
+
+              [Parameter(Mandatory)]
+              [hashtable]$_exchange,
+
+              [Parameter(Mandatory)]
+              [boolean]$_trigger
+            )
+            throw 'the skies are falling';
+          }
+
+          [scriptblock]$summaryWithError = {
+            param(
+              [int]$_count,
+              [int]$_skipped,
+              [int]$_errors,
+              [boolean]$_trigger,
+              [hashtable]$_exchange
+            )
+
+            Write-Debug "  [Summary] Count: '$_count', skipped: '$_skipped', errors: '$_errors', trigger: '$_trigger'";
+            $_errors | Should -Be $_count;
+          }
+
+          Invoke-TraverseDirectory -Path $resolvedSourcePath -Block $errorBlock `
+            -Summary $summaryWithError -Condition $filterDirectories -Hoist;
+        }
+
+      } # and: Error
     } # and: directory tree and Hoist specified
   } # given: custom scriptblock specified
 

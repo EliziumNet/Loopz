@@ -488,7 +488,9 @@ function Invoke-TraverseDirectory {
         }
       }
       catch {
-        $controller.IncrementError();
+        $result = [PSCustomObject]@{
+          ErrorReason = "Unhandled Error: $($_.Exception.Message)";
+        }
       }
       finally {
         $controller.HandleResult($result);

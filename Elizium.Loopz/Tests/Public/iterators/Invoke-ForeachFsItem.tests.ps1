@@ -137,6 +137,23 @@ Describe 'Invoke-ForeachFsItem' {
         $container.count | Should -Be 4;
       }
     }
+
+    Context 'and: error occurs' {
+      It 'should: handle error' {
+        [scriptblock]$block = {
+          param(
+            [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', '')]
+            [System.IO.FileInfo]$FileInfo,
+            [int]$Index,
+            [hashtable]$Exchange,
+            [boolean]$Trigger
+          )
+          throw 'The skies are falling';
+        }
+        [string]$directoryPath = './Tests/Data/fefsi';
+        Get-ChildItem $directoryPath -Recurse -Filter '*.txt' -File | Invoke-ForeachFsItem -Block $block;
+      }
+    }
   } # given: condition NOT provided
 
   Context 'given: condition provided' {
