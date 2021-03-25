@@ -10,6 +10,9 @@ function Get-Signals {
   .DESCRIPTION
     The signals returned include the user defined signal overrides.
 
+  NOTE: 3rd party commands need to register their signal usage with the signal
+  registry. This can be done using command Register-CommandSignals and would
+  be best performed at module initialisation stage invoked at import time.
   #>
   [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidGlobalVars', '')]
   [OutputType([hashtable])]

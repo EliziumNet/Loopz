@@ -1,5 +1,18 @@
 
 function Get-LargestLength {
+  <#
+  .NAME
+    Get-LargestLength
+
+  .SYNOPSIS
+    Get the size of the largest string item in the collection.
+
+  .DESCRIPTION
+    
+  
+  .PARAMETER Data
+    Hashtable containing the table data.
+  #>
   param(
     [string[]]$items
   )

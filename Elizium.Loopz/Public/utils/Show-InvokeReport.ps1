@@ -1,5 +1,57 @@
 
 function Show-InvokeReport {
+  <#
+  .NAME
+    Show-InvokeReport
+
+  .SYNOPSIS
+    Given a list of parameters, shows which parameter set they resolve to. If they
+  don't resolve to a parameter set then this is reported. If the parameters
+  resolve to more than one parameter set, then all possible candidates are reported.
+  This is a helper function which end users and developers alike can use to determine
+  which parameter sets are in play for a given list of parameters. It was built to
+  counter the un helpful message one sees when a command is invoked either with
+  insufficient or an incorrect combination:
+
+  "Parameter set cannot be resolved using the specified named parameters. One or
+  more parameters issued cannot be used together or an insufficient number of
+  parameters were provided.".
+  
+  Of course not all error scenarios can be detected, but some are which is better
+  than none. This command is a substitute for actually invoking the target command.
+  The target command may not be safe to invoke on an ad-hoc basis, so it's safer
+  to invoke this command specifying the parameters without their values.
+
+  .DESCRIPTION
+    If no errors were found with any the parameter sets for this command, then
+  the result is simply a message indicating no problems found. If the user wants
+  to just get the parameter set info for a command, then they can use command
+  Show-ParameterSetInfo instead.
+
+    Parameter set violations are defined as rules. The following rules are defined:
+  - 'Non Unique Parameter Set': Each parameter set must have at least one unique
+  parameter. If possible, make this parameter a mandatory parameter.
+  - 'Non Unique Positions': A parameter set that contains multiple positional
+  parameters must define unique positions for each parameter. No two positional
+  parameters can specify the same position.
+  - 'Multiple Claims to Pipeline item': Only one parameter in a set can declare the
+  ValueFromPipeline keyword with a value of true.
+  - 'In All Parameter Sets By Accident': Defining a parameter with multiple
+  'Parameter Blocks', some with and some without a parameter set, is invalid.
+
+  .PARAMETER Common
+    switch to indicate if the standard PowerShell Common parameters show be included
+
+  .PARAMETER Name
+    The name of the command to show invoke report for
+
+  .PARAMETER Params
+    The set of parameter names the command is invoked for. This is like invoking the
+  command without specifying the values of the parameters.
+
+  .PARAMETER Scribbler
+    The Krayola scribbler instance used to manage rendering to console
+  #>
   [CmdletBinding()]
   [Alias('shire')]
   param(

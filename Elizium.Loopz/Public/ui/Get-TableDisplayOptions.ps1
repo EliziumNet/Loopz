@@ -1,5 +1,16 @@
 
 function Get-TableDisplayOptions {
+  <#
+  .NAME
+    Get-TableDisplayOptions
+
+  .SYNOPSIS
+    Gets the default table display options.
+
+  .DESCRIPTION
+    The client can further customise by overwriting the members on the
+  PSCustomObject returned.
+  #>
   [OutputType([PSCustomObject])]
   param(
     [Parameter()]

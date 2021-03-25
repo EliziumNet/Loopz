@@ -1,5 +1,25 @@
 
 function Get-UniqueCrossPairs {
+  <#
+  .NAME
+    Get-UniqueCrossPairs
+
+  .SYNOPSIS
+    Given 2 string arrays, returns an array of PSCustomObjects, containing
+  First and Second properties. The result is a list of all unique pair combinations
+  of the 2 input sequences.
+
+  .DESCRIPTION
+    Effectively, the result is a matrix with the first collection defining 1 axis
+  and the other defining the other axis. Pairs where both elements are the same are
+  omitted.
+  
+  .PARAMETER First
+    First string array to compare
+
+  .PARAMETER Second
+    The other string array to compare
+  #>
   [OutputType([PSCustomObject[]])]
   param(
     [Parameter(Mandatory, Position = 0)]
@@ -24,7 +44,6 @@ function Get-UniqueCrossPairs {
           First  = $Item;
           Second = $o;
         }
-
       }
     }
     $pairs;

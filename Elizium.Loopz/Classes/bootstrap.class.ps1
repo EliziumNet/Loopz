@@ -128,15 +128,15 @@ class BoundEntity {
 
   .DESCRIPTION
     Populates Keys into exchange. A simple entity can be used if all that is required
-  is to populate an exchange entry (via Keys); this is wht the Value member is
+  is to populate an exchange entry (via Keys); this is why the Value member is
   optional.
 
   * Activate (primary: mandatory) -> flag to indicate if the entity is to be created.
   * Activator (relation: mandatory) -> predicate to indicate if the entity is to be created.
   * Name (mandatory) -> identifies the entity
   * SpecType (mandatory) -> 'simple'
-  * Value (optional) -> the value of the user supplied expression (including occurrence)
-  * Keys (optional ) -> Collection of key/value pairs to be inserted into exchange.
+  * Value (optional) -> typically the value of a parameter, but can be anything.
+  * Keys (optional) -> Collection of key/value pairs to be inserted into exchange.
 #>
 class SimpleEntity : BoundEntity {
   SimpleEntity([PSCustomObject]$spec): base($spec) {
@@ -166,7 +166,7 @@ class SimpleEntity : BoundEntity {
   * Signal (mandatory) -> name of the signal
   * SignalValue (optional) -> the display value of the signal
   * Force (optional) -> container selector.
-  * Keys (optional ) -> Collection of key/value pairs to be inserted into exchange.
+  * Keys (optional) -> Collection of key/value pairs to be inserted into exchange.
 #>
 class SignalEntity : BoundEntity {
   [string]$_signalOverrideValue;
@@ -237,7 +237,7 @@ class SignalEntity : BoundEntity {
     is stored in exchange.
   * OccurrenceKey (optional) -> Key identifying where the occurrence value for this regex
     is stored in exchange.
-  * Keys (optional ) -> Collection of key/value pairs to be inserted into exchange.
+  * Keys (optional) -> Collection of key/value pairs to be inserted into exchange.
 
   For derived:
   * Activate (primary: mandatory) -> flag to indicate if the entity is to be created.
@@ -326,7 +326,9 @@ class RegexEntity : SignalEntity {
     For formatter parameters
 
   .DESCRIPTION
-    This is a signal entity with the addition of a validator which check
+    This is a signal entity with the addition of a validator which checks that the
+  value represented does not contain file system unsafe characters. Uses function
+  Test-IsFileSystemSafe to perform this check.
 
   * Activate (primary: mandatory) -> flag to indicate if the entity is to be created.
   * Activator (relation: mandatory) -> predicate to indicate if the entity is to be created.
@@ -336,7 +338,7 @@ class RegexEntity : SignalEntity {
   * Signal (optional) -> should be provided for parameters, optional for non parameters
   * WholeSpecifier (optional) -> single letter code identifying this regex parameter.
   * Force (optional) -> container selector.
-  * Keys (optional ) -> Collection of key/value pairs to be inserted into exchange.
+  * Keys (optional) -> Collection of key/value pairs to be inserted into exchange.
 #>
 class FormatterEntity : SignalEntity {
   FormatterEntity([PSCustomObject]$spec): base($spec) {

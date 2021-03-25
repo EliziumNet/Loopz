@@ -1,8 +1,42 @@
 
 function Show-ParameterSetInfo {
-  # by KirkMunro (https://github.com/PowerShell/PowerShell/issues/8692)
-  # https://docs.microsoft.com/en-us/powershell/scripting/developer/cmdlet/cmdlet-parameter-sets?view=powershell-7.1
-  #
+  <#
+  .NAME
+    Show-InvokeReport
+
+  .SYNOPSIS
+    Displays information for a commands parameter sets. This includes the standard
+  syntax statement associated with each parameter set, but is also coloured in, to help
+  readability.
+
+  .DESCRIPTION
+    If the command does not define parameter sets, then no information is displayed
+  apart from a message indicating no parameter sets were found.
+
+    One of the issues that a developer can encounter when designing parameter sets for
+  a command is making sure that each parameter set includes at least 1 unique parameter
+  as per recommendations. This function will greatly help in this regard. For each
+  parameter set shown, the table it contains includes a 'Unique' column which shows
+  whether a the parameter is unique to that parameter set. This relieves the developer
+  from having to figure this out themselves.
+
+  .PARAMETER Common
+    switch to indicate if the standard PowerShell Common parameters show be included
+
+  .PARAMETER Name
+    The name of the command to show invoke report for
+
+  .PARAMETER Scribbler
+    The Krayola scribbler instance used to manage rendering to console
+
+  .PARAMETER Sets
+    A list of parameter sets the output should be restricted to. When not specified, all
+  parameter sets are displayed.
+
+  .PARAMETER Title
+    The text displayed as a title. End user does not have to specify this value. It is useful
+  to other client command that invoke this one, so some context can be added to the display.
+  #>
   [CmdletBinding()]
   [Alias('ships')]
   param(
@@ -25,7 +59,10 @@ function Show-ParameterSetInfo {
     [Parameter()]
     [switch]$Test
   )
-
+  # inspired by Get-CommandDetails function by KirkMunro
+  # (https://github.com/PowerShell/PowerShell/issues/8692)
+  # https://docs.microsoft.com/en-us/powershell/scripting/developer/cmdlet/cmdlet-parameter-sets?view=powershell-7.1
+  #
   begin {
     [Krayon]$krayon = Get-Krayon;
     [hashtable]$signals = Get-Signals;
