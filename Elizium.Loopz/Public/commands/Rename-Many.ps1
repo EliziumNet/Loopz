@@ -91,6 +91,9 @@ function Rename-Many {
     Similar to Anchor except that if the pattern specified by AnchorEnd does not match, then
   the Pattern match will be moved to the Start. This is known as a Hybrid Anchor.
 
+  .PARAMETER Append
+    Appends a literal string to end of items name
+
   .PARAMETER Condition
     Provides another way of filtering pipeline items. This is not typically specified on the
   command line, rather it is meant for those wanting to build functionality on top of Rename-Many.
@@ -121,6 +124,10 @@ function Rename-Many {
   opposed to say '123', which could be used directly in the $Paste/$With parameter without
   the need for $Copy. The match defined by $Copy is stored in special variable ${_c} and
   can be referenced as such from $Paste and $With.
+
+  .PARAMETER Cut
+    Is a replacement for the Pattern parameter, when a Cut operation is required. The matched
+  items will be removed from the item's name, and no other replacement occurs.
 
   .PARAMETER Diagnose
     switch parameter that indicates the command should be run in WhatIf mode. When enabled
@@ -188,6 +195,9 @@ function Rename-Many {
 
     => This indicates that the last match should be captured into named group 'code'.
 
+  .PARAMETER Prepend
+    Prefixes a literal string to start of items name
+
   .PARAMETER Relation
     Used in conjunction with the $Anchor parameter and can be set to either 'before' or
   'after' (the default). Defines the relationship of the $pattern match with the $Anchor
@@ -253,88 +263,106 @@ function Rename-Many {
   .PARAMETER underscore
     The pipeline item which should either be an instance of FileInfo or DirectoryInfo.
 
-  + MOVE EXAMPLES (anchored)
+  * MOVE EXAMPLES (anchored)
 
   .EXAMPLE 1
   Move a static string before anchor (consider file items only):
+
   gci ... | Rename-Many -File -Pattern 'data' -Anchor 'loopz' -Relation 'before'
 
   .EXAMPLE 2
   Move last occurrence of whole-word static string before anchor:
+
   gci ... | Rename-Many -Pattern 'data',l -Anchor 'loopz' -Relation 'before' -Whole p
 
   .EXAMPLE 3
   Move a static string before anchor and drop (consider Directory items only):
+
   gci ... | Rename-Many -Directory -Pattern 'data' -Anchor 'loopz' -Relation 'before' -Drop '-'
 
   .EXAMPLE 4
   Move a static string before anchor and drop (consider Directory items only), if anchor
   does not match, move the pattern match to end:
+  
   gci ... | Rename-Many -Directory -Pattern 'data' -AnchorEnd 'loopz' -Relation 'before' -Drop '-'
 
   .EXAMPLE 5
   Move a static string to start and drop (consider Directory items only):
+
   gci ... | Rename-Many -Directory -Pattern 'data' -Start -Drop '-'
 
   .EXAMPLE 6
   Move a match before anchor:
+
   gci ... | Rename-Many -Pattern '\d{2}-data' -Anchor 'loopz' -Relation 'before'
 
   .EXAMPLE 7
   Move last occurrence of whole-word static string before anchor:
+
   gci ... | Rename-Many -Pattern '\d{2}-data',l -Anchor 'loopz' -Relation 'before' -Whole p
 
   .EXAMPLE 8
   Move a match before anchor and drop:
+
   gci ... | Rename-Many -Pattern '\d{2}-data' -Anchor 'loopz' -Relation 'before' -Drop '-'
 
-  + UPDATE EXAMPLES (Paste)
+  * UPDATE EXAMPLES (Paste)
 
   .EXAMPLE 9
   Update last occurrence of whole-word static string using $Paste:
+
   gci ... | Rename-Many -Pattern 'data',l -Whole p -Paste '_info_'
 
   .EXAMPLE 10
   Update a static string using $Paste:
+
   gci ... | Rename-Many -Pattern 'data' -Paste '_info_'
 
   .EXAMPLE 11
   Update 2nd occurrence of whole-word match using $Paste and preserve anchor:
+
   gci ... | Rename-Many -Pattern '\d{2}-data', l -Paste '${_a}_info_'
 
   .EXAMPLE 12
   Update match contain named capture group using $Paste and preserve the anchor:
+
   gci ... | Rename-Many -Pattern (?<day>\d{2})-(?<mon>\d{2})-(?<year>\d{2})
     -Paste '(${year})-(${mon})-(${day}) ${_a}'
 
   .EXAMPLE 13
   Update match contain named capture group using $Paste and preserve the anchor and copy
   whole last occurrence:
+
   gci ... | Rename-Many -Pattern (?<day>\d{2})-(?<mon>\d{2})-(?<year>\d{2})
     -Copy '[A-Z]{3}',l -Whole c -Paste 'CCY_${_c} (${year})-(${mon})-(${day}) ${_a}'
 
-  + CUT EXAMPLES (Cut)
+  * CUT EXAMPLES (Cut)
 
   .EXAMPLE 14
   Cut a literal token:
+
   gci ... | Rename-Many -Cut 'data'
 
   .EXAMPLE 15
-  Cut last occurrence of literal token
+  Cut last occurrence of literal token:
+
   gci ... | Rename-Many -Cut, l 'data'
 
   .EXAMPLE 16
-  Cut the second 2 digit sequence
+  Cut the second 2 digit sequence:
+
   gci ... | Rename-Many -Cut, 2 '\d{2}'
 
-  + APPENDAGE EXAMPLES
+  * APPENDAGE EXAMPLES
 
   .EXAMPLE 17
-  Prefix items with fixed token
+  Prefix items with fixed token:
+
   gci ... | Rename-Many -Prepend 'begin_'
 
   .EXAMPLE 18
-  Append fixed token to items
+  Append fixed token to items:
+
   gci ... | Rename-Many -Append '_end'
 
   #>

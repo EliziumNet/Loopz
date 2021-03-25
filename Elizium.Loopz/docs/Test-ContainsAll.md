@@ -5,52 +5,51 @@ online version:
 schema: 2.0.0
 ---
 
-# Test-IsFileSystemSafe
+# Test-ContainsAll
 
 ## SYNOPSIS
 
-Checks the $Value to see if it contains any file-system un-safe characters.
+Given two sequences of strings, determines if first contains all elements
+of the other.
 
 ## SYNTAX
 
 ```powershell
-Test-IsFileSystemSafe [[-Value] <String>] [[-InvalidSet] <Char[]>] [<CommonParameters>]
+Test-ContainsAll [-Super] <String[]> [-Sub] <String[]> [<CommonParameters>]
 ```
 
 ## DESCRIPTION
 
-Warning, this function is not comprehensive nor platform specific, but it does not intend to be.
-There are some characters eg /, that are are allowable under mac/linux as part of the filename but are not under windows; in this case they are considered unsafe for all platforms.
-This approach is taken because of the likely possibility that a file may be copied over from differing file system types.
+Is the first set a super set of the second.
 
 ## PARAMETERS
 
-### -InvalidSet
+### -Sub
 
-(Client does not need to specify this parameter; used for testing purposes only).
+The sub set (Second)
 
 ```yaml
-Type: Char[]
+Type: String[]
 Parameter Sets: (All)
 Aliases:
 
-Required: False
+Required: True
 Position: 1
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -Value
+### -Super
 
-The string value to check.
+The super set (First)
 
 ```yaml
-Type: String
+Type: String[]
 Parameter Sets: (All)
 Aliases:
 
-Required: False
+Required: True
 Position: 0
 Default value: None
 Accept pipeline input: False
@@ -69,7 +68,7 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ### System.Boolean
 
-Returns $true if the value contains ony file-system safe characters only, $false otherwise
+Returns $true if Super contains all the elements of Sub, $false otherwise.
 
 ## NOTES
 

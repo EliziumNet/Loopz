@@ -5,28 +5,78 @@ online version:
 schema: 2.0.0
 ---
 
-# Show-Signals
+# Get-TableDisplayOptions
 
 ## SYNOPSIS
 
-Shows all defined signals, including user defined signals.
+Gets the default table display options.
 
 ## SYNTAX
 
 ```powershell
-Show-Signals [[-SourceSignals] <Hashtable>] [-Registry <Hashtable>] [-Include <String[]>] [-Test]
- [<CommonParameters>]
+Get-TableDisplayOptions [[-Signals] <Hashtable>] [[-Scribbler] <Object>] [[-Select] <String[]>]
+ [[-Custom] <PSObject>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
 
-User can override signal definitions in their profile, typically using the provided function Update-CustomSignals.
+The client can further customise by overwriting the members on the
+PSCustomObject returned.
 
 ## PARAMETERS
 
-### -SourceSignals
+### -Custom
 
-Hashtable containing signals to be displayed.
+A client defined PSCustomObject that will be populated under the ./Custom in the
+PSCustomObject returned.
+
+```yaml
+Type: PSObject
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 3
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Scribbler
+
+The Krayola scribbler instance used to manage rendering to console.
+
+```yaml
+Type: Object
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 1
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Select
+
+An array of strings defining which columns are selected to be shown in the table.
+
+```yaml
+Type: String[]
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 2
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Signals
+
+The signals hashtable collection from which to select the signals.
 
 ```yaml
 Type: Hashtable
@@ -35,54 +85,6 @@ Aliases:
 
 Required: False
 Position: 0
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -Include
-
-Provides a filter. When specified, only the applications included in the list will be shown.
-
-```yaml
-Type: String[]
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -Registry
-
-Hashtable containing information concerning commands usage of signals.
-
-```yaml
-Type: Hashtable
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -Test
-
-Required by unit tests only.
-
-```yaml
-Type: SwitchParameter
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -98,7 +100,9 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## OUTPUTS
 
-### System.Object
+### System.Management.Automation.PSObject
+
+The table display options including client defined custom section.
 
 ## NOTES
 

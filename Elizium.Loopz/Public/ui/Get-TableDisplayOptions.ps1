@@ -10,6 +10,20 @@ function Get-TableDisplayOptions {
   .DESCRIPTION
     The client can further customise by overwriting the members on the
   PSCustomObject returned.
+
+  .PARAMETER Custom
+    A client defined PSCustomObject that will be populated under the ./Custom in the
+  PSCustomObject returned.
+
+  .PARAMETER Scribbler
+    The Krayola scribbler instance used to manage rendering to console.
+
+  .PARAMETER Select
+    An array of strings defining which columns are selected to be shown in the table.
+
+  .PARAMETER Signals
+    The signals hashtable collection from which to select the signals.
+
   #>
   [OutputType([PSCustomObject])]
   param(

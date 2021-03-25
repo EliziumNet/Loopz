@@ -13,6 +13,9 @@ function Get-SyntaxScheme {
   are derived from the Krayola theme. The colours are subject to the presence of
   the environment variable 'KRAYOLA_LIGHT_TERMINAL', this is to prevent light
   foreground colours being selected when the background is also using light colours.
+
+  .PARAMETER Theme
+    The Krayola theme that the scheme will be associated with.
   #>
   [OutputType([Hashtable])]
   param(

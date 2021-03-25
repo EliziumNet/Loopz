@@ -17,13 +17,13 @@ function New-Syntax {
     The name of the command to get syntax instance for
 
   .PARAMETER Scheme
-    The hashtable syntax specific scheme instance 
+    The hashtable syntax specific scheme instance
 
   .PARAMETER Scribbler
-    The Krayola scribbler instance used to manage rendering to console.
+    The Krayola scribbler instance used to manage rendering to console
 
   .PARAMETER Signals
-    The signals hashtable collection.
+    The signals hashtable collection
   #>
   param(
     [Parameter(Mandatory)]

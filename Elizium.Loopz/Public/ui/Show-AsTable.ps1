@@ -12,33 +12,21 @@ function Show-AsTable {
   to the options provided. The clint can override the default cell rendering behaviour
   by providing a render function.
 
-  .PARAMETER MetaData
-    Hashtable instance which maps column titles to a PSCustomObject instance that
-  contains display information pertaining to that column. The object must contain
-  - FieldName: the name of the column
-  - Max: the size of the largest value found in the table data for that column
-  - Type: the type of data represented by that column
-
   .PARAMETER Headers
     Hashtable instance that represents the headers displayed for the table. Maps the
   raw column title to the actual text used to display it. In practice, this is a
   space padded version of the raw title determined from the meta data.
+
+  .PARAMETER MetaData
+    Hashtable instance which maps column titles to a PSCustomObject instance that
+  contains display information pertaining to that column. The object must contain
+
+  - FieldName: the name of the column
+  - Max: the size of the largest value found in the table data for that column
+  - Type: the type of data represented by that column
   
-  .PARAMETER Table
-    Hashtable containing the table data. Currently, the data row is indexed by the
-  'Name' property and as such, the Name in in row must be unique (actually acts
-  like its the primary key for the table; this will be changed in future so that
-  an alternative ID field is used instead of Name.)
-
-  .PARAMETER Title
-    If provided, this will be shown as the title for this table.
-
-  .PARAMETER TitleFormat
-    A table title format string which must contain a {0} place holder for the Title
-  to be inserted into.
-
-  .PARAMETER Scribbler
-    The Krayola scribbler instance used to manage rendering to console.
+  .PARAMETER Options
+    The table display options (See command Get-TableDisplayOptions)
 
   .PARAMETER Render
     A script-block allowing client defined cell rendering logic. The Render script-block
@@ -52,8 +40,21 @@ function Show-AsTable {
   - Scribbler: The Krayola scribbler instance
   - counter: the row number
 
-  .PARAMETER Options
-    The table display options (See Get-TableDisplayOptions)
+  .PARAMETER Scribbler
+    The Krayola scribbler instance used to manage rendering to console.
+
+  .PARAMETER Table
+    Hashtable containing the table data. Currently, the data row is indexed by the
+  'Name' property and as such, the Name in in row must be unique (actually acts
+  like its the primary key for the table; this will be changed in future so that
+  an alternative ID field is used instead of Name.)
+
+  .PARAMETER Title
+    If provided, this will be shown as the title for this table.
+
+  .PARAMETER TitleFormat
+    A table title format string which must contain a {0} place holder for the Title
+  to be inserted into.
   #>
   param(
     [Parameter()]

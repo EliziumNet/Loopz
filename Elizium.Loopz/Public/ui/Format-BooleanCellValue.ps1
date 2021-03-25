@@ -14,12 +14,12 @@ function Format-BooleanCellValue {
   (the default values are emoji values 'SWITCH-ON'/'SWITCH-OFF') in the table
   options.
 
-  .PARAMETER Value
-    The original boolean value in string form.
-
   .PARAMETER TableOptions
     The PSCustomObject that contains the alternative boolean values (./Values/True
   and ./Values/False)
+
+  .PARAMETER Value
+    The original boolean value in string form.
   #>
   [OutputType([string])]
   param(

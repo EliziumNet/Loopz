@@ -13,7 +13,7 @@ Helper function to make it easy to generate a line to be displayed.
 
 ## SYNTAX
 
-```
+```powershell
 Format-StructuredLine [-Exchange] <Hashtable> [-LineKey] <String> [[-CrumbKey] <String>]
  [[-MessageKey] <String>] [-Truncate] [[-Krayon] <Krayon>] [[-Options] <PSObject>] [<CommonParameters>]
 ```

@@ -5,57 +5,55 @@ online version:
 schema: 2.0.0
 ---
 
-# Get-Signals
+# Get-PartitionedPcoHash
 
 ## SYNOPSIS
 
-Returns a copy of the Signals hashtable.
+Partitions a hash of PSCustomObject (Pco)s by a specified field name.
 
 ## SYNTAX
 
 ```powershell
-Get-Signals [[-SourceSignals] <Hashtable>] [[-Custom] <Hashtable>] [<CommonParameters>]
+Get-PartitionedPcoHash [-Hash] <Hashtable> [-Field] <String> [<CommonParameters>]
 ```
 
 ## DESCRIPTION
 
-The signals returned include the user defined signal overrides.
-
-NOTE: 3rd party commands need to register their signal usage with the signal
-registry. This can be done using command Register-CommandSignals and would
-be best performed at module initialisation stage invoked at import time.
+Given a hashtable whose values are PSCustomObjects, will return a hashtable of
+hashtables, keyed by the field specified. This effectively re-groups the hashtable
+entries based on a custom field. The first level hash in the result is keyed,
+by the field specified. The second level has is the original hash key. So
+given the original hash [ORIGINAL-KEY]=>[PSCustomObject], after partitioning,
+the same PSCustomObject can be accessed, via 2 steps $outputHash[$Field][ORIGINAL-KEY].
 
 ## PARAMETERS
 
-### -Custom
+### -Field
 
-The hashtable instance containing custom overrides. Does not need to be
-specified by the client as it is defaulted.
+The name of the field to partition by
 
 ```yaml
-Type: Hashtable
+Type: String
 Parameter Sets: (All)
 Aliases:
 
-Required: False
+Required: True
 Position: 1
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -SourceSignals
+### -Hash
 
-The hashtable instance containing the source signal definitions. The actual signals
-returned are derived from the source. Does not need to be specified by the client as
-it is defaulted.
+The input hashtable to partition
 
 ```yaml
 Type: Hashtable
 Parameter Sets: (All)
 Aliases:
 
-Required: False
+Required: True
 Position: 0
 Default value: None
 Accept pipeline input: False
@@ -72,9 +70,9 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## OUTPUTS
 
-### System.Collections.Hashtable
+### System.Object
 
-The resolved Signal definitions.
+A hashtable of hashtable keyed by the field specified.
 
 ## NOTES
 

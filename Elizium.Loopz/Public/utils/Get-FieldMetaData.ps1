@@ -8,7 +8,7 @@ function Get-FieldMetaData {
     Derives the meta data from the table data provided.
 
   .DESCRIPTION
-    THe source table data is just an array of PSCustomObjects where each object
+    The source table data is just an array of PSCustomObjects where each object
   represents a row in the table. The meta data is required to format the table
   cells correctly so that each cell is properly aligned.
   

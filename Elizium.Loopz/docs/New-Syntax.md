@@ -5,60 +5,47 @@ online version:
 schema: 2.0.0
 ---
 
-# Show-Signals
+# New-Syntax
 
 ## SYNOPSIS
 
-Shows all defined signals, including user defined signals.
+Get a new 'Syntax' object for a command.
 
 ## SYNTAX
 
 ```powershell
-Show-Signals [[-SourceSignals] <Hashtable>] [-Registry <Hashtable>] [-Include <String[]>] [-Test]
+New-Syntax [-CommandName] <String> [[-Signals] <Hashtable>] [[-Scribbler] <Scribbler>] [[-Scheme] <Hashtable>]
  [<CommonParameters>]
 ```
 
 ## DESCRIPTION
 
-User can override signal definitions in their profile, typically using the provided function Update-CustomSignals.
+The Syntax instance is a supporting class for the parameter set tools. It contains
+various formatters, string definitions and utility functionality. The primary feature
+it contains is that relating to the colouring in of the standard syntax statement
+that is derived from a commands parameter set.
 
 ## PARAMETERS
 
-### -SourceSignals
+### -CommandName
 
-Hashtable containing signals to be displayed.
+The name of the command to get syntax instance for
 
 ```yaml
-Type: Hashtable
+Type: String
 Parameter Sets: (All)
 Aliases:
 
-Required: False
+Required: True
 Position: 0
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -Include
+### -Scheme
 
-Provides a filter. When specified, only the applications included in the list will be shown.
-
-```yaml
-Type: String[]
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -Registry
-
-Hashtable containing information concerning commands usage of signals.
+The hashtable syntax specific scheme instance
 
 ```yaml
 Type: Hashtable
@@ -66,23 +53,39 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: Named
+Position: 3
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -Test
+### -Scribbler
 
-Required by unit tests only.
+The Krayola scribbler instance used to manage rendering to console
 
 ```yaml
-Type: SwitchParameter
+Type: Scribbler
 Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: Named
+Position: 2
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Signals
+
+The signals hashtable collection
+
+```yaml
+Type: Hashtable
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 1
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -99,6 +102,8 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 ## OUTPUTS
 
 ### System.Object
+
+A new syntax instance
 
 ## NOTES
 

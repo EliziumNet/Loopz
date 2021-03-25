@@ -24,6 +24,8 @@ function Get-AsTable {
   .PARAMETER MetaData
     Hashtable instance which maps column titles to a PSCustomObject instance that
   contains display information pertaining to that column. The object must contain
+  the following members:
+  
   - FieldName: the name of the column
   - Max: the size of the largest value found in the table data for that column
   - Type: the type of data represented by that column

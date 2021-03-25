@@ -13,6 +13,15 @@ function Get-Signals {
   NOTE: 3rd party commands need to register their signal usage with the signal
   registry. This can be done using command Register-CommandSignals and would
   be best performed at module initialisation stage invoked at import time.
+
+  .PARAMETER Custom
+    The hashtable instance containing custom overrides. Does not need to be
+  specified by the client as it is defaulted.
+
+  .PARAMETER SourceSignals
+    The hashtable instance containing the main signals. Does not need to be
+  specified by the client as it is defaulted.
+
   #>
   [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidGlobalVars', '')]
   [OutputType([hashtable])]

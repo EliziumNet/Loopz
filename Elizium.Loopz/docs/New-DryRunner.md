@@ -5,31 +5,38 @@ online version:
 schema: 2.0.0
 ---
 
-# Show-Signals
+# New-DryRunner
 
 ## SYNOPSIS
 
-Shows all defined signals, including user defined signals.
+Dry-Runner factory function
 
 ## SYNTAX
 
 ```powershell
-Show-Signals [[-SourceSignals] <Hashtable>] [-Registry <Hashtable>] [-Include <String[]>] [-Test]
+New-DryRunner [[-CommandName] <String>] [[-Signals] <Hashtable>] [[-Scribbler] <Scribbler>]
  [<CommonParameters>]
 ```
 
 ## DESCRIPTION
 
-User can override signal definitions in their profile, typically using the provided function Update-CustomSignals.
+The Dry-Runner is used by the Show-InvokeReport command. The DryRunner can
+be used in unit-tests to ensure that expected parameters can be used to
+invoke the function without causing errors. In the unit tests, the client just needs
+to instantiate the DryRunner (using this function) then pass in an expected list
+of parameters to the Resolve method. The test case can review the result parameter
+set(s) and assert as appropriate. (Actually, a developer can also use the
+RuleController class in unit tests to check that commands do not violate the
+parameter set rules.)
 
 ## PARAMETERS
 
-### -SourceSignals
+### -CommandName
 
-Hashtable containing signals to be displayed.
+The name of the command to get DryRunner instance for
 
 ```yaml
-Type: Hashtable
+Type: String
 Parameter Sets: (All)
 Aliases:
 
@@ -40,25 +47,25 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -Include
+### -Scribbler
 
-Provides a filter. When specified, only the applications included in the list will be shown.
+The Krayola scribbler instance used to manage rendering to console
 
 ```yaml
-Type: String[]
+Type: Scribbler
 Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: Named
+Position: 2
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -Registry
+### -Signals
 
-Hashtable containing information concerning commands usage of signals.
+The signals hashtable collection
 
 ```yaml
 Type: Hashtable
@@ -66,23 +73,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -Test
-
-Required by unit tests only.
-
-```yaml
-Type: SwitchParameter
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
+Position: 1
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -99,6 +90,8 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 ## OUTPUTS
 
 ### System.Object
+
+A new DryRunner instance
 
 ## NOTES
 

@@ -5,32 +5,35 @@ online version:
 schema: 2.0.0
 ---
 
-# Test-IsFileSystemSafe
+# Format-BooleanCellValue
 
 ## SYNOPSIS
 
-Checks the $Value to see if it contains any file-system un-safe characters.
+Table Render callback that can be passed into Show-AsTable
 
 ## SYNTAX
 
 ```powershell
-Test-IsFileSystemSafe [[-Value] <String>] [[-InvalidSet] <Char[]>] [<CommonParameters>]
+Format-BooleanCellValue [[-Value] <String>] [[-TableOptions] <PSObject>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
 
-Warning, this function is not comprehensive nor platform specific, but it does not intend to be.
-There are some characters eg /, that are are allowable under mac/linux as part of the filename but are not under windows; in this case they are considered unsafe for all platforms.
-This approach is taken because of the likely possibility that a file may be copied over from differing file system types.
+For table cells containing boolean fields, this callback function will
+render the cell with alternative values other than 'true' or 'false'. Typically,
+the client would set the alternative representation of these boolean values
+(the default values are emoji values 'SWITCH-ON'/'SWITCH-OFF') in the table
+options.
 
 ## PARAMETERS
 
-### -InvalidSet
+### -TableOptions
 
-(Client does not need to specify this parameter; used for testing purposes only).
+The PSCustomObject that contains the alternative boolean values (./Values/True
+and ./Values/False)
 
 ```yaml
-Type: Char[]
+Type: PSObject
 Parameter Sets: (All)
 Aliases:
 
@@ -43,7 +46,7 @@ Accept wildcard characters: False
 
 ### -Value
 
-The string value to check.
+The original boolean value in string form.
 
 ```yaml
 Type: String
@@ -67,9 +70,7 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## OUTPUTS
 
-### System.Boolean
-
-Returns $true if the value contains ony file-system safe characters only, $false otherwise
+### System.String
 
 ## NOTES
 

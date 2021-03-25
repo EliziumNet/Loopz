@@ -111,9 +111,6 @@ function New-BootStrap {
   * Force (optional) -> container selector.
   * Keys (optional) -> Collection of key/value pairs to be inserted into exchange.
 
-  .PARAMETER Exchange
-    The exchange instance to populate.
-    
   .PARAMETER Containers
     A PSCustomObject that must contain a 'Wide' property and a 'Props' property. Both of
   these must be of type Krayola.Line. 'Prop's are designed to show a small item of information,
@@ -121,6 +118,9 @@ function New-BootStrap {
   in the console. Wide items, are those which when show take up a lot of screen space, eg
   showing a file's full path is often a 'wide' item, so it would be best to present it on
   its own line.
+
+  .PARAMETER Exchange
+    The exchange instance to populate.
 
   .PARAMETER Options
     Not mandatory. Currently, only specifies a 'Whole' property. The 'Whole' property is a

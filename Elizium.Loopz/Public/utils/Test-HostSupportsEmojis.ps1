@@ -16,7 +16,7 @@ function Test-HostSupportsEmojis {
   returned for Fluent is false. Its assumed that hosts on Linux and Mac can support
   the display of emojis, so they return true. If user want to enforce using emojis,
   then they can define LOOPZ_FORCE_EMOJIS in the environment, this will force this
-  function to return.  
+  function to return.
   #>
   [OutputType([boolean])]
   param()
