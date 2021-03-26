@@ -45,23 +45,41 @@ The following table shows the list of public commands exported from the Loopz mo
 | [Invoke-ForeachFsItem](Elizium.Loopz/docs/Invoke-ForeachFsItem.md)               | Invoke a function foreach file system object
 | [Invoke-MirrorDirectoryTree](Elizium.Loopz/docs/Invoke-MirrorDirectoryTree.md)   | Copy a directory tree invoking a function
 | [Invoke-TraverseDirectory](Elizium.Loopz/docs/Invoke-TraverseDirectory.md)       | Navigate a directory tree invoking a function
-| [Write-HostFeItemDecorator](Elizium.Loopz/docs/Write-HostFeItemDecorator.md)     | Write output foreach file system object
 | [Show-Header](Elizium.Loopz/docs/Show-Header.md)                                 | Show iteration Header
 | [Show-Summary](Elizium.Loopz/docs/Show-Summary.md)                               | Show iteration Summary
+| [Write-HostFeItemDecorator](Elizium.Loopz/docs/Write-HostFeItemDecorator.md)     | Write output foreach file system object
+
+## Parameter Set Tools
+
+This module includes a collection of commands/classes that comprise the parameter set tools. When building new commands that use the parameter set framework, it can be difficult to build them so they don't violate the established rules, particular when the command is complex and has a large number of parameters and parameter sets. These parameter sets tools aims to fill a void and give developers some additional tools that can be used to resolved common parameter issues. The following table show the commands in this tool set:
+
+| COMMAND-NAME                                                                     | DESCRIPTION
+|----------------------------------------------------------------------------------|------------
+| [Show-InvokeReport](Elizium.Loopz/docs/Show-InvokeReport.md)                     | Show command invoke report
+| [Show-ParameterSetInfo](Elizium.Loopz/docs/Show-ParameterSetInfo.md)             | Show parameter set info
+| [Show-ParameterSetReport](Elizium.Loopz/docs/Show-ParameterSetReport.md)         | Show parameter set violations
+
+| CLASS-NAME                                                                       | DESCRIPTION
+|----------------------------------------------------------------------------------|------------
+| [dryrunner](Elizium.Loopz/docs/dryrunner.md)                                     | Dry run a command
+| [rules](Elizium.Loopz/docs/rules.md)                                             | Parameter set rules
+| [syntax](Elizium.Loopz/docs/syntax.md)                                           | Command syntax
 
 ## Supporting Utilities (for developers)
 
 | COMMAND-NAME                                                                     | DESCRIPTION
 |----------------------------------------------------------------------------------|------------
+| [Add-Appendage](Elizium.Loopz/docs/Add-Appendage.md)                             | Add prefix or suffix
 | [Edit-RemoveSingleSubString](Elizium.Loopz/docs/Edit-RemoveSingleSubString.md)   | Remove single substring
 | [Format-StructuredLine](Elizium.Loopz/docs/Format-StructuredLine.md)             | Create Krayon line
+| [Format-Escape](Elizium.Loopz/docs/Format-Escape.md)                             | Escape a regular expression
 | [Get-FormattedSignal](Elizium.Loopz/docs/Get-FormattedSignal.md)                 | Get formatted signal
 | [Get-InverseSubstring](Elizium.Loopz/docs/Get-InverseSubString.md)               | Get inverse substring
 | [Get-IsLocked](Elizium.Loopz/docs/Get-IsLocked.md)                               | Get locked state of a command
 | [Get-PaddedLabel](Elizium.Loopz/docs/Get-PaddedLabel.md)                         | Get space padded string
-| [Get-PlatformName](Elizium.Loopz/docs/Get-PlatformName.md)                           | Get platform name
+| [Get-PlatformName](Elizium.Loopz/docs/Get-PlatformName.md)                       | Get platform name
 | [Get-PsObjectField](Elizium.Loopz/docs/Get-PsObjectField.md)                     | Get field from PSCustomObject
-| [Get-Signals](Elizium.Loopz/docs/Get-Signals.md)                                     | Get signals
+| [Get-Signals](Elizium.Loopz/docs/Get-Signals.md)                                 | Get signals
 | [Initialize-ShellOperant](Elizium.Loopz/docs/Initialize-ShellOperant.md)         | Init shell operation
 | [Invoke-ByPlatform](Elizium.Loopz/docs/Invoke-ByPlatform.md)                     | Invoke OS specific fn
 | [Move-Match](Elizium.Loopz/docs/Move-Match.md)                                   | Move regex match
@@ -72,7 +90,12 @@ The following table shows the list of public commands exported from the Loopz mo
 | [Select-SignalContainer](Elizium.Loopz/docs/Select-SignalContainer.md)           | Select signal into a container
 | [Split-Match](Elizium.Loopz/docs/Split-Match.md)                                 | Split regex match
 | [Test-IsFileSystemSafe](Elizium.Loopz/docs/Test-IsFileSystemSafe.md)             | Tes if string is FS safe
+| [Update-GroupRefs](Elizium.Loopz/docs/Update-GroupRefs.md)                       | Update named group refs
 | [Update-Match](Elizium.Loopz/docs/Update-Match.md)                               | Update regex match
+
+| CLASS-NAME                                                                       | DESCRIPTION
+|----------------------------------------------------------------------------------|------------
+| [bootstrap](Elizium.Loopz/docs/bootstrap.md)                                     | Command init helper
 
 ## General Concepts
 

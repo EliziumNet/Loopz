@@ -1,5 +1,20 @@
 
 function Get-FieldMetaData {
+  <#
+  .NAME
+    Get-FieldMetaData
+
+  .SYNOPSIS
+    Derives the meta data from the table data provided.
+
+  .DESCRIPTION
+    The source table data is just an array of PSCustomObjects where each object
+  represents a row in the table. The meta data is required to format the table
+  cells correctly so that each cell is properly aligned.
+  
+  .PARAMETER Data
+    Hashtable containing the table data.
+  #>
   param(
     [Parameter()]
     [ValidateScript( { $_ -and $_.Count -gt 0 })]

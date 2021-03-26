@@ -19,11 +19,9 @@ Test-IsFileSystemSafe [[-Value] <String>] [[-InvalidSet] <Char[]>] [<CommonParam
 
 ## DESCRIPTION
 
-Warning, this function is not comprehensive nor platform specific, but it does not
-intend to be. There are some characters eg /, that are are allowable under mac/linux
-as part of the filename but are not under windows; in this case they are considered
-unsafe for all platforms. This approach is taken because of the likely possibility
-that a file may be copied over from differing file system types.
+Warning, this function is not comprehensive nor platform specific, but it does not intend to be.
+There are some characters eg /, that are are allowable under mac/linux as part of the filename but are not under windows; in this case they are considered unsafe for all platforms.
+This approach is taken because of the likely possibility that a file may be copied over from differing file system types.
 
 ## PARAMETERS
 
@@ -70,6 +68,8 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 ## OUTPUTS
 
 ### System.Boolean
+
+Returns $true if the value contains ony file-system safe characters only, $false otherwise
 
 ## NOTES
 

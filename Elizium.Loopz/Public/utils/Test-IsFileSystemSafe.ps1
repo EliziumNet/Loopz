@@ -16,10 +16,6 @@ function Test-IsFileSystemSafe {
 
   .PARAMETER Value
     The string value to check.
-
-  .PARAMETER Value
-
-
   #>
   [OutputType([boolean])]
   param(

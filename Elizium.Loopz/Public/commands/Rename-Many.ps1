@@ -57,8 +57,6 @@ function Rename-Many {
   * f: first occurrence
   * l: last occurrence
   * <number>: the nth occurrence
-  * *: all occurrences. The wild card occurrence can only be used with 'update' or 'cut' operations
-  (it doesn't make sense for example to 'move' all occurrences of a pattern to the anchor)
   The occurrence is specified after the regular expression eg:
   -Pattern '\w\d{2,3}', l
     which means match the Last occurrence of the expression.
@@ -84,6 +82,17 @@ function Rename-Many {
   pipeline item's name (after the $Pattern match has been removed). The $Pattern match that
   is removed is inserted at the position indicated by the anchor match in collaboration with
   the $Relation parameter.
+
+  .PARAMETER AnchorEnd
+    Similar to Anchor except that if the pattern specified by AnchorEnd does not match, then
+  the Pattern match will be moved to the End. This is known as a Hybrid Anchor.
+
+  .PARAMETER AnchorStart
+    Similar to Anchor except that if the pattern specified by AnchorEnd does not match, then
+  the Pattern match will be moved to the Start. This is known as a Hybrid Anchor.
+
+  .PARAMETER Append
+    Appends a literal string to end of items name
 
   .PARAMETER Condition
     Provides another way of filtering pipeline items. This is not typically specified on the
@@ -111,10 +120,14 @@ function Rename-Many {
   $Paste parameter; see $Paste or $With). Since this is a regular expression to be used in
   $Paste/$With, there is no value in the user specifying a static pattern, because that
   static string can just be defined in $Paste/$With. The value in the $Copy parameter comes
-  when a generic pattern is defined eg \d{3} (is non static), specifies any 3 digits as
+  when a generic pattern is defined eg \d{3} (is non Literal), specifies any 3 digits as
   opposed to say '123', which could be used directly in the $Paste/$With parameter without
   the need for $Copy. The match defined by $Copy is stored in special variable ${_c} and
   can be referenced as such from $Paste and $With.
+
+  .PARAMETER Cut
+    Is a replacement for the Pattern parameter, when a Cut operation is required. The matched
+  items will be removed from the item's name, and no other replacement occurs.
 
   .PARAMETER Diagnose
     switch parameter that indicates the command should be run in WhatIf mode. When enabled
@@ -131,9 +144,9 @@ function Rename-Many {
   are processed.
 
   .PARAMETER Drop
-    A string parameter (only applicable to move operations, ie Anchor/Star/End) that defines
-  what text is used to replace the Pattern match. So in this use-case, the user wants to
-  move a particular token/pattern to another part of the name and at the same time drop a
+    A string parameter (only applicable to move operations, ie Anchor/Star/End/hybrid) that
+  defines what text is used to replace the Pattern match. So in this use-case, the user wants
+  to move a particular token/pattern to another part of the name and at the same time drop a
   static string in the place where the $Pattern was removed from.
 
   .PARAMETER End
@@ -182,6 +195,9 @@ function Rename-Many {
 
     => This indicates that the last match should be captured into named group 'code'.
 
+  .PARAMETER Prepend
+    Prefixes a literal string to start of items name
+
   .PARAMETER Relation
     Used in conjunction with the $Anchor parameter and can be set to either 'before' or
   'after' (the default). Defines the relationship of the $pattern match with the $Anchor
@@ -217,7 +233,7 @@ function Rename-Many {
   can specify which of the parameters 'Whole' should be applied to. Valid values are:
 
   * 'p': $Pattern
-  * 'a': $Anchor
+  * 'a': $Anchor/AnchorEnd/AnchorStart
   * 'c': $Copy
   * 'i': $Include
   * 'x': $Except
@@ -237,7 +253,7 @@ function Rename-Many {
   When $Pattern contains named capture groups, these variables can also be referenced. Eg if the
   $Pattern is defined as '(?<day>\d{1,2})-(?<mon>\d{1,2})-(?<year>\d{4})', then the variables
   ${day}, ${mon} and ${year} also become available for use in $With or $Paste.
-  Typically, $With is static text which is used to replace the $Pattern match and is inserted
+  Typically, $With is literal text which is used to replace the $Pattern match and is inserted
   according to the Anchor match, (or indeed $Start or $End) and $Relation. When using $With,
   whatever is defined in the $Anchor match is not removed from the pipeline's name (this is
   different to how $Paste works).
@@ -247,73 +263,107 @@ function Rename-Many {
   .PARAMETER underscore
     The pipeline item which should either be an instance of FileInfo or DirectoryInfo.
 
+  * MOVE EXAMPLES (anchored)
+
   .EXAMPLE 1
   Move a static string before anchor (consider file items only):
+
   gci ... | Rename-Many -File -Pattern 'data' -Anchor 'loopz' -Relation 'before'
 
   .EXAMPLE 2
   Move last occurrence of whole-word static string before anchor:
+
   gci ... | Rename-Many -Pattern 'data',l -Anchor 'loopz' -Relation 'before' -Whole p
 
   .EXAMPLE 3
   Move a static string before anchor and drop (consider Directory items only):
+
   gci ... | Rename-Many -Directory -Pattern 'data' -Anchor 'loopz' -Relation 'before' -Drop '-'
 
   .EXAMPLE 4
-  Update a static string using $With (consider file items only):
-  gci ... | Rename-Many -File -Pattern 'data' -With 'info'
+  Move a static string before anchor and drop (consider Directory items only), if anchor
+  does not match, move the pattern match to end:
+  
+  gci ... | Rename-Many -Directory -Pattern 'data' -AnchorEnd 'loopz' -Relation 'before' -Drop '-'
 
   .EXAMPLE 5
-  Update last occurrence of whole-word static string using $With:
-  gci ... | Rename-Many -Pattern 'data',l -With 'info' -Whole p
+  Move a static string to start and drop (consider Directory items only):
+
+  gci ... | Rename-Many -Directory -Pattern 'data' -Start -Drop '-'
 
   .EXAMPLE 6
-  Update a static string using $Paste:
-  gci ... | Rename-Many -Pattern 'data' -Paste '_info_'
-
-  .EXAMPLE 7
-  Update last occurrence of whole-word static string using $Paste:
-  gci ... | Rename-Many -Pattern 'data',l -Whole p -Paste '_info_'
-
-  .EXAMPLE 8
   Move a match before anchor:
+
   gci ... | Rename-Many -Pattern '\d{2}-data' -Anchor 'loopz' -Relation 'before'
 
-  .EXAMPLE 9
+  .EXAMPLE 7
   Move last occurrence of whole-word static string before anchor:
+
   gci ... | Rename-Many -Pattern '\d{2}-data',l -Anchor 'loopz' -Relation 'before' -Whole p
 
-  .EXAMPLE 10
+  .EXAMPLE 8
   Move a match before anchor and drop:
+
   gci ... | Rename-Many -Pattern '\d{2}-data' -Anchor 'loopz' -Relation 'before' -Drop '-'
 
+  * UPDATE EXAMPLES (Paste)
+
+  .EXAMPLE 9
+  Update last occurrence of whole-word static string using $Paste:
+
+  gci ... | Rename-Many -Pattern 'data',l -Whole p -Paste '_info_'
+
+  .EXAMPLE 10
+  Update a static string using $Paste:
+
+  gci ... | Rename-Many -Pattern 'data' -Paste '_info_'
+
   .EXAMPLE 11
-  Update a match using $With:
-  gci ... | Rename-Many -Pattern '\d{2}-data' -With 'info'
-
-  .EXAMPLE 12
-  Update last occurrence of whole-word match using $With:
-  gci ... | Rename-Many -Pattern '\d{2}-data',l -With 'info' -Whole p
-
-  .EXAMPLE 13
-  Update match contain named capture group using $With:
-  gci ... | Rename-Many -Pattern '(?<day>\d{2})-(?<mon>\d{2})-(?<year>\d{2})'
-    -With '(${year})-(${mon})-(${day})'
-
-  .EXAMPLE 14
   Update 2nd occurrence of whole-word match using $Paste and preserve anchor:
+
   gci ... | Rename-Many -Pattern '\d{2}-data', l -Paste '${_a}_info_'
 
-  .EXAMPLE 15
+  .EXAMPLE 12
   Update match contain named capture group using $Paste and preserve the anchor:
+
   gci ... | Rename-Many -Pattern (?<day>\d{2})-(?<mon>\d{2})-(?<year>\d{2})
     -Paste '(${year})-(${mon})-(${day}) ${_a}'
 
-  .EXAMPLE 16
+  .EXAMPLE 13
   Update match contain named capture group using $Paste and preserve the anchor and copy
   whole last occurrence:
+
   gci ... | Rename-Many -Pattern (?<day>\d{2})-(?<mon>\d{2})-(?<year>\d{2})
     -Copy '[A-Z]{3}',l -Whole c -Paste 'CCY_${_c} (${year})-(${mon})-(${day}) ${_a}'
+
+  * CUT EXAMPLES (Cut)
+
+  .EXAMPLE 14
+  Cut a literal token:
+
+  gci ... | Rename-Many -Cut 'data'
+
+  .EXAMPLE 15
+  Cut last occurrence of literal token:
+
+  gci ... | Rename-Many -Cut, l 'data'
+
+  .EXAMPLE 16
+  Cut the second 2 digit sequence:
+
+  gci ... | Rename-Many -Cut, 2 '\d{2}'
+
+  * APPENDAGE EXAMPLES
+
+  .EXAMPLE 17
+  Prefix items with fixed token:
+
+  gci ... | Rename-Many -Prepend 'begin_'
+
+  .EXAMPLE 18
+  Append fixed token to items:
+
+  gci ... | Rename-Many -Append '_end'
 
   #>
   [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSShouldProcess', '',

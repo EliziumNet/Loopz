@@ -11,6 +11,15 @@ function Show-Signals {
     User can override signal definitions in their profile, typically using the provided
   function Update-CustomSignals.
 
+  .PARAMETER SourceSignals
+    Hashtable containing signals to be displayed.
+
+  .PARAMETER Registry
+    Hashtable containing information concerning commands usage of signals.
+
+  .PARAMETER Include
+    Provides a filter. When specified, only the applications included in the list
+  will be shown.
   #>
   [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidGlobalVars', '')]
   param(

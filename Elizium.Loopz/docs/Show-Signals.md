@@ -14,35 +14,19 @@ Shows all defined signals, including user defined signals.
 ## SYNTAX
 
 ```powershell
-Show-Signals [[-SourceSignals] <Hashtable>] [[-Custom] <Hashtable>] [<CommonParameters>]
+Show-Signals [[-SourceSignals] <Hashtable>] [-Registry <Hashtable>] [-Include <String[]>] [-Test]
+ [<CommonParameters>]
 ```
 
 ## DESCRIPTION
 
-User can override signal definitions in their profile, typically using the provided
-function Update-CustomSignals.
+User can override signal definitions in their profile, typically using the provided function Update-CustomSignals.
 
 ## PARAMETERS
 
-### -Custom
-
-(User does not need to provide this parameter; required for testing purpose only)
-
-```yaml
-Type: Hashtable
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: 1
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
 ### -SourceSignals
 
-(User does not need to provide this parameter; required for testing purpose only)
+Hashtable containing signals to be displayed.
 
 ```yaml
 Type: Hashtable
@@ -51,6 +35,54 @@ Aliases:
 
 Required: False
 Position: 0
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Include
+
+Provides a filter. When specified, only the applications included in the list will be shown.
+
+```yaml
+Type: String[]
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Registry
+
+Hashtable containing information concerning commands usage of signals.
+
+```yaml
+Type: Hashtable
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Test
+
+Required by unit tests only.
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False

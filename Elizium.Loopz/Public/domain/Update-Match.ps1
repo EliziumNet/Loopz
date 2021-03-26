@@ -7,8 +7,7 @@ function Update-Match {
 
   .SYNOPSIS
     The core update match action function principally used by Rename-Many. Updates
-  $Pattern match in it's current location and can update all $Pattern matches if
-  '*' is specified as the $PatternOccurrence.
+  $Pattern match in it's current location.
 
   .DESCRIPTION
     Returns a new string that reflects updating the specified $Pattern match.

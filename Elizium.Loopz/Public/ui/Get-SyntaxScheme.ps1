@@ -1,5 +1,22 @@
 
 function Get-SyntaxScheme {
+  <#
+  .NAME
+    Get-SyntaxScheme
+
+  .SYNOPSIS
+    Get the scheme instance required by Command Syntax functionality in the
+  parameter set tools.
+
+  .DESCRIPTION
+    The scheme is related to the Krayola theme. Some of the entries in the scheme
+  are derived from the Krayola theme. The colours are subject to the presence of
+  the environment variable 'KRAYOLA_LIGHT_TERMINAL', this is to prevent light
+  foreground colours being selected when the background is also using light colours.
+
+  .PARAMETER Theme
+    The Krayola theme that the scheme will be associated with.
+  #>
   [OutputType([Hashtable])]
   param(
     [Parameter()]

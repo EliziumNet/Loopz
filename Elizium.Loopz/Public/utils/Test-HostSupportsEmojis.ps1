@@ -1,5 +1,23 @@
 
 function Test-HostSupportsEmojis {
+  <#
+  .NAME
+    Test-HostSupportsEmojis
+
+  .SYNOPSIS
+    This is a rudimentary function to determine if the host can display emojis. This
+  function will be super-ceded when this issue (on microsoft/terminal
+  https://github.com/microsoft/terminal/issues/1040) is resolved.
+
+  .DESCRIPTION
+    There is currently no standard way to determine this. As a crude workaround, this function
+  can determine if the host is Windows Terminal and returns true. Fluent Terminal can
+  display emojis, but does not render them very gracefully, so the default value
+  returned for Fluent is false. Its assumed that hosts on Linux and Mac can support
+  the display of emojis, so they return true. If user want to enforce using emojis,
+  then they can define LOOPZ_FORCE_EMOJIS in the environment, this will force this
+  function to return.
+  #>
   [OutputType([boolean])]
   param()
 

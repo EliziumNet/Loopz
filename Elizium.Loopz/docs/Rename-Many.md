@@ -9,61 +9,93 @@ schema: 2.0.0
 
 ## SYNOPSIS
 
-Performs a bulk rename for all file system objects delivered through the pipeline,
-via regular expression replacement.
+Performs a bulk rename for all file system objects delivered through the pipeline, via regular expression replacement.
 
 ## SYNTAX
 
-### ReplaceWith (Default)
+### UpdateInPlace (Default)
 
 ```powershell
-Rename-Many -underscore <FileSystemInfo> [-Pattern] <Array> [-Copy <Array>] [-With <String>] [-Start] [-End]
- [-Paste <String>] [-Drop <String>] [-File] [-Directory] [-Except <String>] [-Include <String>]
- [-Whole <String>] [-Condition <ScriptBlock>] [-Top <Int32>] [-Transform <ScriptBlock>] [-Context <PSObject>]
- [-Diagnose] [-WhatIf] [-Confirm] [<CommonParameters>]
+Rename-Many -underscore <FileSystemInfo> [-Pattern] <Array> [-Copy <Array>] [-With <String>] -Paste <String>
+ [-File] [-Directory] [-Except <String>] [-Include <String>] [-Whole <String>] [-Condition <ScriptBlock>]
+ [-Top <Int32>] [-Context <PSObject>] [-Diagnose] [-Test] [-WhatIf] [-Confirm] [<CommonParameters>]
+```
+
+### Transformer
+
+```powershell
+Rename-Many -underscore <FileSystemInfo> [-Pattern] <Array> [-File] [-Directory] [-Except <String>]
+ [-Include <String>] [-Whole <String>] [-Condition <ScriptBlock>] [-Top <Int32>] -Transform <ScriptBlock>
+ [-Context <PSObject>] [-Diagnose] [-Test] [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 
 ### MoveToEnd
 
 ```powershell
-Rename-Many -underscore <FileSystemInfo> [-Pattern] <Array> [-With <String>] [-End] [-Paste <String>]
+Rename-Many -underscore <FileSystemInfo> [-Pattern] <Array> [-Copy <Array>] [-With <String>] [-End]
  [-Drop <String>] [-File] [-Directory] [-Except <String>] [-Include <String>] [-Whole <String>]
- [-Condition <ScriptBlock>] [-Top <Int32>] [-Transform <ScriptBlock>] [-Context <PSObject>] [-Diagnose]
- [-WhatIf] [-Confirm] [<CommonParameters>]
+ [-Condition <ScriptBlock>] [-Top <Int32>] [-Context <PSObject>] [-Diagnose] [-Test] [-WhatIf] [-Confirm]
+ [<CommonParameters>]
 ```
 
 ### MoveToStart
 
 ```powershell
-Rename-Many -underscore <FileSystemInfo> [-Pattern] <Array> [-With <String>] [-Start] [-Paste <String>]
+Rename-Many -underscore <FileSystemInfo> [-Pattern] <Array> [-Copy <Array>] [-With <String>] [-Start]
  [-Drop <String>] [-File] [-Directory] [-Except <String>] [-Include <String>] [-Whole <String>]
- [-Condition <ScriptBlock>] [-Top <Int32>] [-Transform <ScriptBlock>] [-Context <PSObject>] [-Diagnose]
- [-WhatIf] [-Confirm] [<CommonParameters>]
+ [-Condition <ScriptBlock>] [-Top <Int32>] [-Context <PSObject>] [-Diagnose] [-Test] [-WhatIf] [-Confirm]
+ [<CommonParameters>]
 ```
 
 ### MoveToAnchor
 
 ```powershell
 Rename-Many -underscore <FileSystemInfo> [-Pattern] <Array> -Anchor <Array> [-Relation <String>]
- [-Copy <Array>] [-With <String>] [-Paste <String>] [-Drop <String>] [-File] [-Directory] [-Except <String>]
- [-Include <String>] [-Whole <String>] [-Condition <ScriptBlock>] [-Top <Int32>] [-Transform <ScriptBlock>]
- [-Context <PSObject>] [-Diagnose] [-WhatIf] [-Confirm] [<CommonParameters>]
+ [-Copy <Array>] [-With <String>] [-Drop <String>] [-File] [-Directory] [-Except <String>] [-Include <String>]
+ [-Whole <String>] [-Condition <ScriptBlock>] [-Top <Int32>] [-Context <PSObject>] [-Diagnose] [-Test]
+ [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 
-### Append
+### HybridEnd
+
+```powershell
+Rename-Many -underscore <FileSystemInfo> [-Pattern] <Array> -AnchorEnd <Array> [-Relation <String>]
+ [-Copy <Array>] [-With <String>] [-Drop <String>] [-File] [-Directory] [-Except <String>] [-Include <String>]
+ [-Whole <String>] [-Condition <ScriptBlock>] [-Top <Int32>] [-Context <PSObject>] [-Diagnose] [-Test]
+ [-WhatIf] [-Confirm] [<CommonParameters>]
+```
+
+### HybridStart
+
+```powershell
+Rename-Many -underscore <FileSystemInfo> [-Pattern] <Array> -AnchorStart <Array> [-Relation <String>]
+ [-Copy <Array>] [-With <String>] [-Drop <String>] [-File] [-Directory] [-Except <String>] [-Include <String>]
+ [-Whole <String>] [-Condition <ScriptBlock>] [-Top <Int32>] [-Context <PSObject>] [-Diagnose] [-Test]
+ [-WhatIf] [-Confirm] [<CommonParameters>]
+```
+
+### Affix
 
 ```powershell
 Rename-Many -underscore <FileSystemInfo> [-Copy <Array>] -Append <String> [-File] [-Directory]
  [-Except <String>] [-Include <String>] [-Whole <String>] [-Condition <ScriptBlock>] [-Top <Int32>]
- [-Transform <ScriptBlock>] [-Context <PSObject>] [-Diagnose] [-WhatIf] [-Confirm] [<CommonParameters>]
+ [-Context <PSObject>] [-Diagnose] [-Test] [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 
-### Prepend
+### Prefix
 
 ```powershell
 Rename-Many -underscore <FileSystemInfo> [-Copy <Array>] -Prepend <String> [-File] [-Directory]
  [-Except <String>] [-Include <String>] [-Whole <String>] [-Condition <ScriptBlock>] [-Top <Int32>]
- [-Transform <ScriptBlock>] [-Context <PSObject>] [-Diagnose] [-WhatIf] [-Confirm] [<CommonParameters>]
+ [-Context <PSObject>] [-Diagnose] [-Test] [-WhatIf] [-Confirm] [<CommonParameters>]
+```
+
+### NoReplacement
+
+```powershell
+Rename-Many -underscore <FileSystemInfo> -Cut <String> [-File] [-Directory] [-Except <String>]
+ [-Include <String>] [-Whole <String>] [-Condition <ScriptBlock>] [-Top <Int32>] [-Context <PSObject>]
+ [-Diagnose] [-Test] [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -100,18 +132,15 @@ LOOPZ_REMY_UNDO_DISABLED to $true)
 Another important point of note is that there are currently 3 modes of operation:
 'move', 'update' or 'cut':
 
-* 'move': requires an anchor, which may be an $Anchor pattern or
-  either $Start or $End switches.
+* 'move': requires an anchor, which may be an $Anchor pattern or either $Start or $End switches.
 * 'update': requires $With or $Paste without an anchor.
 * 'cut': no anchor or $With/$Paste specified, the $Pattern match is simply removed
   from the name.
 
 The following regular expression parameters:
-
 * $Pattern
 * $Anchor
 * $Copy
-
 can optionally have an occurrence value specified that can be used to select which
 match is active. In the case where a provided expression has multiple matches, the
 occurrence value can be used to single out which one. When no occurrence is specified,
@@ -120,171 +149,143 @@ the default is the first match only. The occurrence for a parameter can be:
 * f: first occurrence
 * l: last occurrence
 * \<number\>: the nth occurrence
-* *: all occurrences. The wild card occurrence can only be used with 'update' or 'cut' operations
-(it doesn't make sense for example to 'move' all occurrences of a pattern to the anchor)
 The occurrence is specified after the regular expression eg:
 -Pattern '\w\d{2,3}', l
   which means match the Last occurrence of the expression.
-(Actually, an occurrence may be specified for $Include and $Exclude but there is no
+(Actually, an occurrence may be specified for $Include and $Except but there is no
 point in doing so because these patterns only provide a filtering function and play
 no part in the actual renaming process).
 
   A note about escaping. If a pattern needs to use an regular expression character as
 a literal, it must be escaped. There are multiple ways of doing this:
 * use the 'esc' function; eg: -Pattern $($esc('(\d{2})'))
-* use a leading \~; -Pattern '\~(123)'
+* use a leading ~; -Pattern '~(123)'
 
 The above 2 approaches escape the entire string. The second approach is more concise
 and avoids the necessary use of extra brackets and $.
 
 * use 'esc' alongside other string concatenation:
-  eg: -Pattern $($esc('(123)') + '-(?\<ccy\>GBP|SEK)').
+  eg: -Pattern $($esc('(123)') + '-(?<ccy>GBP|SEK)').
 This third method is required when the whole pattern should not be subjected to
 escaping.
 
-## EXAMPLES
+---
 
-### Example 1
+* MOVE EXAMPLES (anchored)
 
-```powershell
+.EXAMPLE 1
+Move a static string before anchor (consider file items only):
+
 gci ... | Rename-Many -File -Pattern 'data' -Anchor 'loopz' -Relation 'before'
-```
 
-Move a static string before anchor (consider file items only)
+.EXAMPLE 2
+Move last occurrence of whole-word static string before anchor:
 
-### Example 2
-
-```powershell
 gci ... | Rename-Many -Pattern 'data',l -Anchor 'loopz' -Relation 'before' -Whole p
-```
 
-Move last occurrence of whole-word static string before anchor
+.EXAMPLE 3
+Move a static string before anchor and drop (consider Directory items only):
 
-### Example 3
-
-```powershell
 gci ... | Rename-Many -Directory -Pattern 'data' -Anchor 'loopz' -Relation 'before' -Drop '-'
-```
 
-Move a static string before anchor and drop (consider Directory items only)
+.EXAMPLE 4
+Move a static string before anchor and drop (consider Directory items only), if anchor
+does not match, move the pattern match to end:
 
-### Example 4
+gci ... | Rename-Many -Directory -Pattern 'data' -AnchorEnd 'loopz' -Relation 'before' -Drop '-'
 
-```powershell
-gci ... | Rename-Many -File -Pattern 'data' -With 'info'
-```
+.EXAMPLE 5
+Move a static string to start and drop (consider Directory items only):
 
-Update a static string using $With (consider file items only)
+gci ... | Rename-Many -Directory -Pattern 'data' -Start -Drop '-'
 
-### Example 5
+.EXAMPLE 6
+Move a match before anchor:
 
-```powershell
-gci ... | Rename-Many -Pattern 'data',l -With 'info' -Whole p
-```
-
-Update last occurrence of whole-word static string using $With
-
-### Example 6
-
-```powershell
-gci ... | Rename-Many -Pattern 'data' -Paste '_info_'
-```
-
-Update a static string using $Paste
-
-### Example 7
-
-```powershell
-gci ... | Rename-Many -Pattern 'data',l -Whole p -Paste '_info_'
-```
-
-Update last occurrence of whole-word static string using $Paste
-
-### Example 8
-
-```powershell
 gci ... | Rename-Many -Pattern '\d{2}-data' -Anchor 'loopz' -Relation 'before'
-```
 
-Move a match before anchor
+.EXAMPLE 7
+Move last occurrence of whole-word static string before anchor:
 
-### Example 9
-
-```powershell
 gci ... | Rename-Many -Pattern '\d{2}-data',l -Anchor 'loopz' -Relation 'before' -Whole p
-```
 
-Move last occurrence of whole-word static string before anchor
+.EXAMPLE 8
+Move a match before anchor and drop:
 
-### Example 10
-
-```powershell
 gci ... | Rename-Many -Pattern '\d{2}-data' -Anchor 'loopz' -Relation 'before' -Drop '-'
-```
 
-Move a match before anchor and drop
+---
 
-### Example 11
+* UPDATE EXAMPLES (Paste)
 
-```powershell
-gci ... | Rename-Many -Pattern '\d{2}-data' -With 'info'
-```
+.EXAMPLE 9
+Update last occurrence of whole-word static string using $Paste:
 
-Update a match using $With
+gci ... | Rename-Many -Pattern 'data',l -Whole p -Paste '_info_'
 
-### Example 12
+.EXAMPLE 10
+Update a static string using $Paste:
 
-```powershell
-gci ... | Rename-Many -Pattern '\d{2}-data',l -With 'info' -Whole p
-```
+gci ... | Rename-Many -Pattern 'data' -Paste '_info_'
 
-Update last occurrence of whole-word match using $With
+.EXAMPLE 11
+Update 2nd occurrence of whole-word match using $Paste and preserve anchor:
 
-### Example 13
-
-```powershell
-gci ... | Rename-Many -Pattern '(?<day>\d{2})-(?<mon>\d{2})-(?<year>\d{2})'
-    -With '(${year})-(${mon})-(${day})'
-```
-
-Update match contain named capture group using $With
-
-### Example 14
-
-```powershell
 gci ... | Rename-Many -Pattern '\d{2}-data', l -Paste '${_a}_info_'
-```
 
-Update 2nd occurrence of whole-word match using $Paste and preserve anchor
+.EXAMPLE 12
+Update match contain named capture group using $Paste and preserve the anchor:
 
-### Example 15
-
-```powershell
 gci ... | Rename-Many -Pattern (?<day>\d{2})-(?<mon>\d{2})-(?<year>\d{2})
   -Paste '(${year})-(${mon})-(${day}) ${_a}'
-```
 
-Update match contain named capture group using $Paste and preserve the anchor
+.EXAMPLE 13
+Update match contain named capture group using $Paste and preserve the anchor and copy
+whole last occurrence:
 
-### Example 16
-
-```powershell
 gci ... | Rename-Many -Pattern (?<day>\d{2})-(?<mon>\d{2})-(?<year>\d{2})
   -Copy '[A-Z]{3}',l -Whole c -Paste 'CCY_${_c} (${year})-(${mon})-(${day}) ${_a}'
-```
 
-Update match contain named capture group using $Paste and preserve the anchor and copy
-whole last occurrence
+---
+
+* CUT EXAMPLES (Cut)
+
+.EXAMPLE 14
+Cut a literal token:
+
+gci ... | Rename-Many -Cut 'data'
+
+.EXAMPLE 15
+Cut last occurrence of literal token:
+
+gci ... | Rename-Many -Cut, l 'data'
+
+.EXAMPLE 16
+Cut the second 2 digit sequence:
+
+gci ... | Rename-Many -Cut, 2 '\d{2}'
+
+---
+
+* APPENDAGE EXAMPLES
+
+.EXAMPLE 17
+Prefix items with fixed token:
+
+gci ... | Rename-Many -Prepend 'begin_'
+
+.EXAMPLE 18
+Append fixed token to items:
+
+gci ... | Rename-Many -Append '_end'
 
 ## PARAMETERS
 
 ### -Anchor
 
-Indicates that the rename operation will be a move of the token from its original point
-to the point indicated by Anchor. Anchor is a regular expression string applied to the
-pipeline item's name (after the $Pattern match has been removed). The $Pattern match that
-is removed is inserted at the position indicated by the anchor match in collaboration with
-the $Relation parameter.
+Indicates that the rename operation will be a move of the token from its original point to the point indicated by Anchor.
+Anchor is a regular expression string applied to the pipeline item's name (after the $Pattern match has been removed).
+The $Pattern match that is removed is inserted at the position indicated by the anchor match in collaboration with the $Relation parameter.
 
 ```yaml
 Type: Array
@@ -298,10 +299,60 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
+### -AnchorEnd
+
+Similar to Anchor except that if the pattern specified by AnchorEnd does not match, then
+the Pattern match will be moved to the End. This is known as a Hybrid Anchor.
+
+```yaml
+Type: Array
+Parameter Sets: HybridEnd
+Aliases:
+
+Required: True
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -AnchorStart
+
+Similar to Anchor except that if the pattern specified by AnchorEnd does not match, then
+the Pattern match will be moved to the Start. This is known as a Hybrid Anchor.
+
+```yaml
+Type: Array
+Parameter Sets: HybridStart
+Aliases:
+
+Required: True
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Append
+
+Appends a literal string to end of items name
+
+```yaml
+Type: String
+Parameter Sets: Affix
+Aliases:
+
+Required: True
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 ### -Condition
 
-Provides another way of filtering pipeline items. This is not typically specified on the
-command line, rather it is meant for those wanting to build functionality on top of Rename-Many.
+Provides another way of filtering pipeline items.
+This is not typically specified on the command line, rather it is meant for those wanting to build functionality on top of Rename-Many.
 
 ```yaml
 Type: ScriptBlock
@@ -326,28 +377,26 @@ Aliases: cf
 
 Required: False
 Position: Named
-Default value: None
+Default value: False
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
 ### -Context
 
-  Provides another way of customising Rename-Many. This is not typically specified on the
-command line, rather it is meant for those wanting to build functionality on top of Rename-Many.
+Provides another way of customising Rename-Many.
+This is not typically specified on the command line, rather it is meant for those wanting to build functionality on top of Rename-Many.
 $Context should be a PSCustomObject with the following note properties:
 
 * Title (default: 'Rename') the name used in the batch header.
 * ItemMessage (default: 'Rename Item') the operation name used for each renamed item.
 * SummaryMessage (default: 'Rename Summary') the name used in the batch summary.
 * Locked (default: 'LOOPZ_REMY_LOCKED) the name of the environment variable which controls
-  the locking of the command.
-* DisabledEnVar (default: 'LOOPZ_REMY_UNDO_DISABLED') the name of the environment variable
-  which controls if the undo script feature is disabled.
-* UndoDisabledEnVar (default: 'LOOPZ_REMY_UNDO_DISABLED') the name of the environment
-  variable which determines if the Undo feature is disabled. This allows any other function
-  built on top of Rename-Many to control the undo feature for itself independently of
-  Rename-Many.
+the locking of the command.
+
+* DisabledEnVar (default: 'LOOPZ_REMY_UNDO_DISABLED') the name of the environment variable   which controls if the undo script feature is disabled.
+* UndoDisabledEnVar (default: 'LOOPZ_REMY_UNDO_DISABLED') the name of the environment   variable which determines if the Undo feature is disabled.
+This allows any other function   built on top of Rename-Many to control the undo feature for itself independently of   Rename-Many.
 
 ```yaml
 Type: PSObject
@@ -363,22 +412,33 @@ Accept wildcard characters: False
 
 ### -Copy
 
-  Regular expression string applied to the pipeline item's name (after the $Pattern match
-has been removed), indicating a portion which should be copied and re-inserted (via the
-$Paste parameter; see $Paste or $With). Since this is a regular expression to be used in
-$Paste/$With, there is no value in the user specifying a static pattern, because that
-static string can just be defined in $Paste/$With. The value in the $Copy parameter comes
-when a generic pattern is defined eg \d{3} (is non static), specifies any 3 digits as
-opposed to say '123', which could be used directly in the $Paste/$With parameter without
-the need for $Copy. The match defined by $Copy is stored in special variable ${_c} and
-can be referenced as such from $Paste and $With.
+Regular expression string applied to the pipeline item's name (after the $Pattern match has been removed), indicating a portion which should be copied and re-inserted (via the $Paste parameter; see $Paste or $With).
+Since this is a regular expression to be used in $Paste/$With, there is no value in the user specifying a static pattern, because that static string can just be defined in $Paste/$With.
+The value in the $Copy parameter comes when a generic pattern is defined eg \d{3} (is non static), specifies any 3 digits as opposed to say '123', which could be used directly in the $Paste/$With parameter without the need for $Copy.
+The match defined by $Copy is stored in special variable ${_c} and can be referenced as such from $Paste and $With.
 
 ```yaml
 Type: Array
-Parameter Sets: ReplaceWith, MoveToAnchor
+Parameter Sets: UpdateInPlace, MoveToEnd, MoveToStart, MoveToAnchor, HybridEnd, HybridStart, Affix, Prefix
 Aliases:
 
 Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Cut
+
+Is a replacement for the Pattern parameter, when a Cut operation is required. The matched items will be removed from the item's name, and no other replacement occurs.
+
+```yaml
+Type: String
+Parameter Sets: NoReplacement
+Aliases:
+
+Required: True
 Position: Named
 Default value: None
 Accept pipeline input: False
@@ -387,13 +447,11 @@ Accept wildcard characters: False
 
 ### -Diagnose
 
-switch parameter that indicates the command should be run in WhatIf mode. When enabled
-it presents additional information that assists the user in correcting the un-expected
-results caused by an incorrect/un-intended regular expression. The current diagnosis
-will show the contents of named capture groups that they may have specified. When an item
-is not renamed (usually because of an incorrect regular expression), the user can use the
-diagnostics along side the 'Not Renamed' reason to track down errors. When $Diagnose has
-been specified, $WhatIf does not need to be specified.
+switch parameter that indicates the command should be run in WhatIf mode.
+When enabled it presents additional information that assists the user in correcting the un-expected results caused by an incorrect/un-intended regular expression.
+The current diagnosis will show the contents of named capture groups that they may have specified.
+When an item is not renamed (usually because of an incorrect regular expression), the user can use the diagnostics along side the 'Not Renamed' reason to track down errors.
+When $Diagnose has been specified, $WhatIf does not need to be specified.
 
 ```yaml
 Type: SwitchParameter
@@ -402,16 +460,15 @@ Aliases:
 
 Required: False
 Position: Named
-Default value: None
+Default value: False
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
 ### -Directory
 
-switch to indicate only Directory items in the pipeline will be processed. If neither
-this switch or the File switch are specified, then both File and Directory items
-are processed.
+switch to indicate only Directory items in the pipeline will be processed.
+If neither this switch or the File switch are specified, then both File and Directory items are processed.
 
 ```yaml
 Type: SwitchParameter
@@ -420,21 +477,19 @@ Aliases:
 
 Required: False
 Position: Named
-Default value: None
+Default value: False
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
 ### -Drop
 
-A string parameter (only applicable to move operations, ie Anchor/Star/End) that defines
-what text is used to replace the Pattern match. So in this use-case, the user wants to
-move a particular token/pattern to another part of the name and at the same time drop a
-static string in the place where the $Pattern was removed from.
+A string parameter (only applicable to move operations, ie Anchor/Star/End) that defines what text is used to replace the Pattern match.
+So in this use-case, the user wants to move a particular token/pattern to another part of the name and at the same time drop a static string in the place where the $Pattern was removed from.
 
 ```yaml
 Type: String
-Parameter Sets: (All)
+Parameter Sets: MoveToEnd, MoveToStart, MoveToAnchor, HybridEnd, HybridStart
 Aliases:
 
 Required: False
@@ -446,20 +501,7 @@ Accept wildcard characters: False
 
 ### -End
 
-Is another type of anchor used instead of $Anchor and specifies that the $Pattern match
-should be moved to the end of the new name.
-
-```yaml
-Type: SwitchParameter
-Parameter Sets: ReplaceWith
-Aliases:
-
-Required: False
-Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
+Is another type of anchor used instead of $Anchor and specifies that the $Pattern match should be moved to the end of the new name.
 
 ```yaml
 Type: SwitchParameter
@@ -468,16 +510,16 @@ Aliases:
 
 Required: True
 Position: Named
-Default value: None
+Default value: False
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
 ### -Except
 
-Regular expression string applied to the original pipeline item's name (before the $Pattern
-match has been removed). Allows the user to exclude some items that have been fed in via the
-pipeline. Those items that match the exclusion are skipped during the rename batch.
+Regular expression string applied to the original pipeline item's name (before the $Pattern match has been removed).
+Allows the user to exclude some items that have been fed in via the pipeline.
+Those items that match the exclusion are skipped during the rename batch.
 
 ```yaml
 Type: String
@@ -493,9 +535,8 @@ Accept wildcard characters: False
 
 ### -File
 
-switch to indicate only File items in the pipeline will be processed. If neither
-this switch or the Directory switch are specified, then both File and Directory items
-are processed.
+switch to indicate only File items in the pipeline will be processed.
+If neither this switch or the Directory switch are specified, then both File and Directory items are processed.
 
 ```yaml
 Type: SwitchParameter
@@ -504,23 +545,19 @@ Aliases:
 
 Required: False
 Position: Named
-Default value: None
+Default value: False
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
 ### -Include
 
-Regular expression string applied to the original pipeline item's name (before the $Pattern
-match has been removed). Allows the user to include some items that have been fed in via the
-pipeline. Only those items that match $Include pattern are included during the rename batch,
-the others are skipped. The value of the Include parameter comes when you want to define
-a pattern which pipeline items match, without it be removed from the original name, which is
-what happens with $Pattern. Eg, the user may want to specify the only items that should be
-considered a candidate to be renamed are those that match a particular pattern but doing so
-in $Pattern would simply remove that pattern. That may be ok, but if it's not, the user should
-specify a pattern in the $Include and use $Pattern for the match you do want to be moved
-(with Anchor/Start/End) or replaced (with $With/$Paste).
+Regular expression string applied to the original pipeline item's name (before the $Pattern match has been removed).
+Allows the user to include some items that have been fed in via the pipeline.
+Only those items that match $Include pattern are included during the rename batch, the others are skipped.
+The value of the Include parameter comes when you want to define a pattern which pipeline items match, without it be removed from the original name, which is what happens with $Pattern.
+Eg, the user may want to specify the only items that should be considered a candidate to be renamed are those that match a particular pattern but doing so in $Pattern would simply remove that pattern.
+That may be ok, but if it's not, the user should specify a pattern in the $Include and use $Pattern for the match you do want to be moved (with Anchor/Start/End) or replaced (with $With/$Paste).
 
 ```yaml
 Type: String
@@ -536,21 +573,19 @@ Accept wildcard characters: False
 
 ### -Paste
 
-This is a NON regular expression string. It would be more accurately described as a formatter,
-similar to the $With parameter. When $Paste is defined, the $Anchor (if specified) is removed
-from the original name and needs to be be re-inserted using the special variable ${_a}. The
-other special variables that can be used inside a $Paste string is documented under the $With
-parameter.
+This is a NON regular expression string.
+It would be more accurately described as a formatter, similar to the $With parameter.
+When $Paste is defined, the $Anchor (if specified) is removed from the original name and needs to be be re-inserted using the special variable ${_a}.
+The other special variables that can be used inside a $Paste string is documented under the $With parameter.
 
-The $Paste string can specify a format that defines the replacement and since it removes the
-$Anchor, the $Relation is not applicable ($Relation and $Paste can't be used together).
+The $Paste string can specify a format that defines the replacement and since it removes the $Anchor, the $Relation is not applicable ($Relation and $Paste can't be used together).
 
 ```yaml
 Type: String
-Parameter Sets: (All)
+Parameter Sets: UpdateInPlace
 Aliases:
 
-Required: False
+Required: True
 Position: Named
 Default value: None
 Accept pipeline input: False
@@ -559,19 +594,16 @@ Accept wildcard characters: False
 
 ### -Pattern
 
-Regular expression string that indicates which part of the pipeline items' name that
-either needs to be moved or replaced as part of bulk rename operation. Those characters
-in the name which match are removed from the name.
-The pattern can be followed by an occurrence indicator. As the $Pattern parameter is
-strictly speaking an array, the user can specify the occurrence after the regular
-expression eg:
-$Pattern '(?\<code\>\w\d{2})', l
+Regular expression string that indicates which part of the pipeline items' name that either needs to be moved or replaced as part of bulk rename operation.
+Those characters in the name which match are removed from the name.
+The pattern can be followed by an occurrence indicator.
+As the $Pattern parameter is strictly speaking an array, the user can specify the occurrence after the regular expression eg: $Pattern '(?\<code\>\w\d{2})', l
 
-=> This indicates that the last match should be captured into named group 'code'.
+=\> This indicates that the last match should be captured into named group 'code'.
 
 ```yaml
 Type: Array
-Parameter Sets: (All)
+Parameter Sets: UpdateInPlace, Transformer, MoveToEnd, MoveToStart, MoveToAnchor, HybridEnd, HybridStart
 Aliases:
 
 Required: True
@@ -581,15 +613,30 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -Relation
+### -Prepend
 
-Used in conjunction with the $Anchor parameter and can be set to either 'before' or
-'after' (the default). Defines the relationship of the $pattern match with the $Anchor
-match in the new name for the pipeline item.
+Prefixes a literal string to start of items name
 
 ```yaml
 Type: String
-Parameter Sets: MoveToAnchor
+Parameter Sets: Prefix
+Aliases:
+
+Required: True
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Relation
+
+Used in conjunction with the $Anchor parameter and can be set to either 'before' or 'after' (the default).
+Defines the relationship of the $pattern match with the $Anchor match in the new name for the pipeline item.
+
+```yaml
+Type: String
+Parameter Sets: MoveToAnchor, HybridEnd, HybridStart
 Aliases:
 Accepted values: before, after
 
@@ -602,20 +649,7 @@ Accept wildcard characters: False
 
 ### -Start
 
-Is another type of anchor used instead of $Anchor and specifies that the $Pattern match
-should be moved to the start of the new name.
-
-```yaml
-Type: SwitchParameter
-Parameter Sets: ReplaceWith
-Aliases:
-
-Required: False
-Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
+Is another type of anchor used instead of $Anchor and specifies that the $Pattern match should be moved to the start of the new name.
 
 ```yaml
 Type: SwitchParameter
@@ -624,17 +658,16 @@ Aliases:
 
 Required: True
 Position: Named
-Default value: None
+Default value: False
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
 ### -Top
 
-A number indicating how many items to process. If it is known that the number of items
-that will be candidates to be renamed is large, the user can limit this is the first $Top
-number of items. This is typically used as an exploratory tool, to determine the effects
-of the rename operation.
+A number indicating how many items to process.
+If it is known that the number of items that will be candidates to be renamed is large, the user can limit this is the first $Top number of items.
+This is typically used as an exploratory tool, to determine the effects of the rename operation.
 
 ```yaml
 Type: Int32
@@ -650,24 +683,23 @@ Accept wildcard characters: False
 
 ### -Transform
 
-A script block which is given the chance to perform a modification to the finally named
-item. The transform is invoked prior to post-processing, so that the post-processing rules
-are not breached and the transform does not have to worry about breaking them. The transform
-function's signature is as follows:
+A script block which is given the chance to perform a modification to the finally named item.
+The transform is invoked prior to post-processing, so that the post-processing rules are not breached and the transform does not have to worry about breaking them.
+The transform function's signature is as follows:
 
 * Original: original item's name
 * Renamed: new name
 * CapturedPattern: pattern capture
 
-and should return the new name. If the transform does not change the name, it should return
-an empty string.
+and should return the new name.
+If the transform does not change the name, it should return an empty string.
 
 ```yaml
 Type: ScriptBlock
-Parameter Sets: (All)
+Parameter Sets: Transformer
 Aliases:
 
-Required: False
+Required: True
 Position: Named
 Default value: None
 Accept pipeline input: False
@@ -686,25 +718,23 @@ Aliases: wi
 
 Required: False
 Position: Named
-Default value: None
+Default value: False
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
 ### -Whole
 
-Provides an alternative way to indicate that the regular expression parameters
-should be treated as a whole word (it just wraps the expression inside \b tokens).
-If set to '*', then it applies to all expression parameters otherwise a single letter
-can specify which of the parameters 'Whole' should be applied to. Valid values are:
+Provides an alternative way to indicate that the regular expression parameters should be treated as a whole word (it just wraps the expression inside \b tokens).
+If set to '*', then it applies to all expression parameters otherwise a single letter can specify which of the parameters 'Whole' should be applied to.
+Valid values are:
 
 * 'p': $Pattern
 * 'a': $Anchor
 * 'c': $Copy
 * 'i': $Include
 * 'x': $Exclude
-* '*': All the above
-(NB: Currently, can't be set to more than 1 of the above items at a time)
+* '*': All the above (NB: Currently, can't be set to more than 1 of the above items at a time)
 
 ```yaml
 Type: String
@@ -721,31 +751,28 @@ Accept wildcard characters: False
 
 ### -With
 
-This is a NON regular expression string. It would be more accurately described as a formatter,
-similar to the $Paste parameter. Defines what text is used as the replacement for the $Pattern
-match. Works in concert with $Relation (whereas $Paste does not). $With can reference special
-variables:
+This is a NON regular expression string.
+It would be more accurately described as a formatter, similar to the $Paste parameter.
+Defines what text is used as the replacement for the $Pattern match.
+Works in concert with $Relation (whereas $Paste does not).
+$With can reference special variables:
 
 * $0: the pattern match
 * ${_a}: the anchor match
 * ${_c}: the copy match
 
-When $Pattern contains named capture groups, these variables can also be referenced. Eg if the
-$Pattern is defined as '(?\<day\>\d{1,2})-(?\<mon\>\d{1,2})-(?\<year\>\d{4})', then the variables
-${day}, ${mon} and ${year} also become available for use in $With or $Paste.
-Typically, $With is static text which is used to replace the $Pattern match and is inserted
-according to the Anchor match, (or indeed $Start or $End) and $Relation. When using $With,
-whatever is defined in the $Anchor match is not removed from the pipeline's name (this is
-different to how $Paste works).
-If neither $With or Paste have been specified, then the rename operation becomes a 'Cut'
-operation and will be indicated as such in the batch summary.
+When $Pattern contains named capture groups, these variables can also be referenced.
+Eg if the $Pattern is defined as '(?\<day\>\d{1,2})-(?\<mon\>\d{1,2})-(?\<year\>\d{4})', then the variables ${day}, ${mon} and ${year} also become available for use in $With or $Paste.
+Typically, $With is static text which is used to replace the $Pattern match and is inserted according to the Anchor match, (or indeed $Start or $End) and $Relation.
+When using $With, whatever is defined in the $Anchor match is not removed from the pipeline's name (this is different to how $Paste works).
+If neither $With or Paste have been specified, then the rename operation becomes a 'Cut' operation and will be indicated as such in the batch summary.
 
 ```yaml
 Type: String
-Parameter Sets: ReplaceLiteralWith
+Parameter Sets: UpdateInPlace, MoveToEnd, MoveToStart, MoveToAnchor, HybridEnd, HybridStart
 Aliases:
 
-Required: True
+Required: False
 Position: Named
 Default value: None
 Accept pipeline input: False
@@ -765,6 +792,22 @@ Required: True
 Position: Named
 Default value: None
 Accept pipeline input: True (ByValue)
+Accept wildcard characters: False
+```
+
+### -Test
+
+Required by unit tests only.
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
 Accept wildcard characters: False
 ```
 

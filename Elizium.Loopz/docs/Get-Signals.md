@@ -21,9 +21,16 @@ Get-Signals [[-SourceSignals] <Hashtable>] [[-Custom] <Hashtable>] [<CommonParam
 
 The signals returned include the user defined signal overrides.
 
+NOTE: 3rd party commands need to register their signal usage with the signal
+registry. This can be done using command Register-CommandSignals and would
+be best performed at module initialisation stage invoked at import time.
+
 ## PARAMETERS
 
 ### -Custom
+
+The hashtable instance containing custom overrides. Does not need to be
+specified by the client as it is defaulted.
 
 ```yaml
 Type: Hashtable
@@ -38,6 +45,10 @@ Accept wildcard characters: False
 ```
 
 ### -SourceSignals
+
+The hashtable instance containing the source signal definitions. The actual signals
+returned are derived from the source. Does not need to be specified by the client as
+it is defaulted.
 
 ```yaml
 Type: Hashtable
@@ -62,6 +73,8 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 ## OUTPUTS
 
 ### System.Collections.Hashtable
+
+The resolved Signal definitions.
 
 ## NOTES
 
