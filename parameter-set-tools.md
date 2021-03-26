@@ -23,7 +23,7 @@ Show all the parameter information for a command. For brevity, this example supp
 
 > Get-Command 'Rename-Many' | ships -Sets UpdateInPlace, NoReplacement
 
-![picture](../../resources/images/use-pstool.SHIPS.command.jpg)
+![picture](resources/images/use-pstool.SHIPS.command.jpg)
 
 ### Show-ParameterSetReport
 
@@ -35,32 +35,32 @@ Show all the parameter information for a command. For brevity, this example supp
 
 > Get-Command 'Rename-Many' | sharp
 
-![picture](../../resources/images/use-pstool.SHARP.remy.no-violations.command.jpg)
+![picture](resources/images/use-pstool.SHARP.remy.no-violations.command.jpg)
 
 However, there are currently 4 rules that could be violated and these are illustrated next.
 
 + 1) :x: *Must Contain Unique Set Of Params*
 No two parameter sets can contain exactly the same set of parameters.
 
-![picture](../../resources/images/violates.UNIQUE-PARAM-SET.rule.jpg)
+![picture](resources/images/violates.UNIQUE-PARAM-SET.rule.jpg)
 
 In this example, we can see we have 1 violation. That is, there are two parameter sets 'Alpha' and 'Beta' which have the same set of parameters and therefore can't be disambiguated by PowerShell. Since the 2 parameters are equivalent, it goes on to show the parameter set info for the first parameter set only, 'Alpha'.
 
 + 2) :x: *Must Contain Unique Positions*
 
-![picture](../../resources/images/violates.UNIQUE-POSITIONS.rule.jpg)
+![picture](resources/images/violates.UNIQUE-POSITIONS.rule.jpg)
 
 Parameters must make unique claims to a position within any single parameter set. In this example, we can see that in parameter set 'Alpha', there are 3 parameters 'DuplicatePosA', 'DuplicatePosB' and 'DuplicatePosC' making claim to position 999. In parameter set 'Beta', both 'SameA' and 'SameB' stake a claim to position 111.
 
 + 3) :x: *Must Not Have Multiple Pipeline Params*
 
-![picture](../../resources/images/violates.SINGLE-PIPELINE-PARAM.rule.jpg)
+![picture](resources/images/violates.SINGLE-PIPELINE-PARAM.rule.jpg)
 
 There are 2 violations here. In parameter set 'Alpha', there are four parameters defined with *ValueFromPipeline* set to $true and three parameters in parameter set 'Beta', likewise.
 
 + 4) :x: *Must Not Be In All Parameter Sets By Accident*
 
-![picture](../../resources/images/sample.jpg)
+![picture](resources/images/sample.jpg)
 Tbd.
 
 ### Show-InvokeReport
@@ -83,7 +83,7 @@ When *Show-InvokeReport* is invoked with a valid set of invoke parameters, the c
 
 > Get-Command Rename-Many | Show-InvokeReport -Params underscore, Pattern, Paste
 
-![picture](../../resources/images/use-pstool.SHIRE.valid-params.command.jpg)
+![picture](resources/images/use-pstool.SHIRE.valid-params.command.jpg)
 
 ## Parameter Set Classes
 
@@ -164,4 +164,4 @@ that is derived from a commands parameter set.
 
 sample:
 
-![picture](../../resources/images/sample.jpg)
+![picture](resources/images/sample.jpg)
