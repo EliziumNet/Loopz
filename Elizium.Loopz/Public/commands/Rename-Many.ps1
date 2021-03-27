@@ -1391,26 +1391,14 @@ function Rename-Many {
     # NB: anchoredRegEx refers to whether -Start or -End anchors have been specified,
     # NOT the -Anchor pattern (when ANCHOR-TYPE = 'MATCHED-ITEM') itself.
     #
-    [regex]$anchoredRegEx = if ([RegexEntity]$ae = $bootStrap.Get('Anchored')) {
-      $ae.RegEx;
-    }
-    else {
-      $null;
-    }
+    [RegExEntity]$ae = $bootStrap.Get('Anchored');
+    [regex]$anchoredRegEx = ${ae}?.get_RegEx();
 
-    [regex]$includedRegEx = if ([RegExEntity]$ie = $bootStrap.Get('Include')) {
-      $ie.RexEx;
-    }
-    else {
-      $null;
-    }
+    [RegExEntity]$ie = $bootStrap.Get('Include');
+    [regex]$includedRegEx = ${ie}?.get_RegEx();
 
-    [regex]$exceptRegEx = if ([RegExEntity]$ee = $bootStrap.Get('Except')) {
-      $ee.RexEx;
-    }
-    else {
-      $null;
-    }
+    [RegExEntity]$ee = $bootStrap.Get('Except');
+    [regex]$exceptRegEx = ${ee}?.get_RegEx();
 
     [regex]$patternRegEx = if ($patternEntity) {
       $patternEntity.RegEx;

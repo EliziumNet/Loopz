@@ -381,18 +381,22 @@ class BootStrap {
     [BoundEntity]$instance = switch ($spec.SpecType) {
       'formatter' {
         [FormatterEntity]::new($spec);
+        break;
       }
 
       'regex' {
         [RegexEntity]::new($spec);
+        break;
       }
 
       'signal' {
         [SignalEntity]::new($spec);
+        break;
       }
 
       'simple' {
         [SimpleEntity]::new($spec);
+        break;
       }
 
       default {
