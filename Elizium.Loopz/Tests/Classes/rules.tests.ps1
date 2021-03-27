@@ -231,6 +231,50 @@ Describe 'Rules' -Tag 'PSTools' {
     }
   } # MustNotHaveMultiplePipelineParams
 
+  Describe 'MustNotBeInAllParameterSetsByAccident' {
+    BeforeAll {
+      InModuleScope Elizium.Loopz {
+        function script:test-ParamInAllParameterSetsByAccident {
+          param(
+            [Parameter(ValueFromPipeline = $true)]
+            [object]$Chaff,
+
+            [Parameter(ParameterSetName = 'Alpha', Mandatory, Position = 1)]
+            [object]$paramA,
+
+            [Parameter()]
+            [Parameter(ParameterSetName = 'Alpha', Position = 2)]
+            [object]$paramB,
+
+            [Parameter(ParameterSetName = 'Alpha', Position = 3)]
+            [object]$paramC,
+
+            [Parameter(ParameterSetName = 'Beta', Position = 1)]
+            [object]$paramD,
+
+            [Parameter()]
+            [Parameter(ParameterSetName = 'Beta', Position = 2)]
+            [object]$paramE
+          )
+        }
+      }
+    }
+
+    Context 'given: functions with violations' {
+      It 'should: report violations' {
+        InModuleScope Elizium.Loopz {
+          [string]$commandName = 'test-ParamInAllParameterSetsByAccident';
+          [CommandInfo]$commandInfo = Get-Command $commandName;
+          [RuleController]$controller = [RuleController]::new($commandInfo);
+          [syntax]$syntax = New-Syntax -CommandName $commandName -Signals $_signals -Scribbler $_scribbler;
+          $controller.Test($syntax).Result | Should -Be $false;
+
+          $commandInfo | Show-ParameterSetReport;
+        }
+      }
+    } # given: functions with violations
+  }
+
   Describe 'Test' {
     BeforeAll {
       InModuleScope Elizium.Loopz {
