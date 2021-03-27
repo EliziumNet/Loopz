@@ -5,17 +5,14 @@ function invoke-PostProcessing {
     [string]$InputSource,
 
     [Parameter()]
-    [PSCustomObject]$Rules,
+    [PSCustomObject[]]$Rules,
 
     [Parameter()]
     [hashtable]$signals
   )
   [string]$transformResult = $InputSource;
-  [array]$iterationRules = $Rules.psobject.Members | where-Object MemberType -like 'NoteProperty';
 
-  [string[]]$appliedSignals = foreach ($_r in $iterationRules) {
-    $rule = $_r.Value;
-
+  [string[]]$appliedSignals = foreach ($rule in $Rules) {
     if ($rule['IsApplicable'].InvokeReturnAsIs($transformResult)) {
       $transformResult = $rule['Transform'].InvokeReturnAsIs($transformResult);
       $rule['Signal'];
