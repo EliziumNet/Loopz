@@ -250,15 +250,15 @@ class Syntax {
       ParamSet                  = "====> Parameter Set: ";
       DuplicatePositions        = "  *** Duplicate Positions for Parameter Set: ";
       MultipleValueFromPipeline = "  *** Multiple ValueFromPipeline claims for Parameter Set: ";
-      AccidentallyInAllSets     = "  *** Parameter '{0}' (of {1}), accidentally in all Parameter Sets: ";
-      Params                    = $(
+      AccidentallyInAllSets     = "  *** Parameter '{0}', accidentally in all Parameter Sets.";
+      BulletedParams            = $(
         "$($bulletedPoint) Params: "
       );
-      Param                     = $(
+      BulletedParam             = $(
         "$($bulletedPoint) Param: "
       );
-      OtherParamSets            = $(
-        "$($bulletedPoint) Other Parameter Sets: "
+      BulletedParamSet          = $(
+        "$($bulletedPoint) Parameter Set: "
       );
     }
 
@@ -287,7 +287,7 @@ class Syntax {
 
     [string]$structuredParamSetStmt = `
     $(
-      "$($this.Snippets.Reset)$($this.Labels.ParamSet)'" +
+      "$($this.Snippets.Reset)$($this.Labels.BulletedParamSet)'" +
       "$($this.Snippets.ParamSetName)$($paramSet.Name)$($this.Snippets.Reset)'" +
       "$defaultLabel"
     );
@@ -349,7 +349,7 @@ class Syntax {
       "$($this.Snippets.Reset)$($this.Labels.DuplicatePositions)" +
       "$($this.QuotedNameStmt($($this.Snippets.ParamSetName), $paramSet.Name))" +
       "$($this.Snippets.Ln)" +
-      "$($this.Snippets.Reset)$($this.Labels.Params) " +
+      "$($this.Snippets.Reset)$($this.Labels.BulletedParams) " +
       "$($quotedPosition) " +
       $this.ResolvedParamStmt($params, $paramSet)
     );
@@ -365,7 +365,7 @@ class Syntax {
       "$($this.Snippets.Reset)$($this.Labels.MultipleValueFromPipeline)" +
       "$($this.QuotedNameStmt($($this.Snippets.ParamSetName), $paramSet.Name))" +
       "$($this.Snippets.Ln)" +
-      "$($this.Snippets.Reset)$($this.Labels.Params) " +
+      "$($this.Snippets.Reset)$($this.Labels.BulletedParams) " +
       $this.ResolvedParamStmt($params, $paramSet)
     );
 
@@ -383,9 +383,9 @@ class Syntax {
       "$($this.ResolveParameterSnippet($paramInfo))$($paramName)$($this.Snippets.Reset)"
     );
 
-    [string[]]$others = ($seed.Others | ForEach-Object {
-        $this.QuotedNameStmt($this.Snippets.ParamSetName, $_.Name)
-      }) -join "$($this.Snippets.Comma)";
+    # [string[]]$others = ($seed.Others | ForEach-Object {
+    #     $this.QuotedNameStmt($this.Snippets.ParamSetName, $_.Name)
+    #   }) -join "$($this.Snippets.Comma)";
 
     [string]$quotedParamSetName = $(
       "$($this.QuotedNameStmt($this.Snippets.ParamSetName, $paramSet.Name))" +
@@ -394,8 +394,8 @@ class Syntax {
 
     [string]$accidentsStmt = $(
       "$($this.Snippets.Reset)" +
-      "$($this.Labels.AccidentallyInAllSets -f $structuredParamName, $quotedParamSetName)" +
-      "$($this.Snippets.Reset)$($this.Snippets.Ln)$($this.Labels.OtherParamSets)$($others)"
+      "$($this.Labels.AccidentallyInAllSets -f $structuredParamName)" +
+      "$($this.Snippets.Reset)$($this.Snippets.Ln)$($this.Labels.BulletedParamSet)$($quotedParamSetName)"
     );
 
     return $accidentsStmt;

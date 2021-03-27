@@ -236,19 +236,14 @@ class MustNotBeInAllParameterSetsByAccident : ParameterSetRule {
 
     [string]$paramSetNameSnippet = $syntax.TableOptions.Snippets.ParamSetName;
     [string]$resetSnippet = $syntax.TableOptions.Snippets.Reset;
-    [string]$commaSnippet = $syntax.TableOptions.Snippets.Comma;
 
     [PSCustomObject]$vo = if ($pods -and $pods.Count -gt 0) {
 
       [string[]]$reasons = $pods | ForEach-Object {
-        [string[]]$otherParamSetNames = $_.Others | ForEach-Object {
-          "$($paramSetNameSnippet)$($_.Name)"
-        };
         [string]$resolvedParam = $syntax.ResolvedParamStmt(@($_.Param), $_.ParamSet);
         $(
-          "{$($resetSnippet)$($resolvedParam)$($resetSnippet) of " +
-          "$($paramSetNameSnippet)$($_.ParamSet.Name)" +
-          "$($resetSnippet) => $($otherParamSetNames -join $commaSnippet)$($resetSnippet)}"
+          "{ parameter $($resetSnippet)$($resolvedParam)$($resetSnippet) of " +
+          "parameter set $($paramSetNameSnippet)$($_.ParamSet.Name)"
         );
       }
       [PSCustomObject]@{
