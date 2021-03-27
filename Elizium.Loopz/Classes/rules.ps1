@@ -442,6 +442,17 @@ class DryRunner {
     $this.RunnerInfo = $runnerInfo;
   }
 
+  [System.Management.Automation.CommandParameterSetInfo[]] Weak([string[]]$params) {
+    [System.Management.Automation.CommandParameterSetInfo[]]$candidateSets = `
+      $this.CommandInfo.ParameterSets | Where-Object {
+      $(
+        (Test-ContainsAll $_.Parameters.Name $params)
+      )
+    };
+
+    return $candidateSets;
+  } # Weak
+
   [System.Management.Automation.CommandParameterSetInfo[]] Resolve([string[]]$params) {
     [System.Management.Automation.CommandParameterSetInfo[]]$candidateSets = `
       $this.CommandInfo.ParameterSets | Where-Object {

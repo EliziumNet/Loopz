@@ -51,6 +51,10 @@ function Show-InvokeReport {
 
   .PARAMETER Scribbler
     The Krayola scribbler instance used to manage rendering to console
+
+  .PARAMETER Strict
+    When specified, will not use Mandatory parameters check to for candidate parameter
+  sets.
   #>
   [CmdletBinding()]
   [Alias('shire')]
@@ -67,6 +71,9 @@ function Show-InvokeReport {
 
     [Parameter()]
     [switch]$Common,
+
+    [Parameter()]
+    [switch]$Strict,
 
     [Parameter()]
     [switch]$Test
@@ -87,6 +94,7 @@ function Show-InvokeReport {
         'Params' = $Params;
         'Common' = $Common.IsPresent;
         'Test'   = $Test.IsPresent;
+        'Strict' = $Strict.IsPresent;
       }
 
       if ($PSBoundParameters.ContainsKey('Scribbler')) {
@@ -113,7 +121,9 @@ function Show-InvokeReport {
       [DryRunner]$runner = [DryRunner]::new($controller, $runnerInfo);
       $Scribbler.Scribble($syntax.TitleStmt('Invoke Report', $_.Name));
 
-      [System.Management.Automation.CommandParameterSetInfo[]]$candidateSets = $runner.Resolve($Params);
+      [System.Management.Automation.CommandParameterSetInfo[]]$candidateSets = $Strict `
+        ? $runner.Resolve($Params) `
+        : $runner.Weak($Params);
 
       [string[]]$candidateNames = $candidateSets.Name
       [string]$candidateNamesCSV = $candidateNames -join ', ';

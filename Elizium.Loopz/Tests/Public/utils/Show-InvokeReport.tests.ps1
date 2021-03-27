@@ -130,6 +130,12 @@ Describe 'Show-InvokeReport' -Tag 'PSTools' {
   Context 'given: Test-InvokedWithParams param set missing mandatory' {
     It 'should: show duplicate parameter sets' {
       InModuleScope Elizium.Loopz {
+        'Test-InvokedWithParams' | Show-InvokeReport -Params @('prepend') -Strict -Test;
+      }
+    }
+
+    It 'should: show duplicate parameter sets' {
+      InModuleScope Elizium.Loopz {
         'Test-InvokedWithParams' | Show-InvokeReport -Params @('prepend') -Test;
       }
     }
@@ -139,7 +145,7 @@ Describe 'Show-InvokeReport' -Tag 'PSTools' {
     It 'should: show the correctly and single resolved parameter set' {
       InModuleScope Elizium.Loopz {
         'Test-InvokedWithParams' | Show-InvokeReport -Params @(
-          'append', 'underscore', 'diagnose', 'top') -Test;
+          'append', 'underscore', 'diagnose', 'top') -Strict -Test;
       }
     }
   }
@@ -148,7 +154,7 @@ Describe 'Show-InvokeReport' -Tag 'PSTools' {
     It 'should: show duplicate parameter sets' -Tag 'BUG' {
       InModuleScope Elizium.Loopz {
         'Test-InvokedWithParams' | Show-InvokeReport -Params @(
-          'underscore', 'prepend') -Common  -Test;
+          'underscore', 'prepend') -Common -Strict -Test;
 
         # This should only return 2 parameter sets: Prepend and PrependDuplicate
         #
@@ -159,7 +165,7 @@ Describe 'Show-InvokeReport' -Tag 'PSTools' {
   Context 'given: Test-InvokedWithParams and ambiguous parameter set' -Skip {
     It 'should: show duplicate parameter sets' {
       InModuleScope Elizium.Loopz {
-        'Test-InvokedWithParams' | Show-InvokeReport -Params @('prepend') -Test;
+        'Test-InvokedWithParams' | Show-InvokeReport -Params @('prepend') -Strict -Test;
 
         # This should only return 2 parameter sets: Prepend and PrependDuplicate
         #
