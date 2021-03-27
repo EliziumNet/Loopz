@@ -1,5 +1,5 @@
 
-Describe 'invoke-PostProcessing' {
+Describe 'invoke-PostProcessing' -Tag 'Current' {
 
   BeforeAll {
     Get-Module Elizium.Loopz | Remove-Module
@@ -8,9 +8,10 @@ Describe 'invoke-PostProcessing' {
 
     InModuleScope Elizium.Loopz {
       [hashtable]$script:_signals = @{
-        'REMY.POST'    = kp(@('Post Process', '🐋'));
-        'TRIM'         = kp(@('Trim', '🍀'));
-        'MULTI-SPACES' = kp(@('Spaces', '🐠'));
+        'REMY.POST'       = kp(@('Post Process', '🐋'));
+        'TRIM'            = kp(@('Trim', '🍀'));
+        'MULTI-SPACES'    = kp(@('Spaces', '🐠'));
+        'MISSING-CAPTURE' = kp(@('Missing Capture', '🐬'));
       }
     }
   }
@@ -76,6 +77,46 @@ Describe 'invoke-PostProcessing' {
 
         $post.Modified | Should -BeTrue;
         $post.TransformResult | Should -BeExactly 'this is a really messy and trim-able result';
+        $post.Signals | Should -HaveCount 2;
+        $post.Indication | Should -Not -BeNullOrEmpty;
+
+        Write-Debug ">>> INDICATION: '$($post.Label)' > '$($post.Indication)'";
+      }
+    }
+  }
+
+  Context 'given: input source with an un-resolved named capture' {
+    It 'should: apply MissingCapture rule' {
+      InModuleScope Elizium.Loopz {
+        [string]$source = 'there are unresolved ${foo}named capture ${bar}groups here';
+
+        [PSCustomObject]$post = invoke-PostProcessing -InputSource $source -Rules $Loopz.Rules.Remy `
+          -Signals $_signals;
+
+        $post.Modified | Should -BeTrue;
+        $post.TransformResult | Should -BeExactly 'there are unresolved named capture groups here';
+        $post.Signals | Should -HaveCount 1;
+        $post.Signals[0] | Should -BeExactly 'MISSING-CAPTURE';
+        $post.Indication | Should -Not -BeNullOrEmpty;
+
+        Write-Debug ">>> INDICATION: '$($post.Label)' > '$($post.Indication)'";
+      }
+    }
+  }
+
+  Context 'given: input source with an un-resolved named capture' {
+    # Application of one 1 rule requires the application of another rule, in this
+    # case, SPACES rule
+    #
+    It 'should: apply MissingCapture and SPACES rule' {
+      InModuleScope Elizium.Loopz {
+        [string]$source = 'there are unresolved ${foo} named capture ${bar} groups here';
+
+        [PSCustomObject]$post = invoke-PostProcessing -InputSource $source -Rules $Loopz.Rules.Remy `
+          -Signals $_signals;
+
+        $post.Modified | Should -BeTrue;
+        $post.TransformResult | Should -BeExactly 'there are unresolved named capture groups here';
         $post.Signals | Should -HaveCount 2;
         $post.Indication | Should -Not -BeNullOrEmpty;
 

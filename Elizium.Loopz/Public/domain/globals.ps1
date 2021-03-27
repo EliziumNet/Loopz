@@ -98,89 +98,90 @@ $global:Loopz = [PSCustomObject]@{
   DefaultSignals        = [ordered]@{
     # Operations
     #
-    'CUT-A'        = (@('Cut', '✂️', ' Σ'));
-    'CUT-B'        = (@('Cut', '🔪', ' Σ'));
-    'COPY-A'       = (@('Copy', '🍒', ' Ψ'));
-    'COPY-B'       = (@('Copy', '🥒', ' Ψ'));
-    'MOVE-A'       = (@('Move', '🍺', '≈≈'));
-    'MOVE-B'       = (@('Move', '🍻', '≈≈'));
-    'PASTE-A'      = (@('Paste', '🌶️', ' ¶'));
-    'PASTE-B'      = (@('Paste', '🥜', ' ¶'));
-    'OVERWRITE-A'  = (@('Overwrite', '♻️', ' Ø'));
-    'OVERWRITE-B'  = (@('Overwrite', '❗', '!!'));
-    'PREPEND'      = (@('Prepend', '📌', '>|'));
-    'APPEND'       = (@('Append', '📌', '|<'));
+    'CUT-A'           = (@('Cut', '✂️', ' Σ'));
+    'CUT-B'           = (@('Cut', '🔪', ' Σ'));
+    'COPY-A'          = (@('Copy', '🍒', ' Ψ'));
+    'COPY-B'          = (@('Copy', '🥒', ' Ψ'));
+    'MOVE-A'          = (@('Move', '🍺', '≈≈'));
+    'MOVE-B'          = (@('Move', '🍻', '≈≈'));
+    'PASTE-A'         = (@('Paste', '🌶️', ' ¶'));
+    'PASTE-B'         = (@('Paste', '🥜', ' ¶'));
+    'OVERWRITE-A'     = (@('Overwrite', '♻️', ' Ø'));
+    'OVERWRITE-B'     = (@('Overwrite', '❗', '!!'));
+    'PREPEND'         = (@('Prepend', '📌', '>|'));
+    'APPEND'          = (@('Append', '📌', '|<'));
 
     # Thingies
     #
-    'DIRECTORY-A'  = (@('Directory', '📁', 'd>'));
-    'DIRECTORY-B'  = (@('Directory', '📂', 'D>'));
-    'FILE-A'       = (@('File', '🏷️', 'f>'));
-    'FILE-B'       = (@('File', '📝', 'F>'));
-    'PATTERN'      = (@('Pattern', '🛡️', 'p:'));
-    'WITH'         = (@('With', '🍑', '><'));
-    'CRUMB-A'      = (@('Crumb', '🎯', '+'));
-    'CRUMB-B'      = (@('Crumb', '🧿', '+'));
-    'CRUMB-C'      = (@('Crumb', '💎', '+'));
-    'SUMMARY-A'    = (@('Summary', '🔆', '*'));
-    'SUMMARY-B'    = (@('Summary', '✨', '*'));
-    'MESSAGE'      = (@('Message', 'Ⓜ️', '()'));
-    'CAPTURE'      = (@('Capture', '☂️', 'λ'));
+    'DIRECTORY-A'     = (@('Directory', '📁', 'd>'));
+    'DIRECTORY-B'     = (@('Directory', '📂', 'D>'));
+    'FILE-A'          = (@('File', '🏷️', 'f>'));
+    'FILE-B'          = (@('File', '📝', 'F>'));
+    'PATTERN'         = (@('Pattern', '🛡️', 'p:'));
+    'WITH'            = (@('With', '🍑', '><'));
+    'CRUMB-A'         = (@('Crumb', '🎯', '+'));
+    'CRUMB-B'         = (@('Crumb', '🧿', '+'));
+    'CRUMB-C'         = (@('Crumb', '💎', '+'));
+    'SUMMARY-A'       = (@('Summary', '🔆', '*'));
+    'SUMMARY-B'       = (@('Summary', '✨', '*'));
+    'MESSAGE'         = (@('Message', 'Ⓜ️', '()'));
+    'CAPTURE'         = (@('Capture', '☂️', 'λ'));
+    'MISSING-CAPTURE' = (@('Missing Capture', '☔', '!λ'));
 
     # Media
     #
-    'AUDIO'        = (@('Audio', '🎶', '_A'));
-    'TEXT'         = (@('Text', '🆎', '_T'));
-    'DOCUMENT'     = (@('Document', '📜', '_D'));
-    'IMAGE'        = (@('Image', '🌌', '_I'));
-    'MOVIE'        = (@('Movie', '🎬', '_M'));
+    'AUDIO'           = (@('Audio', '🎶', '_A'));
+    'TEXT'            = (@('Text', '🆎', '_T'));
+    'DOCUMENT'        = (@('Document', '📜', '_D'));
+    'IMAGE'           = (@('Image', '🌌', '_I'));
+    'MOVIE'           = (@('Movie', '🎬', '_M'));
 
     # Indicators
     #
-    'WHAT-IF'      = (@('WhatIf', '☑️', '✓'));
-    'WARNING-A'    = (@('Warning', '⚠️', ')('));
-    'WARNING-B'    = (@('Warning', '👻', ')('));
-    'SWITCH-ON'    = (@('On', '✔️', '✓'));
-    'SWITCH-OFF'   = (@('Off', '✖️', '×'));
-    'INVALID'      = (@('Invalid', '❌', 'XX'));
-    'OK-A'         = (@('OK', '🚀', ':)'));
-    'OK-B'         = (@('OK', '🌟', ':D'));
-    'BAD-A'        = (@('Bad', '💥', ' ß'));
-    'BAD-B'        = (@('Bad', '💢', ':('));
-    'PROHIBITED'   = (@('Prohibited', '🚫', ' þ'));
-    'INCLUDE'      = (@('Include', '➕', '++'));
-    'EXCLUDE'      = (@('Exclude', '➖', '--'));
-    'SOURCE'       = (@('Source', '🎀', '+='));
-    'DESTINATION'  = (@('Destination', '☀️', '=+'));
-    'TRIM'         = (@('Trim', '🌊', '%%'));
-    'MULTI-SPACES' = (@('Spaces', '❄️', '__'));
-    'DIAGNOSTICS'  = (@('Diagnostics', '🧪', ' Δ'));
-    'LOCKED'       = (@('Locked', '🔐', '>/'));
-    'NOVICE'       = (@('Novice', '🔰', ' Ξ'));
-    'TRANSFORM'    = (@('Transform', '🤖', ' τ'));
-    'BULLET-A'     = (@('Bullet Point', '🔶', '⬥'));
-    'BULLET-B'     = (@('Bullet Point', '🟢', '⬡'));
-    'BULLET-C'     = (@('Bullet Point', '🟨', '⬠'));
-    'BULLET-D'     = (@('Bullet Point', '💠', '⬣'));
+    'WHAT-IF'         = (@('WhatIf', '☑️', '✓'));
+    'WARNING-A'       = (@('Warning', '⚠️', ')('));
+    'WARNING-B'       = (@('Warning', '👻', ')('));
+    'SWITCH-ON'       = (@('On', '✔️', '✓'));
+    'SWITCH-OFF'      = (@('Off', '✖️', '×'));
+    'INVALID'         = (@('Invalid', '❌', 'XX'));
+    'OK-A'            = (@('OK', '🚀', ':)'));
+    'OK-B'            = (@('OK', '🌟', ':D'));
+    'BAD-A'           = (@('Bad', '💥', ' ß'));
+    'BAD-B'           = (@('Bad', '💢', ':('));
+    'PROHIBITED'      = (@('Prohibited', '🚫', ' þ'));
+    'INCLUDE'         = (@('Include', '➕', '++'));
+    'EXCLUDE'         = (@('Exclude', '➖', '--'));
+    'SOURCE'          = (@('Source', '🎀', '+='));
+    'DESTINATION'     = (@('Destination', '☀️', '=+'));
+    'TRIM'            = (@('Trim', '🌊', '%%'));
+    'MULTI-SPACES'    = (@('Spaces', '❄️', '__'));
+    'DIAGNOSTICS'     = (@('Diagnostics', '🧪', ' Δ'));
+    'LOCKED'          = (@('Locked', '🔐', '>/'));
+    'NOVICE'          = (@('Novice', '🔰', ' Ξ'));
+    'TRANSFORM'       = (@('Transform', '🤖', ' τ'));
+    'BULLET-A'        = (@('Bullet Point', '🔶', '⬥'));
+    'BULLET-B'        = (@('Bullet Point', '🟢', '⬡'));
+    'BULLET-C'        = (@('Bullet Point', '🟨', '⬠'));
+    'BULLET-D'        = (@('Bullet Point', '💠', '⬣'));
 
     # Outcomes
     #
-    'FAILED-A'     = (@('Failed', '☢️', '$!'));
-    'FAILED-B'     = (@('Failed', '💩', '$!'));
-    'SKIPPED-A'    = (@('Skipped', '💤', 'zz'));
-    'SKIPPED-B'    = (@('Skipped', '👾', 'zz'));
-    'ABORTED-A'    = (@('Aborted', '✖️', 'o:'));
-    'ABORTED-B'    = (@('Aborted', '👽', 'o:'));
-    'CLASH'        = (@('Clash', '📛', '>¬'));
-    'NOT-ACTIONED' = (@('Not Actioned', '⛔', '-¬'));
+    'FAILED-A'        = (@('Failed', '☢️', '$!'));
+    'FAILED-B'        = (@('Failed', '💩', '$!'));
+    'SKIPPED-A'       = (@('Skipped', '💤', 'zz'));
+    'SKIPPED-B'       = (@('Skipped', '👾', 'zz'));
+    'ABORTED-A'       = (@('Aborted', '✖️', 'o:'));
+    'ABORTED-B'       = (@('Aborted', '👽', 'o:'));
+    'CLASH'           = (@('Clash', '📛', '>¬'));
+    'NOT-ACTIONED'    = (@('Not Actioned', '⛔', '-¬'));
 
     # Command Specific
     #
-    'REMY.ANCHOR'  = (@('Anchor', '⚓', ' §'));
-    'REMY.POST'    = (@('Post Process', '🌈', '=>'));
-    'REMY.DROP'    = (@('Drop', '💧', ' ╬'));
-    'REMY.UNDO'    = (@('Undo Rename', '❎', ' μ'));
-    'GREPS'        = (@('greps', '🔍', 'γ'));
+    'REMY.ANCHOR'     = (@('Anchor', '⚓', ' §'));
+    'REMY.POST'       = (@('Post Process', '🌈', '=>'));
+    'REMY.DROP'       = (@('Drop', '💧', ' ╬'));
+    'REMY.UNDO'       = (@('Undo Rename', '❎', ' μ'));
+    'GREPS'           = (@('greps', '🔍', 'γ'));
   }
 
   OverrideSignals       = @{ # Label, Emoji
@@ -205,10 +206,10 @@ $global:Loopz = [PSCustomObject]@{
   #
   CustomSignals         = $null;
 
-  SignalRegistry = @{
+  SignalRegistry        = @{
     'greps' = @('GREPS');
 
-    'remy' = @(
+    'remy'  = @(
       'APPEND', 'CAPTURE', 'CLASH', 'COPY-A', 'CUT-A', 'DIAGNOSTICS', 'DIRECTORY-A', 'EXCLUDE',
       'FAILED-A', 'FILE-A', 'INCLUDE', 'LOCKED', 'MULTI-SPACES', 'NOT-ACTIONED', 'NOVICE',
       'PASTE-A', 'PATTERN', 'PREPEND', 'REMY.ANCHOR', 'REMY.ANCHOR', 'REMY.DROP',
@@ -244,8 +245,23 @@ $global:Loopz = [PSCustomObject]@{
   }
 
   Rules                 = [PSCustomObject]@{
-    Remy = [PSCustomObject]@{
-      Trim   = @{
+    Remy = @(
+      @{
+        ID             = 'MissingCapture';
+        'IsApplicable' = [scriptblock] {
+          param([string]$_Input)
+          $_Input -match '\$\{\w+\}';
+        };
+
+        'Transform'    = [scriptblock] {
+          param([string]$_Input)
+          $_Input -replace "\$\{\w+\}", ''
+        };
+        'Signal'       = 'MISSING-CAPTURE'
+      },
+
+      @{
+        ID             = 'Trim';
         'IsApplicable' = [scriptblock] {
           param([string]$_Input)
           $($_Input.StartsWith(' ') -or $_Input.EndsWith(' '));
@@ -256,9 +272,10 @@ $global:Loopz = [PSCustomObject]@{
           $_Input.Trim();
         };
         'Signal'       = 'TRIM'
-      }
+      },
 
-      Spaces = @{
+      @{
+        ID             = 'Spaces';
         'IsApplicable' = [scriptblock] {
           param([string]$_Input)
           $_Input -match "\s{2,}";
@@ -270,7 +287,7 @@ $global:Loopz = [PSCustomObject]@{
         };
         'Signal'       = 'MULTI-SPACES'
       }
-    }
+    );
   }
 
   InvalidCharacterSet   = [char[]]'<>:"/\|?*';
