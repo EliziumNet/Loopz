@@ -29,7 +29,7 @@ to invoke this command specifying the parameters without their values.
 ## SYNTAX
 
 ```powershell
-Show-InvokeReport [-Name] <String[]> -Params <String[]> [-Scribbler <Scribbler>] [-Common] [-Test]
+Show-InvokeReport [-Name] <String[]> -Params <String[]> [-Scribbler <Scribbler>] [-Common] [-Strict] [-Test]
  [<CommonParameters>]
 ```
 
@@ -109,6 +109,23 @@ The Krayola scribbler instance used to manage rendering to console
 
 ```yaml
 Type: Scribbler
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Strict
+
+When specified, will not use Mandatory parameters check to for candidate parameter
+sets.
+
+```yaml
+Type: SwitchParameter
 Parameter Sets: (All)
 Aliases:
 

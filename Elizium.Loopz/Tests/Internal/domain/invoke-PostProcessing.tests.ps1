@@ -1,5 +1,5 @@
 
-Describe 'invoke-PostProcessing' -Tag 'Current' {
+Describe 'invoke-PostProcessing' {
 
   BeforeAll {
     Get-Module Elizium.Loopz | Remove-Module
