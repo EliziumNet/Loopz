@@ -202,7 +202,10 @@ Describe 'Invoke-TraverseDirectory' {
               [Parameter(Mandatory)]
               [boolean]$_trigger
             )
-            throw 'the skies are falling';
+            [PSCustomObject]$result = @{
+              ErrorReason = 'the skies are falling';
+            }
+            return $result
           }
 
           [scriptblock]$summaryWithError = {

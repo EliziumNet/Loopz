@@ -653,6 +653,33 @@ function Rename-Many {
       return $actionParameters;
     } # use-actionParams
 
+    function invoke-HandleError {
+      param(
+        [Parameter()]
+        [string]$message,
+        
+        [Parameter()]
+        [string]$prefix,
+
+        [Parameter()]
+        [string]$reThrowIfMatch = $pesterAssertionFailure
+      )
+
+      [string]$errorReason = $(
+        "$prefix\: " + 
+        ($message -split '\n')[0]
+      );
+      # We need Pester to throw pester specific errors. In the lack of, we have to
+      # guess that its a Pester assertion failure and let the exception through so
+      # the test fails.
+      #
+      if ($errorReason -match $reThrowIfMatch) {
+        throw $_;
+      }
+
+      return $errorReason;
+    }
+
     [scriptblock]$doRenameFsItems = {
       [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', '')]
       param(
@@ -687,24 +714,39 @@ function Rename-Many {
       [line]$properties = [line]::new();
       [line[]]$lines = @();
       [hashtable]$signals = $_exchange['LOOPZ.SIGNALS'];
-      [PSCustomObject]$actionResult = & $action @actionParameters;
-      [string]$newItemName = $actionResult.Payload;
+      [string]$errorReason = [string]::Empty;
 
-      if ($_exchange.ContainsKey('LOOPZ.REMY.TRANSFORM')) {
-        [scriptblock]$transform = $_exchange['LOOPZ.REMY.TRANSFORM'];
+      try {
+        [PSCustomObject]$actionResult = & $action @actionParameters;
+        [string]$newItemName = $actionResult.Payload;
 
-        if ($transform) {
-          [string]$transformed = $transform.InvokeReturnAsIs(
-            # Transform function needs the exchange and a new PSCustomObject
-            # which contains the user parameters to Rename-Many (maybe
-            # populated from $PSBoundParameters).
-            #
-            $_underscore.Name, $newItemName, $actionResult.CapturedPattern);
+      }
+      catch {
+        [string]$newItemName = $_underscore.Name;
+        $errorReason = invoke-HandleError -message $_.Exception.Message -prefix 'Action';
+      }
 
-          if (-not([string]::IsNullOrEmpty($transformed))) {
-            $newItemName = $transformed;
+      try {
+        if ([string]::IsNullOrEmpty($errorReason) -and $_exchange.ContainsKey('LOOPZ.REMY.TRANSFORM')) {
+          [scriptblock]$transform = $_exchange['LOOPZ.REMY.TRANSFORM'];
+
+          if ($transform) {
+            [string]$transformed = $transform.InvokeReturnAsIs(
+              # Transform function needs the exchange and a new PSCustomObject
+              # which contains the user parameters to Rename-Many (maybe
+              # populated from $PSBoundParameters).
+              #
+              $_underscore.Name, $newItemName, $actionResult.CapturedPattern
+            );
+
+            if (-not([string]::IsNullOrEmpty($transformed))) {
+              $newItemName = $transformed;
+            }
           }
         }
+      }
+      catch {
+        $errorReason = invoke-HandleError -message $_.Exception.Message -prefix 'Transform';
       }
 
       $postResult = invoke-PostProcessing -InputSource $newItemName -Rules $Loopz.Rules.Remy `
@@ -729,13 +771,18 @@ function Rename-Many {
       [boolean]$trigger = $false;
       [boolean]$whatIf = $_exchange.ContainsKey('WHAT-IF') -and ($_exchange['WHAT-IF']);
 
-      if ($nameHasChanged -and -not($clash)) {
-        $trigger = $true;
+      if ($nameHasChanged -and -not($clash) -and [string]::IsNullOrEmpty($errorReason)) {
+        try {
+          $product = rename-FsItem -From $_underscore -To $newItemName -WhatIf:$whatIf -UndoOperant $operant;
 
-        [UndoRename]$operant = $_exchange.ContainsKey('LOOPZ.REMY.UNDO') `
-          ? $_exchange['LOOPZ.REMY.UNDO'] : $null;
-
-        $product = rename-FsItem -From $_underscore -To $newItemName -WhatIf:$whatIf -UndoOperant $operant;
+          [UndoRename]$operant = $_exchange.ContainsKey('LOOPZ.REMY.UNDO') `
+            ? $_exchange['LOOPZ.REMY.UNDO'] : $null;
+          $trigger = $true;
+        }
+        catch {
+          $product = $newItemName;
+          $errorReason = invoke-HandleError -message $_.Exception.Message -prefix 'Rename';
+        }
       }
       else {
         $product = $_underscore;
@@ -771,7 +818,20 @@ function Rename-Many {
       $_exchange['LOOPZ.WH-FOREACH-DECORATOR.PRODUCT-LABEL'] = $(Get-PaddedLabel -Label $(
           $fileSystemItemType) -Width 9);
 
-      if ($trigger) {
+      if (-not([string]::IsNullOrEmpty($errorReason))) {
+        $null = $lines += (New-Line(
+            New-Pair(@($_exchange['LOOPZ.REMY.FROM-LABEL'], $_underscore.Name))
+          ));
+
+        [couplet]$errorSignal = Get-FormattedSignal -Name 'BAD-A' `
+          -Signals $signals -CustomLabel 'Error' -Value $errorReason;
+
+        $errorSignal.Affirm = $true;
+        $null = $lines += (New-Line(
+            $errorSignal
+          ));
+      }
+      elseif ($trigger) {
         $null = $lines += (New-Line(
             New-Pair(@($_exchange['LOOPZ.REMY.FROM-LABEL'], $_underscore.Name))
           ));
@@ -854,6 +914,10 @@ function Rename-Many {
         $result | Add-Member -MemberType NoteProperty -Name 'Affirm' -Value $true;
       }
 
+      if (-not([string]::IsNullOrEmpty($errorReason))) {
+        $result | Add-Member -MemberType NoteProperty -Name 'ErrorReason' -Value $errorReason;
+      }
+
       return $result;
     } # doRenameFsItems
 
@@ -862,6 +926,8 @@ function Rename-Many {
 
       $result.GetType() -in @([System.IO.FileInfo], [System.IO.DirectoryInfo]) ? $result.Name : $result;
     }
+
+    [string]$pesterAssertionFailure = 'Expected strings to be the same, but they were different';
 
     [System.IO.FileSystemInfo[]]$collection = @();
 
@@ -1400,12 +1466,7 @@ function Rename-Many {
     [RegExEntity]$ee = $bootStrap.Get('Except');
     [regex]$exceptRegEx = ${ee}?.get_RegEx();
 
-    [regex]$patternRegEx = if ($patternEntity) {
-      $patternEntity.RegEx;
-    }
-    else {
-      $null;
-    }
+    [regex]$patternRegEx = ${patternEntity}?.get_RegEx();
 
     [scriptblock]$clientCondition = $Condition;
     [scriptblock]$compoundCondition = {
@@ -1429,11 +1490,11 @@ function Rename-Many {
       # the client's Condition (Rename-Many) is not accidentally hidden.
       #
       [boolean]$isIncluded = ($null -ne $includedRegEx) ? $includedRegEx.IsMatch($pipelineItem.Name) : $true;
-      [boolean]$patternIsMatch = (-not($patternRegEx) -or ($patternRegEx.IsMatch($pipelineItem.Name)));
+      [boolean]$patternIsMatch = ($null -ne $patternRegEx) ? ($patternRegEx.IsMatch($pipelineItem.Name)) : $true;
+      [boolean]$notExcluded = ($null -ne $exceptRegEx) ? -not($exceptRegEx.IsMatch($pipelineItem.Name)) : $true;
 
       return $patternIsMatch -and $isIncluded -and `
-      ((-not($exceptRegEx)) -or -not($exceptRegEx.IsMatch($pipelineItem.Name))) -and `
-        $compoundCondition.InvokeReturnAsIs($pipelineItem);
+        $notExcluded -and $compoundCondition.InvokeReturnAsIs($pipelineItem);
     }
 
     # ------------------------------------------------- [ Execution Phase ] ---

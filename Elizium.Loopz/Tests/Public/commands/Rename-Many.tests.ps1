@@ -361,6 +361,30 @@ Describe 'Rename-Many' -Tag 'remy' {
         }
       }
     } # and: Source matches Pattern
+
+    Context 'and: Transform' {
+      Context 'and: First Only' {
+        It 'should: do rename; replace First Pattern for Copy text' {
+          $script:_expected = @{
+            'loopz.application.t1.log' = 'transformed.loopz.pplication.t1.log';
+            'loopz.application.t2.log' = 'transformed.loopz.pplication.t2.log';
+            'loopz.data.t1.txt'        = 'transformed.loopz.dta.t1.txt';
+            'loopz.data.t2.txt'        = 'transformed.loopz.dta.t2.txt';
+            'loopz.data.t3.txt'        = 'transformed.loopz.dta.t3.txt';
+          }
+
+          [scriptblock]$transformer = [scriptblock] {
+            param($name, $newItemName, $capturedPattern)
+
+            return "transformed.$newItemName";
+          }
+
+          Get-ChildItem -Path $_directoryPath | Rename-Many -File `
+            -Pattern 'a', f -Transform $transformer `
+            -WhatIf:$_whatIf -Test:$_test;
+        }
+      } # and: First Only
+    }
   } # UpdateInPlace
 
   Context 'given: MoveToAnchor' {

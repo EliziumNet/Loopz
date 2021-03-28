@@ -210,21 +210,18 @@
     }
     $scribbler.Line($themedPairs).End();
 
+    [int]$indent = $($Exchange.ContainsKey('LOOPZ.WH-FOREACH-DECORATOR.INDENT') `
+        ? $Exchange['LOOPZ.WH-FOREACH-DECORATOR.INDENT'] : 3);
+    [string]$blank = [string]::new(' ', $indent);
+
+    [System.Collections.Generic.List[line]]$additionalLines = @();
+
     if ($invokeResult -and $invokeResult.psobject.properties.match('Lines') -and $invokeResult.Lines) {
-      [int]$indent = $($Exchange.ContainsKey('LOOPZ.WH-FOREACH-DECORATOR.INDENT') `
-          ? $Exchange['LOOPZ.WH-FOREACH-DECORATOR.INDENT'] : 3);
-      [string]$blank = [string]::new(' ', $indent);
+      $invokeResult.Lines.foreach( { $additionalLines.Add($_) });
+    }
 
-      [line[]]$additionalLines = if ([string]::IsNullOrEmpty($invokeResult.ErrorReason)) {
-        $invokeResult.Lines;
-      }
-      else {
-        $( New-Line( $(New-Pair('Error', $invokeResult.ErrorReason)) ) ) + $invokeResult.Lines;
-      }
-
-      foreach ($line in $additionalLines) {
-        $scribbler.NakedLine($blank, $line).End();
-      }
+    foreach ($line in $additionalLines) {
+      $scribbler.NakedLine($blank, $line).End();
     }
   }
 

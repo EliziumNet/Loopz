@@ -137,23 +137,6 @@ Describe 'Invoke-ForeachFsItem' {
         $container.count | Should -Be 4;
       }
     }
-
-    Context 'and: error occurs' {
-      It 'should: handle error' {
-        [scriptblock]$block = {
-          param(
-            [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', '')]
-            [System.IO.FileInfo]$FileInfo,
-            [int]$Index,
-            [hashtable]$Exchange,
-            [boolean]$Trigger
-          )
-          throw 'The skies are falling';
-        }
-        [string]$directoryPath = './Tests/Data/fefsi';
-        Get-ChildItem $directoryPath -Recurse -Filter '*.txt' -File | Invoke-ForeachFsItem -Block $block;
-      }
-    }
   } # given: condition NOT provided
 
   Context 'given: condition provided' {
@@ -538,4 +521,46 @@ Describe 'Invoke-ForeachFsItem' {
       $container.count | Should -Be 1;
     }
   }
+
+  Context 'and: Error' {
+    It 'should: increment error' {
+      [scriptblock]$errorBlock = {
+        param(
+          [Parameter(Mandatory)]
+          [System.IO.DirectoryInfo]$_underscore,
+
+          [Parameter(Mandatory)]
+          [int]$_index,
+
+          [Parameter(Mandatory)]
+          [hashtable]$_exchange,
+
+          [Parameter(Mandatory)]
+          [boolean]$_trigger
+        )
+        [PSCustomObject]$result = @{
+          ErrorReason = 'the skies are falling';
+        }
+        return $result
+      }
+
+      [scriptblock]$summaryWithError = {
+        param(
+          [int]$_count,
+          [int]$_skipped,
+          [int]$_errors,
+          [boolean]$_trigger,
+          [hashtable]$_exchange
+        )
+
+        Write-Debug "  [Summary] Count: '$_count', skipped: '$_skipped', errors: '$_errors', trigger: '$_trigger'";
+        $_errors | Should -Be $_count;
+      }
+
+      [string]$directoryPath = './Tests/Data/fefsi';
+      $parameters = , @("!!! {0} !!!");
+      Get-ChildItem $directoryPath | Invoke-ForeachFsItem `
+        -Block $errorBlock -BlockParams $parameters -Directory -Summary $summaryWithError;
+    }
+  } # and: Error  
 } # Invoke-ForeachFsItem

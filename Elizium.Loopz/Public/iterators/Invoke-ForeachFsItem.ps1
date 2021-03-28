@@ -319,32 +319,26 @@ function Invoke-ForeachFsItem {
           [int]$index = $controller.RequestIndex();
           [boolean]$trigger = $controller.GetTrigger();
 
-          try {
-            if ('InvokeScriptBlock' -eq $PSCmdlet.ParameterSetName) {
-              $positional = @($pipelineItem, $index, $Exchange, $trigger);
+          if ('InvokeScriptBlock' -eq $PSCmdlet.ParameterSetName) {
+            $positional = @($pipelineItem, $index, $Exchange, $trigger);
 
-              if ($BlockParams.Length -gt 0) {
-                $BlockParams | ForEach-Object {
-                  $positional += $_;
-                }
+            if ($BlockParams.Length -gt 0) {
+              $BlockParams | ForEach-Object {
+                $positional += $_;
               }
-
-              $result = Invoke-Command -ScriptBlock $Block -ArgumentList $positional;
             }
-            elseif ('InvokeFunction' -eq $PSCmdlet.ParameterSetName) {
-              [hashtable]$parameters = $FuncteeParams.Clone();
 
-              $parameters['Underscore'] = $pipelineItem;
-              $parameters['Index'] = $index;
-              $parameters['Exchange'] = $Exchange;
-              $parameters['Trigger'] = $trigger;
+            $result = Invoke-Command -ScriptBlock $Block -ArgumentList $positional;
+          }
+          elseif ('InvokeFunction' -eq $PSCmdlet.ParameterSetName) {
+            [hashtable]$parameters = $FuncteeParams.Clone();
 
-              $result = & $Functee @parameters;
-            }
-          } catch {
-            $result = [PSCustomObject]@{
-              ErrorReason = "Unhandled Error: $($_.Exception.Message)";
-            }
+            $parameters['Underscore'] = $pipelineItem;
+            $parameters['Index'] = $index;
+            $parameters['Exchange'] = $Exchange;
+            $parameters['Trigger'] = $trigger;
+
+            $result = & $Functee @parameters;
           }
 
           $controller.HandleResult($result);
