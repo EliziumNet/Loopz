@@ -210,7 +210,7 @@ $global:Loopz = [PSCustomObject]@{
     'greps' = @('GREPS');
 
     'remy'  = @(
-      'APPEND', 'CAPTURE', 'CLASH', 'COPY-A', 'CUT-A', 'DIAGNOSTICS', 'DIRECTORY-A', 'EXCLUDE',
+      'ABORTED-A', 'APPEND', 'CAPTURE', 'CLASH', 'COPY-A', 'CUT-A', 'DIAGNOSTICS', 'DIRECTORY-A', 'EXCLUDE',
       'FAILED-A', 'FILE-A', 'INCLUDE', 'LOCKED', 'MULTI-SPACES', 'NOT-ACTIONED', 'NOVICE',
       'PASTE-A', 'PATTERN', 'PREPEND', 'REMY.ANCHOR', 'REMY.ANCHOR', 'REMY.DROP',
       'REMY.POST', 'REMY.UNDO', 'TRANSFORM', 'TRIM', 'WHAT-IF', 'WITH'
