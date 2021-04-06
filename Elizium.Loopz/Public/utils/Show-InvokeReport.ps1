@@ -121,7 +121,7 @@ function Show-InvokeReport {
       [DryRunner]$runner = [DryRunner]::new($controller, $runnerInfo);
       $Scribbler.Scribble($syntax.TitleStmt('Invoke Report', $_.Name));
 
-      [System.Management.Automation.CommandParameterSetInfo[]]$candidateSets = $Strict `
+      [System.Management.Automation.CommandParameterSetInfo[]]$candidateSets = $Strict.IsPresent `
         ? $runner.Resolve($Params) `
         : $runner.Weak($Params);
 

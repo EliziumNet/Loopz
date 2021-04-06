@@ -273,7 +273,7 @@ Describe 'Rules' -Tag 'PSTools' {
         }
       }
     } # given: functions with violations
-  }
+  } # MustNotBeInAllParameterSetsByAccident
 
   Describe 'Test' {
     BeforeAll {
@@ -450,9 +450,19 @@ Describe 'Rules' -Tag 'PSTools' {
           $paramSets[0].Name | Should -Be 'ReplaceWith';
         }
       }
+
+      It 'should: weak resolve to parameter set -> "ReplaceWith"' {
+        InModuleScope Elizium.Loopz {
+          [CommandParameterSetInfo[]]$paramSets = $_runner.Weak(
+            @('underscore', 'Pattern', 'With')
+          );
+          $paramSets.Count | Should -Be 4;
+          $paramSets[0].Name | Should -Be 'ReplaceWith';
+        }
+      }
     }
 
-    Context 'given: parameter list that doesnt resolve' {
+    Context 'given: parameter list that does not resolve' {
       It 'should: return empty list' {
         InModuleScope Elizium.Loopz {
           [CommandParameterSetInfo[]]$paramSets = $_runner.Resolve(

@@ -60,13 +60,13 @@ Describe 'find-InAllParameterSetsByAccident' -Tag 'PSTools' {
         [PSCustomObject[]]$accidents = find-InAllParameterSetsByAccident -CommandInfo $commandInfo `
           -Syntax $syntax;
         $accidents | Should -Not -BeNullOrEmpty;
-        $accidents.Count | Should -Be 1;
+        $accidents.Count | Should -Be 4;
       }
     }
   }
 
   Context 'given: multiple parameter in AllParameterSets by accident' {
-    It 'should: report violation' {
+    It 'should: report violation' -Tag 'Current' {
       InModuleScope Elizium.Loopz {
         function test-MultipleInAllParameterSetsByAccident {
           param(
@@ -90,6 +90,34 @@ Describe 'find-InAllParameterSetsByAccident' -Tag 'PSTools' {
             [object]$AccidentalC
           )
         }
+<#
+  $ gcm test-MultipleInAllParameterSetsByAccident | sharp
+  =========================================================================================================================
+  >>>>> SUMMARY:  Found the following 18 violations:
+    🔶 'Non Unique Parameter Set', Count: 6
+        🟨 Reasons: 
+          💠 {Alpha/Beta}
+          💠 {Alpha/Delta}
+          💠 {Alpha/Ok}
+          💠 {Beta/Delta}
+          💠 {Beta/Ok}
+          💠 {Delta/Ok}
+    🔶 'In All Parameter Sets By Accident', Count: 12
+        🟨 Reasons: 
+          💠 { parameter 'AccidentalA' of parameter set Ok
+          💠 { parameter 'AccidentalB' of parameter set Ok
+          💠 { parameter 'AccidentalC' of parameter set Ok
+          💠 { parameter 'AccidentalA' of parameter set Alpha
+          💠 { parameter 'AccidentalB' of parameter set Alpha
+          💠 { parameter 'AccidentalC' of parameter set Alpha
+          💠 { parameter 'AccidentalA' of parameter set Beta
+          💠 { parameter 'AccidentalB' of parameter set Beta
+          💠 { parameter 'AccidentalC' of parameter set Beta
+          💠 { parameter 'AccidentalA' of parameter set Delta
+          💠 { parameter 'AccidentalB' of parameter set Delta
+          💠 { parameter 'AccidentalC' of parameter set Delta
+  =========================================================================================================================
+#>
         [string]$commandName = 'test-MultipleInAllParameterSetsByAccident';
         [CommandInfo]$commandInfo = Get-Command $commandName;
         [Syntax]$syntax = New-Syntax -CommandName $commandName -Signals $_signals `
@@ -98,7 +126,7 @@ Describe 'find-InAllParameterSetsByAccident' -Tag 'PSTools' {
         [PSCustomObject[]]$accidents = find-InAllParameterSetsByAccident -CommandInfo $commandInfo `
           -Syntax $syntax;
         $accidents | Should -Not -BeNullOrEmpty;
-        $accidents.Count | Should -Be 3;
+        $accidents.Count | Should -Be 12;
       }
     }
   }
