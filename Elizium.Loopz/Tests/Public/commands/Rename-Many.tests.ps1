@@ -637,7 +637,69 @@ Describe 'Rename-Many' -Tag 'remy' {
               -WhatIf:$_whatIf -Test:$_test;
           }
         }
-      } #
+      } # and: Anchor does NOT match Pattern
+
+      Context 'and: Drop' {
+        Context 'and: Start specified' {
+          It 'should: move and drop literal' {
+            $script:_expected = @{
+              'loopz.application.t1.log' = '_body-application_loopz.drop.ox.t1.log';
+              'loopz.application.t2.log' = 'loopz.drop.ox.t2_body-application_.log';
+              'loopz.data.t1.txt'        = '_body-data_loopz.drop.ox.t1.txt';
+              'loopz.data.t2.txt'        = 'loopz.drop.ox.t2_body-data_.txt';
+              'loopz.data.t3.txt'        = '_body-data_loopz.drop.ox.t3.txt';
+            }
+
+            Get-ChildItem -File -Path $_directoryPath | Rename-Many `
+              -Pattern '\.(?<body>[^\.]+)' -AnchorStart 't2' `
+              -With '${_a}_body-${body}_' -Drop '.drop.ox' -WhatIf -Test:$_test;
+          }
+
+          It 'should: move and drop capture' {
+            $script:_expected = @{
+              'loopz.application.t1.log' = '_body-application_loopz[application].t1.log';
+              'loopz.application.t2.log' = 'loopz[application].t2_body-application_.log';
+              'loopz.data.t1.txt'        = '_body-data_loopz[data].t1.txt';
+              'loopz.data.t2.txt'        = 'loopz[data].t2_body-data_.txt';
+              'loopz.data.t3.txt'        = '_body-data_loopz[data].t3.txt';
+            }
+
+            Get-ChildItem -File -Path $_directoryPath | Rename-Many `
+              -Pattern '\.(?<body>[^\.]+)' -AnchorStart 't2' `
+              -With '${_a}_body-${body}_' -Drop '[${body}]' -WhatIf -Test:$_test;
+          }
+        }
+
+        Context 'and: End specified' {
+          It 'should: move and drop literal' {
+            $script:_expected = @{
+              'loopz.application.t1.log' = 'loopz.drop.t1_body-application_.log';
+              'loopz.application.t2.log' = 'loopz.drop.t2_body-application_.log';
+              'loopz.data.t1.txt'        = 'loopz.drop.t1_body-data_.txt';
+              'loopz.data.t2.txt'        = 'loopz.drop.t2_body-data_.txt';
+              'loopz.data.t3.txt'        = 'loopz.drop.t3_body-data_.txt';
+            }
+
+            Get-ChildItem -File -Path $_directoryPath | Rename-Many `
+              -Pattern 'loopz\.(?<body>[^\.]+)' -AnchorEnd 't1' `
+              -With '${_a}_body-${body}_' -Drop 'loopz.drop' -WhatIf -Test:$_test;
+          }
+
+          It 'should: move and drop capture' {
+            $script:_expected = @{
+              'loopz.application.t1.log' = '[application].t1_body-application_.log';
+              'loopz.application.t2.log' = '[application].t2_body-application_.log';
+              'loopz.data.t1.txt'        = '[data].t1_body-data_.txt';
+              'loopz.data.t2.txt'        = '[data].t2_body-data_.txt';
+              'loopz.data.t3.txt'        = '[data].t3_body-data_.txt';
+            }
+
+            Get-ChildItem -File -Path $_directoryPath | Rename-Many `
+              -Pattern 'loopz\.(?<body>[^\.]+)' -AnchorEnd 't1' `
+              -With '${_a}_body-${body}_' -Drop '[${body}]' -WhatIf -Test:$_test;
+          }
+        }
+      } # and: Drop
     } # and: Hybrid Anchor
 
     Context 'given: Diagnose enabled' {

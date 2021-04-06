@@ -666,7 +666,7 @@ function Rename-Many {
       )
 
       [string]$errorReason = $(
-        "$prefix\: " + 
+        "$prefix`: " + 
         ($message -split '\n')[0]
       );
       # We need Pester to throw pester specific errors. In the lack of, we have to
@@ -724,6 +724,11 @@ function Rename-Many {
       catch {
         [string]$newItemName = $_underscore.Name;
         $errorReason = invoke-HandleError -message $_.Exception.Message -prefix 'Action';
+
+        [PSCustomObject]$actionResult = [PSCustomObject]@{
+          FailedReason = $errorReason;
+          Success = $false;
+        }
       }
 
       try {
@@ -747,6 +752,11 @@ function Rename-Many {
       }
       catch {
         $errorReason = invoke-HandleError -message $_.Exception.Message -prefix 'Transform';
+
+        [PSCustomObject]$actionResult = [PSCustomObject]@{
+          FailedReason = $errorReason;
+          Success      = $false;
+        }
       }
 
       $postResult = invoke-PostProcessing -InputSource $newItemName -Rules $Loopz.Rules.Remy `
@@ -848,12 +858,6 @@ function Rename-Many {
             -Signals $signals -EmojiAsValue -CustomLabel 'Not Renamed' -EmojiOnlyFormat '{0}';
           $properties.append($notActionedSignal);
         }
-      }
-
-      if (-not($actionResult.Success)) {
-        [couplet]$failedSignal = Get-FormattedSignal -Name 'FAILED-A' `
-          -Signals $signals -Value $actionResult.FailedReason;
-        $properties.append($failedSignal);
       }
 
       if ($whatIf) {

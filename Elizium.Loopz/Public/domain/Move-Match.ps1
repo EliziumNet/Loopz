@@ -195,6 +195,8 @@ function Move-Match {
     [Parameter(ParameterSetName = 'MoveToEnd', Mandatory)]
     [switch]$End,
 
+    [Parameter(ParameterSetName = 'HybridStart')]
+    [Parameter(ParameterSetName = 'HybridEnd')]
     [Parameter(ParameterSetName = 'MoveToAnchor')]
     [Parameter(ParameterSetName = 'MoveToStart')]
     [Parameter(ParameterSetName = 'MoveToEnd')]
