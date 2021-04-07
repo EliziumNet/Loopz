@@ -59,11 +59,13 @@ This module includes a collection of commands/classes that comprise the paramete
 | [Show-ParameterSetInfo](Elizium.Loopz/docs/Show-ParameterSetInfo.md)             | Show parameter set info
 | [Show-ParameterSetReport](Elizium.Loopz/docs/Show-ParameterSetReport.md)         | Show parameter set violations
 
-| CLASS-NAME                                                                       | DESCRIPTION
-|----------------------------------------------------------------------------------|------------
-| [dryrunner](Elizium.Loopz/docs/dryrunner.md)                                     | Dry run a command
-| [rules](Elizium.Loopz/docs/rules.md)                                             | Parameter set rules
-| [syntax](Elizium.Loopz/docs/syntax.md)                                           | Command syntax
+| CLASS-NAME                                                      | DESCRIPTION
+|-----------------------------------------------------------------|------------
+| [DryRunner](parameter-set-tools.md/#dry-runner.class)           | Dry run a command
+| [RuleController](parameter-set-tools.md/#rule-controller.class) | Parameter set rules
+| [Syntax](parameter-set-tools.md/#syntax.class)                  | Command syntax
+
+See [Parameter Set Tools](parameter-set-tools.md)
 
 ## Supporting Utilities (for developers)
 
