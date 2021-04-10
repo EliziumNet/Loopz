@@ -2,9 +2,8 @@
 # :nazar_amulet: Elizium.Loopz Parameter Set Tools
 
 ---
-<div id="using.parameter-set-tools"></div>
 
-## Using the Parameter Set Tools
+## Using the Parameter Set Tools<a name="using.parameter-set-tools"></a>
 
 There are 3 commands that comprise the parameter set tools, the first is a general query command and the others are reports that show violations/problems.
 
@@ -22,9 +21,7 @@ Parameter Set Tool Classes
 | RuleController            | [:heavy_check_mark:](#rule-controller.class) Used by DryRunner
 | Syntax                    | [:heavy_check_mark:](#syntax.class) Used by all parameter set tool commands
 
-<div id="using.show-parameter-set-info"></div>
-
-### Show-ParameterSetInfo
+### Show-ParameterSetInfo<a name="using.show-parameter-set-info"></a>
 
 :dart: using *Show-ParameterSetInfo (ships)*
 
@@ -34,9 +31,7 @@ Show all the parameter information for a command. For brevity, this example supp
 
 ![picture](resources/images/use-pstool.SHIPS.command.jpg)
 
-<div id="using.show-parameter-set-report"></div>
-
-### Show-ParameterSetReport
+### Show-ParameterSetReport<a name="using.show-parameter-set-report"></a>
 
 :dart: using *Show-ParameterSetReport (sharp)*
 
@@ -201,7 +196,7 @@ results in:
 
 We can see that parameters 'paramB' and 'paramE' are mal-defined because of the rogue *[Parameter()]* statements. The parameter sets are displayed for all parameters mis-defined. The reader should also note that a violation is reported for each parameter mis-defined like this for all parameter sets for the command.
 
-<div id="using.show-invoke-report"></div>
+<a name="using.show-invoke-report"></a>
 
 ### Show-InvokeReport
 
@@ -239,7 +234,7 @@ However, if we use the *Strict* parameter, then the result will be a message ind
 
 ## Parameter Set Classes
 
-<div id="dry-runner.class"></div>
+<a name="dry-runner.class"></a>
 
 ### Dry Runner Class
 
@@ -273,9 +268,7 @@ The following example shows how to use the DryRunner in a unit test
   }
 ```
 
-<div id="rule-controller.class"></div>
-
-### Rule Controller Class
+### Rule Controller Class<a name="rule-controller.class"></a>
 
 The RuleController class can be used in unit tests to check that commands do not violate the
 parameter set rules.
@@ -309,9 +302,7 @@ Context 'given: commands under test' {
   }
 ```
 
-<div id="syntax.class"></div>
-
-## Syntax Class
+## Syntax Class<a name="syntax.class"></a>
 
 The Syntax instance is a supporting class for the parameter set tools. It contains
 various formatters, string definitions and utility functionality that relate to a single PowerShell command. The primary feature it contains is that relating to the colouring in of the standard syntax statement

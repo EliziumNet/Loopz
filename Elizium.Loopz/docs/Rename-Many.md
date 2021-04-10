@@ -666,7 +666,7 @@ Accept wildcard characters: False
 ### -Top
 
 A number indicating how many items to process.
-If it is known that the number of items that will be candidates to be renamed is large, the user can limit this is the first $Top number of items.
+If it is known that the number of items that will be candidates to be renamed is large, the user can limit this to the first $Top number of items.
 This is typically used as an exploratory tool, to determine the effects of the rename operation.
 
 ```yaml

@@ -29,12 +29,12 @@ which will be installed automatically if not already present.
 
 ## The Main Commands (for end users)
 
-| COMMAND-NAME                                                                     | DESCRIPTION
-|----------------------------------------------------------------------------------|------------
-| [Format-Escape](Elizium.Loopz/docs/Format-Escape.md)                             | Escape Regex param
-| [Rename-Many](Elizium.Loopz/docs/Rename-Many.md)                                 | Bulk Rename
-| [Show-Signals](Elizium.Loopz/docs/Show-Signals.md)                               | Show signals with overrides
-| [Select-Patterns](Elizium.Loopz/docs/Select-Patterns.md)                         | Find text inside files
+| COMMAND-NAME                                              | DESCRIPTION
+|-----------------------------------------------------------|------------
+| [Format-Escape](Elizium.Loopz/docs/Format-Escape.md)      | Escape Regex param
+| [Rename-Many](Elizium.Loopz/docs/Rename-Many.md)          | [:heavy_check_mark:](bulk-renamer.md) Bulk Renamer
+| [Show-Signals](Elizium.Loopz/docs/Show-Signals.md)        | Show signals with overrides
+| [Select-Patterns](Elizium.Loopz/docs/Select-Patterns.md)  | Find text inside files
 
 ## Iteration functions (for end developers)
 
@@ -53,11 +53,11 @@ The following table shows the list of public commands exported from the Loopz mo
 
 This module includes a collection of commands/classes that comprise the parameter set tools. When building new commands that use the parameter set framework, it can be difficult to build them so they don't violate the established rules, particular when the command is complex and has a large number of parameters and parameter sets. These parameter sets tools aims to fill a void and give developers some additional tools that can be used to resolved common parameter issues. The following table show the commands in this tool set:
 
-| COMMAND-NAME                                                                     | DESCRIPTION
-|----------------------------------------------------------------------------------|------------
-| [Show-InvokeReport](Elizium.Loopz/docs/Show-InvokeReport.md)                     | Show command invoke report
-| [Show-ParameterSetInfo](Elizium.Loopz/docs/Show-ParameterSetInfo.md)             | Show parameter set info
-| [Show-ParameterSetReport](Elizium.Loopz/docs/Show-ParameterSetReport.md)         | Show parameter set violations
+| COMMAND-NAME                                                              | DESCRIPTION
+|---------------------------------------------------------------------------|------------
+| [Show-InvokeReport](Elizium.Loopz/docs/Show-InvokeReport.md)              | [:heavy_check_mark:](#parameter-set-tools.md/using.show-invoke-report) Show command invoke report
+| [Show-ParameterSetInfo](Elizium.Loopz/docs/Show-ParameterSetInfo.md)      | [:heavy_check_mark:](#parameter-set-tools.md/using.show-parameter-set-info) Show parameter set info
+| [Show-ParameterSetReport](Elizium.Loopz/docs/Show-ParameterSetReport.md)  | [:heavy_check_mark:](#parameter-set-tools.md/using.show-parameter-set-report) Show parameter set violations
 
 | CLASS-NAME                                                      | DESCRIPTION
 |-----------------------------------------------------------------|------------
