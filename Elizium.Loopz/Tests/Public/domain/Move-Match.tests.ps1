@@ -20,7 +20,8 @@ Describe 'Move-Match' -Tag 'remy' {
               [RegEx]$anchor = new-expr('Judgement');
               [string]$relation = 'before';
 
-              [PSCustomObject]$moveResult = Move-Match -Value $source -Pattern $pattern -Relation $relation -Anchor $anchor;
+              [PSCustomObject]$moveResult = Move-Match -Value $source -Pattern $pattern `
+                -Relation $relation -Anchor $anchor;
               $moveResult.Payload | Should -BeExactly '06-06-2626Judgement Day: [], Judgement Day: [28-02-2727], take your pick!';
             }
 
@@ -52,8 +53,8 @@ Describe 'Move-Match' -Tag 'remy' {
               [RegEx]$escapedAnchor = new-expr([regex]::Escape('Judgement+'));
               [string]$relation = 'before'
 
-              [PSCustomObject]$moveResult = Move-Match -Value $source -Pattern $pattern -Relation $relation -Anchor $escapedAnchor `
-                -AnchorOccurrence 'L';
+              [PSCustomObject]$moveResult = Move-Match -Value $source -Pattern $pattern `
+                -Relation $relation -Anchor $escapedAnchor -AnchorOccurrence 'L';
               $moveResult.Payload | Should -BeExactly 'Judgement+ Day: [], 06-06-2626Judgement+ Day: [28-02-2727], take your pick!';
             }
 
@@ -76,7 +77,8 @@ Describe 'Move-Match' -Tag 'remy' {
               [RegEx]$anchor = new-expr('fight');
               [string]$relation = 'before'
 
-              [PSCustomObject]$moveResult = Move-Match -Value $source -Pattern $escapedPattern -Relation $relation -Anchor $anchor;
+              [PSCustomObject]$moveResult = Move-Match -Value $source -Pattern $escapedPattern `
+                -Relation $relation -Anchor $anchor;
               $moveResult.Payload | Should -BeExactly '+firefight  with +fire';
             }
 
@@ -150,7 +152,8 @@ Describe 'Move-Match' -Tag 'remy' {
               [RegEx]$anchor = new-expr('fight ');
               [string]$relation = 'after'
 
-              [PSCustomObject]$moveResult = Move-Match -Value $source -Pattern $escapedPattern -Relation $relation -Anchor $anchor;
+              [PSCustomObject]$moveResult = Move-Match -Value $source -Pattern $escapedPattern `
+                -Relation $relation -Anchor $anchor;
               $moveResult.Payload | Should -BeExactly 'so fight +firethe  with +fire';
             }
 
@@ -395,6 +398,20 @@ Describe 'Move-Match' -Tag 'remy' {
                   $moveResult.Payload | Should -BeExactly 'There is$ where your +fire is$(+fire ) going';
                 }
               }
+
+              Context 'and: With contains Anchor named capture group reference' {
+                It 'should: move the last match before the first anchor' {
+                  [string]$source = 'There is where +fire your +fire is going';
+                  [RegEx]$escapedPattern = new-expr([regex]::Escape('+fire') + '\s');
+                  [RegEx]$anchor = new-expr('(?<x>is\s)');
+                  [string]$with = '[${x}]($0) ';
+
+                  [PSCustomObject]$moveResult = Move-Match -Value $source -Pattern $escapedPattern -PatternOccurrence 'l' `
+                    -Anchor $anchor -With $with;
+
+                  $moveResult.Payload | Should -BeExactly 'There [is ](+fire ) where +fire your is going';
+                }
+              }
             } # and: Whole Pattern reference
           } # before
 
@@ -511,7 +528,8 @@ Describe 'Move-Match' -Tag 'remy' {
         [RegEx]$pattern = new-expr('bomb!');
         [RegEx]$anchor = new-expr('\d{2}-\d{2}-\d{4}\s');
 
-        [PSCustomObject]$moveResult = Move-Match -Value $source -Pattern $pattern -Relation 'before' -Anchor $anchor;
+        [PSCustomObject]$moveResult = Move-Match -Value $source -Pattern $pattern `
+          -Relation 'before' -Anchor $anchor;
 
         $moveResult.Payload | Should -BeExactly $source -Because "No ('$pattern') match found";
         $moveResult.Success | Should -BeFalse;

@@ -457,7 +457,37 @@ Describe 'Rename-Many' -Tag 'remy' {
                   -Pattern 'loopz.' -Anchor 'a', l -Relation 'before' -Top 2 `
                   -WhatIf:$_whatIf -Test:$_test;
               }
-            } 
+            }
+          }
+
+          Context 'and: With references $0' {
+            It 'should: insert the Pattern match' {
+              $script:_expected = @{
+                'loopz.application.t1.log' = 'CLANGER.application.1-[loopz].log';
+                'loopz.application.t2.log' = 'CLANGER.application.2-[loopz].log';
+                'loopz.data.t1.txt'        = 'CLANGER.data.1-[loopz].txt';
+                'loopz.data.t2.txt'        = 'CLANGER.data.2-[loopz].txt';
+                'loopz.data.t3.txt'        = 'CLANGER.data.3-[loopz].txt';
+              }
+
+              Get-ChildItem -File -Path $_directoryPath | Rename-Many -File `
+                -Pattern 'loopz' -Anchor 't(?<n>\d)', l -Relation 'after' -With '${n}-[$0]' `
+                -Drop 'CLANGER' -WhatIf:$_whatIf -Test:$_test;
+            }
+
+            It 'should: insert the Pattern match' {
+              $script:_expected = @{
+                'loopz.application.t1.log' = 'CLANGER.application.1-[loopz].log';
+                'loopz.application.t2.log' = 'CLANGER.application.2-[loopz].log';
+                'loopz.data.t1.txt'        = 'CLANGER.data.1-[loopz].txt';
+                'loopz.data.t2.txt'        = 'CLANGER.data.2-[loopz].txt';
+                'loopz.data.t3.txt'        = 'CLANGER.data.3-[loopz].txt';
+              }
+
+              Get-ChildItem -File -Path $_directoryPath | Rename-Many -File `
+                -Pattern 'loopz' -Anchor 't(?<n>\d)', l -With '${n}-[$0]' `
+                -Drop 'CLANGER' -WhatIf:$_whatIf -Test:$_test;
+            }
           }
 
           Context 'and: Source matches Pattern, but differs by case' {
@@ -762,10 +792,8 @@ Describe 'Rename-Many' -Tag 'remy' {
           }
         } # and: Source match does NOT match Pattern
       } # and: Source matches with Named Captures
-    } # given: Diagnose enabled
 
-    Context 'given: Diagnose enabled' {
-      Context 'ReplaceWith' {
+      Context 'ReplaceWith (Update)' {
         Context 'and: Source matches with Named Captures' {
           Context 'and: Copy matches' {
             It 'should: do rename; move Pattern match with Copy capture' {
@@ -827,7 +855,7 @@ Describe 'Rename-Many' -Tag 'remy' {
             }
           }
         }
-      } # ReplaceWith
+      } # ReplaceWith (Update)
     } # given: Diagnose enabled
   } # given: MoveToAnchor
 
