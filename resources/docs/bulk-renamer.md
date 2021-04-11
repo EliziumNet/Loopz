@@ -239,7 +239,7 @@ Now that we have our somewhat finalised version, lets see how this looks in a ba
 
 (actually, the screen shot below uses the [Top](#parameter-ref.top) parameter to reduce the number of item processed, for brevity)
 
-![picture](..\images\bulk-rename.MOVE-TO-FINAL.with-post-SPACES.jpg)
+![picture](../images/bulk-rename.MOVE-TO-FINAL.with-post-SPACES.jpg)
 
 It can be seen that for each item renamed, the new name is displayed in red, with the original name displayed it in white. Next to the new name, supplementary info is displayed, including 'Post (Spaces)' (we'll come to this a little later) and a *WhatIf* indicator.
 
@@ -259,7 +259,7 @@ That space at the end is our issue. There is already a space preceding the \<TRA
 
 :heavy_plus_sign: -Pattern '(?<disc>\d{2})-' -Anchor '\d{2}' -With '${_a}-${disc} -' -Top 10 -WhatIf
 
-![picture](..\images\bulk-rename.MOVE-TO-FINAL.fixed-post-SPACES.jpg)
+![picture](../images/bulk-rename.MOVE-TO-FINAL.fixed-post-SPACES.jpg)
 
 The *Post Processing* is there to watch our back by automatically enforcing desirable rules and makes the command less pedantic in its operation.
 
@@ -267,7 +267,7 @@ In other more complicated rename batches, we might (and probably will) encounter
 
 For this example, we can see when *Diagnose* is specified, we can see the value of named capture groups:
 
-![picture](..\images\bulk-rename.MOVE-TO-FINAL.fixed-with-DIAGNOSTICS.jpg)
+![picture](../images/bulk-rename.MOVE-TO-FINAL.fixed-with-DIAGNOSTICS.jpg)
 
 Focusing on the first entry, item named '01-01 Autobahn.mp3', we can see the diagnostics entry:
 
