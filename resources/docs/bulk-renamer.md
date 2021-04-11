@@ -107,7 +107,7 @@ The following parameters belong to all *Rename-Many* parameter sets:
 | [Condition](#parameter-ref.condition) |       | [:x:](blah)                  | A custom predicate script-block that filters pipeline items
 | [Context](#parameter-ref.context)     |       | [:x:](blah)                  | A PSCustomObject with options to customise Rename-Many
 | [Directory](#parameter-ref.directory) | d     | [:heavy_check_mark:](blah)   | Filter for Directory items only
-| [Diagnose](#parameter-ref.diagnose)   | di    | [:heavy_check_mark:](blah)   | WhatIf mode with added diagnostic info
+| [Diagnose](#parameter-ref.diagnose)   | dg    | [:heavy_check_mark:](blah)   | WhatIf mode with added diagnostic info
 | [End](#parameter-ref.end)             | e     | [:heavy_check_mark:](blah)   | Move Pattern
 | [Except](#parameter-ref.except)       | x     | [:heavy_check_mark:](blah)   | Filter out items that match this regex
 | [File](#parameter-ref.file)           | f     | [:heavy_check_mark:](blah)   | Filter for File items only

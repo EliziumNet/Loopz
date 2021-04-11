@@ -505,7 +505,7 @@ function Rename-Many {
     [PSCustomObject]$Context = $Loopz.Defaults.Remy.Context,
 
     [Parameter()]
-    [Alias('di')]
+    [Alias('dg')]
     [switch]$Diagnose,
 
     [Parameter()]
