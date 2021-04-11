@@ -55,17 +55,17 @@ This module includes a collection of commands/classes that comprise the paramete
 
 | COMMAND-NAME                                                              | DESCRIPTION
 |---------------------------------------------------------------------------|------------
-| [Show-InvokeReport](Elizium.Loopz/docs/Show-InvokeReport.md)              | [:heavy_check_mark:](#parameter-set-tools.md/using.show-invoke-report) Show command invoke report
-| [Show-ParameterSetInfo](Elizium.Loopz/docs/Show-ParameterSetInfo.md)      | [:heavy_check_mark:](#parameter-set-tools.md/using.show-parameter-set-info) Show parameter set info
-| [Show-ParameterSetReport](Elizium.Loopz/docs/Show-ParameterSetReport.md)  | [:heavy_check_mark:](#parameter-set-tools.md/using.show-parameter-set-report) Show parameter set violations
+| [Show-InvokeReport](Elizium.Loopz/docs/Show-InvokeReport.md)              | [:heavy_check_mark:](#resources/docs/parameter-set-tools.md/using.show-invoke-report) Show command invoke report
+| [Show-ParameterSetInfo](Elizium.Loopz/docs/Show-ParameterSetInfo.md)      | [:heavy_check_mark:](#resources/docs/parameter-set-tools.md/using.show-parameter-set-info) Show parameter set info
+| [Show-ParameterSetReport](Elizium.Loopz/docs/Show-ParameterSetReport.md)  | [:heavy_check_mark:](#resources/docs/parameter-set-tools.md/using.show-parameter-set-report) Show parameter set violations
 
 | CLASS-NAME                                                      | DESCRIPTION
 |-----------------------------------------------------------------|------------
-| [DryRunner](parameter-set-tools.md/#dry-runner.class)           | Dry run a command
-| [RuleController](parameter-set-tools.md/#rule-controller.class) | Parameter set rules
-| [Syntax](parameter-set-tools.md/#syntax.class)                  | Command syntax
+| [DryRunner](#resources/docs/parameter-set-tools.md/dry-runner.class)           | Dry run a command
+| [RuleController](#resources/docs/parameter-set-tools.md/rule-controller.class) | Parameter set rules
+| [Syntax](#resources/docs/parameter-set-tools.md/syntax.class)                  | Command syntax
 
-See [Parameter Set Tools](parameter-set-tools.md)
+See [Parameter Set Tools](#resources/docs/parameter-set-tools.md)
 
 ## Supporting Utilities (for developers)
 

@@ -146,7 +146,7 @@ As the saying goes, 'a picture is worth a thousand words'. This is particularly 
 
 For those parameter sets that require the *Pattern* parameter (which is most of them; *NoReplacement* which uses the *Cut* parameter does not), the content that is matched by the Pattern, is removed prior to applying other regex parameters.
 
-It is useful for the user to think about this when composing regex patterns. For for example, given the following input source:
+It is useful for the user to think about this when composing regex patterns. So for example, given the following input source:
 
 > 01-From-My-Mind-To-Yours
 
@@ -177,7 +177,7 @@ To change this path, the user should define either an absolute or relative path 
 | [Start](#parameter-ref.start)             | s     | Replace a regular expression match
 | [With](#parameter-ref.anchor)             | w     | Formatter used when performing *Move*
 
-Moves a match from it's current location in an item to a target location known as the Anchor. The anchor itself is a regular expression. All of the parameters with the exception of *With* are mutually exclusive (to see confirmation of this, the user can use the [Parameter Set Tools](parameter-set-tools.md) in particular the command [Show-ParameterSetInfo (ships)](#parameter-set-tools.md/using.show-parameter-set-info), which reveal that there are indeed the unique parameters in their respective parameter sets).
+Moves a match from it's current location in an item to a target location known as the Anchor. The anchor itself is a regular expression. All of the parameters with the exception of *With* are mutually exclusive (to see confirmation of this, the user can use the [Parameter Set Tools](#resources/docs/parameter-set-tools.md) in particular the command [Show-ParameterSetInfo (ships)](#resources/docs/parameter-set-tools.md/using.show-parameter-set-info), which reveal that there are indeed the unique parameters in their respective parameter sets).
 
 ### :gem: Move to Anchor
 

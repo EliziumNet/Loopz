@@ -29,7 +29,7 @@ Show all the parameter information for a command. For brevity, this example supp
 
 > $ Get-Command 'Rename-Many' | ships -Sets UpdateInPlace, NoReplacement
 
-![picture](resources/images/use-pstool.SHIPS.command.jpg)
+![picture](../images/use-pstool.SHIPS.command.jpg)
 
 ### Show-ParameterSetReport<a name="using.show-parameter-set-report"></a>
 
@@ -39,7 +39,7 @@ Show all the parameter information for a command. For brevity, this example supp
 
 > $ Get-Command 'Rename-Many' | sharp
 
-![picture](resources/images/use-pstool.SHARP.remy.no-violations.command.jpg)
+![picture](../images/use-pstool.SHARP.remy.no-violations.command.jpg)
 
 However, there are currently 4 rules that could be violated and these are illustrated next.
 
@@ -75,7 +75,7 @@ No two parameter sets can contain exactly the same set of parameters.
 
 results in:
 
-![picture](resources/images/violates.UNIQUE-PARAM-SET.rule.jpg)
+![picture](../images/violates.UNIQUE-PARAM-SET.rule.jpg)
 
 In this example, we can see we have 1 violation. That is, there are two parameter sets 'Alpha' and 'Beta' which have the same set of parameters and therefore can't be disambiguated by PowerShell. Since the 2 parameter sets are equivalent, it goes on to show the parameter set info for the first parameter set only, 'Alpha'.
 
@@ -112,7 +112,7 @@ Parameters must make unique claims to a position within any single parameter set
 
 results in:
 
-![picture](resources/images/violates.UNIQUE-POSITIONS.rule.jpg)
+![picture](../images/violates.UNIQUE-POSITIONS.rule.jpg)
 
 In this example, we can see that in parameter set 'Alpha', there are 3 parameters 'DuplicatePosA', 'DuplicatePosB' and 'DuplicatePosC' making claim to position 999. In parameter set 'Beta', both 'SameA' and 'SameB' stake a claim to position 111.
 
@@ -148,7 +148,7 @@ In this example, we can see that in parameter set 'Alpha', there are 3 parameter
 
 results in:
 
-![picture](resources/images/violates.SINGLE-PIPELINE-PARAM.rule.jpg)
+![picture](../images/violates.SINGLE-PIPELINE-PARAM.rule.jpg)
 
 There are 2 violations here. In parameter set 'Alpha', there are four parameters defined with *ValueFromPipeline* set to $true and three parameters in parameter set 'Beta', likewise.
 
@@ -192,7 +192,7 @@ function test-ParamInAllParameterSetsByAccident {
 
 results in:
 
-![picture](resources/images/violates.ACCIDENTAL-ALL-SETS.rule.jpg)
+![picture](../images/violates.ACCIDENTAL-ALL-SETS.rule.jpg)
 
 We can see that parameters 'paramB' and 'paramE' are mal-defined because of the rogue *[Parameter()]* statements. The parameter sets are displayed for all parameters mis-defined. The reader should also note that a violation is reported for each parameter mis-defined like this for all parameter sets for the command.
 
@@ -216,7 +216,7 @@ When *Show-InvokeReport* is invoked with a valid set of invoke parameters, the c
 
 > $ Get-Command Rename-Many | Show-InvokeReport -Params underscore, Pattern, Paste
 
-![picture](resources/images/use-pstool.SHIRE.valid-params.command.jpg)
+![picture](../images/use-pstool.SHIRE.valid-params.command.jpg)
 
 When a user invokes a real command and makes a mistake with the set of parameters on the command line, they can run into the error message quoted previously. The user can mistakenly either provide too many parameters none of which actually resolve to a parameter set or too few. In either case, the user can invoke *Show-InvokeReport* specifying the rogue set and in the case of providing too few parameters it will simply show a message saying so.
 
@@ -224,13 +224,13 @@ Again, using *Rename-Many* as our test command, the following shows 2 difference
 
 > $ gcm Rename-Many | shire -Params underscore, pattern, drop, relation
 
-![picture](resources/images/use-pstool.SHIRE.ambiguous-params.weak.command.jpg)
+![picture](../images/use-pstool.SHIRE.ambiguous-params.weak.command.jpg)
 
 However, if we use the *Strict* parameter, then the result will be a message indicating the supplied parameters do not resolve to a parameter set. This because the *Strict* mode takes mandatory parameters into account. The resolved candidates will only include those parameter sets whose mandatory parameters are **ALL** present in the provided set of parameters. So, actually, if we supplied a set of parameters which contains all the mandatory parameters of a particular parameter set, with the *Strict* flag set, we should see the resolved set:
 
 > $ gcm rename-many | shire -Params underscore, pattern, drop, AnchorStart -Strict
 
-![picture](resources/images/use-pstool.SHIRE.valid-params.strict.command.jpg)
+![picture](../images/use-pstool.SHIRE.valid-params.strict.command.jpg)
 
 ## Parameter Set Classes
 
