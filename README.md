@@ -32,7 +32,7 @@ which will be installed automatically if not already present.
 | COMMAND-NAME                                              | DESCRIPTION
 |-----------------------------------------------------------|------------
 | [Format-Escape](Elizium.Loopz/docs/Format-Escape.md)      | Escape Regex param
-| [Rename-Many](Elizium.Loopz/docs/Rename-Many.md)          | [:heavy_check_mark:](bulk-renamer.md) Bulk Renamer
+| [Rename-Many](Elizium.Loopz/docs/Rename-Many.md)          | [:heavy_check_mark:](resources/docs/bulk-renamer.md) Bulk Renamer
 | [Show-Signals](Elizium.Loopz/docs/Show-Signals.md)        | Show signals with overrides
 | [Select-Patterns](Elizium.Loopz/docs/Select-Patterns.md)  | Find text inside files
 
