@@ -99,17 +99,17 @@ $global:Loopz = [PSCustomObject]@{
     # Operations
     #
     'CUT-A'           = (@('Cut', '✂️', ' Σ'));
-    'CUT-B'           = (@('Cut', '🔪', ' Σ'));
-    'COPY-A'          = (@('Copy', '🍒', ' Ψ'));
-    'COPY-B'          = (@('Copy', '🥒', ' Ψ'));
+    'CUT-B'           = (@('Cut', '🦄', ' Σ'));
+    'COPY-A'          = (@('Copy', '🍒', ' ©️'));
+    'COPY-B'          = (@('Copy', '😺', ' ©️'));
     'MOVE-A'          = (@('Move', '🍺', '≈≈'));
-    'MOVE-B'          = (@('Move', '🍻', '≈≈'));
+    'MOVE-B'          = (@('Move', '🦊', '≈≈'));
     'PASTE-A'         = (@('Paste', '🌶️', ' ¶'));
-    'PASTE-B'         = (@('Paste', '🥜', ' ¶'));
+    'PASTE-B'         = (@('Paste', '🦆', ' ¶'));
     'OVERWRITE-A'     = (@('Overwrite', '♻️', ' Ø'));
     'OVERWRITE-B'     = (@('Overwrite', '❗', '!!'));
-    'PREPEND'         = (@('Prepend', '📌', '>|'));
-    'APPEND'          = (@('Append', '📌', '|<'));
+    'PREPEND'         = (@('Prepend', '⏭️', '>|'));
+    'APPEND'          = (@('Append', '⏮️', '|<'));
 
     # Thingies
     #
@@ -118,7 +118,7 @@ $global:Loopz = [PSCustomObject]@{
     'FILE-A'          = (@('File', '🏷️', 'f>'));
     'FILE-B'          = (@('File', '📝', 'F>'));
     'PATTERN'         = (@('Pattern', '🛡️', 'p:'));
-    'WITH'            = (@('With', '🍑', '><'));
+    'WITH'            = (@('With', '🍑', ' Ψ'));
     'CRUMB-A'         = (@('Crumb', '🎯', '+'));
     'CRUMB-B'         = (@('Crumb', '🧿', '+'));
     'CRUMB-C'         = (@('Crumb', '💎', '+'));
@@ -144,6 +144,7 @@ $global:Loopz = [PSCustomObject]@{
     'SWITCH-ON'       = (@('On', '✔️', '✓'));
     'SWITCH-OFF'      = (@('Off', '✖️', '×'));
     'INVALID'         = (@('Invalid', '❌', 'XX'));
+    'BECAUSE'         = (@('Because', '⚗️', '??'));
     'OK-A'            = (@('OK', '🚀', ':)'));
     'OK-B'            = (@('OK', '🌟', ':D'));
     'BAD-A'           = (@('Bad', '💥', ' ß'));

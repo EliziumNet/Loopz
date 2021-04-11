@@ -857,6 +857,13 @@ function Rename-Many {
           [couplet]$notActionedSignal = Get-FormattedSignal -Name 'NOT-ACTIONED' `
             -Signals $signals -EmojiAsValue -CustomLabel 'Not Renamed' -EmojiOnlyFormat '{0}';
           $properties.append($notActionedSignal);
+
+          [string]$reason = Get-PsObjectField -Object $actionResult -Field 'FailedReason'
+          if (-not([string]::IsNullOrEmpty($reason))) {
+            [couplet]$becauseSignal = Get-FormattedSignal -Name 'BECAUSE' `
+              -Signals $signals -Value $reason;
+            $properties.append($becauseSignal);
+          }
         }
       }
 
