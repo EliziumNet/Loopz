@@ -257,7 +257,7 @@ That space at the end is our issue. There is already a space preceding the \<TRA
 
 ... without the trailing space, fixes the problem:
 
-:heavy_plus_sign: -Pattern '(?<disc>\d{2})-' -Anchor '\d{2}' -With '${_a}-${disc} -' -Top 10 -WhatIf
+:heavy_plus_sign: -Pattern '(?\<disc\>\d{2})-' -Anchor '\d{2}' -With '${_a}-${disc} -' -Top 10 -WhatIf
 
 ![picture](../images/bulk-rename.MOVE-TO-FINAL.fixed-post-SPACES.jpg)
 
@@ -282,9 +282,17 @@ This is quite a convenient and tidy example, because all the input items are of 
 
 In this case, the *Pattern* will match because there is still a 2 digit sequence, but the *Anchor* will no longer match. This results in this item not being renamed and this is indicated in the output:
 
-![picture](need-the-picture-showing-the-failure-reaon-which-is-currently-not-shown)
+![picture](../images/bulk-rename.MOVE-TO-FINAL.not-renamed-BECAUSE.jpg)
 
-The final point worthy of note is the 'Undo Rename' in the summary. By default, all executed commands are *undo-able*. If we find that after running the command (assuming it has been unlocked and *WhatIf* is not specified), the results are not as envisioned (shouldn't really happen, because the *WhatIf* should always be used for new executions), the rename can be undone.
+:warning: The *With* format parameter MUST be defined with single quotes. Using double quotes causes string interpolation to occur resulting in named group references to not be evaluated as expected. Let's re-run the last command, but using double quotes for the *With* parameter:
+
+:x: -Pattern '(?\<disc\>\d{2})-' -Anchor '\d{2}' -With "${_a}-${disc} -" -Top 10 -WhatIf
+
+![picture](../images/bulk-rename.MOVE-TO-FINAL.interpolated-WITH.double-quotes.jpg)
+
+This shows that '${_a}' and '${disc}' are both evaluated to an empty string, breaking the desired result. The same applies to the [paste](#parameter-ref.paste) format parameter.
+
+The final point worthy of note is the 'Undo Rename' in the summary. By default, all executed commands are *undo-able* (assuming the undo feature has not been disabled). If we find that after running the command (assuming it has been unlocked and *WhatIf* is not specified), the results are not as envisioned (shouldn't really happen, because the *WhatIf* should always be used for new executions), the rename can be undone.
 
 The summary contains a [path](#general.saved-undo-scripts) to an undo script under the 'Undo Rename' signal. The user can review its contents first (recommended before running any scripts on a system) and then source that file. The undo script is purely a sequence of renames in reverse with the original name and new names swapped around, thereby reversing the whole batch.
 
