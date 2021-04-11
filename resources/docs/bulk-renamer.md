@@ -28,7 +28,7 @@ perform any renames until it has been unlocked by the user. When locked, the com
 runs as though *WhatIf* has been specified. There are indications in the output to show
 that the command is in a locked state (there is an indicator in the batch header and
 a 'Novice' indicator in the summary). To activate the command, the user needs to
-set the environment variable 'LOOPZ_REMY_LOCKED' to $false. The user should not
+set the environment variable 'LOOPZ_REMY_LOCKED' to $false; ie ($env:LOOPZ_REMY_LOCKED = $false, either temporarily in the session, or permanently in the powershell profile, see $Profile). The user should not
 unlock the command until they are comfortable with how to use this command properly
 and knows how to write regular expressions correctly. (See regex101.com)
 
@@ -44,7 +44,7 @@ in the summary. (The user can, if they wish disable the undo feature if they don
 to have to manage the accumulation of undo scripts, by setting the environment variable
 LOOPZ_REMY_UNDO_DISABLED to $true.)
 
-### :gem: Occurrence
+### :gem: Occurrence<a name="general.occurrence"></a>
 
 All regular expression parameters as listed below ...
 
@@ -67,7 +67,7 @@ So for example the *Pattern* can be specified as:
 
 This means that the second occurrence of the match 'foo' should be taken as the token match for each item being renamed.
 
-### :gem: Filtering
+### :gem: Filtering<a name="general.filtering"></a>
 
 Generally, the user must indicate which items are to be renamed using the pipeline. Any command can be used to select file system items (directories or files), but typically *Get-ChildItem* would be used and the result then piped to Rename-Many. *Get-ChildItem* contains a *Filter* parameter but this can only filter as a blob using wildcards where appropriate, but can not filter by a regular expression. The user could use an extra pipeline stage using Where-Object eg:
 
@@ -81,7 +81,7 @@ and similarly for *Except*.
 
 Any items filtered out 'inband' (by the filter parameters on *Rename-Many* as opposed to 'out of band' filtering applied to the previous stage of the pipeline, eg the filter parameter on Get-ChildItem), will be counted as a 'Skipped' item in the Summary displayed at the end of the rename batch.
 
-### :gem: Formatter Parameters
+### :gem: Formatter Parameters<a name="general.formatter-parameters"></a>
 
 The following parameters are known as *formatters*. This means that they are strings which contain the replacement text for the match. The formatter can also reference named (or numbered) group references defined in the non-filtering regex parameters:
 
@@ -96,7 +96,7 @@ So given the following as an example (not all parameters have been defined so do
 
 we can see that inside the *With* formatter, there are references to named group captures ('y', 'm', 'd') that are defined inside the *Pattern* regex.
 
-### :gem: General Parameters
+### :gem: General Parameters<a name="general.general-parameters"></a>
 
 The following parameters belong to all *Rename-Many* parameter sets:
 
@@ -117,7 +117,7 @@ The following parameters belong to all *Rename-Many* parameter sets:
 | [Transform](#parameter-ref.transform) |       | [:x:](blah)   | A script-block to perform custom rename operation
 | [Whole](#parameter-ref.whole)         |       | [:heavy_check_mark:](blah)   | Applies 'whole word' match to regex parameters
 
-### :gem: Post Processing
+### :gem: Post Processing<a name="general.post-processing"></a>
 
 During the renaming process, an item maybe renamed resulting in unfavourable characteristics in the resultant file/directory name. Eg, it is not wise to leave a file name with trailing or leading spaces. The following are the characteristics that are automatically fixed by a post processing operation:
 
@@ -138,11 +138,11 @@ The following shows an example of the *MissingCapture* operation being applied a
 
 ![picture](../images/bulk-rename.POST-PROC-EX.jpg)
 
-### :gem: Signals
+### :gem: Signals<a name="general.signals"></a>
 
 As the saying goes, 'a picture is worth a thousand words'. This is particularly cogent when eye-balling a stream of repetitive content generated as a result of an iterative operation such as the result of *Rename-Many*. Viewing and trying to process a wall of mono-coloured un-structured content can be difficult. This was the rationale behind the use of emojis (generalised into the concept of a *Signal* in commands) and of another Elizium PowerShell module [Krayola](https://github.com/EliziumNet/Krayola). The combination of coloured, consistently structured text with the use of emoji based signals is intended to aid human readability of repetitive content.
 
-### :gem: The Replacement Process
+### :gem: The Replacement Process<a name="general.the-replacement-process"></a>
 
 For those parameter sets that require the *Pattern* parameter (which is most of them; *NoReplacement* which uses the *Cut* parameter does not), the content that is matched by the Pattern, is removed prior to applying other regex parameters.
 
@@ -159,6 +159,12 @@ results in first, the removal of the *Pattern* match leaving this behind:
 > From-My-Mind-To-Yours
 
 It is to this remainder that all other regex parameters are applied.
+
+### :gem: Saved Undo Scripts<a name="general.saved-undo-scripts"></a>
+
+The undo facility enables a rename batch to be reversed. The location of the scripts is displayed in the rename summary. By default, scripts are saved to '.loopz' under the home ($Home) directory, but this can be overridden.
+
+To change this path, the user should define either an absolute or relative path in the environment variable 'LOOPZ_PATH'. Relative paths are relative to the $Home directory.
 
 ## :sparkles: Move Match<a name="action.move-match"></a>
 
@@ -201,11 +207,86 @@ Focusing on a single file item in the batch being: '**02-09 Radio Stars.mp3**':
 
 > -0902 Radio Stars.mp3
 
-Although the order of the *DISC-NO* and *TRACK-NO* have been swapped around, this is almost certainly not what we would want. We need to maintain the dash in between them. We can't include the dash inside the *Pattern* because that would just result in '0902-'. This is where the *With* formatter parameter comes into play. We can format the replacement text:
+Although the order of the *DISC-NO* and *TRACK-NO* have been swapped around, this is almost certainly not what we would want. We need to maintain the dash in between them. We can't include the dash inside the *Pattern* because that would just result in '0902-'. This is where the *With* formatter parameter and *Relation* comes into play. We can format the replacement text:
 
-:heavy_minus_sign: Rename-Many -Pattern '\d{2}' -Anchor '\d{2}' -With '-$0' -WhatIf
+:heavy_minus_sign: Rename-Many -Pattern '\d{2}' -Anchor '\d{2}' -With '${_a}-$0' -WhatIf
 
-:heavy_plus_sign:
+> -09-02 Radio Stars.mp3
+
+This is starting to get better, but there is still a problem. We now have a stray leading dash, but before discussing that issue, the contents of the [With](#parameter-ref.with) parameter needs explaining. Formatter parameters can access whole regex captures defined by other parameters and/or named/numeric capture groups defined within them. So in this example '$0' represents the whole [Pattern](#parameter-ref.pattern) match which evaluates to '02' and ${_a} represents the whole [Anchor](#parameter-ref.anchor) match which evaluates to '09'.
+
+So back to the issue at hand, being the leading stray '-'. We could solve this 1 of 2 ways
+
+* 1️⃣ capture the dash inside the *Pattern*, but also inside the *Pattern*, the characters that we really want to preserve now need to be inserted into a named capture group, so that they can be individually addressed without the whole *Pattern match*. Inside *With*, we replace '$0', with the named capture group 'disc', referenced as '${disc}':
+
+:radio_button: -Pattern '(?\<disc\>\d{2})-' -Anchor '\d{2}' -With '${_a}-${disc}' -WhatIf
+
+> 09-02 Radio Stars.mp3
+
+* 2️⃣ capture the dash inside the *Anchor* and use the same technique for 1️⃣ above. This time, inside *With*, we replace ${_a}, with the named capture group 'track', referenced as '${track}':
+
+:radio_button: -Pattern '\d{2}' -Anchor '-(?\<track\>\d{2})' -With '${track}-$0' -WhatIf
+
+> 09-02 Radio Stars.mp3
+
+Finally, we might decide that the \<TRACK-NO\>-\<DISC-NO\> sequence needs to be more clearly separated from the \<TRACK-NAME\>, so an extra ' - ' is inserted into *With*, let's say using technique 1️⃣ above (but equally applies to 2️⃣):
+
+:heavy_plus_sign: -Pattern '(?<disc>\d{2})-' -Anchor '\d{2}' -With '${_a}-${disc} - ' -WhatIf
+
+> 09-02 - Radio Stars.mp3
+
+Now that we have our somewhat finalised version, lets see how this looks in a batch:
+
+(actually, the screen shot below uses the [Top](#parameter-ref.top) parameter to reduce the number of item processed, for brevity)
+
+![picture](..\images\bulk-rename.MOVE-TO-FINAL.with-post-SPACES.jpg)
+
+It can be seen that for each item renamed, the new name is displayed in red, with the original name displayed it in white. Next to the new name, supplementary info is displayed, including 'Post (Spaces)' (we'll come to this a little later) and a *WhatIf* indicator.
+
+At the beginning of the batch, a title is shown with the [Locked](#general.safety-features) status highlighted. At the end of the batch, the rename summary is shown, displaying the value of key parameter values and some stats.
+
+The 'Post (Spaces)' previously mentioned, indicates we have made a slight formatting error that has been fixed automatically for us by [Post Processing](#general.post-processing). In this case we have created a *With* formatter that results in consecutive spaces in the resultant rename.
+
+So looking at our definition of *With* again:
+
+> -With '${_a}-${disc} - '
+
+That space at the end is our issue. There is already a space preceding the \<TRACK-NAME\> which was not captured by either *Pattern* or *Anchor*, so we don't need to insert another. So adjusting this to be
+
+> -With '${_a}-${disc} -'
+
+... without the trailing space, fixes the problem:
+
+:heavy_plus_sign: -Pattern '(?<disc>\d{2})-' -Anchor '\d{2}' -With '${_a}-${disc} -' -Top 10 -WhatIf
+
+![picture](..\images\bulk-rename.MOVE-TO-FINAL.fixed-post-SPACES.jpg)
+
+The *Post Processing* is there to watch our back by automatically enforcing desirable rules and makes the command less pedantic in its operation.
+
+In other more complicated rename batches, we might (and probably will) encounter a scenario where the named group captures defined are not doing what we expected. In this case, we can run the command with diagnostics enabled via the [Diagnose](#parameter-ref.diagnose) parameter.
+
+For this example, we can see when *Diagnose* is specified, we can see the value of named capture groups:
+
+![picture](..\images\bulk-rename.MOVE-TO-FINAL.fixed-with-DIAGNOSTICS.jpg)
+
+Focusing on the first entry, item named '01-01 Autobahn.mp3', we can see the diagnostics entry:
+
+> "[🧪] Pattern" => "([☂️] \<disc\>)='01', ([☂️] <0>)='01-'"
+
+This tells us that *Pattern* contains named group reference(s), in this case:
+
+* 'disc': '01'
+* $0: '01-'
+
+This is quite a convenient and tidy example, because all the input items are of identical form, but this is not always the case. Let's assume, the first entry in this list: '01-01 Autobahn.mp3' is not named that way, instead it is '01-0 Autobahn.mp3' so the track number is now just a single digit '0'.
+
+In this case, the *Pattern* will match because there is still a 2 digit sequence, but the *Anchor* will no longer match. This results in this item not being renamed and this is indicated in the output:
+
+![picture](need-the-picture-showing-the-failure-reaon-which-is-currently-not-shown)
+
+The final point worthy of note is the 'Undo Rename' in the summary. By default, all executed commands are *undo-able*. If we find that after running the command (assuming it has been unlocked and *WhatIf* is not specified), the results are not as envisioned (shouldn't really happen, because the *WhatIf* should always be used for new executions), the rename can be undone.
+
+The summary contains a [path](#general.saved-undo-scripts) to an undo script under the 'Undo Rename' signal. The user can review its contents first (recommended before running any scripts on a system) and then source that file. The undo script is purely a sequence of renames in reverse with the original name and new names swapped around, thereby reversing the whole batch.
 
 ### :gem: Move to Start
 
