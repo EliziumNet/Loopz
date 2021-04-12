@@ -146,7 +146,7 @@ For *Trim* and *Spaces*, the post processing simply involves removal of the unwa
 
 > ${some-variable}
 
-which occurs as a result of a named group reference defined in a formatter parameter (*With*/*Paste*) not being populated as a result of applying a regex parameter to the item and it not matching. An example of this occurring is with the use of a [Hybrid Anchor](#tbd) (*HybridStart*/*HybridEnd*), where the user specifies a pattern that includes a named group capture, but for some items, this match may fail (so by design, the match would fall back to being moved to start or end), but the formatter parameter *With* contains a reference to that named capture group. When this match fails, the reference '${some-variable}' still remains, which is removed by the post processing operation.
+which occurs as a result of a named group reference defined in a formatter parameter (*With*/*Paste*) not being populated as a result of applying a regex parameter to the item and it not matching. An example of this occurring is with the use of a [Hybrid Anchor](#using.move-to-hybrid-anchor) (*AnchorStart*/*AnchorEnd*), where the user specifies a pattern that includes a named group capture, but for some items, this match may fail (so by design, the match would fall back to being moved to start or end), but the formatter parameter *With* contains a reference to that named capture group. When this match fails, the reference '${some-variable}' still remains, which is removed by the post processing operation.
 
 These post-processing operations are made explicit in the ui because **sometimes** they occur as a result of
 a mal-formed regular expression that can be automatically fixed, but doing so may lure the user into thinking they're specifying the regex pattern correctly when in fact a minor correctable mistake has been made. It is best to be explicit about such issues rather than fix them silently.
@@ -194,9 +194,9 @@ To change this path, the user should define either an absolute or relative path 
 | [Start](#parameter-ref.start)             | s     | Replace a regular expression match
 | [With](#parameter-ref.anchor)             | w     | Formatter used when performing *Move*
 
-Moves a match from it's current location in an item to a target location known as the Anchor. The anchor itself is a regular expression. All of the parameters with the exception of *With* are mutually exclusive (to see confirmation of this, the user can use the [Parameter Set Tools](#resources/docs/parameter-set-tools.md) in particular the command [Show-ParameterSetInfo (ships)](#resources/docs/parameter-set-tools.md/using.show-parameter-set-info), which reveal that there are indeed the unique parameters in their respective parameter sets).
+Moves a match from it's current location in an item to a target location known as the [*Anchor*](#parameter-ref.anchor). The anchor itself is a regular expression. All of the parameters in this section,  with the exception of *With* are mutually exclusive (to see confirmation of this, the user can use the [Parameter Set Tools](#resources/docs/parameter-set-tools.md) in particular the command [Show-ParameterSetInfo (ships)](#resources/docs/parameter-set-tools.md/using.show-parameter-set-info), which reveals that they are indeed the unique parameters in their respective parameter sets).
 
-In the following walk-throughs, example invocations are preceded with a :heavy_minus_sign: to indicate a solution that has some scope for improvement. Subsequent to this will be further discussion on how to improve the command and those which are deemed satisfactory are marked with :heavy_plus_sign:.
+In the following walk-throughs, example invocations are preceded with a :heavy_minus_sign: to indicate a solution that has some scope for improvement. Subsequent to this will be further discussion on how to improve the command and those which are deemed satisfactory are marked with :heavy_plus_sign:. Sometimes, a command does not work in the desired way. These examples are highlighted by a :x:.
 
 ### :gem: Move to Anchor<a name="using.move-to-anchor"></a>
 
@@ -258,7 +258,7 @@ Finally, we might decide that the \<TRACK-NO\>-\<DISC-NO\> sequence needs to be 
 
 Now that we have our somewhat finalised version, lets see how this looks in a batch:
 
-(actually, the screen shot below uses the [Top](#parameter-ref.top) parameter to reduce the number of item processed, for brevity)
+(actually, the screen shot below uses the [Top](#parameter-ref.top) parameter to reduce the number of items processed, for brevity)
 
 ![picture](../images/bulk-rename.MOVE-TO-ANCHOR-FINAL.with-post-SPACES.jpg)
 
@@ -349,7 +349,7 @@ Let's explore each of the points that gets us to this result:
 
 Now that we have our finalised version, lets see how this looks in a batch:
 
-(actually, the screen shot below uses the [Top](#parameter-ref.top) parameter to reduce the number of item processed, for brevity)
+(actually, the screen shot below uses the [Top](#parameter-ref.top) parameter to reduce the number of items processed, for brevity)
 
 ![picture](../images/bulk-rename.MOVE-TO-START-FINAL.fixed.jpg)
 
@@ -384,7 +384,7 @@ This works, but it's not very graceful. So again we can optimise this via the *W
 We have chosen to spice up the formatter with extra content, but as we did before, we'll examine all the points that gets us to this state:
 
 * **End**: switch parameter specified, this means, move the *Pattern* match to the end
-* *'-'* inside *Pattern*: this is required, otherwise the remaining '04' will have a '-' right next to it, when this time, we'd rather it were removed. So we remove it by including it in the *Pattern*
+* *'-'* inside **Pattern**: this is required, otherwise the remaining '04' will have a '-' right next to it, when this time, we'd rather it were removed. So we remove it by including it in the *Pattern*
 * **disc**: named capture group inside *Pattern*. This is now required because the *Pattern* now includes a '-' which needs to be removed because a leading '-' is unsightly and unnecessary.
 * **With**: includes named group reference to the captured *DISK-NO*, but this also contain additional literal content; ie wrapping in brackets and inserting the literal 'disc-'
 
@@ -405,7 +405,7 @@ Bingo! The extra points worthy of note are:
 
 Let's see this in our batch:
 
-(actually, the screen shot below uses the [Top](#parameter-ref.top) parameter to reduce the number of item processed, for brevity)
+(actually, the screen shot below uses the [Top](#parameter-ref.top) parameter to reduce the number of items processed, for brevity)
 
 ![picture](../images/bulk-rename.MOVE-TO-END-FINAL.fixed.jpg)
 
@@ -417,31 +417,97 @@ In the rename batch, some items may match the *Anchor* pattern and others may no
 
 So using a hybrid anchor allows the user to perform an anchor oriented operation with a backup if the anchor doesn't match, all in the same batch.
 
+Consider the following directory list in our somewhat contrived example:
+
+![picture](../images/bulk-rename.MOVE-TO-HYBRID-ANCHOR.dir-list.jpg)
+
+We've decided that we want to move the date (if it exists) to precede the fragment '- at'. So in this case the date is the target of the *Pattern* match and '- at' is our *Anchor*. The directories are not consistently named, so we'll encounter different results from each item.
+
+Let's tailor our requirement a little and say, move the date to the *Anchor* if it exists and if it doesn't, then move it to the end. This is where we need a *Hybrid Anchor*. The hybrid parameters are [*AnchorStart*](#(#parameter-ref.anchorstart)) and [*AnchorEnd*](#parameter-ref.anchorend).
+
+Before we start using a *Hybrid Anchor* let's see what happens when we use a regular one:
+
+:heavy_minus_sign: Rename-Many -Pattern '\(?\d{2}-\d{2}-\d{4}\)?' -Anchor '- at' -Relation 'before' -WhatIf
+
+Results in (please excuse the wrap arounds):
+
+![picture](../images/bulk-rename.MOVE-TO-HYBRID-ANCHOR.not-HYBRID.jpg)
+
+Things to note:
+
+* 2 items filtered out, the first: **'(21-06-216) The Nephilim - Summer Solstice - at Kentish Town'** because the date is incorrect, the year is wrong, and **'Def Leppard, Hysteria in the Round - at Corn Exchange'** because it doesn't have a date at all.
+* 2 items are not renamed, the first: **'(27-03-1997) Orbital - The Middle Of Nowhere Tour Pics'** because it does not contain the *Anchor* '- at' that we require and the second **'Motley Crue - Gig Photos (23-11-2011) London'** not renamed for the same reason. See the *Because* signal in the output (*'Anchor Match'*).
+* We specify *Relation* to be *'after'*, since the default is 'before' and we want to move after the *Anchor*.
+
+So in this particular batch run, 2 items are not renamed because the *Anchor* match failed. Now let's use a *Hybrid Anchor* (we simply replace *Anchor* with *AnchorEnd*):
+
+:heavy_minus_sign: 3️⃣ Rename-Many -Pattern '\\(?\d{2}-\d{2}-\d{4}\\)?' -AnchorEnd '- at' -Relation 'before' -WhatIf
+
+results in:
+
+![picture](../images/bulk-rename.MOVE-TO-HYBRID-ANCHOR.with-ANCHOR-END.jpg)
+
+Now, all the un-skipped items in the batch are renamed. When the Anchor does not match, the date is moved to the end.
+
+But again, the date inserted could do with some alteration. Let's say we wanted to change the date format so that they are in the ISO form '\<YEAR\>-\<MONTH\>-\<DAY\>'. To do this, our *Pattern* has to make use of named capture groups again. Also, other literal text can be defined, which we can achieve by using the *With* parameter.
+
+But before we move on, let's take another look at our command in 3️⃣. Did you notice anything different about this example? Well, since the directories contain characters that are special to regular expressions and we access them in our *Pattern*, they need to be [escaped](#general.escaping). In this case, the open '(' and close ')' brackets need escaping hence the '\\(' and '\\)' in the *Pattern*.
+
+So, improving our command line, we get to:
+
+:heavy_minus_sign: -Pattern '\\(?(?\<d\>\d{2})-(?\<m\>\d{2})-(?\<y\>\d{4})\\)?' -AnchorEnd '- at' -With ' - on ${y}-${m}-${d} ${_a}' -WhatIf
+
+Resulting in:
+
+![picture](../images/bulk-rename.MOVE-TO-HYBRID-ANCHOR.with-ANCHOR-END.and-captures.jpg)
+
+Points of note:
+
+* **Pattern**: contains named captures for day, month and year. This is so we can re-arrange them inside *With*.
+* **Relation**: No need to specify the *Relation* now, because *With* has been specified (see next point)
+* **With**: contains a reference to the whole *Anchor* (${_a}), which is now removed, requiring it to be re-inserted if so required. It also contains extra literal content, in particular a leading ' -'.
+
+On closer inspection, it appears we have an issue. Item **'Underworld - (01-06-1999) - at Brixton Academy'** is renamed to: **'Underworld - - on 1999-06-01 - at Brixton Academy'**. The '- -' looks ugly and is an un-intended result (caused by the leading ' -' previously mentioned), which occurs because of our *With* replacement, not quite meeting the needs of this item. This kind of thing happens regularly and in this situation we can exclude it so that it can be processed in a separate batch. Since this is the only item to be excluded, we can use a discriminating value for the [Except](#parameter-ref.except) parameter, ie: 'Underworld':
+
+:heavy_plus_sign: Rename-Many -Except 'Underworld' -Pattern '\\(?(?\<d\>\d{2})-(?\<m\>\d{2})-(?\<y\>\d{4})\\)?' -AnchorEnd '- at' -With ' - on ${y}-${m}-${d} ${_a}' -WhatIf
+
+and we finally arrive at:
+
+![picture](../images/bulk-rename.MOVE-TO-HYBRID-ANCHOR-FINAL.with-EXCEPT.jpg)
+
+Typically, *Except* would be just generic enough to single out items to be skipped, but can't be so general as to exclude items that ought not to be. We only need to exclude a single item in this case, so our regular expression can be as specific as it needs to be (*'Underworld'*).
+
+What we've learnt about *AnchorEnd* hybrid applies identically to *AnchorStar*, except that the *Pattern*,match is moved to the start.
+
 ## :sparkles: Update Match<a name="action.update-match"></a>
 
-| Update Parameter         | Alias | DESCRIPTION
-|--------------------------|-------|------------------------------------------------------------------
-| [Paste](#tbd)            | ps    | [:heavy_check_mark:](blah) Formatter used when performing in place *Update*
+| Update Parameter              | Alias | DESCRIPTION
+|-------------------------------|-------|------------------------------------------------------------------
+| [Paste](#parameter-ref.paste) | ps    | [:heavy_check_mark:](blah) Formatter used when performing in place *Update*
+
+*Update-Match* simply involves modifying a match in its present location. Since we don't have an *Anchor* to deal with, it is much simpler to use than *Move Match* scenarios.
+
+As well as no *Anchor* and related parameters, instead of using the *With* parameter, we use the *Paste* format parameter instead and it serves a similar purpose. The peculiarities of PowerShell parameter sets means that it is much easier to use a separate parameter, rather than to try an re-use *With* in a different context (it is the same reason why new parameters were defined for the *Hybrid Anchors*, instead of re-purposing *Anchor*/*Start*/*End*).
 
 ## :sparkles: Cut Match<a name="action.cut-match"></a>
 
-| Regex Parameter          | Alias | DESCRIPTION
-|--------------------------|-------|------------------------------------------------------------------
-| [Cut](#tbd) | :heavy_multiplication_x:      | [:heavy_check_mark:](blah) Remove this match without a replacement
+| Regex Parameter           | Alias | DESCRIPTION
+|---------------------------|-------|------------------------------------------------------------------
+| [Cut](#parameter-ref.cut) | :heavy_multiplication_x: | [:heavy_check_mark:](blah) Remove this match without a replacement
 
 ## :sparkles: Add Appendage<a name="action.add-appendage"></a>
 
 ### Add Prefix
 
-| Prefix Parameter         | Alias | DESCRIPTION
-|--------------------------|-------|------------------------------------------------------------------
-| [Prepend](#tbd)          | pr    | [:heavy_check_mark:](blah) Prefix items' name with this literal string
+| Prefix Parameter                  | Alias | DESCRIPTION
+|-----------------------------------|-------|----------------------------------------------------------------
+| [Prepend](#parameter-ref.prepend) | pr    | [:heavy_check_mark:](blah) Prefix items' name with this literal string
 
 ### Add Suffix
 
-| Suffix Parameter         | Alias | DESCRIPTION
-|--------------------------|-------|------------------------------------------------------------------
-| [Append](#tbd)           | ap    | [:heavy_check_mark:](blah) Append this literal string to items' name
+| Suffix Parameter                | Alias | DESCRIPTION
+|---------------------------------|-------|------------------------------------------------------------------
+| [Append](#parameter-ref.append) | ap    | [:heavy_check_mark:](blah) Append this literal string to items' name
 
 ## :sparkles: Transform<a name="action.transform"></a>
 
@@ -526,7 +592,7 @@ is not renamed (usually because of an incorrect regular expression), the user ca
 
 ### :dart: Directory<a name="parameter-ref.directory"></a>
 
-**Type**: blah
+**Type**: [switch]
 
 Indicates only Directory items in the pipeline will be processed. If neither this switch or the [File](#parameter-ref.file) switch are specified, then both File and Directory items are processed.
 
@@ -679,9 +745,10 @@ When *Pattern* contains named capture groups, these variables can also be refere
 ${day}, ${mon} and ${year} also become available for use in *With* or *Paste*.
 
 Typically, *With* is literal text which is used to replace the *Pattern* match and is inserted
-according to the anchor parameters and *Relation*. When using *With*, whatever is defined in the *anchor* match is not removed from the pipeline's name (this is different to how *Paste* works).
+according to the anchor parameters and *Relation*. When using *With*, whatever is defined in the *anchor* match **IS** removed from the pipeline's name and requires the user to re-insert it with '${_a}' inside *With*
+if so required. The reason for this is that when *With* is not present, the *Pattern* match content is inserted verbatim next to the *Anchor* either before or after. But if we use a *With*, then the user has full control over where-abouts the *Anchor* is inserted inside *With*, so *Relation* is redundant.
 
-## Troubleshooting / Common Errors
+## :radioactive: Troubleshooting / Common Errors
 
 Most issues that occur with using *Rename-Many* is as the result of not defining a regex pattern correctly. These clearly can only be fixed, by reviewing the pattern and adjusting accordingly.
 
@@ -691,7 +758,7 @@ It is advised that users always run with *WhatIf* enabled for new invocations of
 * use PCRE compatible patterns. Eg, for named capture groups some regex engines use '(P?\<name\>)', this form will not work with Rename-Many, so make sure the correct syntax is being used in regex definitions.
 * mixing up *Paste* with *With*
 
-## Expanding Rename-Many Capabilities
+## :hammer: Expanding Rename-Many Capabilities
 
 ### Higher Order Commands
 
@@ -702,3 +769,7 @@ To build a high level *Rename-Many* command, a developer should perform the foll
 * Define the contents of the [Context](#parameter-ref.context) parameter
 * Define the regular expression and formatter parameters that need to be abstracted away and encapsulated
 * The higher level command
+
+## :green_salad: Recipes
+
+This section contains some examples that solve common renaming requirements. They are intended to give the reader a jump start in defining their own regular expressions and formatters to use with *Rename-Many*.

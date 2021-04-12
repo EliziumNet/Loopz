@@ -765,7 +765,6 @@ When $Pattern contains named capture groups, these variables can also be referen
 Eg if the $Pattern is defined as '(?\<day\>\d{1,2})-(?\<mon\>\d{1,2})-(?\<year\>\d{4})', then the variables ${day}, ${mon} and ${year} also become available for use in $With or $Paste.
 Typically, $With is static text which is used to replace the $Pattern match and is inserted according to the Anchor match, (or indeed $Start or $End) and $Relation.
 When using $With, whatever is defined in the $Anchor match is not removed from the pipeline's name (this is different to how $Paste works).
-If neither $With or Paste have been specified, then the rename operation becomes a 'Cut' operation and will be indicated as such in the batch summary.
 
 ```yaml
 Type: String
