@@ -196,6 +196,8 @@ To change this path, the user should define either an absolute or relative path 
 
 Moves a match from it's current location in an item to a target location known as the Anchor. The anchor itself is a regular expression. All of the parameters with the exception of *With* are mutually exclusive (to see confirmation of this, the user can use the [Parameter Set Tools](#resources/docs/parameter-set-tools.md) in particular the command [Show-ParameterSetInfo (ships)](#resources/docs/parameter-set-tools.md/using.show-parameter-set-info), which reveal that there are indeed the unique parameters in their respective parameter sets).
 
+In the following walk-throughs, example invocations are preceded with a :heavy_minus_sign: to indicate a solution that has some scope for improvement. Subsequent to this will be further discussion on how to improve the command and those which are deemed satisfactory are marked with :heavy_plus_sign:.
+
 ### :gem: Move to Anchor<a name="using.move-to-anchor"></a>
 
 Move a regex match identified by *Pattern* from the items' name from its current location to a location specified by the *Anchor* regex pattern.
@@ -209,6 +211,8 @@ Let's say we have a bunch of audio files which are currently named in the form:
 ... and we wish to move the *DISC-NO* to after the *TRACK-NO*. In this case, the *DISC-NO* would be the subject of the *Pattern* match and the *TRACK-NO* would be the *Anchor*.
 
 So an initial attempt of the command could be:
+
+:heavy_minus_sign: Rename-Many -Pattern '\d{2}' -Anchor '\d{2}' -WhatIf
 
 > gci ... | Rename-Many -Pattern '\d{2}' -Anchor '\d{2}' -WhatIf
 
@@ -256,7 +260,7 @@ Now that we have our somewhat finalised version, lets see how this looks in a ba
 
 (actually, the screen shot below uses the [Top](#parameter-ref.top) parameter to reduce the number of item processed, for brevity)
 
-![picture](../images/bulk-rename.MOVE-TO-FINAL.with-post-SPACES.jpg)
+![picture](../images/bulk-rename.MOVE-TO-ANCHOR-FINAL.with-post-SPACES.jpg)
 
 It can be seen that for each item renamed, the new name is displayed in red, with the original name displayed in white. Next to the new name, supplementary info is displayed, including 'Post (Spaces)' (we'll come to this a little later) and a *WhatIf* indicator.
 
@@ -276,7 +280,7 @@ That space at the end is our issue. There is already a space preceding the \<TRA
 
 :heavy_plus_sign: -Pattern '(?\<disc\>\d{2})-' -Anchor '\d{2}' -With '${_a}-${disc} -' -Top 10 -WhatIf
 
-![picture](../images/bulk-rename.MOVE-TO-FINAL.fixed-post-SPACES.jpg)
+![picture](../images/bulk-rename.MOVE-TO-ANCHOR-FINAL.fixed-post-SPACES.jpg)
 
 The *Post Processing* is there to watch our back by automatically enforcing desirable rules and makes the command less pedantic in its operation.
 
@@ -284,7 +288,7 @@ In other more complicated rename batches, we might (and probably will) encounter
 
 For this example, when *Diagnose* is specified, we can see the value of named capture groups:
 
-![picture](../images/bulk-rename.MOVE-TO-FINAL.fixed-with-DIAGNOSTICS.jpg)
+![picture](../images/bulk-rename.MOVE-TO-ANCHOR-FINAL.fixed-with-DIAGNOSTICS.jpg)
 
 Focusing on the first entry, item named '01-01 Autobahn.mp3', we can see the diagnostics entry:
 
@@ -299,13 +303,13 @@ This is quite a convenient and tidy example, because all the input items are of 
 
 In this case, the *Pattern* will match because there is still a 2 digit sequence, but the *Anchor* will no longer match. This results in this item not being renamed and this is indicated in the output:
 
-![picture](../images/bulk-rename.MOVE-TO-FINAL.not-renamed-BECAUSE.jpg)
+![picture](../images/bulk-rename.MOVE-TO-ANCHOR-FINAL.not-renamed-BECAUSE.jpg)
 
 :warning: <a name = "using.formatters-must-use-single-quotes"></a> The *With* format parameter MUST be defined with single quotes. Using double quotes causes string interpolation to occur resulting in named group references to not be evaluated as expected. Let's re-run the last command, but using double quotes for the *With* parameter:
 
 :x: -Pattern '(?\<disc\>\d{2})-' -Anchor '\d{2}' -With "${_a}-${disc} -" -Top 10 -WhatIf
 
-![picture](../images/bulk-rename.MOVE-TO-FINAL.interpolated-WITH.double-quotes.jpg)
+![picture](../images/bulk-rename.MOVE-TO-ANCHOR-FINAL.interpolated-WITH.double-quotes.jpg)
 
 This shows that '${_a}' and '${disc}' are both evaluated to an empty string, breaking the desired result. The same applies to the [paste](#parameter-ref.paste) format parameter.
 
@@ -317,20 +321,93 @@ The summary contains a [path](#general.saved-undo-scripts) to an undo script und
 
 Move a regex match identified by *Pattern* from the items' name from its current location to the start of an item's name.
 
-Continuing with the audio files as discussed in [*Move To Anchor*](#using.move-to-anchor), let's say we want to move the <TRACK-NO> to the start of an item's name.
+Continuing with the audio files as discussed in [*Move To Anchor*](#using.move-to-anchor), let's say we want to move the \<TRACK-NO\> to the start of an item's name.
 
-Focusing on a single file item in the batch being: '**02-06 Airwaves.mp3**':
+Focusing on a single file item in the batch, this time being: '**02-06 Airwaves.mp3**':
 
 * **02** represents the *DISK-NO*
 * **06** represents the *TRACK-NO*
 * **Airwaves** represents the *TRACK-NAME*
 
-:heavy_minus_sign: Rename-Many -Pattern '\d{2}', 2 -Start -WhatIf
+:heavy_minus_sign: 1️⃣ Rename-Many -Pattern '\d{2}', 2 -Start -WhatIf
 
-> -0902 Radio Stars.mp3
+> 0602- Airwaves.mp3
+
+However as, we discovered in the [previous section](#using.move-to-anchor), we need to do more to obtain a satisfactory result. We can tidy this up, with the use of the *With* parameter:
+
+:heavy_plus_sign: -Pattern '-(?\<track\>\d{2})' -Start -With '${track}-' -Drop ' -' -WhatIf
+
+> 06-02 - Airwaves.mp3
+
+Let's explore each of the points that gets us to this result:
+
+* **Start**: switch parameter specified, this means, move the *Pattern* match to the start
+* *'-'* inside *Pattern*: this is required, otherwise the remaining '02' will have a '-' right next to it, when we would rather there be a space in between. So we remove it by including it in the *Pattern* and then drop a ' -'
+* **track**: named capture group inside *Pattern*. This is now required because the *Pattern* now includes a '-' which needs to be removed so it can be replaced by a ' -' via the *Drop*.
+* **Drop**: We use ' -' to ensure that the remaining dash is preceded by a space. Note, the *Drop* parameter allows us to perform an additional operation to the prime one, which in this case is the move of a token to the start.
+* **Pattern Occurrence**: In our first attempt above (:heavy_minus_sign: 1️⃣), we used an *Occurrence* of 2, because we initially targetted the 2nd 2 digit sequence. Now that the *Pattern* includes a '-', there is now no ambiguity between the two 2 digit sequences, so we can leave the *Occurrence* to default to the first.
+
+Now that we have our finalised version, lets see how this looks in a batch:
+
+(actually, the screen shot below uses the [Top](#parameter-ref.top) parameter to reduce the number of item processed, for brevity)
+
+![picture](../images/bulk-rename.MOVE-TO-START-FINAL.fixed.jpg)
+
+:warning: When using the *Start* and *End* anchors (this does not apply to [*Hybrid Anchors*](#using.move-to-hybrid-anchor)), the user should be aware that if the match is already at the target location, then it will be skipped. For example, if we had a series of directories that contained a date in its name, but the location of the date was inconsistent, we might decide we want to move the date for every directory to the end. However, some directories may already have the date at the end, so there is no point in processing these items. That is why some items may be skipped when using *Start* and *End* anchors.
+
 ### :gem: Move to End<a name="using.move-to-end"></a>
 
-Move a regex match identified by *Pattern* from the items' name from its current location to the end of an item's name.
+Move a regex match identified by *Pattern* from the item's name from its current location to the end of its name.
+
+This time, we want to move the \<DISK-NO\> to the end of the item's name. The reader might be thinking *well isn't this just the opposite to using Start?* and they would be right. But in the discussion of *Move To End* we'll address some slightly different issues/techniques that illustrate other ways the command can be used.
+
+Focusing on a single file item in the batch, this time being: '**02-04 Intermission.mp3**':
+
+* **02** represents the *DISK-NO*
+* **04** represents the *TRACK-NO*
+* **Intermission** represents the *TRACK-NAME*
+
+Our initial naive attempt might be:
+
+:heavy_minus_sign: 2️⃣ Rename-Many -Pattern '\d{2}' -End -WhatIf
+
+resulting in:
+
+> -04 Intermission02.mp3
+
+This works, but it's not very graceful. So again we can optimise this via the *With* formatter.
+
+:heavy_minus_sign: -Pattern '(?\<disc\>\d{2})-' -End -With ' (disc-${disc})' -WhatIf
+
+> 04 Intermission (disc-02).mp3
+
+We have chosen to spice up the formatter with extra content, but as we did before, we'll examine all the points that gets us to this state:
+
+* **End**: switch parameter specified, this means, move the *Pattern* match to the end
+* *'-'* inside *Pattern*: this is required, otherwise the remaining '04' will have a '-' right next to it, when this time, we'd rather it were removed. So we remove it by including it in the *Pattern*
+* **disc**: named capture group inside *Pattern*. This is now required because the *Pattern* now includes a '-' which needs to be removed because a leading '-' is unsightly and unnecessary.
+* **With**: includes named group reference to the captured *DISK-NO*, but this also contain additional literal content; ie wrapping in brackets and inserting the literal 'disc-'
+
+However, this is not our chosen solution. We want to insert a dash in between the *TRACK-NO* and *TRACK-NAME* as we did before so that our example is renamed to: '04 - Intermission (disc-02).mp3'
+
+Achieving this, requires more work than we completed in our initial attempt 2️⃣:
+
+:heavy_plus_sign: -Pattern '(?\<disc\>\d{2})-(?\<track\>\d{2})' -End -With ' (disc-${disc})' -Drop '${track} -' -WhatIf
+
+which results in:
+
+> 04 - Intermission (disc-02).mp3
+
+Bingo! The extra points worthy of note are:
+
+* **Pattern**: Now, we capture the *DISK-NO* and the *TRACK-NO* and then drop *TRACK-NO*
+* **Drop**: This example illustrates that we don't have to drop static text. We can also reference named capture groups defined in *Pattern* and other regex parameters such as *Anchor* and *Copy*. In this case, we drop the *TRACK-NO* with an additional ' -'.
+
+Let's see this in our batch:
+
+(actually, the screen shot below uses the [Top](#parameter-ref.top) parameter to reduce the number of item processed, for brevity)
+
+![picture](../images/bulk-rename.MOVE-TO-END-FINAL.fixed.jpg)
 
 ### :gem: Move to Hybrid Anchor<a name="using.move-to-hybrid-anchor"></a>
 
