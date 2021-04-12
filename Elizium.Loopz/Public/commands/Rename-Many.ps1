@@ -1267,37 +1267,6 @@ function Rename-Many {
     }
     $bootStrap.Register($endSpec);
 
-    # [Anchored]
-    #
-    [PSCustomObject]$anchoredSpec = if ($PSBoundParameters.ContainsKey('Start') -and $Start) {
-      [PSCustomObject]@{
-        Activate      = $true;
-        Name          = 'Anchored';
-        SpecType      = 'regex';
-        Value         = $("^*{_dependency}");
-        Dependency    = 'Pattern';
-        RegExKey      = 'LOOPZ.REMY.ANCHORED-REGEX';
-        OccurrenceKey = 'LOOPZ.REMY.ANCHORED-OCC';
-      }
-    }
-    elseif ($PSBoundParameters.ContainsKey('End') -and $End) {
-      [PSCustomObject]@{
-        Activate      = $true;
-        Name          = 'Anchored';
-        SpecType      = 'regex';
-        Value         = $("*{_dependency}$");
-        Dependency    = 'Pattern';
-        RegExKey      = 'LOOPZ.REMY.ANCHORED-REGEX';
-        OccurrenceKey = 'LOOPZ.REMY.ANCHORED-OCC';
-      }
-    }
-    else {
-      $null;
-    }
-    if ($anchoredSpec) {
-      $bootStrap.Register($anchoredSpec);
-    }
-
     # [Drop]
     #
     [PSCustomObject]$dropSpec = [PSCustomObject]@{
@@ -1465,12 +1434,6 @@ function Rename-Many {
       }
     }
 
-    # NB: anchoredRegEx refers to whether -Start or -End anchors have been specified,
-    # NOT the -Anchor pattern (when ANCHOR-TYPE = 'MATCHED-ITEM') itself.
-    #
-    [RegExEntity]$ae = $bootStrap.Get('Anchored');
-    [regex]$anchoredRegEx = ${ae}?.get_RegEx();
-
     [RegExEntity]$ie = $bootStrap.Get('Include');
     [regex]$includedRegEx = ${ie}?.get_RegEx();
 
@@ -1486,10 +1449,31 @@ function Rename-Many {
       )
 
       [boolean]$clientResult = $clientCondition.InvokeReturnAsIs($pipelineItem);
-      [boolean]$isAlreadyAnchoredAt = $anchoredRegEx -and $anchoredRegEx.IsMatch($pipelineItem.Name);
+      [boolean]$isStart = $bootStrap.Contains('Start');
+      [boolean]$isEnd = $bootStrap.Contains('End');
+
+      [boolean]$isAlreadyAnchoredAt = if ($isStart -or $isEnd) {
+        [hashtable]$anchoredParameters = @{
+          'Source'     = $pipelineItem.Name;
+          'Expression' = $patternRegEx;
+          'Occurrence' = $patternEntity.Occurrence;
+        }
+
+        if ($isStart) {
+          $anchoredParameters['Start'] = $true;
+        }
+        else {
+          $anchoredParameters['End'] = $true;
+        }
+
+        Test-IsAlreadyAnchoredAt @anchoredParameters;
+      }
+      else {
+        $false;
+      }
 
       return $($clientResult -and -not($isAlreadyAnchoredAt));
-    };
+    } # compoundCondition
 
     [scriptblock]$invokeCondition = {
       param(
