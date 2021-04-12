@@ -67,6 +67,23 @@ So for example the *Pattern* can be specified as:
 
 This means that the second occurrence of the match 'foo' should be taken as the token match for each item being renamed.
 
+### :gem: Escaping<a name="general.escaping"></a>
+
+If a regex parameter needs to use a regular expression character as
+a literal, it must be escaped. There are multiple ways of doing this:
+
+* use the 'esc' function (alias for *Format-Escape*); eg: -Pattern $($esc('(123)'))
+* use a leading ~ inside the regex parameter; eg: -Pattern '~(123)'
+
+The above 2 approaches escape the entire string. The second approach is more concise
+and avoids the necessary use of extra brackets and $.
+
+* use 'esc' alongside other string concatenation:
+  eg: -Pattern $($esc('(123)') + '-(?<ccy>GBP|SEK)').
+
+This third method is required when the whole pattern should not be subjected to
+escaping.
+
 ### :gem: Filtering<a name="general.filtering"></a>
 
 Generally, the user must indicate which items are to be renamed using the pipeline. Any command can be used to select file system items (directories or files), but typically *Get-ChildItem* would be used and the result then piped to Rename-Many. *Get-ChildItem* contains a *Filter* parameter but this can only filter as a blob using wildcards where appropriate, but can not filter by a regular expression. The user could use an extra pipeline stage using Where-Object eg:
@@ -179,7 +196,7 @@ To change this path, the user should define either an absolute or relative path 
 
 Moves a match from it's current location in an item to a target location known as the Anchor. The anchor itself is a regular expression. All of the parameters with the exception of *With* are mutually exclusive (to see confirmation of this, the user can use the [Parameter Set Tools](#resources/docs/parameter-set-tools.md) in particular the command [Show-ParameterSetInfo (ships)](#resources/docs/parameter-set-tools.md/using.show-parameter-set-info), which reveal that there are indeed the unique parameters in their respective parameter sets).
 
-### :gem: Move to Anchor
+### :gem: Move to Anchor<a name="using.move-to-anchor"></a>
 
 Move a regex match identified by *Pattern* from the items' name from its current location to a location specified by the *Anchor* regex pattern.
 
@@ -241,7 +258,7 @@ Now that we have our somewhat finalised version, lets see how this looks in a ba
 
 ![picture](../images/bulk-rename.MOVE-TO-FINAL.with-post-SPACES.jpg)
 
-It can be seen that for each item renamed, the new name is displayed in red, with the original name displayed it in white. Next to the new name, supplementary info is displayed, including 'Post (Spaces)' (we'll come to this a little later) and a *WhatIf* indicator.
+It can be seen that for each item renamed, the new name is displayed in red, with the original name displayed in white. Next to the new name, supplementary info is displayed, including 'Post (Spaces)' (we'll come to this a little later) and a *WhatIf* indicator.
 
 At the beginning of the batch, a title is shown with the [Locked](#general.safety-features) status highlighted. At the end of the batch, the rename summary is shown, displaying the value of key parameter values and some stats.
 
@@ -265,7 +282,7 @@ The *Post Processing* is there to watch our back by automatically enforcing desi
 
 In other more complicated rename batches, we might (and probably will) encounter a scenario where the named group captures defined are not doing what we expected. In this case, we can run the command with diagnostics enabled via the [Diagnose](#parameter-ref.diagnose) parameter.
 
-For this example, we can see when *Diagnose* is specified, we can see the value of named capture groups:
+For this example, when *Diagnose* is specified, we can see the value of named capture groups:
 
 ![picture](../images/bulk-rename.MOVE-TO-FINAL.fixed-with-DIAGNOSTICS.jpg)
 
@@ -276,7 +293,7 @@ Focusing on the first entry, item named '01-01 Autobahn.mp3', we can see the dia
 This tells us that *Pattern* contains named group reference(s), in this case:
 
 * 'disc': '01'
-* $0: '01-'
+* '0': '01-'
 
 This is quite a convenient and tidy example, because all the input items are of identical form, but this is not always the case. Let's assume, the first entry in this list: '01-01 Autobahn.mp3' is not named that way, instead it is '01-0 Autobahn.mp3' so the track number is now just a single digit '0'.
 
@@ -284,7 +301,7 @@ In this case, the *Pattern* will match because there is still a 2 digit sequence
 
 ![picture](../images/bulk-rename.MOVE-TO-FINAL.not-renamed-BECAUSE.jpg)
 
-:warning: The *With* format parameter MUST be defined with single quotes. Using double quotes causes string interpolation to occur resulting in named group references to not be evaluated as expected. Let's re-run the last command, but using double quotes for the *With* parameter:
+:warning: <a name = "using.formatters-must-use-single-quotes"></a> The *With* format parameter MUST be defined with single quotes. Using double quotes causes string interpolation to occur resulting in named group references to not be evaluated as expected. Let's re-run the last command, but using double quotes for the *With* parameter:
 
 :x: -Pattern '(?\<disc\>\d{2})-' -Anchor '\d{2}' -With "${_a}-${disc} -" -Top 10 -WhatIf
 
@@ -296,15 +313,26 @@ The final point worthy of note is the 'Undo Rename' in the summary. By default, 
 
 The summary contains a [path](#general.saved-undo-scripts) to an undo script under the 'Undo Rename' signal. The user can review its contents first (recommended before running any scripts on a system) and then source that file. The undo script is purely a sequence of renames in reverse with the original name and new names swapped around, thereby reversing the whole batch.
 
-### :gem: Move to Start
+### :gem: Move to Start<a name="using.move-to-start"></a>
 
 Move a regex match identified by *Pattern* from the items' name from its current location to the start of an item's name.
 
-### :gem: Move to End
+Continuing with the audio files as discussed in [*Move To Anchor*](#using.move-to-anchor), let's say we want to move the <TRACK-NO> to the start of an item's name.
+
+Focusing on a single file item in the batch being: '**02-06 Airwaves.mp3**':
+
+* **02** represents the *DISK-NO*
+* **06** represents the *TRACK-NO*
+* **Airwaves** represents the *TRACK-NAME*
+
+:heavy_minus_sign: Rename-Many -Pattern '\d{2}', 2 -Start -WhatIf
+
+> -0902 Radio Stars.mp3
+### :gem: Move to End<a name="using.move-to-end"></a>
 
 Move a regex match identified by *Pattern* from the items' name from its current location to the end of an item's name.
 
-### :gem: Move to Hybrid Anchor
+### :gem: Move to Hybrid Anchor<a name="using.move-to-hybrid-anchor"></a>
 
 In the rename batch, some items may match the *Anchor* pattern and others may not. Ordinarily, if the *Anchor* does not match, then the rename will not occur for this item. This would then require the user to re-run the command with a redefined anchor or run with an entirely different parameter set. However, with a **Hybrid Anchor**, what we're saying is:
 
@@ -582,7 +610,7 @@ Most issues that occur with using *Rename-Many* is as the result of not defining
 
 It is advised that users always run with *WhatIf* enabled for new invocations of Rename-Many, so that the results can be confirmed before being actioned for real. When unexpected results occur, the user can specify the *Diagnose* parameter to ensure that named capture groups are working as expected. Readers are also directed to use other 3rd party resources to debug regex patterns such as [regex101](https://regex101.com).
 
-* incorrect use of double quotes on formatter parameters; use single quotes to avoid incorrect interpolation
+* incorrect use of double quotes on formatter parameters; use single quotes to avoid incorrect interpolation. (See [Formatters Must Use Single Quotes](#using.formatters-must-use-single-quotes))
 * use PCRE compatible patterns. Eg, for named capture groups some regex engines use '(P?\<name\>)', this form will not work with Rename-Many, so make sure the correct syntax is being used in regex definitions.
 * mixing up *Paste* with *With*
 
