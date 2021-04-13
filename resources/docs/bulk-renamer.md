@@ -667,7 +667,9 @@ specify a pattern in the *Include* and use *Pattern* for the match you do want t
 
 **Type**: [string]
 
-When *Paste* is defined, the [Anchor](#parameter-ref.anchor) (if specified) is removed from the original name and needs to be be re-inserted using the special variable ${_a}. The other special variables that can be used inside a *Paste* string is documented under the [With](#parameter-ref.with) parameter.
+Formatter parameter for Update operations. Can contain named/numbered group references
+defined inside regular expression parameters, or use special named references $0 for the whole
+[Pattern](#parameter-ref.pattern) match and ${_c} for the whole [Copy](#parameter-ref.copy) match.
 
 ### :dart: Pattern<a name="parameter-ref.pattern"></a>
 
