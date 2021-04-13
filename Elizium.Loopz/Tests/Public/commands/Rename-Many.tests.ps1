@@ -364,7 +364,7 @@ Describe 'Rename-Many' -Tag 'remy' {
 
     Context 'and: Transform' {
       Context 'and: First Only' {
-        It 'should: do rename; replace First Pattern for Copy text' {
+        It 'should: do rename; replace First Pattern for Copy text' -Tag 'Current' {
           $script:_expected = @{
             'loopz.application.t1.log' = 'transformed.loopz.pplication.t1.log';
             'loopz.application.t2.log' = 'transformed.loopz.pplication.t2.log';
@@ -1205,9 +1205,6 @@ Describe 'Rename-Many parameter sets' -Tag 'remy' {
           ParamSet    = 'UpdateInPlace' 
         },
         @{ Parameters = 'underscore', 'Pattern', 'Paste', 'Copy';
-          ParamSet    = 'UpdateInPlace' 
-        },
-        @{ Parameters = 'underscore', 'Pattern', 'Paste', 'Copy', 'With';
           ParamSet    = 'UpdateInPlace' 
         },
 

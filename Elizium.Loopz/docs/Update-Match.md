@@ -16,7 +16,7 @@ $Pattern match in it's current location.
 
 ```powershell
 Update-Match [-Value] <String> [-Pattern] <Regex> [[-PatternOccurrence] <String>] [[-Copy] <Regex>]
- [[-CopyOccurrence] <String>] [[-With] <String>] [[-Paste] <String>] [-Diagnose] [<CommonParameters>]
+ [[-CopyOccurrence] <String>] [[-Paste] <String>] [-Diagnose] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -34,8 +34,8 @@ The user should not be using named capture groups in Copy rather, they should be
 
 Regular expression string applied to $Value (after the $Pattern match has been removed), indicating a portion which should be copied and re-inserted (via the $Paste parameter; see $Paste or $With).
 Since this is a regular expression to be used in $Paste/$With, there is no value in the user specifying a static pattern, because that static string can just be defined in $Paste/$With.
-The value in the $Copy parameter comes when a generic pattern is defined eg \d{3} (is non static), specifies any 3 digits as opposed to say '123', which could be used directly in the $Paste/$With parameter without the need for $Copy.
-The match defined by $Copy is stored in special variable ${_p} and can be referenced as such from $Paste and $With.
+The value in the $Copy parameter comes when a generic pattern is defined eg \d{3} (is non literal), specifies any 3 digits as opposed to say '123', which could be used directly in the $Paste/$With parameter without the need for $Copy.
+The match defined by $Copy is stored in special variable ${_c} and can be referenced as such from $Paste and $With.
 
 ```yaml
 Type: Regex
@@ -159,21 +159,6 @@ Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
-
-### -With
-
-This is a NON regular expression string.
-It would be more accurately described as a formatter, similar to the $Paste parameter.
-Defines what text is used as the replacement for the $Pattern match.
-Works in concert with $Relation (whereas $Paste does not).
-$With can reference special variables:
-
-* $0: the pattern match
-* ${_c}: the copy match
-
-When $Pattern contains named capture groups, these variables can also be referenced.
-Eg if the $Pattern is defined as '(?\<day\>\d{1,2})-(?\<mon\>\d{1,2})-(?\<year\>\d{4})', then the variables ${day}, ${mon} and ${year} also become available for use in $With or $Paste.
-Typically, $With is static text which is used to replace the $Pattern match.
 
 ```yaml
 Type: String
