@@ -752,11 +752,7 @@ number of item processed
 
           if ($transform) {
             [string]$transformed = $transform.InvokeReturnAsIs(
-              # Transform function needs the exchange and a new PSCustomObject
-              # which contains the user parameters to Rename-Many (maybe
-              # populated from $PSBoundParameters).
-              #
-              $_underscore.Name, $newItemName, $actionResult.CapturedPattern
+              $_underscore.Name, $newItemName, $actionResult.CapturedPattern, $_exchange
             );
 
             if (-not([string]::IsNullOrEmpty($transformed))) {
@@ -1025,6 +1021,8 @@ number of item processed
       'LOOPZ.REMY.MAX-ITEM-MESSAGE-SIZE'      = $maxItemMessageSize;
       'LOOPZ.REMY.FIXED-INDENT'               = get-fixedIndent -Theme $theme;
       'LOOPZ.REMY.FROM-LABEL'                 = Get-PaddedLabel -Label 'From' -Width 9;
+
+      'LOOPZ.REMY.USER-PARAMS'                = $PSBoundParameters;
     }
 
     [string]$adjustedWhole = if ($PSBoundParameters.ContainsKey('Whole')) {

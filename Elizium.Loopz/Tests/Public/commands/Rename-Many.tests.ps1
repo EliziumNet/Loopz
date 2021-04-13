@@ -374,7 +374,7 @@ Describe 'Rename-Many' -Tag 'remy' {
           }
 
           [scriptblock]$transformer = [scriptblock] {
-            param($name, $newItemName, $capturedPattern)
+            param($name, $newItemName, $capturedPattern, $exchange)
 
             return "transformed.$newItemName";
           }
