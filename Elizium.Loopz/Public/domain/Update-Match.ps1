@@ -11,24 +11,22 @@ function Update-Match {
 
   .DESCRIPTION
     Returns a new string that reflects updating the specified $Pattern match.
-    First Update-Match, removes the Pattern match from $Value. This makes the With and
+    First Update-Match, removes the Pattern match from $Value. This makes the Paste and
   Copy match against the remainder ($patternRemoved) of $Value. This way, there is
-  no overlap between the Pattern match and $With and it also makes the functionality more
+  no overlap between the Pattern match and $Paste and it also makes the functionality more
   understandable for the user. NB: Pattern only tells you what to remove, but it's the
-  With, Copy and Paste that defines what to insert. The user should not be using named
-  capture groups in Copy rather, they should be defined inside $Paste and referenced
-  inside Paste.
+  With, Copy and Paste that defines what to insert.
 
   .PARAMETER Copy
     Regular expression string applied to $Value (after the $Pattern match has been removed),
   indicating a portion which should be copied and re-inserted (via the $Paste parameter;
-  see $Paste or $With). Since this is a regular expression to be used in $Paste/$With, there
+  see $Paste). Since this is a regular expression to be used in $Paste, there
   is no value in the user specifying a static pattern, because that static string can just be
-  defined in $Paste/$With. The value in the $Copy parameter comes when a generic pattern is
-  defined eg \d{3} (is non static), specifies any 3 digits as opposed to say '123', which
-  could be used directly in the $Paste/$With parameter without the need for $Copy. The match
-  defined by $Copy is stored in special variable ${_p} and can be referenced as such from
-  $Paste and $With.
+  defined in $Paste. The value in the $Copy parameter comes when a generic pattern is
+  defined eg \d{3} (is non literal), specifies any 3 digits as opposed to say '123', which
+  could be used directly in the $Paste parameter without the need for $Copy. The match
+  defined by $Copy is stored in special variable ${_c} and can be referenced as such from
+  $Paste.
 
   .PARAMETER CopyOccurrence
     Can be a number or the letters f, l
@@ -64,18 +62,6 @@ function Update-Match {
   .PARAMETER Value
     The source value against which regular expressions are applied.
 
-  .PARAMETER With
-    This is a NON regular expression string. It would be more accurately described as a formatter,
-  similar to the $Paste parameter. Defines what text is used as the replacement for the $Pattern
-  match. Works in concert with $Relation (whereas $Paste does not). $With can reference special
-  variables:
-  * $0: the pattern match
-  * ${_c}: the copy match
-  When $Pattern contains named capture groups, these variables can also be referenced. Eg if the
-  $Pattern is defined as '(?<day>\d{1,2})-(?<mon>\d{1,2})-(?<year>\d{4})', then the variables
-  ${day}, ${mon} and ${year} also become available for use in $With or $Paste.
-  Typically, $With is static text which is used to replace the $Pattern match.
-
   #>
   [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', '')]
   [OutputType([string])]
@@ -96,9 +82,6 @@ function Update-Match {
     [Parameter()]
     [ValidateScript( { $_ -ne '0' })]
     [string]$CopyOccurrence = 'f',
-
-    [Parameter()]
-    [string]$With,
 
     [Parameter()]
     [string]$Paste,
@@ -159,27 +142,10 @@ function Update-Match {
       $capturedCopy;
     }
 
-    [string]$replaceWith = if ($PSBoundParameters.ContainsKey('With')) {
-      # Still need to resolve group references inside With
-      #
-      # [string]$withText = Update-GroupRefs -Source $With -Captures $patternCaptures;
-      # $withText = Update-GroupRefs -Source $withText -Captures $copyCaptures;
-      $With;
-    }
-    else {
-      [string]::Empty;
-    }
-
     if ([string]::IsNullOrEmpty($failedReason)) {
-      if ($PSBoundParameters.ContainsKey('Paste')) {
-        [string]$format = $Paste.Replace('${_c}', $copyText).Replace(
-          '${_w}', $replaceWith).Replace('$0', $capturedPattern);
-      }
-      else {
-        # Just do a straight swap of the pattern match for the replaceWith
-        #
-        [string]$format = $replaceWith;
-      }
+      [string]$format = $PSBoundParameters.ContainsKey('Paste') `
+        ? $Paste.Replace('${_c}', $copyText).Replace('$0', $capturedPattern) `
+        : [string]::Empty;
 
       # Resolve all named/numbered group references
       #
