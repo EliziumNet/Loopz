@@ -15,9 +15,9 @@ Describe 'Update-Match' -Tag 'remy' {
         It 'should: return original string unmodified' {
           [string]$source = 'We are like the dreamer who dreams and then lives inside the dream';
           [RegEx]$pattern = new-expr('blooper');
-          [string]$with = 'dandelion';
+          [string]$paste = 'dandelion';
 
-          [PSCustomObject]$updateResult = Update-Match -Value $source -Pattern $pattern -With $with;
+          [PSCustomObject]$updateResult = Update-Match -Value $source -Pattern $pattern -Paste $paste;
 
           $updateResult.Payload | Should -BeExactly $source;
           $updateResult.Success | Should -BeFalse;
@@ -29,9 +29,9 @@ Describe 'Update-Match' -Tag 'remy' {
         It 'should: replace the single match' {
           [string]$source = 'We are like the dreamer';
           [RegEx]$pattern = new-expr('dream');
-          [string]$with = 'heal';
+          [string]$paste = 'heal';
 
-          [PSCustomObject]$updateResult = Update-Match -Value $source -Pattern $pattern -With $with;
+          [PSCustomObject]$updateResult = Update-Match -Value $source -Pattern $pattern -Paste $paste;
           $updateResult.Payload | Should -BeExactly 'We are like the healer';
         }
       }
@@ -40,9 +40,9 @@ Describe 'Update-Match' -Tag 'remy' {
         It 'should: replace the first match only' {
           [string]$source = 'We are like the dreamer who dreams and then lives inside the dream';
           [RegEx]$pattern = new-expr('dream');
-          [string]$with = 'heal';
+          [string]$paste = 'heal';
 
-          [PSCustomObject]$updateResult = Update-Match -Value $source -Pattern $pattern -With $with;
+          [PSCustomObject]$updateResult = Update-Match -Value $source -Pattern $pattern -Paste $paste;
           $updateResult.Payload | Should -BeExactly 'We are like the healer who dreams and then lives inside the dream';
         }
       }
@@ -51,9 +51,9 @@ Describe 'Update-Match' -Tag 'remy' {
         It 'should: replace specified match only' {
           [string]$source = 'We are like the dreamer who dreams and then lives inside the dream';
           [RegEx]$pattern = new-expr('dream');
-          [string]$with = 'heal';
+          [string]$paste = 'heal';
 
-          [PSCustomObject]$updateResult = Update-Match -Value $source -Pattern $pattern -With $with `
+          [PSCustomObject]$updateResult = Update-Match -Value $source -Pattern $pattern -Paste $paste `
             -PatternOccurrence '2';
           $updateResult.Payload | Should -BeExactly 'We are like the dreamer who heals and then lives inside the dream';
         }
@@ -63,9 +63,9 @@ Describe 'Update-Match' -Tag 'remy' {
         It 'should: return value unmodified' {
           [string]$source = 'We are like the dreamer who dreams and then lives inside the dream';
           [RegEx]$pattern = new-expr('dream');
-          [string]$with = 'heal';
+          [string]$paste = 'heal';
 
-          [PSCustomObject]$updateResult = Update-Match -Value $source -Pattern $pattern -With $with `
+          [PSCustomObject]$updateResult = Update-Match -Value $source -Pattern $pattern -Paste $paste `
             -PatternOccurrence '99';
           $updateResult.Payload | Should -BeExactly $source;
         }
@@ -145,17 +145,17 @@ Describe 'Update-Match' -Tag 'remy' {
         }
       } # and: Paste & Copy
 
-      Context 'and: Paste & With' {
+      Context 'and: Paste & Copy' {
         Context 'Copy matches' {
           It 'should: replace the single match' {
             [string]$source = 'We are like the dreamer';
             [RegEx]$pattern = new-expr('dream');
-            [string]$with = 'heal';
-            [string]$paste = '==${_w}==';
+            [string]$copy = '[^\s]+';
+            [string]$paste = '==${_c}==';
 
             [PSCustomObject]$updateResult = Update-Match -Value $source -Pattern $pattern `
-              -With $with -Paste $paste;
-            $updateResult.Payload | Should -BeExactly 'We are like the ==heal==er';
+              -Copy $copy -Paste $paste;
+            $updateResult.Payload | Should -BeExactly 'We are like the ==We==er';
           }
         }
       } # and: Paste & Copy
@@ -167,9 +167,9 @@ Describe 'Update-Match' -Tag 'remy' {
           It 'should: return original string unmodified' {
             [string]$source = 'We are like the dreamer who dreams and then lives inside the dream';
             [RegEx]$pattern = new-expr('\bscream\b');
-            [string]$with = 'heal';
+            [string]$paste = 'heal';
 
-            [PSCustomObject]$updateResult = Update-Match -Value $source -Pattern $pattern -With $with;
+            [PSCustomObject]$updateResult = Update-Match -Value $source -Pattern $pattern -Paste $paste;
             $updateResult.Payload | Should -BeExactly $source;
 
             $updateResult.FailedReason.Contains('Pattern') | Should -BeTrue;
@@ -180,9 +180,9 @@ Describe 'Update-Match' -Tag 'remy' {
           It 'should: replace the single match' {
             [string]$source = 'We are like the dreamer who dreams and then lives inside the dream';
             [RegEx]$pattern = new-expr('\bdream\b');
-            [string]$with = 'healer';
+            [string]$paste = 'healer';
 
-            [PSCustomObject]$updateResult = Update-Match -Value $source -Pattern $pattern -With $with;
+            [PSCustomObject]$updateResult = Update-Match -Value $source -Pattern $pattern -Paste $paste;
             $updateResult.Payload | Should -BeExactly 'We are like the dreamer who dreams and then lives inside the healer';
           }
         }
@@ -191,9 +191,9 @@ Describe 'Update-Match' -Tag 'remy' {
           It 'should: replace the first single match only' {
             [string]$source = 'We are like the dreamer who has a dream and then lives inside the dream';
             [RegEx]$pattern = new-expr('\bdream\b');
-            [string]$with = 'healer';
+            [string]$paste = 'healer';
 
-            [PSCustomObject]$updateResult = Update-Match -Value $source -Pattern $pattern -With $with;
+            [PSCustomObject]$updateResult = Update-Match -Value $source -Pattern $pattern -Paste $paste;
             $updateResult.Payload | Should -BeExactly 'We are like the dreamer who has a healer and then lives inside the dream';
           }
         }
@@ -204,9 +204,9 @@ Describe 'Update-Match' -Tag 'remy' {
           It 'should: replace the single match' {
             [string]$source = 'Party like its 31-12-1999';
             [RegEx]$pattern = new-expr('\d{2}-\d{2}-\d{4}');
-            [string]$with = 'Nineteen Ninety Nine';
+            [string]$paste = 'Nineteen Ninety Nine';
 
-            [PSCustomObject]$updateResult = Update-Match -Value $source -Pattern $pattern -With $with;
+            [PSCustomObject]$updateResult = Update-Match -Value $source -Pattern $pattern -Paste $paste;
             $updateResult.Payload | Should -BeExactly 'Party like its Nineteen Ninety Nine';
           }
         }
@@ -215,9 +215,9 @@ Describe 'Update-Match' -Tag 'remy' {
           It 'should: replace the first match only' {
             [string]$source = '01-01-2000 Party like its 31-12-1999';
             [RegEx]$pattern = new-expr('\d{2}-\d{2}-\d{4}');
-            [string]$with = 'New Years Eve 1999';
+            [string]$paste = 'New Years Eve 1999';
 
-            [PSCustomObject]$updateResult = Update-Match -Value $source -Pattern $pattern -With $with `
+            [PSCustomObject]$updateResult = Update-Match -Value $source -Pattern $pattern -Paste $paste `
               -PatternOccurrence 'f';
             $updateResult.Payload | Should -BeExactly 'New Years Eve 1999 Party like its 31-12-1999';
           }
@@ -225,9 +225,9 @@ Describe 'Update-Match' -Tag 'remy' {
           It 'should: replace identified match only' {
             [string]$source = '01-01-2000 Party like its 31-12-1999, today is 24-09-2020';
             [RegEx]$pattern = new-expr('\d{2}-\d{2}-\d{4}');
-            [string]$with = '[DATE]';
+            [string]$paste = '[DATE]';
 
-            [PSCustomObject]$updateResult = Update-Match -Value $source -Pattern $pattern -With $with `
+            [PSCustomObject]$updateResult = Update-Match -Value $source -Pattern $pattern -Paste $paste `
               -PatternOccurrence '2';
             $updateResult.Payload | Should -BeExactly '01-01-2000 Party like its [DATE], today is 24-09-2020';
           }
@@ -269,9 +269,9 @@ Describe 'Update-Match' -Tag 'remy' {
         It 'should: return original string unmodified' {
           [string]$source = 'The sound the wind makes in the pines';
           [RegEx]$pattern = new-expr('bear');
-          [string]$with = 'woods';
+          [string]$paste = 'woods';
 
-          [PSCustomObject]$updateResult = Update-Match -Value $source -Pattern $pattern -With $with;
+          [PSCustomObject]$updateResult = Update-Match -Value $source -Pattern $pattern -Paste $paste;
           $updateResult.Payload | Should -BeExactly 'The sound the wind makes in the pines';
         }
       }
@@ -280,9 +280,9 @@ Describe 'Update-Match' -Tag 'remy' {
         It 'should: replace the single match' {
           [string]$source = 'The sound the wind makes in the pines';
           [RegEx]$pattern = new-expr('wind');
-          [string]$with = 'owl';
+          [string]$paste = 'owl';
 
-          [PSCustomObject]$updateResult = Update-Match -Value $source -Pattern $pattern -With $with;
+          [PSCustomObject]$updateResult = Update-Match -Value $source -Pattern $pattern -Paste $paste;
           $updateResult.Payload | Should -BeExactly 'The sound the owl makes in the pines';
         }
       }
@@ -291,9 +291,9 @@ Describe 'Update-Match' -Tag 'remy' {
         It 'should: replace the last single match only' {
           [string]$source = 'The sound the wind makes in the pines';
           [RegEx]$pattern = new-expr('in');
-          [string]$with = '==';
+          [string]$paste = '==';
 
-          [PSCustomObject]$updateResult = Update-Match -Value $source -Pattern $pattern -With $with `
+          [PSCustomObject]$updateResult = Update-Match -Value $source -Pattern $pattern -Paste $paste `
             -PatternOccurrence 'l';
           $updateResult.Payload | Should -BeExactly 'The sound the wind makes in the p==es';
         }
@@ -306,9 +306,9 @@ Describe 'Update-Match' -Tag 'remy' {
           It 'should: return original string unmodified' {
             [string]$source = 'The sound the wind makes in the pines';
             [RegEx]$pattern = new-expr('\bbear\b');
-            [string]$with = 'woods';
+            [string]$paste = 'woods';
 
-            [PSCustomObject]$updateResult = Update-Match -Value $source -Pattern $pattern -With $with;
+            [PSCustomObject]$updateResult = Update-Match -Value $source -Pattern $pattern -Paste $paste;
 
             $updateResult.Payload | Should -BeExactly $source;
             $updateResult.Success | Should -BeFalse;
@@ -320,9 +320,9 @@ Describe 'Update-Match' -Tag 'remy' {
           It 'should: replace the single match' {
             [string]$source = 'The sound the wind makes in the pines';
             [RegEx]$pattern = new-expr('\bin\b');
-            [string]$with = 'under';
+            [string]$paste = 'under';
 
-            [PSCustomObject]$updateResult = Update-Match -Value $source -Pattern $pattern -With $with;
+            [PSCustomObject]$updateResult = Update-Match -Value $source -Pattern $pattern -Paste $paste;
             $updateResult.Payload | Should -BeExactly 'The sound the wind makes under the pines';
           }
         }
@@ -331,9 +331,9 @@ Describe 'Update-Match' -Tag 'remy' {
           It 'should: replace the last single match only' {
             [string]$source = 'The sound the wind makes in the pines or in the woods';
             [RegEx]$pattern = new-expr('in');
-            [string]$with = 'under';
+            [string]$paste = 'under';
 
-            [PSCustomObject]$updateResult = Update-Match -Value $source -Pattern $pattern -With $with `
+            [PSCustomObject]$updateResult = Update-Match -Value $source -Pattern $pattern -Paste $paste `
               -PatternOccurrence 'l';
             $updateResult.Payload | Should -BeExactly 'The sound the wind makes in the pines or under the woods';
           }
@@ -345,9 +345,9 @@ Describe 'Update-Match' -Tag 'remy' {
           It 'should: replace the single match' {
             [string]$source = 'Party like its 31-12-1999';
             [RegEx]$pattern = new-expr('\d{2}-\d{2}-\d{4}');
-            [string]$with = 'Nineteen Ninety Nine';
+            [string]$paste = 'Nineteen Ninety Nine';
 
-            [PSCustomObject]$updateResult = Update-Match -Value $source -Pattern $pattern -With $with;
+            [PSCustomObject]$updateResult = Update-Match -Value $source -Pattern $pattern -Paste $paste;
             $updateResult.Payload | Should -BeExactly 'Party like its Nineteen Ninety Nine';
           }
         }
@@ -356,9 +356,9 @@ Describe 'Update-Match' -Tag 'remy' {
           It 'should: replace the last match only' {
             [string]$source = '01-01-2000 Party like its 31-12-1999';
             [RegEx]$pattern = new-expr('\d{2}-\d{2}-\d{4}');
-            [string]$with = 'New Years Eve 1999';
+            [string]$paste = 'New Years Eve 1999';
 
-            [PSCustomObject]$updateResult = Update-Match -Value $source -Pattern $pattern -With $with `
+            [PSCustomObject]$updateResult = Update-Match -Value $source -Pattern $pattern -Paste $paste `
               -PatternOccurrence 'l';
             $updateResult.Payload | Should -BeExactly '01-01-2000 Party like its New Years Eve 1999';
           }
@@ -384,9 +384,9 @@ Describe 'Update-Match' -Tag 'remy' {
       It 'should: replace all matches' {
         [string]$source = 'Cyanopsia: blue, Cataract: blue, Moody: blues, Azora: blue, Azul: blue, Hinto: blue';
         [RegEx]$pattern = new-expr('blue');
-        [string]$with = 'red';
+        [string]$paste = 'red';
 
-        [PSCustomObject]$updateResult = Update-Match -Value $source -Pattern $pattern -With $with `
+        [PSCustomObject]$updateResult = Update-Match -Value $source -Pattern $pattern -Paste $paste `
           -PatternOccurrence '2';
         $updateResult.Payload | Should -BeExactly 'Cyanopsia: blue, Cataract: red, Moody: blues, Azora: blue, Azul: blue, Hinto: blue';
       }
@@ -394,9 +394,9 @@ Describe 'Update-Match' -Tag 'remy' {
       It 'should: replace all whole word matches' {
         [string]$source = 'Cyanopsia: blue, Cataract: blue, Moody: blues, Azora: blue, Azul: blue, Hinto: blue';
         [RegEx]$pattern = new-expr('\bblue\b');
-        [string]$with = 'red';
+        [string]$paste = 'red';
 
-        [PSCustomObject]$updateResult = Update-Match -Value $source -Pattern $pattern -With $with `
+        [PSCustomObject]$updateResult = Update-Match -Value $source -Pattern $pattern -Paste $paste `
           -PatternOccurrence '3';
         $updateResult.Payload | Should -BeExactly 'Cyanopsia: blue, Cataract: blue, Moody: blues, Azora: red, Azul: blue, Hinto: blue';
       }
@@ -406,9 +406,9 @@ Describe 'Update-Match' -Tag 'remy' {
       It 'should: replace all matches' {
         [string]$source = 'Currencies: [GBP], [CHF], [CUC], [CZK], [GHS]';
         [RegEx]$pattern = new-expr('\[(?<ccy>[A-Z]{3})\]');
-        [string]$with = '(***)';
+        [string]$paste = '(***)';
 
-        [PSCustomObject]$updateResult = Update-Match -Value $source -Pattern $pattern -With $with `
+        [PSCustomObject]$updateResult = Update-Match -Value $source -Pattern $pattern -Paste $paste `
           -PatternOccurrence '4';
         $updateResult.Payload | Should -BeExactly 'Currencies: [GBP], [CHF], [CUC], (***), [GHS]';
       }
