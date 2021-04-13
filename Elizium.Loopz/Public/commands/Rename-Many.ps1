@@ -752,7 +752,10 @@ number of item processed
 
           if ($transform) {
             [string]$transformed = $transform.InvokeReturnAsIs(
-              $_underscore.Name, $newItemName, $actionResult.CapturedPattern, $_exchange
+              [System.IO.Path]::GetFileNameWithoutExtension($_underscore.Name),
+              $newItemName,
+              $actionResult.CapturedPattern,
+              $_exchange
             );
 
             if (-not([string]::IsNullOrEmpty($transformed))) {
