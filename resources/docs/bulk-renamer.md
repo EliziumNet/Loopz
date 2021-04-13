@@ -477,7 +477,7 @@ and we finally arrive at:
 
 Typically, *Except* would be just generic enough to single out items to be skipped, but can't be so general as to exclude items that ought not to be. We only need to exclude a single item in this case, so our regular expression can be as specific as it needs to be (*'Underworld'*).
 
-What we've learnt about *AnchorEnd* hybrid applies identically to *AnchorStar*, except that the *Pattern*,match is moved to the start.
+What we've learnt about *AnchorEnd* hybrid applies identically to *AnchorStar*, except that the *Pattern* match is moved to the start.
 
 ## :sparkles: Update Match<a name="action.update-match"></a>
 
@@ -489,11 +489,27 @@ What we've learnt about *AnchorEnd* hybrid applies identically to *AnchorStar*, 
 
 As well as no *Anchor* and related parameters, instead of using the *With* parameter, we use the *Paste* format parameter instead and it serves a similar purpose. The peculiarities of PowerShell parameter sets means that it is much easier to use a separate parameter, rather than to try an re-use *With* in a different context (it is the same reason why new parameters were defined for the *Hybrid Anchors*, instead of re-purposing *Anchor*/*Start*/*End*).
 
+The file list which was the subject of [Move To Hybrid](#using.move-to-hybrid-anchor) will be used in the following discussion.
+
+This time, we want to update the dates in place, changing the format to be in US date format (mm-dd-yyyy)
+
+:heavy_plus_sign: Rename-Many -Pattern '\\(?(?\<d\>\d{2})-(?\<m\>\d{2})-(?\<y\>\d{4})\\)?' -Paste '[${m}-${d}-${y}]' -WhatIf
+
+![picture](../images/bulk-rename.UPDATE-MATCH-FINAL.with-PASTE.jpg)
+
 ## :sparkles: Cut Match<a name="action.cut-match"></a>
 
 | Regex Parameter           | Alias | DESCRIPTION
 |---------------------------|-------|------------------------------------------------------------------
 | [Cut](#parameter-ref.cut) | :heavy_multiplication_x: | [:heavy_check_mark:](blah) Remove this match without a replacement
+
+Simply removes the content matched by *Cut*
+
+Let's remove the date element from the directory list featured in the previous section
+
+:heavy_plus_sign: Rename-Many -Cut '\\(?(?\<d\>\d{2})-(?\<m\>\d{2})-(?\<y\>\d{4})\\)?' -WhatIf
+
+![picture](../images/bulk-rename.CUT-MATCH-FINAL.jpg)
 
 ## :sparkles: Add Appendage<a name="action.add-appendage"></a>
 
@@ -503,11 +519,25 @@ As well as no *Anchor* and related parameters, instead of using the *With* param
 |-----------------------------------|-------|----------------------------------------------------------------
 | [Prepend](#parameter-ref.prepend) | pr    | [:heavy_check_mark:](blah) Prefix items' name with this literal string
 
+Appends literal content to start of an item's name.
+
+Using our audio file list, example from [Move To Anchor](#using.move-to-anchor), we can prefix each items name with some literal content:
+
+:heavy_plus_sign: Rename-Many -Prepend 'Kraftwerk - ' -Top 10 -WhatIf
+
+![picture](../images/bulk-rename.PREPEND-FINAL.jpg)
+
 ### Add Suffix
 
 | Suffix Parameter                | Alias | DESCRIPTION
 |---------------------------------|-------|------------------------------------------------------------------
 | [Append](#parameter-ref.append) | ap    | [:heavy_check_mark:](blah) Append this literal string to items' name
+
+Appends literal content to end of an item's name.
+
+Eg:
+
+:heavy_plus_sign: Rename-Many -Append ' - Kraftwerk' -Top 10 -WhatIf
 
 ## :sparkles: Transform<a name="action.transform"></a>
 
@@ -639,7 +669,7 @@ specify a pattern in the *Include* and use *Pattern* for the match you do want t
 
 **Type**: [string]
 
-When *Paste* is defined, the [Anchor](#parameter-ref.anchor) (if specified) is removed from the original name and needs to be be re-inserted using the special variable ${_a}. The other special variables that can be used inside a *Paste* string is documented under the [With](#parameter-ref.with) parameter. The *Paste* string can specify a format that defines the replacement and since it removes the *Anchor*, the [Relation](#parameter-ref.relation) is not applicable.
+When *Paste* is defined, the [Anchor](#parameter-ref.anchor) (if specified) is removed from the original name and needs to be be re-inserted using the special variable ${_a}. The other special variables that can be used inside a *Paste* string is documented under the [With](#parameter-ref.with) parameter.
 
 ### :dart: Pattern<a name="parameter-ref.pattern"></a>
 
@@ -756,11 +786,11 @@ It is advised that users always run with *WhatIf* enabled for new invocations of
 
 * incorrect use of double quotes on formatter parameters; use single quotes to avoid incorrect interpolation. (See [Formatters Must Use Single Quotes](#using.formatters-must-use-single-quotes))
 * use PCRE compatible patterns. Eg, for named capture groups some regex engines use '(P?\<name\>)', this form will not work with Rename-Many, so make sure the correct syntax is being used in regex definitions.
-* mixing up *Paste* with *With*
+* mixing up *Paste* with *With*. In the early stages of using *Rename-Many*, the user may accidentally use the wrong formatter parameter for the rename action being performed, usually resulting in PowerShell prompting for the wrong mandatory arguments or simply resulting in a terminating error. *With* is used for *Move* operations and *Paste* is used for static in-place updates.
 
 ## :hammer: Expanding Rename-Many Capabilities
 
-### Higher Order Commands
+### :mortar_board: Higher Order Commands
 
 Provides the facility to reuse the base *Rename-Many* functionality to build higher level functionality. Since regular expressions are not particularly easy to specify without prior skill and knowledge, it might be advantageous to build a high level command that wraps the base functionality and has embedded within it a commonly used combination of parameters and regular expression definitions. This way the high level version can hide-away difficult to remember regular expressions that are used on a regular basis.
 
@@ -768,7 +798,113 @@ To build a high level *Rename-Many* command, a developer should perform the foll
 
 * Define the contents of the [Context](#parameter-ref.context) parameter
 * Define the regular expression and formatter parameters that need to be abstracted away and encapsulated
-* The higher level command
+* Define the new user facing parameter set
+* Define the higher level command implementation
+
+Let's say we want to create a command to re-arrange dates in UK format (dd-mm-yyyy) to ISO format 'yyyy-mm-dd', called **Convert-Date**
+
+:pencil: **1) Define a context**
+
+```powershell
+    [PSCustomObject]$Context = [PSCustomObject]@{
+      Title             = 'Reformat UK dates to ISO Format';
+      ItemMessage       = 'To ISO format';
+      SummaryMessage    = 'UK Dates Converted to ISO';
+      Locked            = 'CONVERT_UK_DATES_LOCKED';
+      UndoDisabledEnVar = 'CONVERT_UK_DATES_UNDO_DISABLED';
+      OperantShortCode  = 'convuk';
+    }
+```
+
+Taking one of the previously displayed screen-shots ...:
+
+![picture](../images/bulk-rename.MOVE-TO-HYBRID-ANCHOR.with-ANCHOR-END.jpg)
+
+... we can see, where some of those context items appear in the output. From this screen-shot:
+
+* *Title* ('Locked: Rename'): **'Locked: Reformat UK dates to ISO Format'**
+* *ItemMessage* ('Rename Item'): **'To ISO format'**
+* *SummaryMessage* ('Rename Summary'): **'UK Dates Converted to ISO'**
+
+The other non UI elements:
+
+* *Locked*: The name of the environment variable used to unlock this command
+* *UndoDisabledEnVar*: The name of the environment variable used to disable the *Undo Rename* feature for this command
+* *OperantShortCode*: A short code representing the command (typically, the command's alias) used as part of the path to files generated by the *Undo Rename* feature
+
+:pencil: **2) Define the arguments passed into 'Rename-Many'**
+
+* *Pattern*: '(?\<d>\d{2})-(?\<m>\d{2})-(?\<y>\d{4})'
+* *Paste*: '(${y}-${m}-${d})'
+
+These arguments will be hardcoded into *Convert-Date*, so that the end user doesn't have to specify them.
+
+:pencil: **3) Define new user facing parameters**
+
+We can either accept file system objects from the pipeline (but they would need to be collected up and passed into a new pipeline involving *Rename-Many*) or define a new *Path* like parameter. We'll do the latter in this case and call it *LiteralPath*.
+
+We probably need to replicate *WhatIf* and *Diagnose*, which would be forwarded onto *Rename-Many*. In the case of *WhatIf*, we don't define that explicitly, instead we decorate our function with *SupportsShouldProcess*. But it should be noted that generally, the value of *WhatIf* flows from the user invoked command to other standard PowerShell functions (eg *Move-Item*), but it doesn't flow from one 3rd party command to another unless they are in the same module. That is to say, *WhatIf* does not cross module boundaries (except the standard PowerShell functions). This means we need to forward the value of *WhatIf* explicitly, by doing something like:
+
+> -WhatIf:$($PSBoundParameters.ContainsKey('WhatIf'))
+
+Since *WhatIf* doesn't exist in its own right, we need to use *$PSBoundParameters* to see if it is present in the bound parameters.
+
+Now we end up with a command signature as follows:
+
+```powershell
+  function Convert-Date {
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSShouldProcess', '')]
+    [CmdletBinding(SupportsShouldProcess)]
+    [Alias('convuk')]
+    param( 
+      [Parameter()]
+      [string]$LiteralPath,
+
+      [Parameter()]
+      [switch]$Diagnose
+    )
+    ...
+  }
+```
+
+:pencil: **4) Define the implementation**
+
+Typically, the parameters to *Rename-Many* would be splatted, via a hashtable.
+
+```powershell
+function Convert-Date {
+  # signature not repeated, see previous code snippet instead
+
+  [PSCustomObject]$context = @{
+    Title             = 'Reformat UK dates to ISO Format';
+    ItemMessage       = 'To ISO format';
+    SummaryMessage    = 'UK Dates Converted to ISO';
+    Locked            = 'CONVERT_UK_DATES_LOCKED';
+    UndoDisabledEnVar = 'CONVERT_UK_DATES_UNDO_DISABLED';
+    OperantShortCode  = 'convuk';
+  }
+
+  [hashtable]$parameters = @{
+    'Pattern'  = '(?<d>\d{2})-(?<m>\d{2})-(?<y>\d{4})';
+    'Paste'    = '(${y}-${m}-${d})';
+    'Context'  = $context;
+    'Diagnose' = $Diagnose.IsPresent;
+    'WhatIf'   = $PSBoundParameters.ContainsKey('WhatIf');
+  }
+
+  Get-ChildItem -LiteralPath $LiteralPath | Rename-Many @parameters
+}
+```
+
+The user can use the higher order command *Convert-Date* with a simpler more specialised interface instead of *Rename-Many*, eg:
+
+:heavy_plus_sign: Convert-Date -LiteralPath ~/logs -WhatIf
+
+Note, there is another way of complementing the functionality of existing commands that would apply in this scenario and that is with a *Proxy Command*. This is a slightly more involved process but contains some of the same techniques just discussed. It's out of the scope of this documentation, but [here](https://devblogs.microsoft.com/scripting/proxy-functions-spice-up-your-powershell-core-cmdlets/) is a blog post that describes how to apply this technique.
+
+### :robot: Using Transform
+
+A new example that illustrates how to use Transform, replace all [ with ( and ] with )
 
 ## :green_salad: Recipes
 
