@@ -14,7 +14,7 @@ There are multiple modes of operation that Rename-Many runs in, which are *Updat
 | [Update Match](#action.update-match)   | Replace a regular expression match
 | [Cut Match](#action.cut-match)         | Remove a regular expression match
 | [Add Appendage](#action.add-appendage) | Add a fixed token to Start or End of item
-| [Transform](#action.transform)         | Apply a custom transform to perform rename
+| [Transform](#using.transform)          | Apply a custom transform to perform rename
 
 ## :sparkles: General Concepts
 
@@ -539,8 +539,6 @@ Eg:
 
 :heavy_plus_sign: Rename-Many -Append ' - Kraftwerk' -Top 10 -WhatIf
 
-## :sparkles: Transform<a name="action.transform"></a>
-
 ## :sparkles: Parameter Reference<a name="parameter-reference"></a>
 
 ### :dart: Anchor<a name="parameter-ref.anchor"></a>
@@ -790,7 +788,7 @@ It is advised that users always run with *WhatIf* enabled for new invocations of
 
 ## :hammer: Expanding Rename-Many Capabilities
 
-### :mortar_board: Higher Order Commands
+### :mortar_board: Higher Order Commands<a name = "develop.higher-order-commands"></a>
 
 Provides the facility to reuse the base *Rename-Many* functionality to build higher level functionality. Since regular expressions are not particularly easy to specify without prior skill and knowledge, it might be advantageous to build a high level command that wraps the base functionality and has embedded within it a commonly used combination of parameters and regular expression definitions. This way the high level version can hide-away difficult to remember regular expressions that are used on a regular basis.
 
@@ -847,7 +845,7 @@ We probably need to replicate *WhatIf* and *Diagnose*, which would be forwarded 
 
 > -WhatIf:$($PSBoundParameters.ContainsKey('WhatIf'))
 
-Since *WhatIf* doesn't exist in its own right, we need to use *$PSBoundParameters* to see if it is present in the bound parameters.
+Since *$WhatIf* doesn't exist in its own right, we need to use *$PSBoundParameters* to see if it is present in the bound parameters.
 
 Now we end up with a command signature as follows:
 
@@ -902,9 +900,51 @@ The user can use the higher order command *Convert-Date* with a simpler more spe
 
 Note, there is another way of complementing the functionality of existing commands that would apply in this scenario and that is with a *Proxy Command*. This is a slightly more involved process but contains some of the same techniques just discussed. It's out of the scope of this documentation, but [here](https://devblogs.microsoft.com/scripting/proxy-functions-spice-up-your-powershell-core-cmdlets/) is a blog post that describes how to apply this technique.
 
-### :robot: Using Transform
+### :robot: Using Transform<a name = "develop.transform"></a>
 
-A new example that illustrates how to use Transform, replace all [ with ( and ] with )
+Another way to obtain custom functionality from *Rename-Many* is to provide a custom script-block for the *Transform* parameter. This will be illustrated with an example that replaces all '[' with '(' and all ')' with ']'. This might be useful to skirt round a widely encountered problem using the *Path* parameter of mutating commands like *Rename-Item* which ascribes custom semantics to '[' and ']' in file system paths, causing un-expected results. (This can be averted using *LiteralPath*, but this is just an example to discuss using the *Transform* parameter.)
+
+The signature of the *Transform* script-block is as follows
+
+```powershell
+  param(
+    [Parameter()]
+    [string]$Original,
+
+    [Parameter()]
+    [string]$Renamed,
+
+    [Parameter()]
+    [string]$PatternCapture,
+
+    [Parameter()]
+    [hashtable]$Exchange
+  )
+```
+
+where:
+
+* **Original:** The original file or directory name
+* **Renamed:** The original name with the *Pattern* match removed
+* **PatternCapture:** The content matched by *Pattern*
+* **Exchange:** The exchange instance (See [Exchange](../../README.md/#general.exchange))
+
+This could be implemented as follows
+
+```powershell
+  [ScriptBlock]$transformer = [ScriptBlock] {
+    param($Original, $Renamed, $PatternCapture, $Exchange)
+    return $Original.Replace('[', '(').Replace(']', ')');
+  }
+```
+
+... and theoretically, could be invoked as:
+
+:heavy_multiplication_x: Rename-Many -Pattern '\\[[\w]+\\]' -Transform $transformer -WhatIf
+
+But, the *Transform* parameter is not meant to be used interactively (although it could be, but would be cumbersome). Rather, the intention is that the user would create a [*Higher Order Command*](#develop.higher-order-commands) so invoking this function interactively would become more convenient on the command line.
+
+:pushpin: In this example, the *Pattern* becomes a filter, such that only items containing any word characters (\\w) inside square brackets are processed.
 
 ## :green_salad: Recipes
 
