@@ -115,7 +115,7 @@ $global:Loopz = [PSCustomObject]@{
     #
     'DIRECTORY-A'     = (@('Directory', '📁', 'd>'));
     'DIRECTORY-B'     = (@('Directory', '📂', 'D>'));
-    'FILE-A'          = (@('File', '🏷️', 'f>'));
+    'FILE-A'          = (@('File', '💠', 'f>'));
     'FILE-B'          = (@('File', '📝', 'F>'));
     'PATTERN'         = (@('Pattern', '🛡️', 'p:'));
     'WITH'            = (@('With', '🍑', ' Ψ'));
