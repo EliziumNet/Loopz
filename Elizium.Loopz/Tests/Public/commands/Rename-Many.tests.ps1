@@ -1007,7 +1007,7 @@ Describe 'Rename-Many' -Tag 'remy' {
     }
 
     Context 'and: Cut with Occurrence' {
-      It 'should: do rename; cut the 2nd occurrence' -Tag 'Current' {
+      It 'should: do rename; cut the 2nd occurrence' {
         $script:_expected = @{
           'loopz.application.t1.log' = 'loopz.appication.t1.log';
           'loopz.application.t2.log' = 'loopz.appication.t2.log';
