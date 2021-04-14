@@ -442,7 +442,7 @@ function Rename-Many {
     [string]$Drop,
 
     [Parameter(ParameterSetName = 'NoReplacement', Mandatory)]
-    [string]$Cut,
+    [array]$Cut,
 
     [Parameter(ParameterSetName = 'Prefix', Mandatory)]
     [string]$Prepend,

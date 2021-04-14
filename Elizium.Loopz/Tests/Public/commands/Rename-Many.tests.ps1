@@ -364,7 +364,7 @@ Describe 'Rename-Many' -Tag 'remy' {
 
     Context 'and: Transform' {
       Context 'and: First Only' {
-        It 'should: do rename; replace First Pattern for Copy text' -Tag 'Current' {
+        It 'should: do rename; replace First Pattern for Copy text' {
           $script:_expected = @{
             'loopz.application.t1.log' = 'transformed.loopz.pplication.t1.log';
             'loopz.application.t2.log' = 'transformed.loopz.pplication.t2.log';
@@ -1006,12 +1006,25 @@ Describe 'Rename-Many' -Tag 'remy' {
       }
     }
 
+    Context 'and: Cut with Occurrence' {
+      It 'should: do rename; cut the 2nd occurrence' -Tag 'Current' {
+        $script:_expected = @{
+          'loopz.application.t1.log' = 'loopz.appication.t1.log';
+          'loopz.application.t2.log' = 'loopz.appication.t2.log';
+        }
+
+        Get-ChildItem -Path $_directoryPath | Rename-Many -File `
+          -Cut 'l', 2 `
+          -WhatIf:$_whatIf -Test:$_test -Diagnose;
+      }
+    }
+
     Context 'and: Cut does not match' {
       It 'should: do rename; cut the Pattern' {
         $script:_expected = $_unchanged;
 
         Get-ChildItem -Path $_directoryPath | Rename-Many -File `
-          -Cut $(esc('wobble')) `
+          -Cut 'wobble' `
           -WhatIf:$_whatIf -Test:$_test -Diagnose;
       }
     }
