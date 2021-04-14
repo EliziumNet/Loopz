@@ -35,6 +35,42 @@ function Show-Signals {
     [Parameter()]
     [switch]$Test
   )
+
+  function get-GraphemeLength {
+    param(
+      [Parameter(Position = 0)]
+      [string]$Value
+    )
+    [System.Text.StringRuneEnumerator]$enumerator = $Value.EnumerateRunes();
+    [int]$count = 0;
+
+    while ($enumerator.MoveNext()) {
+      $count++;
+    }
+
+    return $count;
+  }
+
+  function get-TextElementLength {
+    param(
+      [Parameter(Position = 0)]
+      [string]$Value
+    )
+    # This function is of no use, but leaving it in for reference, until the
+    # issue of bad emoji behaviour has been fixed.
+    #
+    [System.Globalization.TextElementEnumerator]$enumerator = `
+      [System.Globalization.StringInfo]::GetTextElementEnumerator($Value);
+
+    [int]$count = 0;
+
+    while ($enumerator.MoveNext()) {
+      $count++;
+    }
+
+    return $count;
+  }
+
   [hashtable]$theme = Get-KrayolaTheme;
   [Krayon]$krayon = New-Krayon -Theme $theme;
   [Scribbler]$scribbler = New-Scribbler -Krayon $krayon -Test:$Test.IsPresent;
@@ -59,7 +95,7 @@ function Show-Signals {
       ? $options.Custom.Snippets.ResetAlternateBack 
     : $options.Custom.Snippets.ResetDefaultBack;
 
-    switch ($column) {
+    switch -Regex ($column) {
       'Name' {
         [string]$nameSnippet = ($row.Length.Trim() -eq '2') `
           ? $options.Custom.Snippets.Standard : $options.Custom.Snippets.Cell;
@@ -73,7 +109,8 @@ function Show-Signals {
         # defined causing misalignment.
         # 
         if ($options.Custom.UsingEmojis) {
-          if ($row.Length.Trim() -eq '1') {
+          [string]$length = $row.Length.Trim();
+          if ($length -eq '1') {
             # Chop off the last character
             #
             $value = $value -replace ".$";
@@ -83,7 +120,7 @@ function Show-Signals {
         break;
       }
 
-      'Length' {
+      'Length|GraphLn' {
         $scribbler.Scribble("$($backSnippet)$($value)");
         break;
       }
@@ -121,7 +158,7 @@ function Show-Signals {
 
   # Make sure that 'Custom' is always the last column
   #
-  [string[]]$columnSelection = @('Name', 'Label', 'Icon', 'Length') + $(
+  [string[]]$columnSelection = @('Name', 'Label', 'Icon', 'Length', 'GraphLn') + $(
     $Registry.PSBase.Keys | Where-Object { $Include -contains $_ } | ForEach-Object { $_; }
   ) + 'Custom';
 
@@ -146,12 +183,14 @@ function Show-Signals {
   [string[]]$customKeys = $Loopz.CustomSignals.PSBase.Keys;
   [PSCustomObject[]]$source = $($SourceSignals.GetEnumerator() | ForEach-Object {
       [string]$signalKey = $_.Key;
+
       [PSCustomObject]$signalDef = [PSCustomObject]@{
-        Name   = $_.Key;
-        Label  = $_.Value.Key;
-        Icon   = $_.Value.Value;
-        Length = $_.Value.Value.Length;
-        Custom = $($customKeys -contains $signalKey);
+        Name    = $_.Key;
+        Label   = $_.Value.Key;
+        Icon    = $_.Value.Value;
+        Length  = $_.Value.Value.Length;
+        GraphLn = $(get-GraphemeLength $_.Value.Value);
+        Custom  = $($customKeys -contains $signalKey);
       }
 
       # Now add onto the signal definition, the dependent registered commands
@@ -172,6 +211,7 @@ function Show-Signals {
     @{Name = 'Label'; Expression = { $_.Label }; }
     @{Name = 'Icon'; Expression = { $_.Icon }; }
     @{Name = 'Length'; Expression = { $_.Length }; }
+    @{Name = 'GraphLn'; Expression = { $_.GraphLn }; }
     @{Name = 'Custom'; Expression = { $_.Custom }; }
   );
 
