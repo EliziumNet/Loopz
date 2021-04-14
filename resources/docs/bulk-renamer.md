@@ -50,14 +50,14 @@ All regular expression parameters as listed below ...
 
 | Regex Parameter                           | Alias | DESCRIPTION
 |-------------------------------------------|-------|------------------------------------------------------------------
-| [Anchor](#parameter-ref.anchor)           | a     | [:heavy_check_mark:](blah) Where to move match to
-| [AnchorEnd](#parameter-ref.anchorend)     | ae    | [:heavy_check_mark:](blah) Move match to end if item does not match
-| [AnchorStart](#parameter-ref.anchorstart) | as    | [:heavy_check_mark:](blah) Move match to start if item does not match
-| [Copy](#parameter-ref.copy)               | co    | [:heavy_check_mark:](blah) Make a copy of this match for formatter reference
-| [Cut](#parameter-ref.cut)                 | :heavy_multiplication_x:      | [:heavy_check_mark:](blah) Remove this match without a replacement
-| [Except](#parameter-ref.except)           | x     | [:heavy_check_mark:](blah) Filter out items that match
-| [Include](#parameter-ref.include)         | i     | [:heavy_check_mark:](blah) Filter in items that match
-| [Pattern](#parameter-ref.pattern)         | w     | [:heavy_check_mark:](blah) Replace or Move this match
+| [Anchor](#parameter-ref.anchor)           | a     | Where to move match to
+| [AnchorEnd](#parameter-ref.anchorend)     | ae    | Move match to end if item does not match
+| [AnchorStart](#parameter-ref.anchorstart) | as    | Move match to start if item does not match
+| [Copy](#parameter-ref.copy)               | co    | Make a copy of this match for formatter reference
+| [Cut](#parameter-ref.cut)                 | :heavy_multiplication_x:      | Remove this match without a replacement
+| [Except](#parameter-ref.except)           | x     | Filter out items that match
+| [Include](#parameter-ref.include)         | i     | Filter in items that match
+| [Pattern](#parameter-ref.pattern)         | w     | Replace or Move this match
 
 ... are all declared as arrays. This allows the user to augment the regular expression with an additional value denoting which match occurrence is in effect. This value can be either numeric which denotes which match to select or 'f' for the first match or 'l' indicating the last match. The exception to the use of the *Occurrence* value is with *Include*/*Except*, which are filtering parameters (see the following section). Since they are used for filtering, the *Occurrence* value is irrelevant, so should not be supplied.
 
@@ -104,8 +104,8 @@ The following parameters are known as *formatters*. This means that they are str
 
 | Formatter Parameter           | Alias | DESCRIPTION
 |-------------------------------|-------|------------------------------------------------------------------
-| [With](#parameter-ref.with)   | w     | [:heavy_check_mark:](blah) used when performing *Move*
-| [Paste](#parameter-ref.paste) | ps    | [:heavy_check_mark:](blah) used when performing in place *Update*
+| [With](#parameter-ref.with)   | w     | used when performing *Move*
+| [Paste](#parameter-ref.paste) | ps    | used when performing in place *Update*
 
 So given the following as an example (not all parameters have been defined so do not take this as a literal example)
 
@@ -121,18 +121,18 @@ The following parameters belong to all *Rename-Many* parameter sets:
 
 | General Parameter                     | Alias | Interactive (non Developer)  | DESCRIPTION
 |---------------------------------------|-------|------------------------------|-----------------------------------
-| [Condition](#parameter-ref.condition) |       | [:x:](blah)                  | A custom predicate script-block that filters pipeline items
-| [Context](#parameter-ref.context)     |       | [:x:](blah)                  | A PSCustomObject with options to customise Rename-Many
-| [Directory](#parameter-ref.directory) | d     | [:heavy_check_mark:](blah)   | Filter for Directory items only
-| [Diagnose](#parameter-ref.diagnose)   | dg    | [:heavy_check_mark:](blah)   | WhatIf mode with added diagnostic info
-| [End](#parameter-ref.end)             | e     | [:heavy_check_mark:](blah)   | Move Pattern
-| [Except](#parameter-ref.except)       | x     | [:heavy_check_mark:](blah)   | Filter out items that match this regex
-| [File](#parameter-ref.file)           | f     | [:heavy_check_mark:](blah)   | Filter for File items only
-| [Include](#parameter-ref.include)     | i     | [:heavy_check_mark:](blah)   | Filter out items that do not match this regex
-| [Start](#parameter-ref.start)         | s     | [:heavy_check_mark:](blah)   | Move matched Pattern to start of items name
-| [Top](#parameter-ref.top)             | t     | [:heavy_check_mark:](blah)   | Process the first n items only
-| [Transform](#parameter-ref.transform) |       | [:x:](blah)   | A script-block to perform custom rename operation
-| [Whole](#parameter-ref.whole)         |       | [:heavy_check_mark:](blah)   | Applies 'whole word' match to regex parameters
+| [Condition](#parameter-ref.condition) |       | :x:                          | A custom predicate script-block that filters pipeline items
+| [Context](#parameter-ref.context)     |       | :x:                          | A PSCustomObject with options to customise Rename-Many
+| [Directory](#parameter-ref.directory) | d     | :heavy_check_mark:           | Filter for Directory items only
+| [Diagnose](#parameter-ref.diagnose)   | dg    | :heavy_check_mark:           | WhatIf mode with added diagnostic info
+| [End](#parameter-ref.end)             | e     | :heavy_check_mark:           | Move Pattern
+| [Except](#parameter-ref.except)       | x     | :heavy_check_mark:           | Filter out items that match this regex
+| [File](#parameter-ref.file)           | f     | :heavy_check_mark:           | Filter for File items only
+| [Include](#parameter-ref.include)     | i     | :heavy_check_mark:           | Filter out items that do not match this regex
+| [Start](#parameter-ref.start)         | s     | :heavy_check_mark:           | Move matched Pattern to start of items name
+| [Top](#parameter-ref.top)             | t     | :heavy_check_mark:           | Process the first n items only
+| [Transform](#parameter-ref.transform) |       | :x:                          | A script-block to perform custom rename operation
+| [Whole](#parameter-ref.whole)         |       | :heavy_check_mark:           | Applies 'whole word' match to regex parameters
 
 ### :gem: Post Processing<a name="general.post-processing"></a>
 
@@ -483,7 +483,7 @@ What we've learnt about *AnchorEnd* hybrid applies identically to *AnchorStar*, 
 
 | Update Parameter              | Alias | DESCRIPTION
 |-------------------------------|-------|------------------------------------------------------------------
-| [Paste](#parameter-ref.paste) | ps    | [:heavy_check_mark:](blah) Formatter used when performing in place *Update*
+| [Paste](#parameter-ref.paste) | ps    | Formatter used when performing in place *Update*
 
 *Update-Match* simply involves modifying a match in its present location. Since we don't have an *Anchor* to deal with, it is much simpler to use than *Move Match* scenarios.
 
@@ -499,9 +499,9 @@ This time, we want to update the dates in place, changing the format to be in US
 
 ## :sparkles: Cut Match<a name="action.cut-match"></a>
 
-| Regex Parameter           | Alias | DESCRIPTION
-|---------------------------|-------|------------------------------------------------------------------
-| [Cut](#parameter-ref.cut) | :heavy_multiplication_x: | [:heavy_check_mark:](blah) Remove this match without a replacement
+| Regex Parameter           | Alias                    | DESCRIPTION
+|---------------------------|--------------------------|----------------------------------------
+| [Cut](#parameter-ref.cut) | :heavy_multiplication_x: | Remove this match without a replacement
 
 Simply removes the content matched by *Cut*
 
@@ -516,8 +516,8 @@ Let's remove the date element from the directory list featured in the previous s
 ### Add Prefix
 
 | Prefix Parameter                  | Alias | DESCRIPTION
-|-----------------------------------|-------|----------------------------------------------------------------
-| [Prepend](#parameter-ref.prepend) | pr    | [:heavy_check_mark:](blah) Prefix items' name with this literal string
+|-----------------------------------|-------|----------------------------------------------------
+| [Prepend](#parameter-ref.prepend) | pr    | Prefix items' name with this literal string
 
 Appends literal content to start of an item's name.
 
@@ -529,9 +529,9 @@ Using our audio file list, example from [Move To Anchor](#using.move-to-anchor),
 
 ### Add Suffix
 
-| Suffix Parameter                | Alias | DESCRIPTION
-|---------------------------------|-------|------------------------------------------------------------------
-| [Append](#parameter-ref.append) | ap    | [:heavy_check_mark:](blah) Append this literal string to items' name
+| Suffix Parameter                  | Alias | DESCRIPTION
+|-----------------------------------|-------|----------------------------------------------------
+| [Append](#parameter-ref.append)   | ap    | Append this literal string to items' name
 
 Appends literal content to end of an item's name.
 
