@@ -446,7 +446,7 @@ number of item processed
     [string]$Drop,
 
     [Parameter(ParameterSetName = 'NoReplacement', Mandatory)]
-    [string]$Cut,
+    [array]$Cut,
 
     [Parameter(ParameterSetName = 'Prefix', Mandatory)]
     [Alias('pr')]
