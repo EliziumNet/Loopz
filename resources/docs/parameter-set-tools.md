@@ -9,9 +9,9 @@ There are 3 commands that comprise the parameter set tools, the first is a gener
 
 | Command Name              | Alias | Description
 |---------------------------|-------|-------------------------------------------------------
-| Show-ParameterSetInfo     | ships [:heavy_check_mark:](#using.show-parameter-set-info) | Show general parameter set info including syntax statement for all of a command's parameter sets |
-| Show-ParameterSetReport   | sharp [:heavy_check_mark:](#using.show-parameter-set-report) | For a given command, show all parameter set violations |
-| Show-InvokeReport         | shire [:heavy_check_mark:](#using.show-invoke-report) | Given a set of parameters, determine which (if any) which parameter sets could be resolved to |
+| Show-ParameterSetInfo     | [:heavy_check_mark:](#using.show-parameter-set-info) ship | Show general parameter set info including syntax statement for all of a command's parameter sets |
+| Show-ParameterSetReport   | [:heavy_check_mark:](#using.show-parameter-set-report) sharp | For a given command, show all parameter set violations |
+| Show-InvokeReport         | [:heavy_check_mark:](#using.show-invoke-report) shire | Given a set of parameters, determine which (if any) which parameter sets could be resolved to |
 
 Parameter Set Tool Classes
 
