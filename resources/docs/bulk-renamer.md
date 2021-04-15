@@ -6,7 +6,7 @@
 See also the [Parameter Reference](#parameter-reference), for a more detailed explanation of each parameter and
 [Safety Features](#general.safety-features) to see how to *Unlock* the command so it becomes effective.
 
-There are multiple modes of operation that Rename-Many runs in, which are *Update*/*Move*/*Cut*/*Appendage*. On top of this, a developer can extend it capabilities by providing a custom *Transform* function explained here.
+There are multiple modes of operation that *Rename-Many* runs in, which are *Update*/*Move*/*Cut*/*Appendage*. On top of this, a developer can extend it capabilities by providing a custom [*Transform*](using.transform) and/or build [*Higher Order Commands*](#develop.higher-order-commands).
 
 | Mode                                   | DESCRIPTION
 |----------------------------------------|---------------------------------------------
@@ -20,7 +20,7 @@ There are multiple modes of operation that Rename-Many runs in, which are *Updat
 
 ### :gem: Safety features<a name="general.safety-features"></a>
 
-Rename-Many is a powerful command and should be used with caution. Because of the
+*Rename-Many* is a powerful command and should be used with caution. Because of the
 potential of accidental misuse, a number of protections have been put in place:
 
 * By default, the command is locked. This means that the command will not actually
@@ -252,7 +252,7 @@ So back to the issue at hand, being the leading stray '-'. We could solve this 1
 
 Finally, we might decide that the \<TRACK-NO\>-\<DISC-NO\> sequence needs to be more clearly separated from the \<TRACK-NAME\>, so an extra ' - ' is inserted into *With*, let's say using technique 1️⃣ above (but equally applies to 2️⃣):
 
-:heavy_plus_sign: -Pattern '(?<disc>\d{2})-' -Anchor '\d{2}' -With '${_a}-${disc} - ' -WhatIf
+:heavy_plus_sign: Rename-Many -Pattern '(?<disc>\d{2})-' -Anchor '\d{2}' -With '${_a}-${disc} - ' -WhatIf
 
 > 09-02 - Radio Stars.mp3
 
@@ -278,7 +278,7 @@ That space at the end is our issue. There is already a space preceding the \<TRA
 
 ... without the trailing space, fixes the problem:
 
-:heavy_plus_sign: -Pattern '(?\<disc\>\d{2})-' -Anchor '\d{2}' -With '${_a}-${disc} -' -Top 10 -WhatIf
+:heavy_plus_sign: Rename-Many -Pattern '(?\<disc\>\d{2})-' -Anchor '\d{2}' -With '${_a}-${disc} -' -Top 10 -WhatIf
 
 ![picture](../images/bulk-rename.MOVE-TO-ANCHOR-FINAL.fixed-post-SPACES.jpg)
 
@@ -307,7 +307,7 @@ In this case, the *Pattern* will match because there is still a 2 digit sequence
 
 :warning: <a name = "using.formatters-must-use-single-quotes"></a> The *With* format parameter MUST be defined with single quotes. Using double quotes causes string interpolation to occur resulting in named group references to not be evaluated as expected. Let's re-run the last command, but using double quotes for the *With* parameter:
 
-:x: -Pattern '(?\<disc\>\d{2})-' -Anchor '\d{2}' -With "${_a}-${disc} -" -Top 10 -WhatIf
+:x: Rename-Many -Pattern '(?\<disc\>\d{2})-' -Anchor '\d{2}' -With "${_a}-${disc} -" -Top 10 -WhatIf
 
 ![picture](../images/bulk-rename.MOVE-TO-ANCHOR-FINAL.interpolated-WITH.double-quotes.jpg)
 
@@ -335,7 +335,7 @@ Focusing on a single file item in the batch, this time being: '**02-06 Airwaves.
 
 However as, we discovered in the [previous section](#using.move-to-anchor), we need to do more to obtain a satisfactory result. We can tidy this up, with the use of the *With* parameter:
 
-:heavy_plus_sign: -Pattern '-(?\<track\>\d{2})' -Start -With '${track}-' -Drop ' -' -WhatIf
+:heavy_plus_sign: Rename-Many -Pattern '-(?\<track\>\d{2})' -Start -With '${track}-' -Drop ' -' -WhatIf
 
 > 06-02 - Airwaves.mp3
 
@@ -377,7 +377,7 @@ resulting in:
 
 This works, but it's not very graceful. So again we can optimise this via the *With* formatter.
 
-:heavy_minus_sign: -Pattern '(?\<disc\>\d{2})-' -End -With ' (disc-${disc})' -WhatIf
+:heavy_minus_sign: Rename-Many -Pattern '(?\<disc\>\d{2})-' -End -With ' (disc-${disc})' -WhatIf
 
 > 04 Intermission (disc-02).mp3
 
@@ -392,7 +392,7 @@ However, this is not our chosen solution. We want to insert a dash in between th
 
 Achieving this, requires more work than we completed in our initial attempt 2️⃣:
 
-:heavy_plus_sign: -Pattern '(?\<disc\>\d{2})-(?\<track\>\d{2})' -End -With ' (disc-${disc})' -Drop '${track} -' -WhatIf
+:heavy_plus_sign: Rename-Many -Pattern '(?\<disc\>\d{2})-(?\<track\>\d{2})' -End -With ' (disc-${disc})' -Drop '${track} -' -WhatIf
 
 which results in:
 
@@ -455,7 +455,7 @@ But before we move on, let's take another look at our command in 3️⃣. Did yo
 
 So, improving our command line, we get to:
 
-:heavy_minus_sign: -Pattern '\\(?(?\<d\>\d{2})-(?\<m\>\d{2})-(?\<y\>\d{4})\\)?' -AnchorEnd '- at' -With ' - on ${y}-${m}-${d} ${_a}' -WhatIf
+:heavy_minus_sign: Rename-Many -Pattern '\\(?(?\<d\>\d{2})-(?\<m\>\d{2})-(?\<y\>\d{4})\\)?' -AnchorEnd '- at' -With ' - on ${y}-${m}-${d} ${_a}' -WhatIf
 
 Resulting in:
 
@@ -806,14 +806,14 @@ Let's say we want to create a command to re-arrange dates in UK format (dd-mm-yy
 :pencil: **1) Define a context**
 
 ```powershell
-    [PSCustomObject]$Context = [PSCustomObject]@{
-      Title             = 'Reformat UK dates to ISO Format';
-      ItemMessage       = 'To ISO format';
-      SummaryMessage    = 'UK Dates Converted to ISO';
-      Locked            = 'CONVERT_UK_DATES_LOCKED';
-      UndoDisabledEnVar = 'CONVERT_UK_DATES_UNDO_DISABLED';
-      OperantShortCode  = 'convuk';
-    }
+  [PSCustomObject]$Context = [PSCustomObject]@{
+    Title             = 'Reformat UK dates to ISO Format';
+    ItemMessage       = 'To ISO format';
+    SummaryMessage    = 'UK Dates Converted to ISO';
+    Locked            = 'CONVERT_UK_DATES_LOCKED';
+    UndoDisabledEnVar = 'CONVERT_UK_DATES_UNDO_DISABLED';
+    OperantShortCode  = 'convuk';
+  }
 ```
 
 Taking one of the previously displayed screen-shots ...:
@@ -872,28 +872,28 @@ Now we end up with a command signature as follows:
 Typically, the parameters to *Rename-Many* would be splatted, via a hashtable.
 
 ```powershell
-function Convert-Date {
-  # signature not repeated, see previous code snippet instead
+  function Convert-Date {
+    # signature not repeated, see previous code snippet instead
 
-  [PSCustomObject]$context = @{
-    Title             = 'Reformat UK dates to ISO Format';
-    ItemMessage       = 'To ISO format';
-    SummaryMessage    = 'UK Dates Converted to ISO';
-    Locked            = 'CONVERT_UK_DATES_LOCKED';
-    UndoDisabledEnVar = 'CONVERT_UK_DATES_UNDO_DISABLED';
-    OperantShortCode  = 'convuk';
+    [PSCustomObject]$context = @{
+      Title             = 'Reformat UK dates to ISO Format';
+      ItemMessage       = 'To ISO format';
+      SummaryMessage    = 'UK Dates Converted to ISO';
+      Locked            = 'CONVERT_UK_DATES_LOCKED';
+      UndoDisabledEnVar = 'CONVERT_UK_DATES_UNDO_DISABLED';
+      OperantShortCode  = 'convuk';
+    }
+
+    [hashtable]$parameters = @{
+      'Pattern'  = '(?<d>\d{2})-(?<m>\d{2})-(?<y>\d{4})';
+      'Paste'    = '(${y}-${m}-${d})';
+      'Context'  = $context;
+      'Diagnose' = $Diagnose.IsPresent;
+      'WhatIf'   = $PSBoundParameters.ContainsKey('WhatIf');
+    }
+
+    Get-ChildItem -LiteralPath $LiteralPath | Rename-Many @parameters
   }
-
-  [hashtable]$parameters = @{
-    'Pattern'  = '(?<d>\d{2})-(?<m>\d{2})-(?<y>\d{4})';
-    'Paste'    = '(${y}-${m}-${d})';
-    'Context'  = $context;
-    'Diagnose' = $Diagnose.IsPresent;
-    'WhatIf'   = $PSBoundParameters.ContainsKey('WhatIf');
-  }
-
-  Get-ChildItem -LiteralPath $LiteralPath | Rename-Many @parameters
-}
 ```
 
 The user can use the higher order command *Convert-Date* with a simpler more specialised interface instead of *Rename-Many*, eg:
