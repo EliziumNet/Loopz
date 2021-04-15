@@ -63,7 +63,7 @@ This module includes a collection of commands/classes that comprise the paramete
 | [RuleController](resources/docs/parameter-set-tools.md/#rule-controller.class) | Parameter set rules
 | [Syntax](resources/docs/parameter-set-tools.md/#syntax.class)                  | Command syntax
 
-See [Parameter Set Tools](resources/docs/parameter-set-tools.md)
+See [Parameter Set Tools](resources/docs/parameter-set-tools.md) [:pray:](#thanks)
 
 ## Supporting Utilities (for developers)
 
@@ -302,3 +302,7 @@ As the write host decorator is functionally the same used in different contents,
 ```powershell
 $LoopzHelpers.WhItemDecoratorBlock
 ```
+
+### Acknowledgements<a name="thanks"></a>
+
+:pray: I'd like to thank @KirkMunro and @JamesWTruher who wrote the original *Get-CommandDetails* function which formed the early roots of the design of *Show-ParameterSetInfo*. See [this](https://github.com/PowerShell/PowerShell/issues/8692) PowerShell issue for proposals on amending the syntax displayed from *Get-Command*.
