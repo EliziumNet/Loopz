@@ -8,9 +8,12 @@ function New-BootStrap {
     Bootstrap factory function
 
   .DESCRIPTION
-    Creates a bootstrap instance for the client command. When a command designed to
-  show a lot of output and indication signals, the bootstrap can help manage this
-  complexity in a common way. A command may want to show the presence of user
+ 
+  Creates a bootstrap instance for the client command. When a command designed to show a
+  lot of output and indication signals, the bootstrap class can be used to help manage this
+  complexity in a common way.
+  
+  A command may want to show the presence of user
   defined parameters with Signals. By using the Boot-strapper the client can be designed
   without having to implement the logic of showing indicators. All the client needs
   to do is to define a 'spec' object which describes a parameter or other indicator

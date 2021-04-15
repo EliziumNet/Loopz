@@ -19,9 +19,9 @@ New-BootStrap [[-Exchange] <Hashtable>] [[-Containers] <PSObject>] [[-Options] <
 
 ## DESCRIPTION
 
-  Creates a bootstrap instance for the client command. When a command designed to
-show a lot of output and indication signals, the bootstrap can help manage this
-complexity in a common way. A command may want to show the presence of user
+Creates a bootstrap instance for the client command. When a command designed to show a lot of output and indication signals, the bootstrap class can be used to help manage this complexity in a common way.
+
+A command may want to show the presence of user
 defined parameters with Signals. By using the Boot-strapper the client can be designed
 without having to implement the logic of showing indicators. All the client needs
 to do is to define a 'spec' object which describes a parameter or other indicator
@@ -116,7 +116,7 @@ For derived:
 
 ---
 
-* 4) **FormatterEntity**: For formatter parameters, which formats a file or directory name.
+* 4) **FormatterEntity**: For formatter parameters, which formats an output value.
   This is a signal entity with the addition of a validator which checks that the
 value represented does not contain file system unsafe characters. Uses function
 Test-IsFileSystemSafe to perform this check.
