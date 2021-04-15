@@ -13,6 +13,7 @@ class Counter {
   [int]hidden $_errors = 0;
   [int]hidden $_value = 0;
   [int]hidden $_skipped = 0;
+  [int]hidden $_triggerCount = 0;
 
   [int] Increment() {
     return ++$this._value;
@@ -36,6 +37,14 @@ class Counter {
 
   [int] Skipped() {
     return $this._skipped;
+  }
+
+  [int] IncrementTrigger() {
+    return ++$this._triggerCount;
+  }
+
+  [int] TriggerCount() {
+    return $this._triggerCount;
   }
 }
 
@@ -102,9 +111,23 @@ class BaseController {
       'Abstract method not implemented (BaseController.Errors)');
   }
 
+  [void] TriggerItem() {
+    throw [System.Management.Automation.MethodInvocationException]::new(
+      'Abstract method not implemented (BaseController.TriggerItem)');
+  }
+
+  [int] TriggerCount() {
+    throw [System.Management.Automation.MethodInvocationException]::new(
+      'Abstract method not implemented (BaseController.TriggerCount)');
+  }
+
   [void] ForeachBegin () {
     [System.Collections.Stack]$stack = $this._exchange.ContainsKey('LOOPZ.CONTROLLER.STACK') `
       ? ($this._exchange['LOOPZ.CONTROLLER.STACK']) : ([System.Collections.Stack]::new());
+
+    if (-not($this._exchange.ContainsKey('LOOPZ.CONTROLLER.STACK'))) {
+      $this._exchange['LOOPZ.CONTROLLER.STACK'] = $stack;
+    }
 
     $stack.Push([Counter]::new());
     $this._exchange['LOOPZ.CONTROLLER.DEPTH'] = $stack.Count;
@@ -125,8 +148,7 @@ class BaseController {
     #
     if ($invokeResult) {
       if ($invokeResult.psobject.properties.match('Trigger') -and $invokeResult.Trigger) {
-        $this._exchange['LOOPZ.FOREACH.TRIGGER'] = $true;
-        $this._trigger = $true;
+        $this.TriggerItem();
       }
 
       if ($invokeResult.psobject.properties.match('Break') -and $invokeResult.Break) {
@@ -150,6 +172,7 @@ class BaseController {
 class ForeachController : BaseController {
   [int]hidden $_skipped = 0;
   [int]hidden $_errors = 0;
+  [int]hidden $_triggerCount = 0;
 
   ForeachController([hashtable]$exchange,
     [scriptblock]$header,
@@ -174,9 +197,21 @@ class ForeachController : BaseController {
     return $this._errors;
   }
 
+  [void] TriggerItem() {
+    $this._exchange['LOOPZ.FOREACH.TRIGGER'] = $true;
+    $this._trigger = $true;
+
+    $this._triggerCount++;
+  }
+
+  [int] TriggerCount() {
+    return $this._triggerCount;
+  }
+
   [void] ForeachEnd () {
     $this._exchange['LOOPZ.FOREACH.TRIGGER'] = $this._trigger;
     $this._exchange['LOOPZ.FOREACH.COUNT'] = $this._index;
+    $this._exchange['LOOPZ.FOREACH.TRIGGER-COUNT'] = $this._triggerCount;
 
     $this._summary.InvokeReturnAsIs($this._index, $this._skipped, $this._errors,
       $this._trigger, $this._exchange);
@@ -191,6 +226,7 @@ class TraverseController : BaseController {
     Count   = 0;
     Errors  = 0;
     Skipped = 0;
+    TriggerCount = 0;
     Trigger = $false;
     Header  = $null;
     Summary = $null;
@@ -222,6 +258,17 @@ class TraverseController : BaseController {
     return $this._session.Errors;
   }
 
+  [void] TriggerItem() {
+    $this._exchange['LOOPZ.CONTROLLER.STACK'].Peek().IncrementTrigger();
+
+    $this._exchange['LOOPZ.FOREACH.TRIGGER'] = $true;
+    $this._trigger = $true;
+  }
+
+  [int] TriggerCount() {
+    return $this._session.TriggerCount;
+  }
+
   [void] ForeachEnd () {
     $this._exchange['LOOPZ.FOREACH.TRIGGER'] = $this._trigger;
     $this._exchange['LOOPZ.FOREACH.COUNT'] = $this._index;
@@ -229,9 +276,11 @@ class TraverseController : BaseController {
     [System.Collections.Stack]$stack = $this._exchange['LOOPZ.CONTROLLER.STACK'];
     [Counter]$counter = $stack.Pop();
     $this._exchange['LOOPZ.CONTROLLER.DEPTH'] = $stack.Count;
+    $this._exchange['LOOPZ.FOREACH.TRIGGER-COUNT'] = $counter.TriggerCount();
     $this._session.Count += $counter.Value();
     $this._session.Errors += $counter.Errors();
     $this._session.Skipped += $counter.Skipped();
+    $this._session.TriggerCount += $counter.TriggerCount();
     if ($this._trigger) {
       $this._session.Trigger = $true;
     }
@@ -259,6 +308,7 @@ class TraverseController : BaseController {
     #
     [Counter]$counter = $stack.Pop();
     $this._exchange['LOOPZ.CONTROLLER.DEPTH'] = $stack.Count;
+    $this._exchange['LOOPZ.FOREACH.TRIGGER-COUNT'] = $this._session.TriggerCount;
 
     if ($stack.Count -eq 0) {
       $this._exchange.Remove('LOOPZ.CONTROLLER.STACK');

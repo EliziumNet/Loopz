@@ -95,10 +95,25 @@ function Show-Summary {
 
   [string]$message = $Exchange.ContainsKey('LOOPZ.SUMMARY-BLOCK.MESSAGE') `
     ? $Exchange['LOOPZ.SUMMARY-BLOCK.MESSAGE'] : 'Summary';
-    
+
   [string]$structuredPropsWithMessage = $(
     "$message;Count,$Count;Skipped,$Skipped;Errors,$Errors;Triggered,$Triggered"
   );
+
+  [string]$structuredPropsWithMessage = if ($Triggered -and `
+      $Exchange.ContainsKey('LOOPZ.FOREACH.TRIGGER-COUNT')) {
+
+    [int]$triggerCount = $Exchange['LOOPZ.FOREACH.TRIGGER-COUNT'];
+    $(
+      "$message;Count,$Count;Skipped,$Skipped;Errors,$Errors;Triggered,$triggerCount"
+    );
+  }
+  else {
+    $(
+      "$message;Count,$Count;Skipped,$Skipped;Errors,$Errors;Triggered,$Triggered"
+    );
+  }
+
   [string]$lineSnippet = $scribbler.WithArgSnippet(
     'Line', $structuredPropsWithMessage
   )

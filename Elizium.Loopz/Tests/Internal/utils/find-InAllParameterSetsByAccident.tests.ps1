@@ -66,7 +66,7 @@ Describe 'find-InAllParameterSetsByAccident' -Tag 'PSTools' {
   }
 
   Context 'given: multiple parameter in AllParameterSets by accident' {
-    It 'should: report violation' -Tag 'Current' {
+    It 'should: report violation' {
       InModuleScope Elizium.Loopz {
         function test-MultipleInAllParameterSetsByAccident {
           param(
