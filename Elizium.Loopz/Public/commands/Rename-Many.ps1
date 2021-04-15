@@ -176,13 +176,9 @@ function Rename-Many {
   (with Anchor/Start/End) or replaced (with $With/$Paste).
 
   .PARAMETER Paste
-    This is a NON regular expression string. It would be more accurately described as a formatter,
-  similar to the $With parameter. When $Paste is defined, the $Anchor (if specified) is removed
-  from the original name and needs to be be re-inserted using the special variable ${_a}. The
-  other special variables that can be used inside a $Paste string is documented under the $With
-  parameter.
-    The $Paste string can specify a format that defines the replacement and since it removes the
-  $Anchor, the $Relation is not applicable ($Relation and $Paste can't be used together).
+    Formatter parameter for Update operations. Can contain named/numbered group references
+  defined inside regular expression parameters, or use special named references $0 for the whole
+  Pattern match and ${_c} for the whole Copy match.
 
   .PARAMETER Pattern
     Regular expression string that indicates which part of the pipeline items' name that
@@ -209,7 +205,7 @@ function Rename-Many {
 
   .PARAMETER Top
     A number indicating how many items to process. If it is known that the number of items
-  that will be candidates to be renamed is large, the user can limit this is the first $Top
+  that will be candidates to be renamed is large, the user can limit this to the first $Top
   number of items. This is typically used as an exploratory tool, to determine the effects
   of the rename operation.
 
@@ -249,16 +245,13 @@ function Rename-Many {
   * $0: the pattern match
   * ${_a}: the anchor match
   * ${_c}: the copy match
-
+number of item processed
   When $Pattern contains named capture groups, these variables can also be referenced. Eg if the
   $Pattern is defined as '(?<day>\d{1,2})-(?<mon>\d{1,2})-(?<year>\d{4})', then the variables
   ${day}, ${mon} and ${year} also become available for use in $With or $Paste.
   Typically, $With is literal text which is used to replace the $Pattern match and is inserted
   according to the Anchor match, (or indeed $Start or $End) and $Relation. When using $With,
-  whatever is defined in the $Anchor match is not removed from the pipeline's name (this is
-  different to how $Paste works).
-    If neither $With or Paste have been specified, then the rename operation becomes a 'Cut'
-  operation and will be indicated as such in the batch summary.
+  whatever is defined in the $Anchor match is removed from the pipeline's name.
 
   .PARAMETER underscore
     The pipeline item which should either be an instance of FileInfo or DirectoryInfo.
@@ -386,24 +379,29 @@ function Rename-Many {
     [Parameter(ParameterSetName = 'MoveToEnd', Mandatory, Position = 1)]
     [Parameter(ParameterSetName = 'Transformer', Mandatory, Position = 1)]
     [ValidateScript( { { $(test-ValidPatternArrayParam -Arg $_ -AllowWildCard ) } })]
+    [Alias('p')]
     [array]$Pattern,
 
     [Parameter(ParameterSetName = 'MoveToAnchor', Mandatory, Position = 2)]
     [ValidateScript( { $(test-ValidPatternArrayParam -Arg $_) })]
+    [Alias('a')]
     [array]$Anchor,
 
     [Parameter(ParameterSetName = 'HybridStart', Mandatory, Position = 2)]
     [ValidateScript( { $(test-ValidPatternArrayParam -Arg $_) })]
+    [Alias('as')]
     [array]$AnchorStart,
 
     [Parameter(ParameterSetName = 'HybridEnd', Mandatory, Position = 2)]
     [ValidateScript( { $(test-ValidPatternArrayParam -Arg $_) })]
+    [Alias('ae')]
     [array]$AnchorEnd,
 
     [Parameter(ParameterSetName = 'HybridStart')]
     [Parameter(ParameterSetName = 'HybridEnd')]
     [Parameter(ParameterSetName = 'MoveToAnchor')]
     [ValidateSet('before', 'after')]
+    [Alias('r')]
     [string]$Relation = 'after',
 
     [Parameter(ParameterSetName = 'HybridStart')]
@@ -415,6 +413,7 @@ function Rename-Many {
     [Parameter(ParameterSetName = 'MoveToStart')]
     [Parameter(ParameterSetName = 'MoveToEnd')]
     [ValidateScript( { { $(test-ValidPatternArrayParam -Arg $_) } })]
+    [Alias('co')]
     [array]$Copy,
 
     [Parameter(ParameterSetName = 'HybridStart')]
@@ -423,15 +422,19 @@ function Rename-Many {
     [Parameter(ParameterSetName = 'MoveToStart', Position = 2)]
     [Parameter(ParameterSetName = 'MoveToEnd', Position = 2)]
     [Parameter(ParameterSetName = 'UpdateInPlace', Position = 2)]
+    [Alias('w')]
     [string]$With,
 
     [Parameter(ParameterSetName = 'MoveToStart', Mandatory)]
+    [Alias('s')]
     [switch]$Start,
 
     [Parameter(ParameterSetName = 'MoveToEnd', Mandatory)]
+    [Alias('e')]
     [switch]$End,
 
     [Parameter(ParameterSetName = 'UpdateInPlace', Mandatory)]
+    [Alias('ps')]
     [string]$Paste,
 
     [Parameter(ParameterSetName = 'HybridStart')]
@@ -439,15 +442,18 @@ function Rename-Many {
     [Parameter(ParameterSetName = 'MoveToAnchor')]
     [Parameter(ParameterSetName = 'MoveToStart')]
     [Parameter(ParameterSetName = 'MoveToEnd')]
+    [Alias('dr')]
     [string]$Drop,
 
     [Parameter(ParameterSetName = 'NoReplacement', Mandatory)]
     [array]$Cut,
 
     [Parameter(ParameterSetName = 'Prefix', Mandatory)]
+    [Alias('pr')]
     [string]$Prepend,
 
     [Parameter(ParameterSetName = 'Affix', Mandatory)]
+    [Alias('ap')]
     [string]$Append,
 
     # Defining parameter sets for File and Directory, just to ensure both of these switches
@@ -455,10 +461,12 @@ function Rename-Many {
     # complex. It's easier just to enforce this with a ValidateScript.
     #
     [Parameter()]
+    [Alias('f')]
     [ValidateScript( { -not($PSBoundParameters.ContainsKey('Directory')); })]
     [switch]$File,
 
     [Parameter()]
+    [Alias('d')]
     [ValidateScript( { -not($PSBoundParameters.ContainsKey('File')); })]
     [switch]$Directory,
 
@@ -472,12 +480,14 @@ function Rename-Many {
 
     [Parameter()]
     [ValidateSet('p', 'a', 'c', 'i', 'x', 'u', '*')]
+    [Alias('wh')]
     [string]$Whole,
 
     [Parameter()]
     [scriptblock]$Condition = ( { return $true; }),
 
     [Parameter()]
+    [Alias('t')]
     [ValidateScript( { $_ -gt 0 } )]
     [int]$Top,
 
@@ -488,6 +498,7 @@ function Rename-Many {
     [PSCustomObject]$Context = $Loopz.Defaults.Remy.Context,
 
     [Parameter()]
+    [Alias('dg')]
     [switch]$Diagnose,
 
     [Parameter()]
@@ -861,6 +872,11 @@ function Rename-Many {
           if (-not([string]::IsNullOrEmpty($reason))) {
             [couplet]$becauseSignal = Get-FormattedSignal -Name 'BECAUSE' `
               -Signals $signals -Value $reason;
+            $properties.append($becauseSignal);
+          }
+          elseif (-not($nameHasChanged)) {
+            [couplet]$becauseSignal = Get-FormattedSignal -Name 'BECAUSE' `
+              -Signals $signals -Value 'Unchanged';
             $properties.append($becauseSignal);
           }
         }

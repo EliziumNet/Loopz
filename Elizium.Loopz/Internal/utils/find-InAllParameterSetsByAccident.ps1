@@ -32,7 +32,7 @@ function find-InAllParameterSetsByAccident {
         $pods.Add($seed);
       }
     }
-
-    return ($pods.Count -gt 0) ? $pods : $null;
   }
+
+  return ($pods.Count -gt 0) ? $pods : $null;
 }

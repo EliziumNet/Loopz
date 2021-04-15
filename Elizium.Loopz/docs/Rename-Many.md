@@ -573,12 +573,7 @@ Accept wildcard characters: False
 
 ### -Paste
 
-This is a NON regular expression string.
-It would be more accurately described as a formatter, similar to the $With parameter.
-When $Paste is defined, the $Anchor (if specified) is removed from the original name and needs to be be re-inserted using the special variable ${_a}.
-The other special variables that can be used inside a $Paste string is documented under the $With parameter.
-
-The $Paste string can specify a format that defines the replacement and since it removes the $Anchor, the $Relation is not applicable ($Relation and $Paste can't be used together).
+Formatter parameter for Update operations. Can contain named/numbered group references defined inside regular expression parameters, or use special named references $0 for the whole *Pattern* match and ${_c} for the whole *Copy* match.
 
 ```yaml
 Type: String
@@ -666,7 +661,7 @@ Accept wildcard characters: False
 ### -Top
 
 A number indicating how many items to process.
-If it is known that the number of items that will be candidates to be renamed is large, the user can limit this is the first $Top number of items.
+If it is known that the number of items that will be candidates to be renamed is large, the user can limit this to the first $Top number of items.
 This is typically used as an exploratory tool, to determine the effects of the rename operation.
 
 ```yaml
@@ -765,7 +760,6 @@ When $Pattern contains named capture groups, these variables can also be referen
 Eg if the $Pattern is defined as '(?\<day\>\d{1,2})-(?\<mon\>\d{1,2})-(?\<year\>\d{4})', then the variables ${day}, ${mon} and ${year} also become available for use in $With or $Paste.
 Typically, $With is static text which is used to replace the $Pattern match and is inserted according to the Anchor match, (or indeed $Start or $End) and $Relation.
 When using $With, whatever is defined in the $Anchor match is not removed from the pipeline's name (this is different to how $Paste works).
-If neither $With or Paste have been specified, then the rename operation becomes a 'Cut' operation and will be indicated as such in the batch summary.
 
 ```yaml
 Type: String

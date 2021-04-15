@@ -44,9 +44,9 @@ function Update-Match {
   been specified, $WhatIf does not need to be specified.
 
   .PARAMETER Paste
-    This is a NON regular expression string. It would be more accurately described as a formatter,
-  similar to the $With parameter. The other special variables that can be used inside a $Paste
-  string is documented under the $With parameter.
+    Formatter parameter for Update operations. Can contain named/numbered group references
+  defined inside regular expression parameters, or use special named references $0 for the whole
+  Pattern match and ${_c} for the whole Copy match.
 
   .PARAMETER Pattern
     Regular expression string that indicates which part of the $Value that either needs

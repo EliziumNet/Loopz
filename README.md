@@ -6,17 +6,15 @@
 [![A B](https://img.shields.io/github/license/eliziumnet/loopz)](https://github.com/eliziumnet/Loopz/blob/master/LICENSE)
 [![A B](https://img.shields.io/powershellgallery/p/Elizium.Loopz)](https://www.powershellgallery.com/packages/Elizium.Loopz)
 
-PowerShell iteration type utilities.
+PowerShell iteration utilities with additional goodies like [Bulk Renamer](resources/docs/bulk-renamer.md) and [Parameter Set Tools](resources/docs/parameter-set-tools.md).
 
 ## Introduction
-
-:warning: A lot of the documentation here is now out of date, it will be updated in due course and work is currently taking place to produce more comprehensive documentation at github pages.
 
 When writing a suite of utilities/functions it can be difficult to develop them so that they behave in a consistent manner. Along with another dependent Powershell module [Elizium.Krayola](https://github.com/plastikfan/Krayola), Elizium.Loopz can be used to build PowerShell commands that are both more visually appealing and consistent particularly with regards to rendering repetitive content as a result of some kind of iteration process.
 
 The module can be installed using the standard **install-module** command:
 
-> PS> install-module -Name Elizium.Loopz
+> PS> install-module -Name Elizium.Loopz -Scope AllUsers
 
 ### Dependencies
 
@@ -29,12 +27,12 @@ which will be installed automatically if not already present.
 
 ## The Main Commands (for end users)
 
-| COMMAND-NAME                                                                     | DESCRIPTION
-|----------------------------------------------------------------------------------|------------
-| [Format-Escape](Elizium.Loopz/docs/Format-Escape.md)                             | Escape Regex param
-| [Rename-Many](Elizium.Loopz/docs/Rename-Many.md)                                 | Bulk Rename
-| [Show-Signals](Elizium.Loopz/docs/Show-Signals.md)                               | Show signals with overrides
-| [Select-Patterns](Elizium.Loopz/docs/Select-Patterns.md)                         | Find text inside files
+| COMMAND-NAME                                              | DESCRIPTION
+|-----------------------------------------------------------|------------
+| [Format-Escape](Elizium.Loopz/docs/Format-Escape.md)      | Escape Regex param
+| [Rename-Many](Elizium.Loopz/docs/Rename-Many.md)          | [:heavy_check_mark:](resources/docs/bulk-renamer.md) Bulk Renamer
+| [Show-Signals](Elizium.Loopz/docs/Show-Signals.md)        | Show signals with overrides
+| [Select-Patterns](Elizium.Loopz/docs/Select-Patterns.md)  | Find text inside files
 
 ## Iteration functions (for end developers)
 
@@ -51,19 +49,21 @@ The following table shows the list of public commands exported from the Loopz mo
 
 ## Parameter Set Tools
 
-This module includes a collection of commands/classes that comprise the parameter set tools. When building new commands that use the parameter set framework, it can be difficult to build them so they don't violate the established rules, particular when the command is complex and has a large number of parameters and parameter sets. These parameter sets tools aims to fill a void and give developers some additional tools that can be used to resolved common parameter issues. The following table show the commands in this tool set:
+This module includes a collection of commands/classes that comprise the parameter set tools. When building new commands that use the parameter set framework, it can be difficult to build them so they don't violate the established rules, particular when the command is complex and has a large number of parameters and parameter sets. These parameter sets tools aims to fill a void and give developers some additional tools that can be used to resolved common parameter issues. The following table shows the commands in this tool set:
 
-| COMMAND-NAME                                                                     | DESCRIPTION
-|----------------------------------------------------------------------------------|------------
-| [Show-InvokeReport](Elizium.Loopz/docs/Show-InvokeReport.md)                     | Show command invoke report
-| [Show-ParameterSetInfo](Elizium.Loopz/docs/Show-ParameterSetInfo.md)             | Show parameter set info
-| [Show-ParameterSetReport](Elizium.Loopz/docs/Show-ParameterSetReport.md)         | Show parameter set violations
+| COMMAND-NAME                                                              | DESCRIPTION
+|---------------------------------------------------------------------------|------------
+| [Show-InvokeReport](Elizium.Loopz/docs/Show-InvokeReport.md)              | [:heavy_check_mark:](resources/docs/parameter-set-tools.md/#using.show-invoke-report) Show command invoke report
+| [Show-ParameterSetInfo](Elizium.Loopz/docs/Show-ParameterSetInfo.md)      | [:heavy_check_mark:](resources/docs/parameter-set-tools.md/#using.show-parameter-set-info) Show parameter set info
+| [Show-ParameterSetReport](Elizium.Loopz/docs/Show-ParameterSetReport.md)  | [:heavy_check_mark:](resources/docs/parameter-set-tools.md/#using.show-parameter-set-report) Show parameter set violations
 
-| CLASS-NAME                                                                       | DESCRIPTION
-|----------------------------------------------------------------------------------|------------
-| [dryrunner](Elizium.Loopz/docs/dryrunner.md)                                     | Dry run a command
-| [rules](Elizium.Loopz/docs/rules.md)                                             | Parameter set rules
-| [syntax](Elizium.Loopz/docs/syntax.md)                                           | Command syntax
+| CLASS-NAME                                                                     | DESCRIPTION
+|--------------------------------------------------------------------------------|------------
+| [DryRunner](resources/docs/parameter-set-tools.md/#dry-runner.class)           | Dry run a command
+| [RuleController](resources/docs/parameter-set-tools.md/#rule-controller.class) | Parameter set rules
+| [Syntax](resources/docs/parameter-set-tools.md/#syntax.class)                  | Command syntax
+
+See [Parameter Set Tools](resources/docs/parameter-set-tools.md)
 
 ## Supporting Utilities (for developers)
 
@@ -74,32 +74,33 @@ This module includes a collection of commands/classes that comprise the paramete
 | [Format-StructuredLine](Elizium.Loopz/docs/Format-StructuredLine.md)             | Create Krayon line
 | [Format-Escape](Elizium.Loopz/docs/Format-Escape.md)                             | Escape a regular expression
 | [Get-FormattedSignal](Elizium.Loopz/docs/Get-FormattedSignal.md)                 | Get formatted signal
-| [Get-InverseSubstring](Elizium.Loopz/docs/Get-InverseSubString.md)               | Get inverse substring
+| [Get-InverseSubstring](Elizium.Loopz/docs/Get-InverseSubString.md)               | Get inverse substring (the opposite of standard substring string method)
 | [Get-IsLocked](Elizium.Loopz/docs/Get-IsLocked.md)                               | Get locked state of a command
 | [Get-PaddedLabel](Elizium.Loopz/docs/Get-PaddedLabel.md)                         | Get space padded string
-| [Get-PlatformName](Elizium.Loopz/docs/Get-PlatformName.md)                       | Get platform name
+| [Get-PlatformName](Elizium.Loopz/docs/Get-PlatformName.md)                       | Get platform name (OS type)
 | [Get-PsObjectField](Elizium.Loopz/docs/Get-PsObjectField.md)                     | Get field from PSCustomObject
 | [Get-Signals](Elizium.Loopz/docs/Get-Signals.md)                                 | Get signals
 | [Initialize-ShellOperant](Elizium.Loopz/docs/Initialize-ShellOperant.md)         | Init shell operation
 | [Invoke-ByPlatform](Elizium.Loopz/docs/Invoke-ByPlatform.md)                     | Invoke OS specific fn
 | [Move-Match](Elizium.Loopz/docs/Move-Match.md)                                   | Move regex match
 | [New-RegularExpression](Elizium.Loopz/docs/New-RegularExpression.md)             | Regex factory fn
-| [Resolve-ByPlatform](Elizium.Loopz/docs/Resolve-ByPlatform.md)                   | Resolve item by OS
+| [Resolve-ByPlatform](Elizium.Loopz/docs/Resolve-ByPlatform.md)                   | Resolve item by OS type
 | [Resolve-PatternOccurrence](Elizium.Loopz/docs/Resolve-PatternOccurrence.md)     | Regex param helper
 | [Select-FsItem](Elizium.Loopz/docs/Select-FsItem.md)                             | A predicate fn used for filtering
 | [Select-SignalContainer](Elizium.Loopz/docs/Select-SignalContainer.md)           | Select signal into a container
 | [Split-Match](Elizium.Loopz/docs/Split-Match.md)                                 | Split regex match
-| [Test-IsFileSystemSafe](Elizium.Loopz/docs/Test-IsFileSystemSafe.md)             | Tes if string is FS safe
+| [Test-IsAlreadyAnchoredAt](Elizium.Loopz/docs/Test-IsAlreadyAnchoredAt.md)       | Test if pattern occurrence already at Start or End
+| [Test-IsFileSystemSafe](Elizium.Loopz/docs/Test-IsFileSystemSafe.md)             | Test if string is FS safe
 | [Update-GroupRefs](Elizium.Loopz/docs/Update-GroupRefs.md)                       | Update named group refs
 | [Update-Match](Elizium.Loopz/docs/Update-Match.md)                               | Update regex match
 
 | CLASS-NAME                                                                       | DESCRIPTION
 |----------------------------------------------------------------------------------|------------
-| [bootstrap](Elizium.Loopz/docs/bootstrap.md)                                     | Command init helper
+| [bootstrap](resources/docs/bootstrap.md)                                         | Command init helper
 
 ## General Concepts
 
-### :o: Exchange hash-table object
+### :sparkles: Exchange hashtable object<a name = "general.exchange"></a>
 
 A common theme present in the main commands is the use of a Hash-table object called $Exchange.
 The scenarios in which the Exchange are as follows:
@@ -121,7 +122,7 @@ passing these (either with *BlockParams* or *FuncteeParams*), this approach is g
 
 However, there is another commonly occurring pattern which would require the use of Exchange. This pattern is the adapter pattern. If there is an existing function that needs to be integrated to be used with Invoke-ForeachFsItem, but does not match the required signature, an intermediate adapter can be implemented. Calling code can put in any additional parameters (required by the non-conformant function) into the Exchange, which are picked up by the adapter and forwarded on as required. Using the adapter this way is much preferred than using additional parameters (*BlockParams* or *FuncteeParams*), because there could be confusion as to whom these parameters are required for, the adapter or the target function/script-block. Using parameters in Exchange can be made to be much clearer because very meaningful names can be used as hash-table keys; Eg, for internal Loopz command interaction (Invoke-MirrorDirectoryTree internally invokes Invoke-TraverseDirectory and uses keys like 'LOOPZ.MIRROR.INVOKEE', which means that, that value is only of importance to Invoke-TraverseDirectory, so any other function that sees this should ignore it).
 
-:exclamation: Note, users should use a similar namespaced style keys, for their own use, to avoid any chance of name clashes and users should not use any keys beginning with 'LOOPZ.' as these are reserved for internal Loopz operation.
+:pushpin: Note, users should use a similar namespaced style keys, for their own use, to avoid any chance of name clashes and users should not use any keys beginning with 'LOOPZ.' as these are reserved for internal Loopz operation.
 
 :warning: Warning don't nest Invoke-ForeachFsItem calls, using the same Exchange instance. That is to say do not use a function/script-block already known to call 'Invoke-ForeachFsItem' with its own Invoke-ForeachFsItem request using the same Exchange instance. If you need to achieve this, then a new and separate Exchange instance should be created. However, recursive functions are fine, as long as it makes sense that different iterations use the same Exchange.
 
@@ -129,7 +130,7 @@ However, there is another commonly occurring pattern which would require the use
 
 The *Invoke-MirrorDirectoryTree* command illustrates this well. Invoke-MirrorDirectoryTree needs to be able to present the invokee with multiple (actually, just 2) DirectoryInfo objects for each source directory encountered, one for the source directory and another for the mirrored directory. Since *Invoke-ForeachFsItem* is the command that under-pins this functionality, Invoke-MirrorDirectoryTree needs to conform to it's requirements, one of which is that a single DirectoryInfo is presented to the invokee. To get around this, it populates a new entry inside the Exchange: 'LOOPZ.MIRROR.ROOT-DESTINATION', which the invokee can now access. This same technique can be used by calling code.
 
-### :o: The Trigger
+### :sparkles: The Trigger
 
 If the script-block/function (invokee) to be invoked by [Invoke-ForeachFsItem](Elizium.Loopz/docs/Invoke-ForeachFsItem.md), [Invoke-MirrorDirectoryTree](Elizium.Loopz/docs/Invoke-MirrorDirectoryTree.md) or [Invoke-TraverseDirectory](Elizium.Loopz/docs/Invoke-TraverseDirectory.md) (the compound function) is a state changing operation (such as renaming a file or a directory), it may be useful to know if the invokee actually performed the change or not, especially when a particular command is re-run. It may be that a rerun of a command results in no actual state change and it may be useful to know this after the batch has completed. (*Please don't confuse this with WhatIf behaviour. An example of not performing an action being alluded to here, is an attempt to rename a file where the new name is the same as the existing one; this could happen in a re-run*) In this scenario, the invokee must set the Trigger accordingly. If the write action was performed, then Trigger should be set (it's just a boolean value) on the PSCustomObject that it should return. The Trigger that the invokee receives as one of the fixed parameters passed to it by the compound function, reflects if any of the previous items in the pipeline set the Trigger.
 
@@ -142,12 +143,12 @@ to true (although in reality, just the existence of the IF-TRIGGERED key, sets t
   $Exchange['LOOPZ.WH-FOREACH-DECORATOR.IF-TRIGGERED'] = $true
 ```
 
-:exclamation: *This indicates that for a particular item in the pipeline, no output should be written
+:pushpin: *This indicates that for a particular item in the pipeline, no output should be written
 for that item, if the invokee has not set the Trigger to true, to indicate that action has been performed*
 
 If a Summary script-block is supplied to the compound function, then it will see if any of the pipeline items set the Trigger.
 
-### :o: Write-HostFeItemDecorator
+### :sparkles: Write-HostFeItemDecorator
 
 When using a custom function/script-block (invokee) with one of the compound functions it is considered good form not to write to the host within the command being written (PSScriptAnalyzer warning *PSAvoidUsingWriteHost* comes to mind). This is so that the command can be composed into a pipeline without generating convoluted output (plus other reasons). However, it isn't against the law to write output and command line utilities are made much the richer and user friendly when they receive feedback for the operations being performed.
 
