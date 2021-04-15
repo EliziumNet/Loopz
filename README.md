@@ -25,6 +25,8 @@ Requires:
 
 which will be installed automatically if not already present.
 
+*For best results on windows, it is recommended that the user installs and uses Microsoft's Windows Terminal, since it has better support for emojis when compared to the ageing Console app. Users can also try [TerminalBuddy](https://github.com/plastikfan/TerminalBuddy), another PowerShell module, so assist in setting up custom colour themes.*
+
 ## The Main Commands (for end users)
 
 | COMMAND-NAME                                              | DESCRIPTION
