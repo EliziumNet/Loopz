@@ -41,4 +41,22 @@ Describe 'Show-ParameterSetInfo' -Tag 'PSTools' {
       'Format-Escape' | Show-ParameterSetInfo -Sets 'barf' -Test;
     }
   }
+
+  Context 'given: byName' {
+    It 'should: Show parameter set info' {
+      Show-ParameterSetInfo -Name 'Rename-Many' -Sets 'MoveToAnchor' -Test
+    }
+  }
+
+  Context 'given: Command alias' {
+    It 'should: should: Show parameter set info' {
+      Show-ParameterSetInfo -Name 'remy' -Sets 'MoveToAnchor' -Test
+    }
+  }
+
+  Context 'given: bad Command' {
+    It 'should: Not Show parameter set info' {
+      Show-ParameterSetInfo -Name 'blah' -Test -ErrorAction SilentlyContinue
+    }
+  }
 }

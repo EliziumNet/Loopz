@@ -31,6 +31,10 @@ Show all the parameter information for a command. For brevity, this example supp
 
 ![picture](../images/use-pstool.SHIPS.command.jpg)
 
+:pushpin: Alternatively, *Show-ParameterSetInfo* can be invoked using the *Name* parameter instead of using the pipeline (and the *Name* can be the command's alias):
+
+> ships -Name 'remy' -Sets UpdateInPlace, NoReplacement
+
 ### Show-ParameterSetReport<a name="using.show-parameter-set-report"></a>
 
 :dart: using *Show-ParameterSetReport (sharp)*
@@ -40,6 +44,10 @@ Show all the parameter information for a command. For brevity, this example supp
 > $ Get-Command 'Rename-Many' | sharp
 
 ![picture](../images/use-pstool.SHARP.remy.no-violations.command.jpg)
+
+:pushpin: Alternatively, *Show-ParameterSetReport* can be invoked using the *Name* parameter instead of using the pipeline (and the *Name* can be the command's alias):
+
+> sharp -Name 'remy'
 
 However, there are currently 4 rules that could be violated and these are illustrated next.
 
@@ -217,6 +225,10 @@ When *Show-InvokeReport* is invoked with a valid set of invoke parameters, the c
 > $ Get-Command Rename-Many | Show-InvokeReport -Params underscore, Pattern, Paste
 
 ![picture](../images/use-pstool.SHIRE.valid-params.command.jpg)
+
+:pushpin: Alternatively, *Show-InvokeReport* can be invoked using the *Name* parameter instead of using the pipeline (and the *Name* can be the command's alias):
+
+> Show-InvokeReport -Name 'Rename-Many' -Params underscore, Pattern, Paste
 
 When a user invokes a real command and makes a mistake with the set of parameters on the command line, they can run into the error message quoted previously. The user can mistakenly either provide too many parameters none of which actually resolve to a parameter set or too few. In either case, the user can invoke *Show-InvokeReport* specifying the rogue set and in the case of providing too few parameters it will simply show a message saying so.
 

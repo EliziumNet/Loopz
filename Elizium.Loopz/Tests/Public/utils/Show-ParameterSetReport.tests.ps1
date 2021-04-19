@@ -169,4 +169,22 @@ Describe 'Show-ParameterSetReport' -Tag 'PSTools' {
       }
     }
   }
+
+  Context 'given: byName' {
+    It 'should: Show parameter set info' {
+      Show-ParameterSetReport -Name 'Rename-Many' -Test
+    }
+  }
+
+  Context 'given: Command alias' {
+    It 'should: should: Show parameter set info' {
+      Show-ParameterSetReport -Name 'remy' -Test
+    }
+  }
+
+  Context 'given: bad Command' {
+    It 'should: Not Show parameter set info' {
+      Show-ParameterSetReport -Name 'blah' -Test -ErrorAction SilentlyContinue
+    }
+  }
 }
