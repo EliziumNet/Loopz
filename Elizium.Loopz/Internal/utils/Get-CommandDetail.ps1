@@ -1,5 +1,5 @@
 
-function Get-CommandDetail {
+function get-CommandDetail {
   #  by KirkMunro (https://github.com/PowerShell/PowerShell/issues/8692)
   [CmdletBinding()]
   param(
@@ -10,7 +10,7 @@ function Get-CommandDetail {
   )
   process {
     if ($_ -isnot [System.Management.Automation.CommandInfo]) {
-      Get-Command -Name $_ | Get-CommandDetail
+      Get-Command -Name $_ | get-CommandDetail
     }
     else {
       $commandPropDetails = ($_ | Format-List @{Name = 'CommandName'; Expression = { $_.Name } }, CommandType, ImplementingType, Dll, HelpFile | Out-String) -replace '^[\r\n]+|[\r\n]+$'
