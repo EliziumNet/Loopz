@@ -12,6 +12,9 @@ function New-RegularExpression {
   flags ('mixsn') which must be specified at the end of the $Expression after a
   '/'.
 
+  .LINK
+    https://eliziumnet.github.io/Loopz/
+
   .PARAMETER Escape
     switch parameter to indicate that the expression should be escaped. (This is an
   alternative to the '~' prefix).
@@ -29,6 +32,20 @@ function New-RegularExpression {
     switch parameter to indicate the expression should be wrapped with word boundary
   markers \b, so an $Expression defined as 'foo' would be adjusted to '\bfoo\b'.
 
+  .EXAMPLE 1 (Create a regular expression object)
+  New-RegularExpression -Expression '(?<y>\d{4})-(?<m>\d{2})-(?<d>\d{2})'
+
+  .EXAMPLE 2 (with WholeWord)
+  New-RegularExpression -Expression '(?<y>\d{4})-(?<m>\d{2})-(?<d>\d{2})' -WholeWord
+
+  .EXAMPLE 3 (Escaped)
+  New-RegularExpression -Expression '(123)' -Escape
+
+  .EXAMPLE 4 (Escaped with leading ~)
+  New-RegularExpression -Expression '~(123)'
+
+  .EXAMPLE 5 (Create a case insensitive expression)
+  New-RegularExpression -Expression 'DATE/i'
   #>
   [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions',
     '', Justification = 'Not a state changing function, its a factory')]
@@ -53,7 +70,7 @@ function New-RegularExpression {
     '[\/\\](?<codes>[mixsn]{1,5})$');
 
   try {
-    [string]$adjustedExpression = $Expression.StartsWith('~') `
+    [string]$adjustedExpression = ($Expression.StartsWith('~') -or $Escape.IsPresent) `
       ? [regex]::Escape($Expression.Substring(1)) : $Expression;
 
     [string[]]$optionsArray = @();
@@ -79,9 +96,6 @@ function New-RegularExpression {
       Write-Debug "New-RegularExpression; created RegEx for pattern: '$adjustedExpression', with options: '$options'";
     }
 
-    if ($Escape.ToBool()) {
-      $adjustedExpression = [regex]::Escape($adjustedExpression);
-    }
     if ($WholeWord.ToBool()) {
       $adjustedExpression = '\b{0}\b' -f $adjustedExpression;
     }

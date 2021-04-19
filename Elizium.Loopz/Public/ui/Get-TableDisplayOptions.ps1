@@ -11,6 +11,9 @@ function Get-TableDisplayOptions {
     The client can further customise by overwriting the members on the
   PSCustomObject returned.
 
+  .LINK
+    https://eliziumnet.github.io/Loopz/
+
   .PARAMETER Custom
     A client defined PSCustomObject that will be populated under the ./Custom in the
   PSCustomObject returned.

@@ -20,6 +20,9 @@ function Register-CommandSignals {
   This will mean that when a module is imported, the command's signals are
   registered and will show up in the table displayed by 'Show-Signals'.
 
+  .LINK
+    https://eliziumnet.github.io/Loopz/
+
   .PARAMETER Alias
     The name of the command's alias, to register the signals under.
 
@@ -29,6 +32,10 @@ function Register-CommandSignals {
 
   .PARAMETER UsedSet
     The set of signals that the specified command uses.
+
+  .EXAMPLE 1
+  Register-CommandSignals -Alias 'xcopy', 'WHAT-IF', 'SOURCE', 'DESTINATION'
+
   #>
   [Alias('rgcos')]
   param(

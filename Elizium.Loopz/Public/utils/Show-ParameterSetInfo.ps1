@@ -20,6 +20,9 @@ function Show-ParameterSetInfo {
   whether a the parameter is unique to that parameter set. This relieves the developer
   from having to figure this out themselves.
 
+  .LINK
+    https://eliziumnet.github.io/Loopz/
+
   .PARAMETER Common
     switch to indicate if the standard PowerShell Common parameters show be included
 
@@ -35,7 +38,22 @@ function Show-ParameterSetInfo {
 
   .PARAMETER Title
     The text displayed as a title. End user does not have to specify this value. It is useful
-  to other client command that invoke this one, so some context can be added to the display.
+  to other client commands that invoke this one, so some context can be added to the display.
+
+  .INPUTS
+    CommandInfo or command name bound to $Name.
+
+  .EXAMPLE 1 (Show all parameter sets, CommandInfo via pipeline)
+
+  Get-Command 'Rename-Many' | Show-ParameterSetInfo
+
+  .EXAMPLE 2 (Show all parameter sets with Common parameters, command name via pipeline)
+
+  'Rename-Many' | Show-ParameterSetInfo -Common
+
+  .EXAMPLE 3 (Show specified parameter sets, command name via pipeline)
+
+  'Rename-Many' | Show-ParameterSetInfo -Sets MoveToAnchor, UpdateInPlace
   #>
   [CmdletBinding()]
   [Alias('ships')]

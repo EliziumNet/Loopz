@@ -1,7 +1,7 @@
 ---
 external help file: Elizium.Loopz-help.xml
 Module Name: Elizium.Loopz
-online version:
+online version: https://eliziumnet.github.io/Loopz/
 schema: 2.0.0
 ---
 
@@ -24,6 +24,43 @@ Provides a way to provide OS specific functionality. Returns $null if the $Hash 
 not contain an entry corresponding to the current platform.
 (Doesn't support invoking a function with named parameters; PowerShell doesn't currently
 support this, not even via splatting, if this changes, this will be implemented.)
+
+## EXAMPLES
+
+### EXAMPLE 1
+
+```powershell
+  function invoke-winFn {
+    param(
+      [string]$name,
+      [string]$colour
+    )
+
+    "win: Name:$name, Colour:$colour";
+  }
+
+  [hashtable]$platformsPositional = @{
+    'windows' = [PSCustomObject]@{
+      FnInfo     = Get-Command -Name invoke-winFn -CommandType Function;
+      Positional = @('cherry', 'red');
+    };
+    'linux'   = [PSCustomObject]@{
+      FnInfo     = Get-Command -Name invoke-linuxFn -CommandType Function;
+      Positional = @('grass', 'green');
+    };
+    'mac'     = [PSCustomObject]@{
+      FnInfo     = Get-Command -Name invoke-macFn -CommandType Function;
+      Positional = @('lagoon', 'blue');
+    };
+  }
+  Invoke-ByPlatform -Hash $platformsPositional;
+```
+
+(invoke-linuxFn, invoke-macFn, omitted above but defined with the same signature as invoke-winFn)
+
+On windows, Returns
+
+'win: Name:cherry, Colour:red'
 
 ## PARAMETERS
 
@@ -63,3 +100,5 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 ## NOTES
 
 ## RELATED LINKS
+
+[Elizium.Loopz](https://github.com/EliziumNet/Loopz)

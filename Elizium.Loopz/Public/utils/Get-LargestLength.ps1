@@ -9,7 +9,10 @@ function Get-LargestLength {
 
   .DESCRIPTION
     Get the size of the largest string item in the collection.
-  
+
+  .LINK
+    https://eliziumnet.github.io/Loopz/
+
   .PARAMETER Data
     Hashtable containing the table data.
 

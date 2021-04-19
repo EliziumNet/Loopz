@@ -14,6 +14,9 @@
   Summary script block can be specified which will be invoked at the end of the mirroring
   batch.
 
+  .LINK
+    https://eliziumnet.github.io/Loopz/
+
   .PARAMETER Block
     The script block to be invoked. The script block is invoked for each directory in the
   source directory tree that satisfy the specified Directory Include/Exclude filters with

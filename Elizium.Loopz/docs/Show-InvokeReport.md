@@ -1,7 +1,7 @@
 ---
 external help file: Elizium.Loopz-help.xml
 Module Name: Elizium.Loopz
-online version:
+online version: https://eliziumnet.github.io/Loopz/
 schema: 2.0.0
 ---
 
@@ -51,6 +51,24 @@ parameters can specify the same position.
 ValueFromPipeline keyword with a value of true.
 - 'In All Parameter Sets By Accident': Defining a parameter with multiple
 'Parameter Blocks', some with and some without a parameter set, is invalid.
+
+## EXAMPLES
+
+### EXAMPLE 1 (CommandInfo via pipeline)
+
+```powershell
+Get-Command 'Rename-Many' | Show-InvokeReport params underscore, Pattern, Anchor, With 
+```
+
+Show invoke report for command 'Rename-Many' from its command info
+
+### EXAMPLE 2 (command name via pipeline)
+
+```powershell
+'Rename-Many' | Show-InvokeReport params underscore, Pattern, Anchor, With 
+```
+
+Show invoke report for command 'Rename-Many' from its command info
 
 ## PARAMETERS
 
@@ -158,7 +176,9 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## INPUTS
 
-### System.String[]
+### System.String[] or CommandInfo[]
+
+Parameter `$Name`, can be CommandInfo derived from get-Command or simply the name of the command as a string. Multiple items can be specified using array notation.
 
 ## OUTPUTS
 
@@ -167,3 +187,5 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 ## NOTES
 
 ## RELATED LINKS
+
+[Elizium.Loopz](https://github.com/EliziumNet/Loopz)

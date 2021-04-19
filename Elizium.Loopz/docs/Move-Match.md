@@ -1,7 +1,7 @@
 ---
 external help file: Elizium.Loopz-help.xml
 Module Name: Elizium.Loopz
-online version:
+online version: https://eliziumnet.github.io/Loopz/
 schema: 2.0.0
 ---
 
@@ -9,8 +9,8 @@ schema: 2.0.0
 
 ## SYNOPSIS
 
-The core move match action function principally used by Rename-Many. Moves a 
-  match according to the specified anchor(s).
+The core move match action function principally used by Rename-Many. Moves a
+match according to the specified anchor(s).
 
 ## SYNTAX
 
@@ -34,6 +34,54 @@ $With, $Copy and $Paste that defines what to insert, with the $Anchor/$Start/$En
 defining where the replacement text should go. The user should not be using named capture
 groups in $Copy, or $Anchor, rather, they should be defined inside $Paste and referenced
 inside $Paste/$With.
+
+## EXAMPLES
+
+### EXAMPLE 1 (Anchor)
+
+```powershell
+Move-Match 'VAL 1999-02-21 + RH - CLOSE' '(?\<dt\>\d{4}-\d{2}-\d{2})' -Anchor ' -' -Relation 'before'
+```
+
+Move a match before an anchor
+
+### EXAMPLE 2 (Anchor)
+
+```powershell
+Move-Match 'VAL 1999-02-21 + RH - CLOSE' '(?\<dt\>\d{4}-\d{2}-\d{2})' -Anchor ' -' -Relation 'before' -Drop '-'
+```
+
+Move a match before an anchor and drop a literal in place of Pattern
+
+### EXAMPLE 3 (Hybrid Anchor)
+
+```powershell
+Move-Match 'VAL 1999-02-21 + RH - CLOSE' '(?\<dt\>\d{4}-\d{2}-\d{2})' -Anchor ' -' -End -Relation 'before' -Drop '-'
+```
+
+Move a match before an anchor, if anchor match fails, then move to end, then drop a literal in place of Pattern.
+
+### EXAMPLE 4 (Anchor with Occurrence)
+
+```powershell
+Move-Match 'VAL 1999-02-21 + RH - CLOSE' '(?\<dt\>\d{4}-\d{2}-\d{2})' -Anchor ' -' -Relation 'before' -AnchorOccurrence 'l'
+```
+
+### EXAMPLE 5 (Result formatted by With, named group reference)
+
+```powershell
+Move-Match 'VAL 1999-02-21 + RH - CLOSE' '(?\<dt\>\d{4}-\d{2}-\d{2})' -Anchor ' -' -With '--(${dt})--'
+```
+
+Move a match to the anchor, and format the output including group references, no anchor
+
+### EXAMPLE 6 (Result formatted by With, named group reference and insert anchor)
+
+```powershell
+Move-Match 'VAL 1999-02-21 + RH - CLOSE' '(?\<dt\>\d{4}-\d{2}-\d{2})' -Anchor ' -' -With '${_a}, --(${dt})--'
+```
+
+Move a match to the anchor, and format the output including group references, insert anchor
 
 ## PARAMETERS
 
@@ -200,12 +248,8 @@ Accept wildcard characters: False
 ### -Paste
 
 This is a NON regular expression string. It would be more accurately described as a formatter,
-similar to the $With parameter. When $Paste is defined, the $Anchor (if specified) is removed
-from $Value and needs to be be re-inserted using the special variable ${_a}. The
-other special variables that can be used inside a $Paste string is documented under the $With
-parameter.
-  The $Paste string can specify a format that defines the replacement and since it removes the
-$Anchor, the $Relation is not applicable ($Relation and $Paste can't be used together).
+similar to the $With parameter. The other special variables that can be used inside a $Paste
+string is documented under the $With parameter.
 
 ```yaml
 Type: String
@@ -353,3 +397,5 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 ## NOTES
 
 ## RELATED LINKS
+
+[Elizium.Loopz](https://github.com/EliziumNet/Loopz)

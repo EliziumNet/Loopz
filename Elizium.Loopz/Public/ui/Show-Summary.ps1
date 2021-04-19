@@ -23,6 +23,9 @@ function Show-Summary {
   all, so if this entry is set (a boolean value), the all wide items appear on their
   own line.
 
+  .LINK
+    https://eliziumnet.github.io/Loopz/
+
   .PARAMETER Count
     The number items processed, this is the number of items in the pipeline which match
   the $Pattern specified and therefore are allocated an index.

@@ -19,6 +19,9 @@ function Invoke-ForeachFsItem {
   will deliver what ever is returned from the script-block/function, so the result of
   Invoke-ForeachFsItem can be piped to another command.
 
+  .LINK
+    https://eliziumnet.github.io/Loopz/
+
   .PARAMETER Block
     The script block to be invoked. The script block is invoked for each item in the
   pipeline that satisfy the Condition with the following positional parameters:

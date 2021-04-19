@@ -18,6 +18,9 @@ function Show-Header {
   * 'LOOPZ.HEADER-BLOCK.LINE': The static line text. The length of this line controls
   how everything else is aligned (ie the flex part and the message if present).
 
+  .LINK
+    https://eliziumnet.github.io/Loopz/
+
   .PARAMETER Exchange
     The exchange hashtable object.
 

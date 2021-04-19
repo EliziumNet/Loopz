@@ -13,6 +13,9 @@ function Select-SignalContainer {
     This is a wrapper around Get-FormattedSignal in addition to selecting the
   signal into a container.
 
+  .LINK
+    https://eliziumnet.github.io/Loopz/
+
   .PARAMETER Containers
     PSCustomObject that contains Wide and Props properties which must be of Krayola's
   type [line].

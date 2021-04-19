@@ -15,6 +15,9 @@ function Split-Match {
   the source with the matched text removed and the third is the match object
   that represents the matched text.
 
+  .LINK
+    https://eliziumnet.github.io/Loopz/
+
   .PARAMETER CapturedOnly
     switch parameter to indicate what should be returned. When the client does not need
   the match object or the remainder, they can use this switch to ensure only the matched
@@ -35,7 +38,13 @@ function Split-Match {
   .PARAMETER Source
     The source value against which regular expression is applied.
 
+  .EXAMPLE 1 (Return full match info)
+  [regex]$re = New-RegularExpression -Expression '(?<d>\d{2})-(?<m>\d{2})-(?<y>\d{4})'
+  [string]$captured, [string]$remainder, $matchInfo = Split-Match -Source '23-06-2006 - Ex' -PatternRegEx $re
 
+  .EXAMPLE 2 (Return captured text only)
+  [regex]$re = New-RegularExpression -Expression '(?<d>\d{2})-(?<m>\d{2})-(?<y>\d{4})'
+  [string]$captured = Split-Match -Source '23-06-2006 - Ex' -PatternRegEx $re -CapturedOnly
   #>
   param(
     [Parameter(Mandatory)]

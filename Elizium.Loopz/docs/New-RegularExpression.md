@@ -1,7 +1,7 @@
 ---
 external help file: Elizium.Loopz-help.xml
 Module Name: Elizium.Loopz
-online version:
+online version: https://eliziumnet.github.io/Loopz/
 schema: 2.0.0
 ---
 
@@ -22,6 +22,48 @@ New-RegularExpression [-Expression] <String> [-Escape] [-WholeWord] [-Label <Str
 Creates a regex object from the $Expression specified. Supports inline regex
 flags ('mixsn') which must be specified at the end of the $Expression after a
 '/'.
+
+## EXAMPLES
+
+### EXAMPLE 1
+
+```powershell
+New-RegularExpression -Expression '(?\<y\>\d{4})-(?\<m\>\d{2})-(?\<d\>\d{2})'
+```
+
+Create a regular expression
+
+### EXAMPLE 2 (with WholeWord)
+
+```powershell
+New-RegularExpression -Expression '(?\<y\>\d{4})-(?\<m\>\d{2})-(?\<d\>\d{2})' -WholeWord
+```
+
+Apply whole word semantics, by surrounding the pattern with word boundary token: '\b'
+
+### EXAMPLE 3 (Escaped)
+
+```powershell
+New-RegularExpression -Expression '(123)' -Escape
+```
+
+Escape the whole pattern.
+
+### EXAMPLE 4 (Escaped with leading ~)
+
+```powershell
+New-RegularExpression -Expression '~(123)'
+```
+
+Escape the whole pattern with leading ~.
+
+### EXAMPLE 5 (Create a case insensitive expression)
+
+```powershell
+New-RegularExpression -Expression 'DATE/i'
+```
+
+Create a case insensitive expression via inline options
 
 ## PARAMETERS
 
@@ -109,3 +151,5 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 ## NOTES
 
 ## RELATED LINKS
+
+[Elizium.Loopz](https://github.com/EliziumNet/Loopz)

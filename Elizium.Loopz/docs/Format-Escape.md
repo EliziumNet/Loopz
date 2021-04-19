@@ -1,7 +1,7 @@
 ---
 external help file: Elizium.Loopz-help.xml
 Module Name: Elizium.Loopz
-online version:
+online version: https://eliziumnet.github.io/Loopz/
 schema: 2.0.0
 ---
 
@@ -24,7 +24,36 @@ Format-Escape [-Source] <Object> [<CommonParameters>]
 Various functions in Loopz have parameters that accept a regular expression. This
 function gives the user an easy way to escape the regex, without them having to do
 this manually themselves which could be tricky to get right depending on their
-requirements.
+requirements. NB: an alternative to using the 'esc' function is to add a ~ to the start
+of the pattern. The tilde is not taken as part of the pattern and is stripped off.
+If a partial escape is required, then split the value into parts that require escaping and
+the other parts that don't.
+
+## EXAMPLES
+
+### EXAMPLE 1 (Use with Rename-Many command)
+
+```powershell
+Rename-Many -Pattern $(esc('(123)'))
+```
+
+Use the 'esc' alias with the Rename-Many command, escaping the regex characters in the Pattern definition.
+
+### EXAMPLE 2 (Use with Rename-Many command)
+
+```powershell
+Rename-Many -Pattern '~(123)'
+```
+
+Use a leading '~' in the pattern definition, to escape the whole value.
+
+### EXAMPLE 3 (Use with Rename-Many command)
+
+```powershell
+Rename-Many -Pattern $(esc('(123)') + '(?<n>\d{3})')
+```
+
+Partial escape defined by concatenating patterns individually escaped or not.
 
 ## PARAMETERS
 
@@ -59,3 +88,5 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 ## NOTES
 
 ## RELATED LINKS
+
+[Elizium.Loopz](https://github.com/EliziumNet/Loopz)

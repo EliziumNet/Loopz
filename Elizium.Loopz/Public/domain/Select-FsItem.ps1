@@ -13,6 +13,9 @@ function Select-FsItem {
   This function is partly required because the Include/Exclude parameters on functions
   such as Get-ChildItems/Copy-Item/Get-Item etc only work on files not directories.
 
+  .LINK
+    https://eliziumnet.github.io/Loopz/
+
   .PARAMETER Case
     Switch parameter which controls case sensitivity of inclusion/exclusion. By default
   filtering is case insensitive. When The Case switch is specified, filtering is case

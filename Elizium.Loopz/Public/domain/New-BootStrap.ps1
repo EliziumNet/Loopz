@@ -114,6 +114,9 @@ function New-BootStrap {
   * Force (optional) -> container selector.
   * Keys (optional) -> Collection of key/value pairs to be inserted into exchange.
 
+  .LINK
+    https://eliziumnet.github.io/Loopz/
+
   .PARAMETER Containers
     A PSCustomObject that must contain a 'Wide' property and a 'Props' property. Both of
   these must be of type Krayola.Line. 'Prop's are designed to show a small item of information,

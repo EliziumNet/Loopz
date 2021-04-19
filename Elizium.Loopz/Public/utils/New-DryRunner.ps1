@@ -17,6 +17,9 @@ function New-DryRunner {
   RuleController class in unit tests to check that commands do not violate the
   parameter set rules.)
 
+  .LINK
+    https://eliziumnet.github.io/Loopz/
+
   .PARAMETER CommandName
     The name of the command to get DryRunner instance for
 

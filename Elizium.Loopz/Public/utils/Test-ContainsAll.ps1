@@ -11,6 +11,9 @@ function Test-ContainsAll {
   .DESCRIPTION
     Is the first set a super set of the second.
 
+  .LINK
+    https://eliziumnet.github.io/Loopz/
+
   .PARAMETER Super
     The super set (First)
 

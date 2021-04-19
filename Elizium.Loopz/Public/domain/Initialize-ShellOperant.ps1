@@ -26,6 +26,9 @@ function Initialize-ShellOperant {
   - DisabledEnVar ('LOOPZ_REMY_UNDO_DISABLED'): The environment variable used to disable
   this operant.
 
+  .LINK
+    https://eliziumnet.github.io/Loopz/
+
   .PARAMETER DryRun
     Similar to WhatIf, but by passing ShouldProcess process for custom handling of
   dry run scenario. DryRun should be set if WhatIf is enabled.

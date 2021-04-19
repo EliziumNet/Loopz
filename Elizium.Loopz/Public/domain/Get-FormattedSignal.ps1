@@ -16,6 +16,9 @@ function Get-FormattedSignal {
   how the signal is displayed. If the function is invoked without a Value, then
   a formatted string is returned, otherwise a pair object is returned.
 
+  .LINK
+    https://eliziumnet.github.io/Loopz/
+
   .PARAMETER CustomLabel
     An alternative label to display overriding the signal's defined label.
 

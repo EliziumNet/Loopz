@@ -12,6 +12,9 @@ function Get-AsTable {
   table cell values. The default will space pad the cell value and align
   according the table options (./HeaderAlign and ./ValueAlign).
 
+  .LINK
+    https://eliziumnet.github.io/Loopz/
+
   .PARAMETER Evaluate
     A script-block allowing client defined cell rendering logic. The Render script-block
   contains the following parameters:

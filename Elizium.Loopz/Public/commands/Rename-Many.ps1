@@ -76,6 +76,9 @@ function Rename-Many {
   This third method is required when the whole pattern should not be subjected to
   escaping.
 
+  .LINK
+    https://eliziumnet.github.io/Loopz/
+
   .PARAMETER Anchor
     Indicates that the rename operation will be a move of the token from its original point
   to the point indicated by Anchor. Anchor is a regular expression string applied to the
@@ -255,6 +258,9 @@ number of item processed
 
   .PARAMETER underscore
     The pipeline item which should either be an instance of FileInfo or DirectoryInfo.
+
+  .INPUTS
+    FileSystemInfo (FileInfo or DirectoryInfo) bound to $underscore
 
   * MOVE EXAMPLES (anchored)
 

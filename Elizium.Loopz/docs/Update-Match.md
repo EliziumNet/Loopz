@@ -1,7 +1,7 @@
 ---
 external help file: Elizium.Loopz-help.xml
 Module Name: Elizium.Loopz
-online version:
+online version: https://eliziumnet.github.io/Loopz/
 schema: 2.0.0
 ---
 
@@ -22,20 +22,57 @@ Update-Match [-Value] <String> [-Pattern] <Regex> [[-PatternOccurrence] <String>
 ## DESCRIPTION
 
 Returns a new string that reflects updating the specified $Pattern match.
-First Update-Match, removes the Pattern match from $Value.
+Firstly, Update-Match removes the Pattern match from $Value.
 This makes the With and Copy match against the remainder ($patternRemoved) of $Value.
-This way, there is no overlap between the Pattern match and $With and it also makes the functionality more understandable for the user.
-NB: Pattern only tells you what to remove, but it's the With, Copy and Paste that defines what to insert.
-The user should not be using named capture groups in Copy rather, they should be defined inside $Paste and referenced inside Paste.
+This way, there is no overlap between the Pattern match and $Paste and it also makes the functionality more understandable for the user.
+NB: Pattern only tells you what to remove, but it's the Copy and Paste that defines what to insert.
+
+## EXAMPLES
+
+### EXAMPLE 1 (Update with literal content)
+
+```powershell
+Update-Match 'VAL 1999-02-21 + RH - CLOSE' '(?\<dt\>\d{4}-\d{2}-\d{2})' -Paste '----X--X--'
+```
+
+### EXAMPLE 2 (Update with variable content)
+
+```powershell
+[string]$today = Get-Date -Format 'yyyy-MM-dd'
+Update-Match 'VAL 1999-02-21 + RH - CLOSE' '(?\<dt\>\d{4}-\d{2}-\d{2})' -Paste $('_(' + $today + ')_')
+```
+
+### EXAMPLE 3 (Update with whole copy reference)
+
+```powershell
+Update-Match 'VAL 1999-02-21 + RH - CLOSE' '(?\<dt\>\d{4}-\d{2}-\d{2})' -Paste '${_c},----X--X--' -Copy '[^\s]+'
+```
+
+### EXAMPLE 4 (Update with group references)
+
+```powershell
+Update-Match 'VAL 1999-02-21 + RH - CLOSE' '(?\<dt\>\d{4}-\d{2}-\d{2})' -Paste '${first},----X--X--' -Copy '(?<first>[^\s]+)'
+```
+
+### EXAMPLE 5 (Update with 2nd copy occurrence)
+
+```powershell
+Update-Match 'VAL 1999-02-21 + RH - CLOSE' '(?\<dt\>\d{4}-\d{2}-\d{2})' -Paste '${_c},----X--X--' -Copy '[^\s]+' -CopyOccurrence 2
+```
 
 ## PARAMETERS
 
 ### -Copy
 
-Regular expression string applied to $Value (after the $Pattern match has been removed), indicating a portion which should be copied and re-inserted (via the $Paste parameter; see $Paste or $With).
-Since this is a regular expression to be used in $Paste/$With, there is no value in the user specifying a static pattern, because that static string can just be defined in $Paste/$With.
-The value in the $Copy parameter comes when a generic pattern is defined eg \d{3} (is non literal), specifies any 3 digits as opposed to say '123', which could be used directly in the $Paste/$With parameter without the need for $Copy.
-The match defined by $Copy is stored in special variable ${_c} and can be referenced as such from $Paste and $With.
+  Regular expression string applied to $Value (after the $Pattern match has been removed),
+indicating a portion which should be copied and re-inserted (via the $Paste parameter;
+see $Paste). Since this is a regular expression to be used in $Paste, there
+is no value in the user specifying a static pattern, because that static string can just be
+defined in $Paste. The value in the $Copy parameter comes when a non literal pattern is
+defined eg \d{3} (is non literal), specifies any 3 digits as opposed to say '123', which
+could be used directly in the $Paste parameter without the need for $Copy. The match
+defined by $Copy is stored in special variable ${_c} and can be referenced as such from
+$Paste.
 
 ```yaml
 Type: Regex
@@ -93,7 +130,8 @@ Accept wildcard characters: False
 
 Formatter parameter for Update operations. Can contain named/numbered group references
 defined inside regular expression parameters, or use special named references $0 for the whole
-Pattern match and ${_c} for the whole Copy match.
+Pattern match and ${_c} for the whole Copy match. The Paste can also contain named/numbered
+group references defined in $Pattern.
 
 ```yaml
 Type: String
@@ -189,3 +227,5 @@ Returns the string which reflects match update operation.
 ## NOTES
 
 ## RELATED LINKS
+
+[Elizium.Loopz](https://github.com/EliziumNet/Loopz)

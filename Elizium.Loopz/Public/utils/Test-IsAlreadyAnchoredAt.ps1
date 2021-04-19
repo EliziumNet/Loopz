@@ -14,6 +14,9 @@ function Test-IsAlreadyAnchoredAt {
   we must use the origin regex, perform the match and then see where that match resides, by consulting
   the index and length of that match instance.
 
+  .LINK
+    https://eliziumnet.github.io/Loopz/
+
   .PARAMETER Source
     The input source
 

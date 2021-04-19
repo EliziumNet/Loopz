@@ -39,6 +39,9 @@ function Show-InvokeReport {
   - 'In All Parameter Sets By Accident': Defining a parameter with multiple
   'Parameter Blocks', some with and some without a parameter set, is invalid.
 
+  .LINK
+    https://eliziumnet.github.io/Loopz/
+
   .PARAMETER Common
     switch to indicate if the standard PowerShell Common parameters show be included
 
@@ -53,8 +56,23 @@ function Show-InvokeReport {
     The Krayola scribbler instance used to manage rendering to console
 
   .PARAMETER Strict
-    When specified, will not use Mandatory parameters check to for candidate parameter
-  sets.
+    When specified, will not use Mandatory parameters check to for candidate parameter sets
+
+  .INPUTS
+    CommandInfo or command name bound to $Name.
+
+  .EXAMPLE
+  Get-Command 'Rename-Many' | Show-InvokeReport params underscore, Pattern, Anchor, With 
+
+   1 (CommandInfo via pipeline)
+  Show invoke report for command 'Rename-Many' from its command info
+
+  .EXAMPLE
+  'Rename-Many' | Show-InvokeReport params underscore, Pattern, Anchor, With 
+
+   2 (command name via pipeline)
+  Show invoke report for command 'Rename-Many' from its command info
+
   #>
   [CmdletBinding()]
   [Alias('shire')]
