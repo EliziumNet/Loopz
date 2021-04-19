@@ -28,7 +28,11 @@ function Show-ParameterSetReport {
     https://eliziumnet.github.io/Loopz/
 
   .PARAMETER Name
-    The name of the command to show parameter set report for
+    The name of the command to show parameter set report for. Can be alias or full command name.
+
+  .PARAMETER InputObject
+    Item(s) from the pipeline. Can be command/alias name of the command, or command/alias
+  info obtained via Get-Command.
 
   .PARAMETER Scribbler
     The Krayola scribbler instance used to manage rendering to console
@@ -42,13 +46,20 @@ function Show-ParameterSetReport {
   .EXAMPLE 2 (command name via pipeline)
   'Rename-Many' | Show-ParameterSetReport
 
+  .EXAMPLE 3 (By Name)
+  Show-ParameterSetReport -Name 'Rename-Many'
+
   #>
   [CmdletBinding()]
   [Alias('sharp')]
   param(
-    [Parameter(Mandatory, Position = 0, ValueFromPipeline, ValueFromPipelineByPropertyName)]
+    [Parameter(ParameterSetName = 'ByName', Mandatory, Position = 0)]
     [ValidateNotNullOrEmpty()]
-    [string[]]$Name,
+    [string]$Name,
+
+    [Parameter(ParameterSetName = 'ByPipeline', Mandatory, ValueFromPipeline, ValueFromPipelineByPropertyName)]
+    [ValidateNotNullOrEmpty()]
+    [array[]]$InputObject,
 
     [Parameter()]
     [Scribbler]$Scribbler,
@@ -63,21 +74,36 @@ function Show-ParameterSetReport {
     if ($null -eq $Scribbler) {
       $Scribbler = New-Scribbler -Krayon $krayon -Test:$Test.IsPresent;
     }
+
+    [hashtable]$sharpParameters = @{
+      'Test' = $Test.IsPresent;
+    }
+
+    if ($PSBoundParameters.ContainsKey('Scribbler')) {
+      $sharpParameters['Scribbler'] = $Scribbler;
+    }
   }
 
   process {
     # Reminder: $_ is commandInfo
-    # 
-    if ($_ -isNot [System.Management.Automation.CommandInfo]) {
-      [hashtable]$sharpParameters = @{
-        'Test'   = $Test.IsPresent;
+    #
+    if (($PSCmdlet.ParameterSetName -eq 'ByName') -or
+      (($PSCmdlet.ParameterSetName -eq 'ByPipeline') -and ($_ -is [string]))) {
+
+      if ($PSCmdlet.ParameterSetName -eq 'ByPipeline') {
+        Get-Command -Name $_ | Show-ParameterSetReport @sharpParameters;
       }
-
-      if ($PSBoundParameters.ContainsKey('Scribbler')) {
-        $sharpParameters['Scribbler'] = $Scribbler;
-      }     
-
-      Get-Command -Name $_ | Show-ParameterSetReport @sharpParameters;
+      else {
+        Get-Command -Name $Name | Show-ParameterSetReport @sharpParameters;
+      }
+    }
+    elseif ($_ -is [System.Management.Automation.AliasInfo]) {
+      if ($_.ResolvedCommand) {
+        $_.ResolvedCommand | Show-ParameterSetReport @sharpParameters;
+      }
+      else {
+        Write-Error "Alias '$_' does not resolve to a command" -ErrorAction Stop;
+      }
     }
     else {
       Write-Debug "    --- Show-ParameterSetReport - Command: [$($_.Name)] ---";

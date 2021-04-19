@@ -46,7 +46,11 @@ function Show-InvokeReport {
     switch to indicate if the standard PowerShell Common parameters show be included
 
   .PARAMETER Name
-    The name of the command to show invoke report for
+    The name of the command to show invoke report for. Can be alias or full command name.
+
+  .PARAMETER InputObject
+    Item(s) from the pipeline. Can be command/alias name of the command, or command/alias
+  info obtained via Get-Command.
 
   .PARAMETER Params
     The set of parameter names the command is invoked for. This is like invoking the
@@ -61,25 +65,31 @@ function Show-InvokeReport {
   .INPUTS
     CommandInfo or command name bound to $Name.
 
-  .EXAMPLE
+  .EXAMPLE 1 (CommandInfo via pipeline)
   Get-Command 'Rename-Many' | Show-InvokeReport params underscore, Pattern, Anchor, With 
 
-   1 (CommandInfo via pipeline)
+   
   Show invoke report for command 'Rename-Many' from its command info
 
-  .EXAMPLE
+  .EXAMPLE 2 (command name via pipeline)
   'Rename-Many' | Show-InvokeReport params underscore, Pattern, Anchor, With 
 
-   2 (command name via pipeline)
   Show invoke report for command 'Rename-Many' from its command info
+
+  .EXAMPLE 3 (By Name)
+  Show-InvokeReport -Name 'Rename-Many' -params underscore, Pattern, Anchor, With
 
   #>
   [CmdletBinding()]
   [Alias('shire')]
   param(
-    [Parameter(Mandatory, Position = 0, ValueFromPipeline, ValueFromPipelineByPropertyName)]
+    [Parameter(ParameterSetName = 'ByName', Mandatory, Position = 0)]
     [ValidateNotNullOrEmpty()]
-    [string[]]$Name,
+    [string]$Name,
+
+    [Parameter(ParameterSetName = 'ByPipeline', Mandatory, ValueFromPipeline, ValueFromPipelineByPropertyName)]
+    [ValidateNotNullOrEmpty()]
+    [array[]]$InputObject,
 
     [Parameter(Mandatory)]
     [string[]]$Params,
@@ -104,22 +114,37 @@ function Show-InvokeReport {
     if ($null -eq $Scribbler) {
       $Scribbler = New-Scribbler -Krayon $krayon -Test:$Test.IsPresent;
     }
+
+    [hashtable]$shireParameters = @{
+      'Params' = $Params;
+      'Common' = $Common.IsPresent;
+      'Test'   = $Test.IsPresent;
+      'Strict' = $Strict.IsPresent;
+    }
+
+    if ($PSBoundParameters.ContainsKey('Scribbler')) {
+      $shireParameters['Scribbler'] = $Scribbler;
+    }      
   }
 
   process {
-    if ($_ -isNot [System.Management.Automation.CommandInfo]) {
-      [hashtable]$shireParameters = @{
-        'Params' = $Params;
-        'Common' = $Common.IsPresent;
-        'Test'   = $Test.IsPresent;
-        'Strict' = $Strict.IsPresent;
+    if (($PSCmdlet.ParameterSetName -eq 'ByName') -or
+      (($PSCmdlet.ParameterSetName -eq 'ByPipeline') -and ($_ -is [string]))) {
+
+      if ($PSCmdlet.ParameterSetName -eq 'ByPipeline') {
+        Get-Command -Name $_ | Show-InvokeReport @shireParameters;
       }
-
-      if ($PSBoundParameters.ContainsKey('Scribbler')) {
-        $shireParameters['Scribbler'] = $Scribbler;
-      }      
-
-      Get-Command -Name $_ | Show-InvokeReport @shireParameters;
+      else {
+        Get-Command -Name $Name | Show-InvokeReport @shireParameters;
+      }
+    }
+    elseif ($_ -is [System.Management.Automation.AliasInfo]) {
+      if ($_.ResolvedCommand) {
+        $_.ResolvedCommand | Show-InvokeReport @shireParameters;
+      }
+      else {
+        Write-Error "Alias '$_' does not resolve to a command" -ErrorAction Stop;
+      }
     }
     else {
       Write-Debug "    --- Show-InvokeReport - Command: [$($_.Name)] ---";

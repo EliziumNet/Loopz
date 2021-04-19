@@ -52,11 +52,17 @@ Get-Command 'Rename-Many' | Show-ParameterSetInfo
 'Rename-Many' | Show-ParameterSetInfo -Sets MoveToAnchor, UpdateInPlace
 ```
 
+### EXAMPLE 4 (By Name)
+
+```powershell
+Show-ParameterSetInfo -Name 'Rename-Many' -Sets MoveToAnchor, UpdateInPlace
+```
+
 ## PARAMETERS
 
 ### -Common
 
-switch to indicate if the standard PowerShell Common parameters show be included
+switch to indicate if the standard PowerShell Common parameters should be included
 
 ```yaml
 Type: SwitchParameter
@@ -70,19 +76,36 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -Name
+### -InputObject
 
-The name of the command to show invoke report for
+Item(s) from the pipeline. Can be command/alias name of the command, or command/alias
+info obtained via Get-Command.
 
 ```yaml
-Type: String[]
-Parameter Sets: (All)
+Type: Array[]
+Parameter Sets: ByPipeline
+Aliases:
+
+Required: True
+Position: Named
+Default value: None
+Accept pipeline input: True (ByPropertyName, ByValue)
+Accept wildcard characters: False
+```
+
+### -Name
+
+The name of the command to show parameter set info report for. Can be alias or full command name.
+
+```yaml
+Type: String
+Parameter Sets: ByName
 Aliases:
 
 Required: True
 Position: 0
 Default value: None
-Accept pipeline input: True (ByPropertyName, ByValue)
+Accept pipeline input: False
 Accept wildcard characters: False
 ```
 

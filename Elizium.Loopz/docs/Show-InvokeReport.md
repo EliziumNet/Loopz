@@ -28,9 +28,18 @@ to invoke this command specifying the parameters without their values.
 
 ## SYNTAX
 
+### ByName
+
 ```powershell
-Show-InvokeReport [-Name] <String[]> -Params <String[]> [-Scribbler <Scribbler>] [-Common] [-Strict] [-Test]
+Show-InvokeReport [-Name] <String> -Params <String[]> [-Scribbler <Scribbler>] [-Common] [-Strict] [-Test]
  [<CommonParameters>]
+```
+
+### ByPipeline
+
+```powershell
+Show-InvokeReport -InputObject <Array[]> -Params <String[]> [-Scribbler <Scribbler>] [-Common] [-Strict]
+ [-Test] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -65,10 +74,16 @@ Show invoke report for command 'Rename-Many' from its command info
 ### EXAMPLE 2 (command name via pipeline)
 
 ```powershell
-'Rename-Many' | Show-InvokeReport params underscore, Pattern, Anchor, With 
+'Rename-Many' | Show-InvokeReport -params underscore, Pattern, Anchor, With 
 ```
 
 Show invoke report for command 'Rename-Many' from its command info
+
+### EXAMPLE 3 (by Name)
+
+```powershell
+Show-InvokeReport -Name 'Rename-Many' -params underscore, Pattern, Anchor, With
+```
 
 ## PARAMETERS
 
@@ -88,19 +103,36 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -Name
+### -InputObject
 
-The name of the command to show invoke report for
+Item(s) from the pipeline. Can be command/alias name of the command, or command/alias
+info obtained via Get-Command.
 
 ```yaml
-Type: String[]
-Parameter Sets: (All)
+Type: Array[]
+Parameter Sets: ByPipeline
+Aliases:
+
+Required: True
+Position: Named
+Default value: None
+Accept pipeline input: True (ByPropertyName, ByValue)
+Accept wildcard characters: False
+```
+
+### -Name
+
+The name of the command to show invoke report for. Can be alias or full command name.
+
+```yaml
+Type: String
+Parameter Sets: ByName
 Aliases:
 
 Required: True
 Position: 0
 Default value: None
-Accept pipeline input: True (ByPropertyName, ByValue)
+Accept pipeline input: False
 Accept wildcard characters: False
 ```
 

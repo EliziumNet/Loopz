@@ -2,7 +2,7 @@
 function Show-ParameterSetInfo {
   <#
   .NAME
-    Show-InvokeReport
+    Show-ParameterSetInfo
 
   .SYNOPSIS
     Displays information for a commands parameter sets. This includes the standard
@@ -24,10 +24,14 @@ function Show-ParameterSetInfo {
     https://eliziumnet.github.io/Loopz/
 
   .PARAMETER Common
-    switch to indicate if the standard PowerShell Common parameters show be included
+    switch to indicate if the standard PowerShell Common parameters should be included
 
   .PARAMETER Name
-    The name of the command to show invoke report for
+    The name of the command to show parameter set info report for. Can be alias or full command name.
+
+  .PARAMETER InputObject
+    Item(s) from the pipeline. Can be command/alias name of the command, or command/alias
+  info obtained via Get-Command.
 
   .PARAMETER Scribbler
     The Krayola scribbler instance used to manage rendering to console
@@ -54,13 +58,22 @@ function Show-ParameterSetInfo {
   .EXAMPLE 3 (Show specified parameter sets, command name via pipeline)
 
   'Rename-Many' | Show-ParameterSetInfo -Sets MoveToAnchor, UpdateInPlace
+
+  .EXAMPLE 4 (By Name)
+
+  Show-ParameterSetInfo -Name 'Rename-Many' -Sets MoveToAnchor, UpdateInPlace
+
   #>
   [CmdletBinding()]
   [Alias('ships')]
   param(
-    [Parameter(Mandatory, Position = 0, ValueFromPipeline, ValueFromPipelineByPropertyName)]
+    [Parameter(ParameterSetName = 'ByName', Mandatory, Position = 0)]
     [ValidateNotNullOrEmpty()]
-    [string[]]$Name,
+    [string]$Name,
+
+    [Parameter(ParameterSetName = 'ByPipeline', Mandatory, ValueFromPipeline, ValueFromPipelineByPropertyName)]
+    [ValidateNotNullOrEmpty()]
+    [array[]]$InputObject,
 
     [Parameter(Position = 1)]
     [string[]]$Sets,
@@ -88,25 +101,40 @@ function Show-ParameterSetInfo {
     if ($null -eq $Scribbler) {
       $Scribbler = New-Scribbler -Krayon $krayon -Test:$Test.IsPresent;
     }
+
+    [hashtable]$shipsParameters = @{
+      'Title'  = $Title;
+      'Common' = $Common.IsPresent;
+      'Test'   = $Test.IsPresent;
+    }
+
+    if ($PSBoundParameters.ContainsKey('Sets')) {
+      $shipsParameters['Sets'] = $Sets;
+    }
+
+    if ($PSBoundParameters.ContainsKey('Scribbler')) {
+      $shipsParameters['Scribbler'] = $Scribbler;
+    }
   }
 
   process {
-    if ($_ -isNot [System.Management.Automation.CommandInfo]) {
-      [hashtable]$shipsParameters = @{
-        'Title' = $Title;
-        'Common' = $Common.IsPresent;
-        'Test' = $Test.IsPresent;
-      }
+    if (($PSCmdlet.ParameterSetName -eq 'ByName') -or
+      (($PSCmdlet.ParameterSetName -eq 'ByPipeline') -and ($_ -is [string]))) {
 
-      if ($PSBoundParameters.ContainsKey('Sets')) {
-        $shipsParameters['Sets'] = $Sets;
+      if ($PSCmdlet.ParameterSetName -eq 'ByPipeline') {
+        Get-Command -Name $_ | Show-ParameterSetInfo @shipsParameters;
       }
-
-      if ($PSBoundParameters.ContainsKey('Scribbler')) {
-        $shipsParameters['Scribbler'] = $Scribbler;
+      else {
+        Get-Command -Name $Name | Show-ParameterSetInfo @shipsParameters;
       }
-
-      Get-Command -Name $_ | Show-ParameterSetInfo @shipsParameters;
+    }
+    elseif ($_ -is [System.Management.Automation.AliasInfo]) {
+      if ($_.ResolvedCommand) {
+        $_.ResolvedCommand | Show-ParameterSetInfo @shipsParameters;
+      }
+      else {
+        Write-Error "Alias '$_' does not resolve to a command" -ErrorAction Stop;
+      }
     }
     else {
       Write-Debug "    --- Show-ParameterSetInfo - Command: [$($_.Name)] ---";

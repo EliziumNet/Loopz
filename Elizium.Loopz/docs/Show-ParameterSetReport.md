@@ -13,8 +13,16 @@ Shows a reporting indicating problems with a command's parameter sets.
 
 ## SYNTAX
 
+### ByName
+
 ```powershell
-Show-ParameterSetReport [-Name] <String[]> [-Scribbler <Scribbler>] [-Test] [<CommonParameters>]
+Show-ParameterSetReport [-Name] <String> [-Scribbler <Scribbler>] [-Test] [<CommonParameters>]
+```
+
+### ByPipeline
+
+```powershell
+Show-ParameterSetReport -InputObject <Array[]> [-Scribbler <Scribbler>] [-Test] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -50,21 +58,44 @@ Get Command Rename-Many | Show-ParameterSetReport
 'Rename-Many' | Show-ParameterSetReport
 ```
 
+### EXAMPLE 3 (By Name)
+
+```powershell
+Show-ParameterSetReport -Name 'Rename-Many'
+```
+
 ## PARAMETERS
+
+### -InputObject
+
+Item(s) from the pipeline. Can be command/alias name of the command, or command/alias
+info obtained via Get-Command.
+
+```yaml
+Type: Array[]
+Parameter Sets: ByPipeline
+Aliases:
+
+Required: True
+Position: Named
+Default value: None
+Accept pipeline input: True (ByPropertyName, ByValue)
+Accept wildcard characters: False
+```
 
 ### -Name
 
-The name of the command to show parameter set report for
+The name of the command to show parameter set report for. Can be alias or full command name.
 
 ```yaml
-Type: String[]
-Parameter Sets: (All)
+Type: String
+Parameter Sets: ByName
 Aliases:
 
 Required: True
 Position: 0
 Default value: None
-Accept pipeline input: True (ByPropertyName, ByValue)
+Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
