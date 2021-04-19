@@ -12,6 +12,9 @@ function Show-AsTable {
   to the options provided. The clint can override the default cell rendering behaviour
   by providing a render function.
 
+  .LINK
+    https://eliziumnet.github.io/Loopz/
+
   .PARAMETER Headers
     Hashtable instance that represents the headers displayed for the table. Maps the
   raw column title to the actual text used to display it. In practice, this is a

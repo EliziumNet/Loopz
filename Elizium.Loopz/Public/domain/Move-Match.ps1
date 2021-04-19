@@ -21,6 +21,9 @@ function Move-Match {
   groups in $Copy, or $Anchor, rather, they should be defined inside $Paste and referenced
   inside $Paste/$With.
 
+  .LINK
+    https://eliziumnet.github.io/Loopz/
+
   .PARAMETER Anchor
     Anchor is a regular expression string applied to $Value (after the $Pattern match has
   been removed). The $Pattern match that is removed is inserted at the position indicated
@@ -121,20 +124,48 @@ function Move-Match {
   ${day}, ${mon} and ${year} also become available for use in $With.
   Typically, $With is static text which is used to replace the $Pattern match and is inserted
   according to the Anchor match, (or indeed $Start or $End).
+
+  .EXAMPLE 1 (Anchor)
+  Move-Match 'VAL 1999-02-21 + RH - CLOSE' '(?<dt>\d{4}-\d{2}-\d{2})' -Anchor ' -' -Relation 'before'
+
+  Move a match before an anchor
+
+  .EXAMPLE 2 (Anchor)
+  Move-Match 'VAL 1999-02-21 + RH - CLOSE' '(?<dt>\d{4}-\d{2}-\d{2})' -Anchor ' -' -Relation 'before' -Drop '-'
+
+  Move a match before an anchor and drop a literal in place of Pattern
+
+  .EXAMPLE 3 (Hybrid Anchor)
+  Move-Match 'VAL 1999-02-21 + RH - CLOSE' '(?<dt>\d{4}-\d{2}-\d{2})' -Anchor ' -' -End -Relation 'before' -Drop '-'
+
+  Move a match before an anchor, if anchor match fails, then move to end, then drop a literal in place of Pattern.
+
+  .EXAMPLE 4 (Anchor with Occurrence)
+  Move-Match 'VAL 1999-02-21 + RH - CLOSE' '(?<dt>\d{4}-\d{2}-\d{2})' -Anchor ' -' -Relation 'before' -AnchorOccurrence 'l'
+
+  .EXAMPLE 5 (Result formatted by With, named group reference)
+  Move-Match 'VAL 1999-02-21 + RH - CLOSE' '(?<dt>\d{4}-\d{2}-\d{2})' -Anchor ' -' -With '--(${dt})--'
+
+  Move a match to the anchor, and format the output including group references, no anchor
+
+  .EXAMPLE 6 (Result formatted by With, named group reference and insert anchor)
+  Move-Match 'VAL 1999-02-21 + RH - CLOSE' '(?<dt>\d{4}-\d{2}-\d{2})' -Anchor ' -' -With '${_a}, --(${dt})--'
+
+  Move a match to the anchor, and format the output including group references, insert anchor
   #>
 
   [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSPossibleIncorrectUsageOfAssignmentOperator', '')]
   [Alias('moma')]
   [OutputType([string])]
   param (
-    [Parameter(Mandatory)]
+    [Parameter(Mandatory, Position = 0)]
     [string]$Value,
 
-    [Parameter(ParameterSetName = 'HybridStart', Mandatory)]
-    [Parameter(ParameterSetName = 'HybridEnd', Mandatory)]
-    [Parameter(ParameterSetName = 'MoveToAnchor', Mandatory)]
-    [Parameter(ParameterSetName = 'MoveToStart', Mandatory)]
-    [Parameter(ParameterSetName = 'MoveToEnd', Mandatory)]
+    [Parameter(ParameterSetName = 'HybridStart', Mandatory, Position = 1)]
+    [Parameter(ParameterSetName = 'HybridEnd', Mandatory, Position = 1)]
+    [Parameter(ParameterSetName = 'MoveToAnchor', Mandatory, Position = 1)]
+    [Parameter(ParameterSetName = 'MoveToStart', Mandatory, Position = 1)]
+    [Parameter(ParameterSetName = 'MoveToEnd', Mandatory, Position = 1)]
     [System.Text.RegularExpressions.RegEx]$Pattern,
 
     [Parameter(ParameterSetName = 'HybridStart')]
@@ -424,7 +455,8 @@ function Move-Match {
           if ($Start.ToBool()) {
             $result = $replaceWith + $remainingText;
             $notes['hybrid'] = 'Start (Anchor failed)';
-          } elseif ($End.ToBool()) {
+          }
+          elseif ($End.ToBool()) {
             $result = $remainingText + $replaceWith;
           }
           else {

@@ -24,11 +24,24 @@ function Show-ParameterSetReport {
   - 'In All Parameter Sets By Accident': Defining a parameter with multiple
   'Parameter Blocks', some with and some without a parameter set, is invalid.
 
+  .LINK
+    https://eliziumnet.github.io/Loopz/
+
   .PARAMETER Name
     The name of the command to show parameter set report for
 
   .PARAMETER Scribbler
     The Krayola scribbler instance used to manage rendering to console
+
+  .INPUTS
+    CommandInfo or command name bound to $Name.
+
+  .EXAMPLE 1 (CommandInfo via pipeline)
+  Get Command Rename-Many | Show-ParameterSetReport
+
+  .EXAMPLE 2 (command name via pipeline)
+  'Rename-Many' | Show-ParameterSetReport
+
   #>
   [CmdletBinding()]
   [Alias('sharp')]

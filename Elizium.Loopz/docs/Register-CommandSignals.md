@@ -1,7 +1,7 @@
 ---
 external help file: Elizium.Loopz-help.xml
 Module Name: Elizium.Loopz
-online version:
+online version: https://eliziumnet.github.io/Loopz/
 schema: 2.0.0
 ---
 
@@ -30,6 +30,14 @@ if too many commands are registered. It is advised that clients invoke
 this for all commands that use signals in the module initialisation code.
 This will mean that when a module is imported, the command's signals are
 registered and will show up in the table displayed by 'Show-Signals'.
+
+## EXAMPLES
+
+### EXAMPLE 1
+
+```powershell
+Register-CommandSignals -Alias 'xcopy', 'WHAT-IF', 'SOURCE', 'DESTINATION'
+```
 
 ## PARAMETERS
 
@@ -97,3 +105,5 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 ## NOTES
 
 ## RELATED LINKS
+
+[Elizium.Loopz](https://github.com/EliziumNet/Loopz)

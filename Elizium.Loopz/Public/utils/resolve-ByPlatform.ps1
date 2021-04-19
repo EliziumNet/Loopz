@@ -12,9 +12,29 @@ function Resolve-ByPlatform {
     Provides a way to select data depending on the current OS as determined by
   Get-PlatformName.
 
+  .LINK
+    https://eliziumnet.github.io/Loopz/
+
   .PARAMETER Hash
     A hashtable object whose keys are values that can be returned by Get-PlatformName. The
   values can be anything.
+
+  .EXAMPLE 1
+
+  [hashtable]$platforms = @{
+    'windows' = 'windows-info';
+    'linux'   = 'linux-info';
+    'mac'     = 'mac-info';
+  }
+  Resolve-ByPlatform -Hash $platforms
+
+  .EXAMPLE 2 (With default)
+
+  [hashtable]$platforms = @{
+    'windows' = 'windows-info';
+    'default' = 'default-info';
+  }
+  Resolve-ByPlatform -Hash $platforms
 
   #>
   param(

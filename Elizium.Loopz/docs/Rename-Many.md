@@ -1,7 +1,7 @@
 ---
 external help file: Elizium.Loopz-help.xml
 Module Name: Elizium.Loopz
-online version:
+online version: https://eliziumnet.github.io/Loopz/
 schema: 2.0.0
 ---
 
@@ -9,7 +9,7 @@ schema: 2.0.0
 
 ## SYNOPSIS
 
-Performs a bulk rename for all file system objects delivered through the pipeline, via regular expression replacement.
+Performs a bulk rename for all file system objects delivered through the pipeline, via regular expression replacement. For more information, please see [Bulk Renamer](https://github.com/EliziumNet/Loopz/blob/master/resources/docs/bulk-renamer.md)
 
 ## SYNTAX
 
@@ -138,6 +138,7 @@ Another important point of note is that there are currently 3 modes of operation
   from the name.
 
 The following regular expression parameters:
+
 * $Pattern
 * $Anchor
 * $Copy
@@ -169,115 +170,155 @@ and avoids the necessary use of extra brackets and $.
 This third method is required when the whole pattern should not be subjected to
 escaping.
 
----
+## EXAMPLES
 
-* MOVE EXAMPLES (anchored)
+### EXAMPLE 1 (Move)
 
-.EXAMPLE 1
-Move a static string before anchor (consider file items only):
-
+```powershell
 gci ... | Rename-Many -File -Pattern 'data' -Anchor 'loopz' -Relation 'before'
+```
 
-.EXAMPLE 2
-Move last occurrence of whole-word static string before anchor:
+Move a static string before anchor (consider file items only)
 
+### EXAMPLE 2 (Move)
+
+```powershell
 gci ... | Rename-Many -Pattern 'data',l -Anchor 'loopz' -Relation 'before' -Whole p
+```
 
-.EXAMPLE 3
-Move a static string before anchor and drop (consider Directory items only):
+Move last occurrence of whole-word static string before anchor
 
+### EXAMPLE 3 (Move)
+
+```powershell
 gci ... | Rename-Many -Directory -Pattern 'data' -Anchor 'loopz' -Relation 'before' -Drop '-'
+```
 
-.EXAMPLE 4
-Move a static string before anchor and drop (consider Directory items only), if anchor
-does not match, move the pattern match to end:
+Move a static string before anchor and drop (consider Directory items only)
 
+### EXAMPLE 4 (Move)
+
+```powershell
 gci ... | Rename-Many -Directory -Pattern 'data' -AnchorEnd 'loopz' -Relation 'before' -Drop '-'
+```
 
-.EXAMPLE 5
-Move a static string to start and drop (consider Directory items only):
+Move a static string before anchor and drop (consider Directory items only), if anchor
+does not match, move the pattern match to end.
 
+### EXAMPLE 5 (Move)
+
+```powershell
 gci ... | Rename-Many -Directory -Pattern 'data' -Start -Drop '-'
+```
 
-.EXAMPLE 6
-Move a match before anchor:
+Move a static string to start and drop (consider Directory items only)
 
+### EXAMPLE 6 (Move)
+
+```powershell
 gci ... | Rename-Many -Pattern '\d{2}-data' -Anchor 'loopz' -Relation 'before'
+```
 
-.EXAMPLE 7
-Move last occurrence of whole-word static string before anchor:
+Move a match before anchor
 
+### EXAMPLE 7 (Move)
+
+```powershell
 gci ... | Rename-Many -Pattern '\d{2}-data',l -Anchor 'loopz' -Relation 'before' -Whole p
+```
 
-.EXAMPLE 8
-Move a match before anchor and drop:
+Move last occurrence of whole-word static string before anchor.
 
+### EXAMPLE 8 (Move)
+
+```powershell
 gci ... | Rename-Many -Pattern '\d{2}-data' -Anchor 'loopz' -Relation 'before' -Drop '-'
+```
 
----
+Move a match before anchor and drop
 
-* UPDATE EXAMPLES (Paste)
+### EXAMPLE 9 (Update)
 
-.EXAMPLE 9
-Update last occurrence of whole-word static string using $Paste:
-
+```powershell
 gci ... | Rename-Many -Pattern 'data',l -Whole p -Paste '_info_'
+```
 
-.EXAMPLE 10
-Update a static string using $Paste:
+Update last occurrence of whole-word static string using $Paste.
 
+### EXAMPLE 10 (Update)
+
+```powershell
 gci ... | Rename-Many -Pattern 'data' -Paste '_info_'
+```
 
-.EXAMPLE 11
-Update 2nd occurrence of whole-word match using $Paste and preserve anchor:
+Update a static string using $Paste
 
+### EXAMPLE 11 (Update)
+
+```powershell
 gci ... | Rename-Many -Pattern '\d{2}-data', l -Paste '${_a}_info_'
+```
 
-.EXAMPLE 12
-Update match contain named capture group using $Paste and preserve the anchor:
+Update 2nd occurrence of whole-word match using $Paste and preserve anchor
 
+### EXAMPLE 12 (Update)
+
+```powershell
 gci ... | Rename-Many -Pattern (?<day>\d{2})-(?<mon>\d{2})-(?<year>\d{2})
   -Paste '(${year})-(${mon})-(${day}) ${_a}'
+```
 
-.EXAMPLE 13
-Update match contain named capture group using $Paste and preserve the anchor and copy
-whole last occurrence:
+Update match contain named capture group using $Paste and preserve the anchor
 
+### EXAMPLE 13 (Update)
+
+```powershell
 gci ... | Rename-Many -Pattern (?<day>\d{2})-(?<mon>\d{2})-(?<year>\d{2})
   -Copy '[A-Z]{3}',l -Whole c -Paste 'CCY_${_c} (${year})-(${mon})-(${day}) ${_a}'
+```
 
----
+Update match contain named capture group using $Paste and preserve the anchor and copy
+whole last occurrence
 
-* CUT EXAMPLES (Cut)
+### EXAMPLE 14 (Cut)
 
-.EXAMPLE 14
-Cut a literal token:
-
+```powershell
 gci ... | Rename-Many -Cut 'data'
+```
 
-.EXAMPLE 15
-Cut last occurrence of literal token:
+Cut a literal token
 
+### EXAMPLE 15 (Cut)
+
+```powershell
 gci ... | Rename-Many -Cut, l 'data'
+```
 
-.EXAMPLE 16
-Cut the second 2 digit sequence:
+Cut last occurrence of literal token
 
+### EXAMPLE 16 (Cut)
+
+```powershell
 gci ... | Rename-Many -Cut, 2 '\d{2}'
+```
 
----
+Cut the second 2 digit sequence
 
-* APPENDAGE EXAMPLES
+### EXAMPLE 17 (Prepend)
 
-.EXAMPLE 17
-Prefix items with fixed token:
-
+```powershell
 gci ... | Rename-Many -Prepend 'begin_'
+```
 
-.EXAMPLE 18
-Append fixed token to items:
+Prefix items with fixed token
 
+### EXAMPLE 18 (Append)
+
+```powershell
 gci ... | Rename-Many -Append '_end'
+```
+
+Append fixed token to items
 
 ## PARAMETERS
 
@@ -813,6 +854,8 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ### System.IO.FileSystemInfo
 
+Parameter `$underscore`, can be DirectoryInfo instance or FileInfo instance.
+
 ## OUTPUTS
 
 ### System.Object
@@ -820,3 +863,5 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 ## NOTES
 
 ## RELATED LINKS
+
+[Bulk Renamer](https://github.com/EliziumNet/Loopz/blob/master/resources/docs/bulk-renamer.md)

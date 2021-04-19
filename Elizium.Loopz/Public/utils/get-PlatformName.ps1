@@ -13,6 +13,9 @@ function Get-PlatformName {
   'windows', 'linux' or 'mac', simples! This function is typically used alongside
   Invoke-ByPlatform and Resolve-ByPlatform.
 
+  .LINK
+    https://eliziumnet.github.io/Loopz/
+
   #>
   $result = if ($IsWindows) {
     'windows';

@@ -14,6 +14,9 @@ function Test-IsFileSystemSafe {
   unsafe for all platforms. This approach is taken because of the likely possibility
   that a file may be copied over from differing file system types.
 
+  .LINK
+    https://eliziumnet.github.io/Loopz/
+
   .PARAMETER Value
     The string value to check.
   #>

@@ -1,7 +1,7 @@
 ---
 external help file: Elizium.Loopz-help.xml
 Module Name: Elizium.Loopz
-online version:
+online version: https://eliziumnet.github.io/Loopz/
 schema: 2.0.0
 ---
 
@@ -24,6 +24,39 @@ Get-UniqueCrossPairs [-First] <String[]> [[-Second] <String[]>] [<CommonParamete
 Effectively, the result is a matrix with the first collection defining 1 axis
 and the other defining the other axis. Pairs where both elements are the same are
 omitted.
+
+## EXAMPLES
+
+### EXAMPLE 1
+
+```powershell
+Get-UniqueCrossPairs -first a,b,c -second a,c,d
+
+Returns
+
+  First Second
+  ----- ------
+  a     c
+  a     d
+  b     a
+  b     c
+  b     d
+  c     d
+```
+
+### EXAMPLE 2
+
+```powershell
+Get-UniqueCrossPairs -first a,b,c -second d
+
+Returns
+
+  First Second
+  ----- ------
+  d     a
+  d     b
+  d     c
+```
 
 ## PARAMETERS
 
@@ -74,3 +107,5 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 ## NOTES
 
 ## RELATED LINKS
+
+[Elizium.Loopz](https://github.com/EliziumNet/Loopz)

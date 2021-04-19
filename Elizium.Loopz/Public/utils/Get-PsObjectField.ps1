@@ -11,6 +11,9 @@ function Get-PsObjectField {
     Returns the value of the specified field. If the field is missing, then
   the default is returned.
 
+  .LINK
+    https://eliziumnet.github.io/Loopz/
+
   .PARAMETER Default
     Default value to return if the $Field doesn't exist on the $Object.
 

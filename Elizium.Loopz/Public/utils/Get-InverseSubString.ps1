@@ -11,6 +11,9 @@ function Get-InverseSubString {
     Returns the remainder of that part of the substring denoted by the $StartIndex
   $Length.
 
+  .LINK
+    https://eliziumnet.github.io/Loopz/
+
   .PARAMETER Length
     The number of characters in the sub-string.
 

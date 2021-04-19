@@ -14,7 +14,10 @@ function Get-PartitionedPcoHash {
   by the field specified. The second level has is the original hash key. So
   given the original hash [ORIGINAL-KEY]=>[PSCustomObject], after partitioning,
   the same PSCustomObject can be accessed, via 2 steps $outputHash[$Field][ORIGINAL-KEY].
-  
+
+  .LINK
+    https://eliziumnet.github.io/Loopz/
+
   .PARAMETER Field
     The name of the field to partition by
 

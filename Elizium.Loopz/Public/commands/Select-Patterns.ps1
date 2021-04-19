@@ -32,6 +32,9 @@ function Select-Patterns {
   all pattern matches in the result with each match displayed in the corresponding allocated
   colour.
 
+  .LINK
+    https://eliziumnet.github.io/Loopz/
+
   .PARAMETER filter
     Defines which files are considered in the search. It can be a path with a wildcard or
   simply a wildcard. If its just a wildcard (eg *.txt), then files considered will be from

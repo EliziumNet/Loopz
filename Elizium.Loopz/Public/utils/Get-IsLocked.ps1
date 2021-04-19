@@ -14,6 +14,9 @@ function Get-IsLocked {
   Eg, for the Rename-Many command, a user can only use it for real when it has been
   unlocked by setting it's associated environment variable 'LOOPZ_REMY_LOCKED' to $false.
 
+  .LINK
+    https://eliziumnet.github.io/Loopz/
+
   .PARAMETER Variable
     The environment variable to check.
 

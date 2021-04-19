@@ -15,6 +15,9 @@ function Invoke-TraverseDirectory {
   for invoking a scriptblock. An optional Summary script block can be specified which will be
   invoked at the end of the traversal batch.
 
+  .LINK
+    https://eliziumnet.github.io/Loopz/
+
   .PARAMETER Block
     The script block to be invoked. The script block is invoked for each directory in the
   source directory tree that satisfy the specified Condition predicate with

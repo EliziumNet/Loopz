@@ -11,6 +11,9 @@ function Edit-RemoveSingleSubString {
   Either the first or the last occurrence of a single substring can be removed
   depending on whether the Last flag has been set.
 
+  .LINK
+    https://eliziumnet.github.io/Loopz/
+
 .PARAMETER Last
   Flag to indicate whether the last occurrence of a sub string is to be removed from the
   Target.
@@ -25,7 +28,10 @@ function Edit-RemoveSingleSubString {
   Flag to indicate if the search is case sensitive or not. By default, search is case
   sensitive.
 
+.EXAMPLE 1
+  $result = edit-RemoveSingleSubString -Target "Twilight and Willow's excellent adventure" -Subtract "excellent ";
 
+  Returns "Twilight and Willow's adventure"
 #>
   [CmdletBinding(DefaultParameterSetName = 'Single')]
   [OutputType([string])]

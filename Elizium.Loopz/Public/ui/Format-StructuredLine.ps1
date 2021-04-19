@@ -12,6 +12,9 @@ function Format-StructuredLine {
   will be interpreted by the Krayola krayon writer. This function behaves like a
   layout manager for a single line.
 
+  .LINK
+    https://eliziumnet.github.io/Loopz/
+
   .PARAMETER CrumbKey
     The key used to index into the $Exchange hashtable to denote which crumb is used.
 

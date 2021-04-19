@@ -17,6 +17,10 @@ function Test-HostSupportsEmojis {
   the display of emojis, so they return true. If user want to enforce using emojis,
   then they can define LOOPZ_FORCE_EMOJIS in the environment, this will force this
   function to return.
+
+  .LINK
+    https://eliziumnet.github.io/Loopz/
+
   #>
   [OutputType([boolean])]
   param()

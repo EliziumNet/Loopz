@@ -11,6 +11,9 @@ function Show-Signals {
     User can override signal definitions in their profile, typically using the provided
   function Update-CustomSignals.
 
+  .LINK
+    https://eliziumnet.github.io/Loopz/
+
   .PARAMETER SourceSignals
     Hashtable containing signals to be displayed.
 
@@ -20,6 +23,18 @@ function Show-Signals {
   .PARAMETER Include
     Provides a filter. When specified, only the applications included in the list
   will be shown.
+
+  .EXAMPLE 1
+
+  Show-Signals
+
+  Show signal definitions and references for all registered commands
+
+  .EXAMPLE 2
+
+  Show-Signals -Include remy, ships
+
+  Show the signal definitions and references for commands 'remy' and 'ships' only
   #>
   [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidGlobalVars', '')]
   param(

@@ -15,6 +15,9 @@ function Add-Appendage {
   match with ${_c}, or if it contains named captures, these can be referenced inside the
   appendage as ${<group-name-ref>}
 
+  .LINK
+    https://eliziumnet.github.io/Loopz/
+
   .PARAMETER Value
     The source value against which regular expressions are applied.
 

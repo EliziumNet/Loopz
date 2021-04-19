@@ -48,6 +48,9 @@
     not contain any UI related code. This strategy also helps for the development of different
     commands that produce output to the terminal in a consistent manner.
 
+  .LINK
+    https://eliziumnet.github.io/Loopz/
+
   .PARAMETER Exchange
     A hash table containing miscellaneous information gathered internally
     throughout the iteration batch. This can be of use to the user, because it is the way

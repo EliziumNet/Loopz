@@ -1,7 +1,7 @@
 ---
 external help file: Elizium.Loopz-help.xml
 Module Name: Elizium.Loopz
-online version:
+online version: https://eliziumnet.github.io/Loopz/
 schema: 2.0.0
 ---
 
@@ -25,6 +25,22 @@ helps us to avoid unnecessary duplicated reg ex matches. It returns
 up to 3 items inside an array, the first is the matched text, the second is
 the source with the matched text removed and the third is the match object
 that represents the matched text.
+
+## EXAMPLES
+
+### EXAMPLE 1 (Return full match info)
+
+```powershell
+[regex]$re = New-RegularExpression -Expression '(?\<d\>\d{2})-(?\<m\>\d{2})-(?\<y\>\d{4})'
+[string]$captured, [string]$remainder, $matchInfo = Split-Match -Source '23-06-2006 - Ex' -PatternRegEx $re
+```
+
+### EXAMPLE 2 (Return captured text only)
+
+```powershell
+[regex]$re = New-RegularExpression -Expression '(?\<d\>\d{2})-(?\<m\>\d{2})-(?\<y\>\d{4})'
+[string]$captured = Split-Match -Source '23-06-2006 - Ex' -PatternRegEx $re -CapturedOnly
+```
 
 ## PARAMETERS
 
@@ -128,3 +144,5 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 ## NOTES
 
 ## RELATED LINKS
+
+[Elizium.Loopz](https://github.com/EliziumNet/Loopz)

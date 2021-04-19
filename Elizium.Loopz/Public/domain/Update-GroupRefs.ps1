@@ -11,6 +11,9 @@ function Update-GroupRefs {
     Returns a new string that reflects the replacement of group named references. The only
   exception is $0, meaning the whole match (not required).
 
+  .LINK
+    https://eliziumnet.github.io/Loopz/
+
   .PARAMETER Source
     The source value containing group references. NB This MUST be an un-interpolated string,
   so if using a literal it should be in single quotes NOT double; this is to prevent the

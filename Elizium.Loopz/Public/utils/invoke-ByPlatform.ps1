@@ -14,6 +14,9 @@ function Invoke-ByPlatform {
     (Doesn't support invoking a function with named parameters; PowerShell doesn't currently
   support this, not even via splatting, if this changes, this will be implemented.)
 
+  .LINK
+    https://eliziumnet.github.io/Loopz/
+
   .PARAMETER Hash
     A hashtable object whose keys are values that can be returned by Get-PlatformName. The
   values are of type PSCustomObject and can contain the following properties:
@@ -21,6 +24,36 @@ function Invoke-ByPlatform {
   invoking Get-Command -Name <function-name>
   + Positional: an array of positional parameter values
 
+  .EXAMPLE 1
+
+  function invoke-winFn {
+    param(
+      [string]$name,
+      [string]$colour
+    )
+
+    "win: Name:$name, Colour:$colour";
+  }
+
+  [hashtable]$script:platformsPositional = @{
+    'windows' = [PSCustomObject]@{
+      FnInfo     = Get-Command -Name invoke-winFn -CommandType Function;
+      Positional = @('cherry', 'red');
+    };
+    'linux'   = [PSCustomObject]@{
+      FnInfo     = Get-Command -Name invoke-linuxFn -CommandType Function;
+      Positional = @('grass', 'green');
+    };
+    'mac'     = [PSCustomObject]@{
+      FnInfo     = Get-Command -Name invoke-macFn -CommandType Function;
+      Positional = @('lagoon', 'blue');
+    };
+  }
+  Invoke-ByPlatform -Hash $platformsPositional;
+
+  On windows, Returns
+
+  'win: Name:cherry, Colour:red'
   #>
   [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingWriteHost", "")]
   [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSPossibleIncorrectUsageOfAssignmentOperator", "")]

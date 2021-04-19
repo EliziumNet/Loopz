@@ -12,6 +12,9 @@ function Resolve-PatternOccurrence {
     Since the occurrence part is optional and defaults to mean first occurrence only,
   this function will fill in the default 'f' when occurrence is not specified.
 
+  .LINK
+    https://eliziumnet.github.io/Loopz/
+
   .PARAMETER Value
     The value of a regex parameter, which is an array whose first element is the
   pattern and the second if present is the match occurrence.

@@ -14,6 +14,9 @@ function Get-Signals {
   registry. This can be done using command Register-CommandSignals and would
   be best performed at module initialisation stage invoked at import time.
 
+  .LINK
+    https://eliziumnet.github.io/Loopz/
+
   .PARAMETER Custom
     The hashtable instance containing custom overrides. Does not need to be
   specified by the client as it is defaulted.

@@ -1,7 +1,7 @@
 ---
 external help file: Elizium.Loopz-help.xml
 Module Name: Elizium.Loopz
-online version:
+online version: https://eliziumnet.github.io/Loopz/
 schema: 2.0.0
 ---
 
@@ -29,6 +29,16 @@ Edit-RemoveSingleSubString [-Last] [<CommonParameters>]
 
 Either the first or the last occurrence of a single substring can be removed
 depending on whether the Last flag has been set.
+
+## EXAMPLES
+
+### EXAMPLE 1
+
+```powershell
+$result = edit-RemoveSingleSubString -Target "Twilight and Willow's excellent adventure" -Subtract "excellent ";
+```
+
+Returns "Twilight and Willow's adventure"
 
 ## PARAMETERS
 
@@ -113,3 +123,5 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 ## NOTES
 
 ## RELATED LINKS
+
+[Elizium.Loopz](https://github.com/EliziumNet/Loopz)

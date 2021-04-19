@@ -14,6 +14,9 @@ function Get-SyntaxScheme {
   the environment variable 'KRAYOLA_LIGHT_TERMINAL', this is to prevent light
   foreground colours being selected when the background is also using light colours.
 
+  .LINK
+    https://eliziumnet.github.io/Loopz/
+
   .PARAMETER Theme
     The Krayola theme that the scheme will be associated with.
   #>

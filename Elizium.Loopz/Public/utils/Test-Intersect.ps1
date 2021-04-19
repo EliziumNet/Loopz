@@ -10,6 +10,9 @@ function Test-Intersect {
   .DESCRIPTION
     Essentially asks the question, 'Do the two sets intersect'.
 
+  .LINK
+    https://eliziumnet.github.io/Loopz/
+
   .PARAMETER First
     First collection of strings to compare.
 

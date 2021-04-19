@@ -12,6 +12,9 @@ function Update-CustomSignals {
   display. The user can specify overrides for any of the declared signals (See
   Show-Signals). Typically, the user should invoke this in their profile script.
 
+  .LINK
+    https://eliziumnet.github.io/Loopz/
+
   .PARAMETER Signals
     A hashtable containing signal overrides.
 

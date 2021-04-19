@@ -13,6 +13,9 @@ function New-Syntax {
   it contains is that relating to the colouring in of the standard syntax statement
   that is derived from a commands parameter set.
 
+  .LINK
+    https://eliziumnet.github.io/Loopz/
+
   .PARAMETER CommandName
     The name of the command to get syntax instance for
 

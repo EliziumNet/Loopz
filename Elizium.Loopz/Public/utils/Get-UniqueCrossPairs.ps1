@@ -13,12 +13,41 @@ function Get-UniqueCrossPairs {
     Effectively, the result is a matrix with the first collection defining 1 axis
   and the other defining the other axis. Pairs where both elements are the same are
   omitted.
-  
+
+  .LINK
+    https://eliziumnet.github.io/Loopz/
+
   .PARAMETER First
     First string array to compare
 
   .PARAMETER Second
     The other string array to compare
+
+  .EXAMPLE 1
+  Get-UniqueCrossPairs -first a,b,c -second a,c,d
+
+  Returns
+
+  First Second
+  ----- ------
+  a     c
+  a     d
+  b     a
+  b     c
+  b     d
+  c     d
+
+  .EXAMPLE 2
+  Get-UniqueCrossPairs -first a,b,c -second d
+
+  Returns
+
+  First Second
+  ----- ------
+  d     a
+  d     b
+  d     c
+
   #>
   [OutputType([PSCustomObject[]])]
   param(

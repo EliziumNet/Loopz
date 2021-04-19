@@ -11,18 +11,21 @@ function Update-Match {
 
   .DESCRIPTION
     Returns a new string that reflects updating the specified $Pattern match.
-    First Update-Match, removes the Pattern match from $Value. This makes the Paste and
+    Firstly, Update-Match removes the Pattern match from $Value. This makes the Paste and
   Copy match against the remainder ($patternRemoved) of $Value. This way, there is
   no overlap between the Pattern match and $Paste and it also makes the functionality more
   understandable for the user. NB: Pattern only tells you what to remove, but it's the
-  With, Copy and Paste that defines what to insert.
+  Copy and Paste that defines what to insert.
+
+  .LINK
+    https://eliziumnet.github.io/Loopz/
 
   .PARAMETER Copy
     Regular expression string applied to $Value (after the $Pattern match has been removed),
   indicating a portion which should be copied and re-inserted (via the $Paste parameter;
   see $Paste). Since this is a regular expression to be used in $Paste, there
   is no value in the user specifying a static pattern, because that static string can just be
-  defined in $Paste. The value in the $Copy parameter comes when a generic pattern is
+  defined in $Paste. The value in the $Copy parameter comes when a non literal pattern is
   defined eg \d{3} (is non literal), specifies any 3 digits as opposed to say '123', which
   could be used directly in the $Paste parameter without the need for $Copy. The match
   defined by $Copy is stored in special variable ${_c} and can be referenced as such from
@@ -46,7 +49,8 @@ function Update-Match {
   .PARAMETER Paste
     Formatter parameter for Update operations. Can contain named/numbered group references
   defined inside regular expression parameters, or use special named references $0 for the whole
-  Pattern match and ${_c} for the whole Copy match.
+  Pattern match and ${_c} for the whole Copy match. The Paste can also contain named/numbered
+  group references defined in $Pattern.
 
   .PARAMETER Pattern
     Regular expression string that indicates which part of the $Value that either needs
@@ -62,14 +66,29 @@ function Update-Match {
   .PARAMETER Value
     The source value against which regular expressions are applied.
 
+  .EXAMPLE 1 (Update with literal content)
+  Update-Match 'VAL 1999-02-21 + RH - CLOSE' '(?<dt>\d{4}-\d{2}-\d{2})' -Paste '----X--X--'
+
+  .EXAMPLE 2 (Update with variable content)
+  [string]$today = Get-Date -Format 'yyyy-MM-dd'
+  Update-Match 'VAL 1999-02-21 + RH - CLOSE' '(?<dt>\d{4}-\d{2}-\d{2})' -Paste $('_(' + $today + ')_')
+
+  .EXAMPLE 3 (Update with whole copy reference)
+  Update-Match 'VAL 1999-02-21 + RH - CLOSE' '(?<dt>\d{4}-\d{2}-\d{2})' -Paste '${_c},----X--X--' -Copy '[^\s]+'
+
+  .EXAMPLE 4 (Update with group references)
+  Update-Match 'VAL 1999-02-21 + RH - CLOSE' '(?<dt>\d{4}-\d{2}-\d{2})' -Paste '${first},----X--X--' -Copy '(?<first>[^\s]+)'
+
+  .EXAMPLE 5 (Update with 2nd copy occurrence)
+  Update-Match 'VAL 1999-02-21 + RH - CLOSE' '(?<dt>\d{4}-\d{2}-\d{2})' -Paste '${_c},----X--X--' -Copy '[^\s]+' -CopyOccurrence 2
   #>
   [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', '')]
   [OutputType([string])]
   param(
-    [Parameter(Mandatory)]
+    [Parameter(Mandatory, Position = 0)]
     [string]$Value,
 
-    [Parameter(Mandatory)]
+    [Parameter(Mandatory, Position = 1)]
     [System.Text.RegularExpressions.RegEx]$Pattern,
 
     [Parameter()]

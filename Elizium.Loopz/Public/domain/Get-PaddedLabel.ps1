@@ -11,6 +11,9 @@ function Get-PaddedLabel {
     Pads out a string with leading or trailing spaces depending on
   alignment.
 
+  .LINK
+    https://eliziumnet.github.io/Loopz/
+
   .PARAMETER Align
     Left or right alignment of the label.
 

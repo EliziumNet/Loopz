@@ -1,7 +1,7 @@
 ---
 external help file: Elizium.Loopz-help.xml
 Module Name: Elizium.Loopz
-online version:
+online version: https://eliziumnet.github.io/Loopz/
 schema: 2.0.0
 ---
 
@@ -22,6 +22,29 @@ Resolve-ByPlatform [[-Hash] <Hashtable>] [<CommonParameters>]
 
 Provides a way to select data depending on the current OS as determined by
 Get-PlatformName.
+
+## EXAMPLES
+
+### EXAMPLE 1
+
+```powershell
+[hashtable]$platforms = @{
+  'windows' = 'windows-info';
+  'linux'   = 'linux-info';
+  'mac'     = 'mac-info';
+}
+Resolve-ByPlatform -Hash $platforms
+```
+
+### EXAMPLE 2 (With default)
+
+```powershell
+[hashtable]$platforms = @{
+  'windows' = 'windows-info';
+  'default' = 'default-info';
+}
+Resolve-ByPlatform -Hash $platforms
+```
 
 ## PARAMETERS
 
@@ -57,3 +80,5 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 ## NOTES
 
 ## RELATED LINKS
+
+[Elizium.Loopz](https://github.com/EliziumNet/Loopz)

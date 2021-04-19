@@ -11,7 +11,10 @@ function Get-FieldMetaData {
     The source table data is just an array of PSCustomObjects where each object
   represents a row in the table. The meta data is required to format the table
   cells correctly so that each cell is properly aligned.
-  
+
+  .LINK
+    https://eliziumnet.github.io/Loopz/
+
   .PARAMETER Data
     Hashtable containing the table data.
   #>

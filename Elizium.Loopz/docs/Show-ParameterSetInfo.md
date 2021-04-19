@@ -1,7 +1,7 @@
 ---
 external help file: Elizium.Loopz-help.xml
 Module Name: Elizium.Loopz
-online version:
+online version: https://eliziumnet.github.io/Loopz/
 schema: 2.0.0
 ---
 
@@ -31,6 +31,26 @@ as per recommendations. This function will greatly help in this regard. For each
 parameter set shown, the table it contains includes a 'Unique' column which shows
 whether a the parameter is unique to that parameter set. This relieves the developer
 from having to figure this out themselves.
+
+## EXAMPLES
+
+### EXAMPLE 1 (Show all parameter sets, CommandInfo via pipeline)
+
+```powershell
+Get-Command 'Rename-Many' | Show-ParameterSetInfo
+```
+
+### EXAMPLE 2 (Show all parameter sets with Common parameters, command name via pipeline)
+
+```powershell
+'Rename-Many' | Show-ParameterSetInfo -Common
+```
+
+### EXAMPLE 3 (Show specified parameter sets, command name via pipeline)
+
+```powershell
+'Rename-Many' | Show-ParameterSetInfo -Sets MoveToAnchor, UpdateInPlace
+```
 
 ## PARAMETERS
 
@@ -138,7 +158,9 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## INPUTS
 
-### System.String[]
+### System.String[] or CommandInfo[]
+
+Parameter `$Name`, can be CommandInfo derived from get-Command or simply the name of the command as a string. Multiple items can be specified using array notation.
 
 ## OUTPUTS
 
@@ -147,3 +169,5 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 ## NOTES
 
 ## RELATED LINKS
+
+[Elizium.Loopz](https://github.com/EliziumNet/Loopz)
