@@ -37,7 +37,7 @@ function Test-HostSupportsEmojis {
     [OutputType([boolean])]
     param()
 
-    return $true;
+    return $false;
   }
 
   [boolean]$result = if ($null -eq $(Get-EnvironmentVariable -Variable 'LOOPZ_FORCE_EMOJIS')) {
