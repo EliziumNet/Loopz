@@ -110,6 +110,7 @@ $global:Loopz = [PSCustomObject]@{
     'OVERWRITE-B'     = (@('Overwrite', '❗', '!!'));
     'PREPEND'         = (@('Prepend', '⏭️', '>|'));
     'APPEND'          = (@('Append', '⏮️', '|<'));
+    'EJECT'           = (@('Append', '⏏️', '^_'));
 
     # Thingies
     #
@@ -183,6 +184,7 @@ $global:Loopz = [PSCustomObject]@{
     'REMY.DROP'       = (@('Drop', '💧', ' ╬'));
     'REMY.UNDO'       = (@('Undo Rename', '❎', ' μ'));
     'GREPS'           = (@('greps', '🔍', 'γ'));
+    'CHOG'            = (@('Change Log', '📜', '~|'));
   }
 
   OverrideSignals       = @{ # Label, Emoji
@@ -227,7 +229,11 @@ $global:Loopz = [PSCustomObject]@{
 
     'shire' = @(
       'FAILED-A', 'INVALID', 'OK-A'
-    )
+    );
+
+    'chog' = @(
+      'CHOG', 'EJECT'
+    );
   }
 
   Defaults              = [PSCustomObject]@{
@@ -292,4 +298,11 @@ $global:Loopz = [PSCustomObject]@{
   }
 
   InvalidCharacterSet   = [char[]]'<>:"/\|?*';
+
+  ChangeLog             = [PSCustomObject]@{
+    PSTypeName    = 'Loopz.Global.ChangeLog';
+
+    DirectoryName = 'loopz-changelog';
+    BaseFileName  = '-changelog.options.json';
+  }
 }

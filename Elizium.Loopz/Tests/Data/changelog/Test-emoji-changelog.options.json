@@ -1,0 +1,114 @@
+{
+  "Snippet": {
+    "Prefix": {
+      "Conditional": "?",
+      "Literal": "!",
+      "Lookup": "&",
+      "NamedGroupRef": "^",
+      "Statement": "*",
+      "Variable": "+"
+    }
+  },
+  "Selection": {
+    "Order": "desc",
+    "SquashBy": "#(?<issue>\\d{1,6})",
+    "Last": true,
+    "IncludeMissingIssue": true,
+    "Subject": {
+      "Include": [
+        "^(?<type>fix|feat|build|chore|ci|docs|doc|style|ref|perf|test)(?:\\((?<scope>[\\w]+)\\))?(?<break>!)?:\\s(?<body>[\\w\\W\\s]+)(?:\\(?#(?<issue>\\d{1,6})\\)?)$",
+        "^(?<type>fix|feat|build|chore|ci|docs|doc|style|ref|perf|test)(?:\\((?<scope>[\\w]+)\\))?(?<break>!)?:\\s(?:#(?<issue>\\d{1,6}))(?<body>[\\w\\W\\s]+)$",
+        "^\\(?(?<type>fix|feat|build|chore|ci|docs|doc|style|ref|perf|test)\\s+(?:#(?<issue>\\d{1,6}))?\\)?(?<break>!)?:\\s(?<body>[\\w\\W\\s]+)$"
+      ],
+      "Exclude": []
+    },
+    "Tags": {}
+  },
+  "SourceControl": {
+    "Service": "GitHub",
+    "HostUrl": "https://github.com/",
+    "AvatarSize": "24",
+    "CommitIdSize": 7
+  },
+  "Output": {
+    "Headings": {
+      "H2": "Release [+{display-tag}] / +{date}",
+      "H3": "*{$}",
+      "H4": "*{$}",
+      "H5": "*{$}",
+      "H6": "*{$}",
+      "Dirty": "DIRTY: *{dirtyStmt}"
+    },
+    "GroupBy": "scope/type/change/break",
+    "LookUp": {
+      "Authors": {
+        "?": ":woman_office_worker:"
+      },
+      "BreakingStatus": {
+        "breaking": ":heavy_plus_sign: BREAKING CHANGES",
+        "non-breaking": ":recycle: NON BREAKING CHANGES"
+      },
+      "ChangeTypes": {
+        "Deprecate": ":heavy_multiplication_x:",
+        "Fixed": ":beetle:",
+        "Add": ":heavy_plus_sign:",
+        "Change": ":copyright:",
+        "Secure": ":key:",
+        "Update": ":copyright:",
+        "Remove": ":heavy_minus_sign:",
+        "?": ":lock:"
+      },
+      "Scopes": {
+        "all": ":star:",
+        "?": ":lock:"
+      },
+      "Types": {
+        "build": ":hammer:",
+        "chore": ":nut_and_bolt:",
+        "ci": ":trophy:",
+        "doc": ":clipboard:",
+        "docs": ":clipboard:",
+        "feat": ":gift:",
+        "fix": ":sparkles:",
+        "perf": ":rocket:",
+        "ref": ":gem:",
+        "style": ":hotsprings:",
+        "test": ":test_tube:",
+        "?": ":lock:"
+      }
+    },
+    "Literals": {
+      "Broken": ":warning:",
+      "BucketEnd": "---",
+      "DateFormat": "yyyy-MM-dd",
+      "Dirty": ":poop:",
+      "Uncategorised": ":anger:"
+    },
+    "Statements": {
+      "Author": " by `@+{author}` &{_A}",
+      "Avatar": " by `@+{author}` +{avatar-img}",
+      "Break": "!{broken} *BREAKING CHANGE* ",
+      "Breaking": "&{_B}",
+      "Change": "[Change Type: &{_C}+{change}] => ",
+      "IssueLink": " \\<+{issue-link}\\>",
+      "Meta": " (Id: +{commitid-link})?{issue-link;issueLinkStmt}",
+      "Commit": "+ ?{is-breaking;breakStmt}?{is-squashed;squashedStmt}*{changeStmt}*{subjectStmt}*{avatarStmt}*{metaStmt}",
+      "DirtyCommit": "+ ?{is-breaking;breakingStmt}+{subject}",
+      "Dirty": "!{dirty}",
+      "Scope": "Scope(&{_S} +{scope})",
+      "Squashed": "SQUASHED: ",
+      "Subject": "Subject: **+{subject}**",
+      "Type": "Commit-Type(&{_T} +{type})"
+    },
+    "Warnings": {
+      "Disable": {
+        "MD026": "no-trailing-punctuation",
+        "MD024": "no-duplicate-heading/no-duplicate-header",
+        "MD033": "no-inline-html",
+        "MD013": "line-length"
+      }
+    },
+    "Base": "ChangeLog",
+    "Template": ""
+  }
+}
