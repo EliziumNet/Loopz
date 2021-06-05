@@ -184,7 +184,7 @@ $global:Loopz = [PSCustomObject]@{
     'REMY.DROP'       = (@('Drop', '💧', ' ╬'));
     'REMY.UNDO'       = (@('Undo Rename', '❎', ' μ'));
     'GREPS'           = (@('greps', '🔍', 'γ'));
-    'CHOG'            = (@('Change Log', '📜', '~|'));
+    'PLOG'            = (@('PoSh Log', '📜', '~|'));
   }
 
   OverrideSignals       = @{ # Label, Emoji
@@ -231,8 +231,8 @@ $global:Loopz = [PSCustomObject]@{
       'FAILED-A', 'INVALID', 'OK-A'
     );
 
-    'chog' = @(
-      'CHOG', 'EJECT'
+    'plog' = @(
+      'PLOG', 'EJECT'
     );
   }
 
@@ -303,6 +303,6 @@ $global:Loopz = [PSCustomObject]@{
     PSTypeName    = 'Loopz.Global.ChangeLog';
 
     DirectoryName = 'loopz-changelog';
-    BaseFileName  = '-changelog.options.json';
+    BaseFileName  = '-poshlog.options.json';
   }
 }

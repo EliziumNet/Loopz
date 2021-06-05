@@ -5,7 +5,7 @@ online version:
 schema: 2.0.0
 ---
 
-# Build-ChangeLog
+# Build-PoShLog
 
 ## SYNOPSIS
 
@@ -16,20 +16,20 @@ Create a change log for the current repo
 ### CreateLog (Default)
 
 ```powershell
-Build-ChangeLog [[-Name] <String>] [[-From] <String>] [[-Until] <String>] [-PassThru] [-Emoji]
+Build-PoShLog [[-Name] <String>] [[-From] <String>] [[-Until] <String>] [-PassThru] [-Emoji]
  [<CommonParameters>]
 ```
 
 ### CreateLogUnreleased
 
 ```powershell
-Build-ChangeLog [[-Name] <String>] [-Unreleased] [-Emoji] [<CommonParameters>]
+Build-PoShLog [[-Name] <String>] [-Unreleased] [-Emoji] [<CommonParameters>]
 ```
 
 ### EjectConfig
 
 ```powershell
-Build-ChangeLog [[-Name] <String>] [-Eject] [-Emoji] [<CommonParameters>]
+Build-PoShLog [[-Name] <String>] [-Eject] [-Emoji] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -95,7 +95,7 @@ To see a detailed explanation of the options config, the user should consult
 ### Example 1
 
 ```powershell
-Build-ChangeLog -name 'Alpha' -Eject -Emoji
+Build-PoShLog -name 'Alpha' -Eject -Emoji
 ```
 
 Eject 'Alpha' emojis options config into the repo under \<root\>/loopz/
@@ -104,7 +104,7 @@ as "Alpha-emoji-changelog.options.json"
 ### Example 2
 
 ```powershell
-Build-ChangeLog -name 'Zen' -Eject
+Build-PoShLog -name 'Zen' -Eject
 ```
 
 Eject 'Zen' options config without emojis into the repo under \<root\>/loopz/
@@ -113,43 +113,34 @@ as "Zen-changelog.options.json"
 ### Example 3
 
 ```powershell
-Build-ChangeLog -name 'Zen' -Eject -GroupBy 'scope/type'
-```
-
-Eject 'Zen' options config without emojis into the repo under \<root\>/loopz/
-as "Zen-changelog.options.json" using a custom GroupBy setting.
-
-### Example 4
-
-```powershell
-Build-ChangeLog -name 'Zen'
+Build-PoShLog -name 'Zen'
 ```
 
 Build a change log using the pre-defined Zen config without emojis.
 
-### Example 5
+### Example 4
 
 ```powershell
-Build-ChangeLog -name 'foo'
+Build-PoShLog -name 'foo'
 ```
 
 Build a change log using a custom 'foo' config. If the 'foo' config does not exist
 a default config is used. The user needs to update the config and re-run.
 
-#### Example 6
+#### Example 5
 
 Build a change log that contains for commits in releases within a specified range.
 
 ```powershell
-Build-ChangeLog -name 'Zen' -From '1.0.0 -Until '3.0.0'
+Build-PoShLog -name 'Zen' -From '1.0.0 -Until '3.0.0'
 ```
 
-#### Example 7
+#### Example 6
 
 Build a change log that contains unreleased commits only.
 
 ```powershell
-Build-ChangeLog -name 'Zen' -Unreleased
+Build-PoShLog -name 'Zen' -Unreleased
 ```
 
 ## PARAMETERS
@@ -297,6 +288,6 @@ If PassThru is present, markdown content redirected to the pipeline.
 
 ## RELATED LINKS
 
-[Build ChangeLog](Elizium.Loopz/docs/build-changelog.md)
+[Build PoShLog](Elizium.Loopz/docs/build-poshlog.md)
 
 [Elizium.Loopz](https://github.com/EliziumNet/Loopz)

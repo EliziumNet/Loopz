@@ -1,12 +1,12 @@
 <!-- MarkDownLint-disable MD013 -->
 <!-- MarkDownLint-disable MD033 -->
 
-# :nazar_amulet: Elizium.Loopz ChangeLog
+# :nazar_amulet: Elizium.Loopz PoSh Log
 
-One of the main rationale's for the development of :scroll: __Build-ChangeLog__ (*chog*) was in recognition of the fact that a repo's commit history may be sub-optimal perhaps not conforming to the guidelines set out in sites like [Conventional Commits](https://www.conventionalcommits.org) and [Keep A Change Log](https://keepachangelog.com). *Build-ChangeLog* was built to be flexible and allow for a wide variety of customisation options defined in json config file. Most of the options are cosmetic with a few that define the structure. Also, the user can keep the default regular expressions (which conform to keep-a-changelog). One of the properties of a good change log are that commits should be grouped together based upon change type/scope/commit-type/breaking changes. This change log implementation performs groupings based on all of these
+One of the main rationale's for the development of :scroll: __Build-PoShLog__ (*chog*) was in recognition of the fact that a repo's commit history may be sub-optimal perhaps not conforming to the guidelines set out in sites like [Conventional Commits](https://www.conventionalcommits.org) and [Keep A Change Log](https://keepachangelog.com). *Build-PoShLog* was built to be flexible and allow for a wide variety of customisation options defined in json config file. Most of the options are cosmetic with a few that define the structure. Also, the user can keep the default regular expressions (which conform to keep-a-changelog). One of the properties of a good change log are that commits should be grouped together based upon change type/scope/commit-type/breaking changes. This change log implementation performs groupings based on all of these
 categories. The quality of the generated changelog depends heavily on the quality of the commit messages in the repo.
 
-The following is a list of the main aims of *Build-ChangLog* command:
+The following is a list of the main aims of *Build-PoShLog* command:
 
 1. Grouping commits by scope/type/change/breaking. These items are represented in the regular expressions defined in the options config
 
@@ -16,15 +16,15 @@ The following is a list of the main aims of *Build-ChangLog* command:
 
 4. Harness the visual appeal of emoji's in highlighting categories of commits.
 
-The _Build-ChangeLog_ command can be used on any repo not just *PowerShell* projects.
+The _Build-PoShLog_ command can be used on any repo not just *PowerShell* projects.
 
 ## Quick Start
 
-First, in a command line, the user should navigate to the repo for which the change log should be generated (trying to invoke the *Build-ChangeLog* command from outside of a git repo will just fail), then perform the following steps:
+First, in a command line, the user should navigate to the repo for which the change log should be generated (trying to invoke the *Build-PoShLog* command from outside of a git repo will just fail), then perform the following steps:
 
 ### (1) __eject options config__
 
-> build-changelog -name 'Alpha' -eject -emoji
+> Build-PoShLog -name 'Alpha' -eject -emoji
 
 In the above, _Alpha_ is the name of a pre-defined config (_Elizium_ and _Zen_ are both available too). the *-emoji* switch is optional, but indicates that the ejected config will contain emojis. Running this eject, will create a folder under the root of the repo *'loopz'* and inside it will be the config just ejected, in this case ___Alpha-emoji-changelog.options.json___ and a template markdown file ___TEMPLATE. md___
 
@@ -46,13 +46,13 @@ Repeat this for all valid scopes in the repo.
 
 + modify statements (at ___./Output/Statements___): This is an optional step, but doing so can aid the users understanding of how the tool works. The statements simply specify literal content and/or refer to other statements. For each commit entry in the change log, the entry point is the 'Commit' statement at ___./Output/Statements/Commit___. For each heading, the entry points are the those statements defined in the headings at ___./Output/Headings/H?___. So these statements should be present and the ones that they in turn refer to. New statements can be defined, see [Statement](#snippet.statement) for more details.
 
-:warning: *A cautionary note about editing json config*: When *build-changelog* is run, it validates the options via a [json schema](https://github.com/EliziumNet/Klassy/blob/master/Elizium.Klassy/FileList/options-chog.schema.json) and this validation process is case sensitive. So be careful when modifying json elements as a case mismatch can result in hard to resolve errors.
+:warning: *A cautionary note about editing json config*: When *Build-PoShLog* is run, it validates the options via a [json schema](https://github.com/EliziumNet/Klassy/blob/master/Elizium.Klassy/FileList/options-chog.schema.json) and this validation process is case sensitive. So be careful when modifying json elements as a case mismatch can result in hard to resolve errors.
 
 ### (3) __edit the TEMPLATE. md file__
 
 This is optional. Defines the template of markdown file and contains placeholders for different components of the change log. Do not remove the placeholders, but other adjustments can be applied. This is not an important step because that content can be adjusted anyway in the generated output.
 
-## Using Build-ChangeLog command
+## Using Build-PoShLog command
 
 Before running, the user needs to eject a config (json), then modify it for the repo's
 needs. There are a few pre-defined configs from which to choose, that customises the
@@ -87,9 +87,9 @@ The generated ChangeLog markdown content is created inside a subdirectory ('loop
 
 :warning: The name of a git tag is not significant when specifying a range. Rather, the date that is associated with the tag is the important entity. It would be easy to assume that tag '3.0.0' comes after a tag '2.0.0', but this is not based on the content of the tag label, it's the underlying date that matters. It just so happens, that '3.0.0' should come after '2.0.0', providing '2.0.0' was released before '2.0.0'. If a tag  contains extra info such as '3.0.0-beta', or perhaps it was defined as 'beta-3.0.0', it now becomes clear that the content of the tag label is not the important entity.
 
-:pick: It was envisaged that the user would run the _Build-ChangeLog_ command initially for the entire commit history. Refine the initial output, then check-in. Then on subsequent releases, the command can then be run just for unreleased commits (using the _Unreleased_ switch). If the repo is a large one, then it would probably be unwise to generate a build log for the entire history in 1 go; in this scenario, the user can be selective by specifying a range using _From_ and _Until_ tags.
+:pick: It was envisaged that the user would run the _Build-PoShLog_ command initially for the entire commit history. Refine the initial output, then check-in. Then on subsequent releases, the command can then be run just for unreleased commits (using the _Unreleased_ switch). If the repo is a large one, then it would probably be unwise to generate a build log for the entire history in 1 go; in this scenario, the user can be selective by specifying a range using _From_ and _Until_ tags.
 
-### Build-ChangeLog parameters
+### Build-PoShLog parameters
 
 + __Name__: The name of the config to use. The current list of predefined configs are 'Alpha',
   'Elizium' and 'Zen' (more may be added in future). However, the user can specify a
@@ -123,54 +123,47 @@ instead of being saved to a file.
 Eject 'Alpha' emojis options config into the repo under <root>/.loopz/
 as "Alpha-emoji-changelog.options.json"
 
-> Build-ChangeLog -name 'Alpha' -Eject -Emoji
+> Build-PoShLog -name 'Alpha' -Eject -Emoji
 
 #### Example 2
 
 Eject 'Zen' options config without emojis into the repo under <root>/.loopz/
 as "Zen-changelog.options.json"
 
-> Build-ChangeLog -name 'Zen' -Eject
-
-#### Example 3
-
-Eject 'Zen' options config without emojis into the repo under <root>/.loopz/
-as "Zen-changelog.options.json" using a custom GroupBy setting.
-
-> Build-ChangeLog -name 'Zen' -Eject -GroupBy 'scope/type'
+> Build-PoShLog -name 'Zen' -Eject
 
 ### :gift: Create a Change Log
 
-#### Example 4
+#### Example 3
 
 Build a change log using the pre-defined Zen config without emojis.
 
-> Build-ChangeLog -name 'Zen'
+> Build-PoShLog -name 'Zen'
 
-#### Example 5
+#### Example 4
 
 Build a change log using a custom 'foo' config. If the 'foo' config does not exist
 a default config is used. The user needs to update the config and re-run.
 
-> Build-ChangeLog -name 'foo'
+> Build-PoShLog -name 'foo'
 
-#### Example 6
+#### Example 5
 
 Build a change log that contains for commits in releases within a specified range.
 
-> Build-ChangeLog -name 'Zen' -From '1.0.0 -Until '3.0.0'
+> Build-PoShLog -name 'Zen' -From '1.0.0 -Until '3.0.0'
 
-#### Example 7
+#### Example 6
 
 Build a change log that contains unreleased commits only.
 
-> Build-ChangeLog -name 'Zen' -Unreleased
+> Build-PoShLog -name 'Zen' -Unreleased
 
 ---
 
 ## Options Config
 
-The options config is a json file (the json schema can be found [here](https://github.com/EliziumNet/Klassy/blob/master/Elizium.Klassy/FileList/options-chog.schema.json)), which needs to first be ejected and then modified to suit the needs of the repo. The following table shows the main sections of the options config:
+The options config is a json file (the json schema can be found [here](https://github.com/EliziumNet/Klassy/blob/master/Elizium.Klassy/FileList/posh-log.options.schema.json)), which needs to first be ejected and then modified to suit the needs of the repo. The following table shows the main sections of the options config:
 
 | Options group                               | DESCRIPTION
 |---------------------------------------------|---------------------------------------------------------
@@ -502,7 +495,7 @@ Statements can be referenced as condition snippets (as previously described in [
 
 ## :checkered_flag: Summary
 
-It would be tempting to think that a user could just generate a change log directly from the commits using this change log command. However, it's not advised to do this. _Build-ChangeLog_ is just the first step and the primary motivation for the creation of this command was to help a user generate a change log for a repo that does not have a great commit history. I am even willing to admit that ___Loopz___ falls into this category mainly because of not realising the importance of good commit etiquette at the start of the project (and others). The value in using this command is that it provides a structure based upon the meta data of the commit history with the ability to decorate with emojis.
+It would be tempting to think that a user could just generate a change log directly from the commits using this change log command. However, it's not advised to do this. _Build-PoShLog_ is just the first step and the primary motivation for the creation of this command was to help a user generate a change log for a repo that does not have a great commit history. I am even willing to admit that ___Loopz___ falls into this category mainly because of not realising the importance of good commit etiquette at the start of the project (and others). The value in using this command is that it provides a structure based upon the meta data of the commit history with the ability to decorate with emojis.
 
 ---
 

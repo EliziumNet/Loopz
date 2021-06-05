@@ -1,8 +1,8 @@
 
-function Build-ChangeLog {
+function Build-PoShLog {
   <#
   .NAME
-    Build-ChangeLog
+    Build-PoShLog
 
   .SYNOPSIS
     Create a change log for the current repo
@@ -96,52 +96,45 @@ function Build-ChangeLog {
 
   .EXAMPLE 1
 
-  Build-ChangeLog -name 'Alpha' -Eject -Emoji
+  Build-PoShLog -name 'Alpha' -Eject -Emoji
 
   Eject 'Alpha' emojis options config into the repo under <root>/loopz/
-  as "Alpha-emoji-changelog.options.json"
+  as "Alpha-emoji-poshlog.options.json"
 
   .EXAMPLE 2
 
-  Build-ChangeLog -name 'Zen' -Eject
+  Build-PoShLog -name 'Zen' -Eject
 
   Eject 'Zen' options config without emojis into the repo under <root>/loopz/
-  as "Zen-changelog.options.json"
+  as "Zen-poshlog.options.json"
 
   .EXAMPLE 3
 
-  Build-ChangeLog -name 'Zen' -Eject -GroupBy 'scope/type'
-
-  Eject 'Zen' options config without emojis into the repo under <root>/loopz/
-  as "Zen-changelog.options.json" using a custom GroupBy setting.
-
-  .EXAMPLE 4
-
-  Build-ChangeLog -name 'Zen'
+  Build-PoShLog -name 'Zen'
 
   Build a change log using the pre-defined Zen config without emojis.
 
-  .EXAMPLE 5
+  .EXAMPLE 4
 
-  Build-ChangeLog -name 'foo'
+  Build-PoShLog -name 'foo'
 
   Build a change log using a custom 'foo' config. If the 'foo' config does not exist
   a default config is used. The user needs to update the config and re-run.
 
-  .Example 6
+  .Example 5
 
-  Build-ChangeLog -name 'Zen' -From '1.0.0 -Until '3.0.0'
+  Build-PoShLog -name 'Zen' -From '1.0.0 -Until '3.0.0'
 
   Build a change log that contains for commits in releases within a specified range.
 
-  .Example 7
+  .Example 6
 
-  Build-ChangeLog -name 'Zen' -Unreleased
+  Build-PoShLog -name 'Zen' -Unreleased
 
   Build a change log that contains unreleased commits only.
   #>
   [CmdletBinding(DefaultParameterSetName = 'CreateLog')]
-  [Alias('chog')]
+  [Alias('plog')]
   param(
     [Parameter(Position = 1)]
     [Alias('n')]
@@ -175,21 +168,21 @@ function Build-ChangeLog {
     [switch]$Test
   )
   [PSCustomObject]$optionsInfo = [PSCustomObject]@{
-    PSTypeName    = 'Loopz.ChangeLog.OptionsInfo';
+    PSTypeName    = 'Loopz.PoShLog.OptionsInfo';
     #
-    Base          = '-changelog.options';
-    DirectoryName = [ChangeLogSchema]::DIRECTORY;
+    Base          = '-poshlog.options';
+    DirectoryName = [PoShLogProfile]::DIRECTORY;
   }
   if ($Test.IsPresent) {
     [string]$rootPath = $($env:PesterTestDrive ?? $env:temp);
     $optionsInfo | Add-Member -NotePropertyName 'Root' -NotePropertyValue $rootPath;
   }
 
-  [ChangeLogOptionsManager]$manager = New-ChangeLogOptionsManager -OptionsInfo $optionsInfo;
+  [PoShLogOptionsManager]$manager = New-PoShLogOptionsManager -OptionsInfo $optionsInfo;
   [Scribbler]$scribbler = New-Scribbler -Test:$Test.IsPresent;
 
   [hashtable]$signals = $(Get-Signals);    
-  [string]$chogSignal = Get-FormattedSignal -Name 'CHOG' -EmojiOnly -Signals $signals -EmojiOnlyFormat '{0}';
+  [string]$chogSignal = Get-FormattedSignal -Name 'PLOG' -EmojiOnly -Signals $signals -EmojiOnlyFormat '{0}';
   [string]$ejectSignal = Get-FormattedSignal -Name 'EJECT' -EmojiOnly -Signals $signals -EmojiOnlyFormat '{0}';
 
   [string]$lnSn = $scribbler.Snippets('Ln');
@@ -242,7 +235,7 @@ function Build-ChangeLog {
           }
         }
       }
-      [ChangeLog]$changeLog = New-ChangeLog -Options $options;
+      [PoShLog]$changeLog = New-PoShLog -Options $options;
 
       [string]$content = $changeLog.Build();
       [string]$base = $options.Output.Base;

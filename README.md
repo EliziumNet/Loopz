@@ -6,7 +6,7 @@
 [![A B](https://img.shields.io/github/license/eliziumnet/loopz)](https://github.com/eliziumnet/Loopz/blob/master/LICENSE)
 [![A B](https://img.shields.io/powershellgallery/p/Elizium.Loopz)](https://www.powershellgallery.com/packages/Elizium.Loopz)
 
-PowerShell iteration utilities with additional goodies like [Bulk Renamer](resources/docs/bulk-renamer.md), [Parameter Set Tools](resources/docs/parameter-set-tools.md) and [Change Log Generator](resources/docs/build-changelog.md).
+PowerShell iteration utilities with additional goodies like [Bulk Renamer](resources/docs/bulk-renamer.md), [Parameter Set Tools](resources/docs/parameter-set-tools.md) and [Change Log Generator](resources/docs/posh-log.md).
 
 ## Introduction
 
@@ -73,7 +73,7 @@ See [Parameter Set Tools](resources/docs/parameter-set-tools.md) [:pray:](#thank
 |----------------------------------------------------------------------------------|------------
 | [Add-Appendage](Elizium.Loopz/docs/Add-Appendage.md)                             | Add prefix or suffix
 | [Edit-RemoveSingleSubString](Elizium.Loopz/docs/Edit-RemoveSingleSubString.md)   | Remove single substring
-| [Build-ChangeLog](Elizium.Loopz/docs/Build-ChangeLog.md)                         | Build a change log
+| [Build-PoShLog](Elizium.Loopz/docs/Build-ChangeLog.md)                           | Build a change log
 | [Format-StructuredLine](Elizium.Loopz/docs/Format-StructuredLine.md)             | Create Krayon line
 | [Format-Escape](Elizium.Loopz/docs/Format-Escape.md)                             | Escape a regular expression
 | [Get-FormattedSignal](Elizium.Loopz/docs/Get-FormattedSignal.md)                 | Get formatted signal
