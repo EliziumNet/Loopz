@@ -39,6 +39,12 @@
       "H6": "*{$}",
       "Dirty": "DIRTY: *{dirtyStmt}"
     },
+    "Sections": {
+      "Release": {
+        "Highlights": "*{highlightsStmt}",
+        "HighlightContent": ["*{highlightDummyStmt}"]
+      }
+    },
     "GroupBy": "scope/type/change/break",
     "LookUp": {
       "Authors": {
@@ -91,6 +97,8 @@
       "Breaking": "&{_B}",
       "Change": "[Change Type: &{_C}+{change}] => ",
       "IssueLink": " \\<+{issue-link}\\>",
+      "Highlights": ":sparkles: HIGHLIGHTS",
+      "HighlightDummy": "+ Lorem ipsum dolor sit amet",
       "Meta": " (Id: +{commitid-link})?{issue-link;issueLinkStmt}",
       "Commit": "+ ?{is-breaking;breakStmt}?{is-squashed;squashedStmt}*{changeStmt}*{subjectStmt}*{avatarStmt}*{metaStmt}",
       "DirtyCommit": "+ ?{is-breaking;breakingStmt}+{subject}",
@@ -98,7 +106,8 @@
       "Scope": "Scope(&{_S} +{scope})",
       "Squashed": "SQUASHED: ",
       "Subject": "Subject: **+{subject}**",
-      "Type": "Commit-Type(&{_T} +{type})"
+      "Type": "Commit-Type(&{_T} +{type})",
+      "Ungrouped": "UNGROUPED!"
     },
     "Warnings": {
       "Disable": {
