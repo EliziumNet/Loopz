@@ -16,6 +16,8 @@ The following is a list of the main aims of *Build-PoShLog* command:
 
 4. Harness the visual appeal of emoji's in highlighting categories of commits.
 
+![logo]
+
 The _Build-PoShLog_ command can be used on any repo not just *PowerShell* projects.
 
 ## Quick Start
@@ -26,7 +28,7 @@ First, in a command line, the user should navigate to the repo for which the cha
 
 > Build-PoShLog -name 'Alpha' -eject -emoji
 
-In the above, _Alpha_ is the name of a pre-defined config (_Elizium_ and _Zen_ are both available too). the *-emoji* switch is optional, but indicates that the ejected config will contain emojis. Running this eject, will create a folder under the root of the repo *'loopz'* and inside it will be the config just ejected, in this case ___Alpha-emoji-changelog.options.json___ and a template markdown file ___TEMPLATE. md___
+In the above, _Alpha_ is the name of a pre-defined config (_Elizium_ and _Zen_ are both available too). the *-emoji* switch is optional, but indicates that the ejected config will contain emojis. Running this eject, will create a folder under the root of the repo *'.loopz'* and inside it will be the config just ejected, in this case ___Alpha-emoji-changelog.options.json___ and a template markdown file ___TEMPLATE. md___
 
 ### (2) __edit options config__
 
@@ -46,7 +48,7 @@ Repeat this for all valid scopes in the repo.
 
 + modify statements (at ___./Output/Statements___): This is an optional step, but doing so can aid the users understanding of how the tool works. The statements simply specify literal content and/or refer to other statements. For each commit entry in the change log, the entry point is the 'Commit' statement at ___./Output/Statements/Commit___. For each heading, the entry points are the those statements defined in the headings at ___./Output/Headings/H?___. So these statements should be present and the ones that they in turn refer to. New statements can be defined, see [Statement](#snippet.statement) for more details.
 
-:warning: *A cautionary note about editing json config*: When *Build-PoShLog* is run, it validates the options via a [json schema](https://github.com/EliziumNet/Klassy/blob/master/Elizium.Klassy/FileList/options-chog.schema.json) and this validation process is case sensitive. So be careful when modifying json elements as a case mismatch can result in hard to resolve errors.
+:warning: *A cautionary note about editing json config*: When *Build-PoShLog* is run, it validates the options via a [json schema](https://github.com/EliziumNet/Klassy/blob/master/Elizium.Klassy/FileList/posh-log.options.schema.json) and this validation process is case sensitive. So be careful when modifying json elements as a case mismatch can result in hard to resolve errors.
 
 ### (3) __edit the TEMPLATE. md file__
 
@@ -83,9 +85,9 @@ as its own entry in the commit log. This will make for a correspondingly large c
 It is recommended that the user specifies some exclusion criteria in the excludes regular
 expressions (there are none by default).
 
-The generated ChangeLog markdown content is created inside a subdirectory ('loopz') inside the repo's root directory. It is expected that the user would copy this file to it's publish location, probably as 'ChangeLog .md' in the repo root. Alternatively, the user can specify the _PassThru_ flag and re-direct straight to the publish path. The options file also in the 'loopz' directory should be checked into source control.
+The generated ChangeLog markdown content is created inside a subdirectory ('.loopz') inside the repo's root directory. It is expected that the user would copy this file to it's publish location, probably as 'ChangeLog .md' in the repo root. Alternatively, the user can specify the _PassThru_ flag and re-direct straight to the publish path (via a pipe '|'). The options file also in the '.loopz' directory should be checked into source control.
 
-:warning: The name of a git tag is not significant when specifying a range. Rather, the date that is associated with the tag is the important entity. It would be easy to assume that tag '3.0.0' comes after a tag '2.0.0', but this is not based on the content of the tag label, it's the underlying date that matters. It just so happens, that '3.0.0' should come after '2.0.0', providing '2.0.0' was released before '2.0.0'. If a tag  contains extra info such as '3.0.0-beta', or perhaps it was defined as 'beta-3.0.0', it now becomes clear that the content of the tag label is not the important entity.
+:warning: The name of a git tag is not significant when specifying a range. Rather, the date that is associated with the tag is the important entity. It would be easy to assume that tag '3.0.0' comes after a tag '2.0.0', but this is not based on the content of the tag label, it's the underlying date that matters. It just so happens, that '3.0.0' should come after '2.0.0', providing '2.0.0' was released before '3.0.0'. If a tag  contains extra info such as '3.0.0-beta', or perhaps it was defined as 'beta-3.0.0', it now becomes clear that the content of the tag label is not the important characteristic.
 
 :pick: It was envisaged that the user would run the _Build-PoShLog_ command initially for the entire commit history. Refine the initial output, then check-in. Then on subsequent releases, the command can then be run just for unreleased commits (using the _Unreleased_ switch). If the repo is a large one, then it would probably be unwise to generate a build log for the entire history in 1 go; in this scenario, the user can be selective by specifying a range using _From_ and _Until_ tags.
 
@@ -172,6 +174,7 @@ The options config is a json file (the json schema can be found [here](https://g
 | [SourceControl](#options.sourcecontrol)     | git related information
 | [Output](#options.output)                   | Controls the generation of output
 | [Output Headings](#options.output.headings) | Headings statements that correspond to GroupBy definition
+| [Output Sections](#options.output.sections) | Pre-defined Markdown sections
 | [Output Lookup](#options.output.lookup)     | Allows the definition of content referenced by the lookup of a value
 
 ### Snippet <a name="options.snippet"></a>
@@ -287,6 +290,18 @@ Designed for a header of a section dedicated to `dirty` commits (it is reference
 
 Designed to be referenced for each dirty commit. The dirty commit is a bulleted entry that should shows the commit subject marked by its breaking status. Since in the commit entry, we only want to see the breaking status if it is a breaking change, it is referenced as a conditional statement using the _is-breaking_ variable.
 
+##### :books: Highlights Statement <a name="statement.highlights"></a>
+
++ *Value*: ":sparkles\: HIGHLIGHTS"
+
+This acts as a title to the highlights section for each release. If the user does not want a highlights section, then they should set this to the empty string instead of removing the whole _Highlights_ statement. If a non emoji config is ejected, then the default highlights will not contain __:sparkles:__ as indicated here.
+
+##### :books: HighlightDummy Statement <a name="statement.highlight-dummy"></a>
+
++ *Value*: "+ Lorem ipsum dolor sit amet"
+
+This is a dummy statement intended to be replaced with appropriate content as the user sees fit.
+
 ##### :books: IssueLink Statement <a name="statement.issuelink"></a>
 
 + *Value*: " \\<\*\*+{issue-link}\*\*\\>"
@@ -358,7 +373,7 @@ Variables can be populated by named group references or from other properties on
 | active-leg        | GroupBy           | Designed to be referenced from a header statement (See :heavy_exclamation_mark: below)
 | active-segment    | groupBy           | Designed to be referenced from a header statement (See :heavy_exclamation_mark: below)
 
-:heavy_exclamation_mark: Since each heading can reference any of the predefined segments ('scope'/'type'/'change-type'/'break') as defined by the _GroupBy_ value, it is not known in advance what they contain. Using _active-segment_ and _active-leg_ let's us access these items without actually explicitly knowing that the current header for example refers to 'type' (_active-segment_)  which is set to 'feat' (_active-leg_).
+:heavy_exclamation_mark: Since each heading can reference any of the predefined segments ('scope'/'type'/'change-type'/'break') as defined by the _GroupBy_ value, it is not known in advance what they contain. Using _active-segment_ and _active-leg_ let's us access these items without actually explicitly knowing that the current header for example refers to 'type' which is set to 'feat'; ie _active-segment_ is set to _active-leg_.
 
 ### Selection <a name="options.selection"></a>
 
@@ -388,14 +403,24 @@ If a repo's commits are already in a uniform state, it is advised to remove the 
 
 ### Output <a name="options.output"></a>
 
-+ __GroupBy__<a name="options.output.groupby"></a>: controls how commits are categorised. Can be any unique combination of 'scope', 'type', 'change' and 'break'. The GroupBy path must correspond to the heading values H3-H6 defined in settings ___Output.Headings.H?___. Those headings must all contain a placeholder '*{$}'. The user is free to add content to these headings, but they must all contain the placeholder. Internally, the placeholder is replaced with whatever _GroupBy_ leg it corresponds to, so for example, if the first leg of the _GroupBy_ is set to `scope`, then the placeholder inside the H3 heading is replaced with '\*{scopeStmt}'.
+#### Output.Headings :mortar_board: <a name="options.output.headings"></a>
+
+Defines what is displayed in section headings. __H2__ always refers to the release. __H3__ to __H6__ are governed by the [_GroupBy_](#options.output.groupby). The __Dirty__ heading is by default configured to display the [Dirty Statement](#statement.dirty).
+
+#### Output.Sections :hash:<a name="options.output.sections"></a>
+
+Allows the definition of content for predefined sections. Currently, only [_Release Highlights_](#statement.highlights) is a predefined section. By default, a release highlights section is generated. However, to diable this, the __Highlights__ entry at ___Options.Output.Sections.Release___ should be set to the empty string.
+
+#### Output.GroupBy :card_file_box:<a name="options.output.groupby"></a>
+
++ __GroupBy__<a name="options.output.groupby"></a>: controls how commits are categorised. Can be any unique combination of 'scope', 'type', 'change' and 'break'. The _GroupBy_ path must correspond to the heading values __H3-H6__ defined in settings ___Output.Headings.H?___. Those headings must all contain a placeholder '\*{$}'. The user is free to add content to these headings, but they must all contain the placeholder. Internally, the placeholder is replaced with whatever _GroupBy_ leg it corresponds to, so for example, if the first leg of the _GroupBy_ is set to `scope`, then the placeholder inside the **H3** heading is replaced with '\*{scopeStmt}'.
 
   + `scope` values are defined in ___Options.Output.Lookup.Scopes___ setting
   + `type` values are defined in ___Options.Output.Lookup.Types___ setting
   + `change` values are defined in ___Options.Output.Lookup.ChangeTypes___ setting (if change isn't
   represented inside the regex as a named group capture, it is taken to being the first
   word of the commit message after the ':' if that also matches the pre-defined change types
-  defined in "ChangeTypes").
+  defined in "ChangeTypes") (NB: This only applies if a _Change_ regular expression has been defined in ___Options.Selection.Subject___).
   + `break` is set according to the breaking status of the commit, defined by the commit's subject containing the breaking marker: "!" after the scope (see the default include regex for an exact specification).
   These translate to "breaking" or "non-breaking" under ___Options.Output.Lookup.Breaking___.
 
@@ -508,3 +533,5 @@ Go forth and commitify beautifully.
 :dart: [Commitizen](https://commitizen-tools.github.io)<br>
 :dart: [Writing Meaningful Git Commit Messages](https://medium.com/@menuka/writing-meaningful-git-commit-messages-a62756b65c81)<br>
 :dart: [Master your git log with Conventional Commits in 6 steps](https://dev.to/angry_nerds/master-your-git-log-with-conventional-commits-in-6-steps-32kp)<br>
+
+[logo]: https://raw.githubusercontent.com/PowerShell/PowerShell/master/assets/ps_black_64.svg?sanitize=true
