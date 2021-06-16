@@ -298,11 +298,4 @@ $global:Loopz = [PSCustomObject]@{
   }
 
   InvalidCharacterSet   = [char[]]'<>:"/\|?*';
-
-  ChangeLog             = [PSCustomObject]@{
-    PSTypeName    = 'Loopz.Global.ChangeLog';
-
-    DirectoryName = 'loopz-changelog';
-    BaseFileName  = '-poshlog.options.json';
-  }
 }
