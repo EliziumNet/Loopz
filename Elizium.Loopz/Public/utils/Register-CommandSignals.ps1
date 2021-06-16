@@ -46,9 +46,12 @@ function Register-CommandSignals {
     [string[]]$UsedSet,
 
     [Parameter()]
-    [hashtable]$Signals = $(Get-Signals)
+    [hashtable]$Signals = $(Get-Signals),
+
+    [Parameter()]
+    [switch]$Silent
   )
-  if ($Loopz.SignalRegistry.ContainsKey($Alias)) {
+  if ($Loopz.SignalRegistry.ContainsKey($Alias) -and -not($Silent.IsPresent)) {
     Write-Warning $("Register ignored; alias: '$Alias' already exists.");
   }
 
