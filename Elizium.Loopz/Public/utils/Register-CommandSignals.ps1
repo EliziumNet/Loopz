@@ -49,9 +49,7 @@ function Register-CommandSignals {
     [hashtable]$Signals = $(Get-Signals)
   )
   if ($Loopz.SignalRegistry.ContainsKey($Alias)) {
-    throw [System.Management.Automation.MethodInvocationException]::new(
-      "Register failed; alias: '$Alias' already exists."
-    );
+    Write-Warning $("Register ignored; alias: '$Alias' already exists.");
   }
 
   [string[]]$signalKeys = $Signals.PSBase.Keys;
