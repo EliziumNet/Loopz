@@ -230,10 +230,6 @@ $global:Loopz = [PSCustomObject]@{
     'shire' = @(
       'FAILED-A', 'INVALID', 'OK-A'
     );
-
-    'plog' = @(
-      'PLOG', 'EJECT'
-    );
   }
 
   Defaults              = [PSCustomObject]@{
