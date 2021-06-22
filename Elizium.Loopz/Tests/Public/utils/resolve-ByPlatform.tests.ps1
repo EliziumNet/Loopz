@@ -1,8 +1,8 @@
 Describe 'Resolve-ByPlatform' {
   BeforeAll {
-    Get-Module Elizium.Loopz | Remove-Module
+    Get-Module Elizium.Loopz | Remove-Module -Force;
     Import-Module .\Output\Elizium.Loopz\Elizium.Loopz.psm1 `
-      -ErrorAction 'stop' -DisableNameChecking;
+      -ErrorAction 'stop' -DisableNameChecking -Force;
 
     [hashtable]$script:platforms = @{
       'windows' = 'windows-info';

@@ -1,9 +1,9 @@
 ﻿
 Describe 'Invoke-MirrorDirectoryTree' {
   BeforeAll {
-    Get-Module Elizium.Loopz | Remove-Module
+    Get-Module Elizium.Loopz | Remove-Module -Force;
     Import-Module .\Output\Elizium.Loopz\Elizium.Loopz.psm1 `
-      -ErrorAction 'stop' -DisableNameChecking;
+      -ErrorAction 'stop' -DisableNameChecking -Force;
 
     # WhatIf set on function calls. This makes the test output very chatty when set to true.
     # WARNING: setting whatIf to true will break the tests, but you can see the directory and

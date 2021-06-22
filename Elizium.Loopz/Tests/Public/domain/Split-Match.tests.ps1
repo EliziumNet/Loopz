@@ -1,9 +1,9 @@
 
 Describe 'Split-Match' -Tag 'SPLIT' {
   BeforeAll {
-    Get-Module Elizium.Loopz | Remove-Module
+    Get-Module Elizium.Loopz | Remove-Module -Force;
     Import-Module .\Output\Elizium.Loopz\Elizium.Loopz.psm1 `
-      -ErrorAction 'stop' -DisableNameChecking;
+      -ErrorAction 'stop' -DisableNameChecking -Force;
 
     [string]$script:source = 'Greetings; spot: 23-05-2017, tom-next: 22-05-2017, cob: 21-05-2017.';
     [string]$script:pattern = '\d{2}-\d{2}-\d{4}';

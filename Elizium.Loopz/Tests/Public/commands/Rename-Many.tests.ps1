@@ -7,7 +7,7 @@ using module Elizium.Klassy;
 
 Describe 'Rename-Many' -Tag 'remy' {
   BeforeAll {
-    Get-Module Elizium.Loopz | Remove-Module
+    Get-Module Elizium.Loopz | Remove-Module -Force;
     Import-Module .\Output\Elizium.Loopz\Elizium.Loopz.psm1 `
       -ErrorAction 'stop' -DisableNameChecking
 
@@ -1068,9 +1068,9 @@ Describe 'Rename-Many' -Tag 'remy' {
 Describe 'Rename-Many (Internal)' {
   BeforeAll {
     InModuleScope Elizium.Loopz { 
-      Get-Module Elizium.Loopz | Remove-Module
+      Get-Module Elizium.Loopz | Remove-Module -Force;
       Import-Module .\Output\Elizium.Loopz\Elizium.Loopz.psm1 `
-        -ErrorAction 'stop' -DisableNameChecking;
+        -ErrorAction 'stop' -DisableNameChecking -Force;
 
       Import-Module Assert;
 
@@ -1109,9 +1109,9 @@ Describe 'Rename-Many (Internal)' {
 
 Describe 'Rename-Many parameter sets' -Tag 'remy' {
   BeforeAll {
-    Get-Module Elizium.Loopz | Remove-Module
+    Get-Module Elizium.Loopz | Remove-Module -Force;
     Import-Module .\Output\Elizium.Loopz\Elizium.Loopz.psm1 `
-      -ErrorAction 'stop' -DisableNameChecking;
+      -ErrorAction 'stop' -DisableNameChecking -Force;
 
     InModuleScope Elizium.Loopz {
       [hashtable]$script:_signals = Get-Signals;

@@ -5,9 +5,9 @@ Describe 'Format-StructuredLine' {
   # case to use with TestCases/Foreach.
   #
   BeforeAll {
-    Get-Module Elizium.Loopz | Remove-Module;
+    Get-Module Elizium.Loopz | Remove-Module -Force;;
     Import-Module .\Output\Elizium.Loopz\Elizium.Loopz.psm1 `
-      -ErrorAction 'stop' -DisableNameChecking;
+      -ErrorAction 'stop' -DisableNameChecking -Force;
 
     InModuleScope Elizium.Loopz {
       [string]$script:LineKey = 'LOOPZ.HEADER-BLOCK.LINE';

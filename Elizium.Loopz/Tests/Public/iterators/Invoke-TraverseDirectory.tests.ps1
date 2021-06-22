@@ -2,9 +2,9 @@ using module Elizium.Krayola;
 
 Describe 'Invoke-TraverseDirectory' {
   BeforeAll {
-    Get-Module Elizium.Loopz | Remove-Module
+    Get-Module Elizium.Loopz | Remove-Module -Force;
     Import-Module .\Output\Elizium.Loopz\Elizium.Loopz.psm1 `
-      -ErrorAction 'stop' -DisableNameChecking;
+      -ErrorAction 'stop' -DisableNameChecking -Force;
 
     [string]$script:filter = '*e*';
 
