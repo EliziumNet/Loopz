@@ -20,7 +20,7 @@ Describe 'test-AreParamSetsEqual' -Tag 'PSTools' {
   }
 
   Context 'given: parameter sets which are different' {
-    It 'should: return false' {
+    It 'should: return false' -Skip -Tag 'Bulk' {
       InModuleScope Elizium.Loopz {
         function test-WithMultipleParamSets {
           param(

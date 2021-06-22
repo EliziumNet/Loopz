@@ -26,9 +26,11 @@ Describe 'Syntax' -Tag 'PSTools' {
     }
   }
 
+  # !! Tests that are written for Rename-many should be re-written using another command
+  #
   Describe 'ParamSetStmt' {
     Context 'given: Rename-Many' {
-      It 'should: show parameter set statements' {
+      It 'should: show parameter set statements' -Skip -Tag 'Bulk' {
         InModuleScope Elizium.Loopz {
           [string]$command = 'Rename-Many';
           [syntax]$syntax = New-Syntax -CommandName $command -Signals $_signals -Scribbler $_scribbler;
@@ -47,7 +49,7 @@ Describe 'Syntax' -Tag 'PSTools' {
 
   Describe 'SyntaxStmt' {
     Context 'given: Rename-Many' {
-      It 'should: show parameter set statements' {
+      It 'should: show parameter set statements' -Skip -Tag 'Bulk' {
         InModuleScope Elizium.Loopz {
           [string]$command = 'Rename-Many';
           [syntax]$syntax = New-Syntax -CommandName $command -Signals $_signals -Scribbler $_scribbler;
@@ -64,7 +66,7 @@ Describe 'Syntax' -Tag 'PSTools' {
     }
 
     Context 'given: parameter set with mandatory switch parameters' {
-      It 'should: colour correctly' {
+      It 'should: colour correctly' -Skip -Tag 'Bulk' {
         InModuleScope Elizium.Loopz {
           [string]$command = 'Rename-Many';
           [CommandInfo]$commandInfo = Get-Command $command;

@@ -171,13 +171,13 @@ Describe 'Show-ParameterSetReport' -Tag 'PSTools' {
   }
 
   Context 'given: byName' {
-    It 'should: Show parameter set info' {
+    It 'should: Show parameter set info' -Skip -Tag 'Bulk' {
       Show-ParameterSetReport -Name 'Rename-Many' -Test
     }
   }
 
   Context 'given: Command alias' {
-    It 'should: should: Show parameter set info' {
+    It 'should: should: Show parameter set info' -Skip -Tag 'Bulk' {
       Show-ParameterSetReport -Name 'remy' -Test
     }
   }

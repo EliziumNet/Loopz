@@ -44,7 +44,7 @@ Describe 'find-DuplicateParamSets' -Tag 'PSTools' {
   }
 
   Context 'given: Rename-Many command set' {
-    It 'should: not find amy duplicates' {
+    It 'should: not find amy duplicates' -Skip -Tag 'Bulk' {
       InModuleScope Elizium.Loopz {
         [string]$commandName = 'Rename-Many'
         [Syntax]$script:_syntax = [Syntax]::new($commandName, $_signals, $_scribbler, $_scheme);

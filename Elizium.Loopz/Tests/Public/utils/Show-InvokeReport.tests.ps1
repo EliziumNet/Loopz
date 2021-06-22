@@ -174,13 +174,13 @@ Describe 'Show-InvokeReport' -Tag 'PSTools' {
   }
 
   Context 'given: byName' {
-    It 'should: Show parameter set info' {
+    It 'should: Show parameter set info' -Skip -Tag 'Bulk' {
       Show-InvokeReport -Name 'Rename-Many' -Params @('underscore', 'Pattern', 'Paste') -Test
     }
   }
 
   Context 'given: Command alias' {
-    It 'should: should: Show parameter set info' {
+    It 'should: should: Show parameter set info' -Skip -Tag 'Bulk' {
       Show-InvokeReport -Name 'remy' -Params @('underscore', 'Pattern', 'Paste') -Test
     }
   }

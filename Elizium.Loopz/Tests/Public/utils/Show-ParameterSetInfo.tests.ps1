@@ -13,7 +13,7 @@ Describe 'Show-ParameterSetInfo' -Tag 'PSTools' {
   }
 
   Context 'given: Sets filter' {
-    It 'should: show only Parameter Sets in Sets' {
+    It 'should: show only Parameter Sets in Sets' -Skip -Tag 'Bulk' {
       'Rename-Many' | Show-ParameterSetInfo -Sets @('ReplaceWith', 'MoveToEnd') -Test;
     }
   }
@@ -31,25 +31,25 @@ Describe 'Show-ParameterSetInfo' -Tag 'PSTools' {
   }
 
   Context 'given: function with no explicit parameter sets defined' {
-    It 'should: NOT BARF' {
+    It 'should: NOT BARF' -Skip -Tag 'Bulk' {
       'Format-Escape' | Show-ParameterSetInfo -Test;
     }
   }
 
   Context 'given: undefined parameter set' {
-    It 'should: show nothing' {
+    It 'should: show nothing' -Skip -Tag 'Bulk' {
       'Format-Escape' | Show-ParameterSetInfo -Sets 'barf' -Test;
     }
   }
 
   Context 'given: byName' {
-    It 'should: Show parameter set info' {
+    It 'should: Show parameter set info' -Skip -Tag 'Bulk' {
       Show-ParameterSetInfo -Name 'Rename-Many' -Sets 'MoveToAnchor' -Test
     }
   }
 
   Context 'given: Command alias' {
-    It 'should: should: Show parameter set info' {
+    It 'should: should: Show parameter set info' -Skip -Tag 'Bulk' {
       Show-ParameterSetInfo -Name 'remy' -Sets 'MoveToAnchor' -Test
     }
   }
