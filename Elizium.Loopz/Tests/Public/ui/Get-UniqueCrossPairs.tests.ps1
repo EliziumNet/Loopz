@@ -1,9 +1,9 @@
 
 Describe 'Get-UniqueCrossPairs' {
   BeforeAll {
-    Get-Module Elizium.Loopz | Remove-Module;
+    Get-Module Elizium.Loopz | Remove-Module -Force;;
     Import-Module .\Output\Elizium.Loopz\Elizium.Loopz.psm1 `
-      -ErrorAction 'stop' -DisableNameChecking;
+      -ErrorAction 'stop' -DisableNameChecking -Force;
   }
 
   Context 'given: 1xn array pair' {

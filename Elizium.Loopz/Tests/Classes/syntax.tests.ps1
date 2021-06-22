@@ -2,9 +2,9 @@ using namespace System.Management.Automation;
 
 Describe 'Syntax' -Tag 'PSTools' {
   BeforeAll {
-    Get-Module Elizium.Loopz | Remove-Module
+    Get-Module Elizium.Loopz | Remove-Module -Force;
     Import-Module .\Output\Elizium.Loopz\Elizium.Loopz.psm1 `
-      -ErrorAction 'stop' -DisableNameChecking;
+      -ErrorAction 'stop' -DisableNameChecking -Force;
 
     InModuleScope Elizium.Loopz {
       [krayon]$script:_krayon = Get-Krayon;

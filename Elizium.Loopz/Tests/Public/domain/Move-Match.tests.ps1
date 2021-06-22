@@ -2,7 +2,7 @@ using namespace System.Text.RegularExpressions;
 
 Describe 'Move-Match' -Tag 'remy' {
   BeforeAll {
-    Get-Module Elizium.Loopz | Remove-Module
+    Get-Module Elizium.Loopz | Remove-Module -Force;
     Import-Module .\Output\Elizium.Loopz\Elizium.Loopz.psm1 `
       -ErrorAction 'stop' -DisableNameChecking
 

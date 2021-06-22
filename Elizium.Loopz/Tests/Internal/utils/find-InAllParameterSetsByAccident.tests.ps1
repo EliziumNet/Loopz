@@ -1,9 +1,9 @@
 using namespace System.Management.Automation;
 Describe 'find-InAllParameterSetsByAccident' -Tag 'PSTools' {
   BeforeAll {
-    Get-Module Elizium.Loopz | Remove-Module;
+    Get-Module Elizium.Loopz | Remove-Module -Force;;
     Import-Module .\Output\Elizium.Loopz\Elizium.Loopz.psm1 `
-      -ErrorAction 'stop' -DisableNameChecking;
+      -ErrorAction 'stop' -DisableNameChecking -Force;
   }
 
   BeforeEach {
