@@ -10,6 +10,7 @@ Describe 'Syntax' -Tag 'PSTools' {
       [krayon]$script:_krayon = Get-Krayon;
       [hashtable]$script:_theme = $_krayon.Theme;
       [hashtable]$script:_signals = Get-Signals;
+      [string]$script:_command = 'Invoke-Command';
     }
   }
 
@@ -29,12 +30,11 @@ Describe 'Syntax' -Tag 'PSTools' {
   # !! Tests that are written for Rename-many should be re-written using another command
   #
   Describe 'ParamSetStmt' {
-    Context 'given: Rename-Many' {
-      It 'should: show parameter set statements' -Skip -Tag 'Bulk' {
+    Context 'given: Invoke-Command' {
+      It 'should: show parameter set statements' {
         InModuleScope Elizium.Loopz {
-          [string]$command = 'Rename-Many';
-          [syntax]$syntax = New-Syntax -CommandName $command -Signals $_signals -Scribbler $_scribbler;
-          [CommandInfo]$commandInfo = Get-Command $command;
+          [syntax]$syntax = New-Syntax -CommandName $_command -Signals $_signals -Scribbler $_scribbler;
+          [CommandInfo]$commandInfo = Get-Command $_command;
 
           foreach ($paramSet in $commandInfo.ParameterSets) {
             [string]$paramSetStmt = $(
@@ -48,12 +48,11 @@ Describe 'Syntax' -Tag 'PSTools' {
   } # ParamSetStmt
 
   Describe 'SyntaxStmt' {
-    Context 'given: Rename-Many' {
-      It 'should: show parameter set statements' -Skip -Tag 'Bulk' {
+    Context 'given: Invoke-Command' {
+      It 'should: show parameter set statements' {
         InModuleScope Elizium.Loopz {
-          [string]$command = 'Rename-Many';
-          [syntax]$syntax = New-Syntax -CommandName $command -Signals $_signals -Scribbler $_scribbler;
-          [CommandInfo]$commandInfo = Get-Command $command;
+          [syntax]$syntax = New-Syntax -CommandName $_command -Signals $_signals -Scribbler $_scribbler;
+          [CommandInfo]$commandInfo = Get-Command $_command;
 
           foreach ($paramSet in $commandInfo.ParameterSets) {
             [string]$syntaxStmt = $(
@@ -66,15 +65,14 @@ Describe 'Syntax' -Tag 'PSTools' {
     }
 
     Context 'given: parameter set with mandatory switch parameters' {
-      It 'should: colour correctly' -Skip -Tag 'Bulk' {
+      It 'should: colour correctly' {
         InModuleScope Elizium.Loopz {
-          [string]$command = 'Rename-Many';
-          [CommandInfo]$commandInfo = Get-Command $command;
+          [CommandInfo]$commandInfo = Get-Command $_command;
 
           if ([System.Management.Automation.CommandParameterSetInfo]$paramSet = `
             $($commandInfo.ParameterSets | Where-Object Name -eq 'MoveToStart')?[0]) {
 
-            [syntax]$syntax = New-Syntax -CommandName $command -Signals $_signals -Scribbler $_scribbler;
+            [syntax]$syntax = New-Syntax -CommandName $_command -Signals $_signals -Scribbler $_scribbler;
             [string]$syntaxStmt = $syntax.SyntaxStmt($paramSet);
 
             [string]$cyanSnippet = $_scribbler.Snippets(@('cyan'));

@@ -1,7 +1,7 @@
 
 Describe 'Show-InvokeReport' -Tag 'PSTools' {
   BeforeAll {
-    Get-Module Elizium.Loopz | Remove-Module -Force;;
+    Get-Module Elizium.Loopz | Remove-Module -Force;
     Import-Module .\Output\Elizium.Loopz\Elizium.Loopz.psm1 `
       -ErrorAction 'stop' -DisableNameChecking -Force;
 
@@ -155,9 +155,6 @@ Describe 'Show-InvokeReport' -Tag 'PSTools' {
       InModuleScope Elizium.Loopz {
         'Test-InvokedWithParams' | Show-InvokeReport -Params @(
           'underscore', 'prepend') -Common -Strict -Test;
-
-        # This should only return 2 parameter sets: Prepend and PrependDuplicate
-        #
       }
     }
   }
@@ -174,20 +171,21 @@ Describe 'Show-InvokeReport' -Tag 'PSTools' {
   }
 
   Context 'given: byName' {
-    It 'should: Show parameter set info' -Skip -Tag 'Bulk' {
-      Show-InvokeReport -Name 'Rename-Many' -Params @('underscore', 'Pattern', 'Paste') -Test
+    It 'should: Show parameter set info' {
+      Show-InvokeReport -Name 'Invoke-MirrorDirectoryTree' -Params @('Block', 'BlockParams', 'Hoist') -Test;
     }
   }
 
   Context 'given: Command alias' {
-    It 'should: should: Show parameter set info' -Skip -Tag 'Bulk' {
-      Show-InvokeReport -Name 'remy' -Params @('underscore', 'Pattern', 'Paste') -Test
+    It 'should: should: Show parameter set info' {
+      Show-InvokeReport -Name 'Mirror-Directory' -Params @('Block', 'BlockParams', 'Hoist') -Test;
     }
   }
 
   Context 'given: bad Command' {
     It 'should: Not Show parameter set info' {
-      Show-InvokeReport -Name 'blah' -Params @('underscore', 'Pattern', 'Paste') -ErrorAction SilentlyContinue -Test
+      Show-InvokeReport -Name 'blah' -Params @('Block', 'BlockParams', 'Hoist') `
+        -ErrorAction SilentlyContinue -Test;
     }
   }
 }

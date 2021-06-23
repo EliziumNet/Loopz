@@ -10,7 +10,6 @@ Describe 'test-AreParamSetsEqual' -Tag 'PSTools' {
 
   BeforeEach {
     InModuleScope Elizium.Loopz {
-      [string]$script:_commandName = 'Rename-Many';
       [Krayon]$script:_krayon = Get-Krayon;
       [hashtable]$script:_signals = Get-Signals;
       [hashtable]$theme = $_krayon.Theme;
@@ -20,7 +19,7 @@ Describe 'test-AreParamSetsEqual' -Tag 'PSTools' {
   }
 
   Context 'given: parameter sets which are different' {
-    It 'should: return false' -Skip -Tag 'Bulk' {
+    It 'should: return false' {
       InModuleScope Elizium.Loopz {
         function test-WithMultipleParamSets {
           param(
@@ -48,7 +47,7 @@ Describe 'test-AreParamSetsEqual' -Tag 'PSTools' {
         [CommandInfo]$commandInfo = Get-Command $commandName;
         [CommandParameterSetInfo]$alphaPsi = $commandInfo.ParameterSets | Where-Object Name -eq 'Alpha';
         [CommandParameterSetInfo]$betaPsi = $commandInfo.ParameterSets | Where-Object Name -eq 'Beta';
-        [Syntax]$syntax = [Syntax]::new($_commandName, $_signals, $_scribbler, $_scheme);
+        [Syntax]$syntax = [Syntax]::new($commandName, $_signals, $_scribbler, $_scheme);
 
         test-AreParamSetsEqual -FirstPsInfo $alphaPsi -SecondPsInfo $betaPsi `
           -Syntax $syntax | Should -BeFalse;

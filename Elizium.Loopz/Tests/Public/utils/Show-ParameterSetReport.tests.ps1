@@ -1,5 +1,5 @@
 
-Describe 'Show-ParameterSetReport' -Tag 'PSTools' {
+Describe 'Show-ParameterSetReport' -Tag 'PSTools', 'Current' {
   BeforeAll {
     Get-Module Elizium.Loopz | Remove-Module -Force;;
     Import-Module .\Output\Elizium.Loopz\Elizium.Loopz.psm1 `
@@ -171,14 +171,14 @@ Describe 'Show-ParameterSetReport' -Tag 'PSTools' {
   }
 
   Context 'given: byName' {
-    It 'should: Show parameter set info' -Skip -Tag 'Bulk' {
-      Show-ParameterSetReport -Name 'Rename-Many' -Test
+    It 'should: Show parameter set info' {
+      Show-ParameterSetReport -Name 'Invoke-MirrorDirectoryTree' -Test
     }
   }
 
   Context 'given: Command alias' {
-    It 'should: should: Show parameter set info' -Skip -Tag 'Bulk' {
-      Show-ParameterSetReport -Name 'remy' -Test
+    It 'should: should: Show parameter set info' {
+      Show-ParameterSetReport -Name 'Mirror-Directory' -Test
     }
   }
 
