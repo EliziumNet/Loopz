@@ -1,5 +1,5 @@
 
-Describe 'Show-ParameterSetReport' -Tag 'PSTools', 'Current' {
+Describe 'Show-ParameterSetReport' -Tag 'PSTools' {
   BeforeAll {
     Get-Module Elizium.Loopz | Remove-Module -Force;;
     Import-Module .\Output\Elizium.Loopz\Elizium.Loopz.psm1 `
