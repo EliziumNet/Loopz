@@ -120,7 +120,9 @@ function Show-ParameterSetReport {
       }
       $controller.ReportAll($queryInfo);
 
-      $Scribbler.Flush();
+      if (-not($PSBoundParameters.ContainsKey('Scribbler'))) {
+        $Scribbler.Flush();
+      }
     }
   }
 }
