@@ -177,7 +177,7 @@ function Show-InvokeReport {
 
       [string]$commonInvokeFormat = $(
         $lnSnippet + $resetSnippet + '   {0}Command: ' +
-        $punctSnippet + '''' + $commandSnippet + $Name + $punctSnippet + '''' +
+        $punctSnippet + '''' + $commandSnippet + $_.Name + $punctSnippet + '''' +
         $resetSnippet + ' invoked with parameters: ' +
         $unresolvedStructuredParams +
         ' {1}' + $lnSnippet
@@ -227,7 +227,9 @@ function Show-InvokeReport {
           -Common:$showCommon -Test:$Test.IsPresent;
       }
 
-      $Scribbler.Flush();
+      if (-not($PSBoundParameters.ContainsKey('Scribbler'))) {
+        $Scribbler.Flush();
+      }
     }
   }
 }

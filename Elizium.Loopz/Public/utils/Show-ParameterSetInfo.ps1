@@ -201,7 +201,9 @@ function Show-ParameterSetInfo {
         );
       }
 
-      $Scribbler.Flush();
+      if (-not($PSBoundParameters.ContainsKey('Scribbler'))) {
+        $Scribbler.Flush();
+      }
     }
   }
 }

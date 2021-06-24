@@ -1,3 +1,5 @@
+using module Elizium.Klassy;
+using module Elizium.Krayola;
 
 Describe 'Show-InvokeReport' -Tag 'PSTools' {
   BeforeAll {
@@ -186,6 +188,24 @@ Describe 'Show-InvokeReport' -Tag 'PSTools' {
     It 'should: Not Show parameter set info' {
       Show-InvokeReport -Name 'blah' -Params @('Block', 'BlockParams', 'Hoist') `
         -ErrorAction SilentlyContinue -Test;
+    }
+  }
+
+  Context 'given: external Scribbler' {
+    BeforeEach {
+      [Scribbler]$script:_scribbler = New-Scribbler -Test;
+    }
+    Context 'and: byName' {
+      It 'should: show command name' {
+        Show-InvokeReport -Name 'Invoke-MirrorDirectoryTree' -Params @(
+          'Block', 'BlockParams', 'Hoist'
+        ) -Test -Scribbler $_scribbler;
+
+        [string]$contents = $_scribbler.Builder.ToString();
+        $contents | Should -Match "Command: [^*]+Invoke-MirrorDirectoryTree[^*]+ invoked with parameters";
+
+        $_scribbler.Flush();
+      }
     }
   }
 }
