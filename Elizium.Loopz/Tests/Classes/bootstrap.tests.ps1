@@ -73,6 +73,7 @@ Describe 'Bootstrap' {
 
       It 'should: bind formatter' {
         InModuleScope Elizium.Loopz {
+          [char]$marker  = [char]0x2BC1;
           [PSCustomObject]$dropSpec = [PSCustomObject]@{
             Activate    = $true;
             SpecType    = 'formatter';
@@ -82,7 +83,7 @@ Describe 'Bootstrap' {
             Force       = 'Wide';
             Keys        = @{
               'LOOPZ.REMY.DROP'   = 'clanger';
-              'LOOPZ.REMY.MARKER' = $Loopz.Defaults.Remy.Marker;
+              'LOOPZ.REMY.MARKER' = $marker;
             }
           }
           $_bootStrapper.Register($dropSpec);

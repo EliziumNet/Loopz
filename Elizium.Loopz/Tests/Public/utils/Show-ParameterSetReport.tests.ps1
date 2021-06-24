@@ -172,13 +172,13 @@ Describe 'Show-ParameterSetReport' -Tag 'PSTools' {
 
   Context 'given: byName' {
     It 'should: Show parameter set info' {
-      Show-ParameterSetReport -Name 'Rename-Many' -Test
+      Show-ParameterSetReport -Name 'Invoke-MirrorDirectoryTree' -Test
     }
   }
 
   Context 'given: Command alias' {
     It 'should: should: Show parameter set info' {
-      Show-ParameterSetReport -Name 'remy' -Test
+      Show-ParameterSetReport -Name 'Mirror-Directory' -Test
     }
   }
 

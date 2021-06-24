@@ -79,7 +79,9 @@ function Initialize-ShellOperant {
 
   [Operant]$operant = if (-not($isDisabled)) {
     [string]$loopzPath = $(Get-EnvironmentVariable -Variable 'LOOPZ_PATH');
-    [string]$subPath = ".loopz" + [System.IO.Path]::DirectorySeparatorChar + $($Options.ShortCode);
+    [string]$subRoot = [string]::IsNullOrEmpty(${Options}?.SubRoot) ? '.elizium' : $Options.SubRoot;
+    [string]$subPath = $(Join-Path -Path $subRoot -ChildPath $Options.ShortCode);
+
     if ([string]::IsNullOrEmpty($loopzPath)) {
       $loopzPath = Join-Path -Path $HomePath -ChildPath $subPath;
     }

@@ -6,15 +6,15 @@ Describe 'Show-ParameterSetInfo' -Tag 'PSTools' {
       -ErrorAction 'stop' -DisableNameChecking -Force;
   }
 
-  Context 'given: Rename-Many command' {
-    It 'should: get parameter set info' -Skip {
-      'Rename-Many' | Show-ParameterSetInfo -Test;
+  Context 'given: Invoke-Command command' {
+    It 'should: get parameter set info' {
+      'Invoke-Command' | Show-ParameterSetInfo -Test;
     }
   }
 
   Context 'given: Sets filter' {
     It 'should: show only Parameter Sets in Sets' {
-      'Rename-Many' | Show-ParameterSetInfo -Sets @('ReplaceWith', 'MoveToEnd') -Test;
+      'Invoke-Command' | Show-ParameterSetInfo -Sets @('InProcess', 'Session') -Test;
     }
   }
 
@@ -32,25 +32,25 @@ Describe 'Show-ParameterSetInfo' -Tag 'PSTools' {
 
   Context 'given: function with no explicit parameter sets defined' {
     It 'should: NOT BARF' {
-      'Format-Escape' | Show-ParameterSetInfo -Test;
+      'Invoke-MirrorDirectoryTree' | Show-ParameterSetInfo -Test;
     }
   }
 
   Context 'given: undefined parameter set' {
     It 'should: show nothing' {
-      'Format-Escape' | Show-ParameterSetInfo -Sets 'barf' -Test;
+      'Invoke-MirrorDirectoryTree' | Show-ParameterSetInfo -Sets 'barf' -Test;
     }
   }
 
   Context 'given: byName' {
     It 'should: Show parameter set info' {
-      Show-ParameterSetInfo -Name 'Rename-Many' -Sets 'MoveToAnchor' -Test
+      Show-ParameterSetInfo -Name 'Invoke-MirrorDirectoryTree' -Sets 'InProcess' -Test
     }
   }
 
   Context 'given: Command alias' {
     It 'should: should: Show parameter set info' {
-      Show-ParameterSetInfo -Name 'remy' -Sets 'MoveToAnchor' -Test
+      Show-ParameterSetInfo -Name 'Mirror-Directory' -Sets 'InvokeFunction' -Test
     }
   }
 
