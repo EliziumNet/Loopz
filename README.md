@@ -6,7 +6,7 @@
 [![A B](https://img.shields.io/github/license/eliziumnet/loopz)](https://github.com/eliziumnet/Loopz/blob/master/LICENSE)
 [![A B](https://img.shields.io/powershellgallery/p/Elizium.Loopz)](https://www.powershellgallery.com/packages/Elizium.Loopz)
 
-PowerShell iteration utilities with additional goodies like [Bulk Renamer](resources/docs/bulk-renamer.md), [Parameter Set Tools](resources/docs/parameter-set-tools.md) and [Change Log Generator](resources/docs/posh-log.md).
+PowerShell iteration utilities with additional goodies like [Parameter Set Tools](resources/docs/parameter-set-tools.md).
 
 ## Introduction
 
@@ -25,14 +25,13 @@ Requires:
 
 which will be installed automatically if not already present.
 
-*For best results on windows, it is recommended that the user installs and uses Microsoft's Windows Terminal, since it has better support for emojis when compared to the ageing Console app. Users can also try [TerminalBuddy](https://github.com/plastikfan/TerminalBuddy), another PowerShell module, so assist in setting up custom colour themes.*
+*For best results on windows, it is recommended that the user installs and uses Microsoft's Windows Terminal, since it has better support for emojis when compared to the ageing Console app. Users can also try [TerminalBuddy](https://github.com/plastikfan/TerminalBuddy), another PowerShell module, to assist in setting up custom colour themes.*
 
 ## The Main Commands (for end users)
 
 | COMMAND-NAME                                              | DESCRIPTION
 |-----------------------------------------------------------|------------
 | [Format-Escape](Elizium.Loopz/docs/Format-Escape.md)      | Escape Regex param
-| [Rename-Many](Elizium.Loopz/docs/Rename-Many.md)          | [:heavy_check_mark:](resources/docs/bulk-renamer.md) Bulk Renamer
 | [Show-Signals](Elizium.Loopz/docs/Show-Signals.md)        | Show signals with overrides
 | [Select-Patterns](Elizium.Loopz/docs/Select-Patterns.md)  | Find text inside files
 
@@ -71,10 +70,8 @@ See [Parameter Set Tools](resources/docs/parameter-set-tools.md) [:pray:](#thank
 
 | COMMAND-NAME                                                                     | DESCRIPTION
 |----------------------------------------------------------------------------------|------------
-| [Add-Appendage](Elizium.Loopz/docs/Add-Appendage.md)                             | Add prefix or suffix
 | [Edit-RemoveSingleSubString](Elizium.Loopz/docs/Edit-RemoveSingleSubString.md)   | Remove single substring
 | [Format-StructuredLine](Elizium.Loopz/docs/Format-StructuredLine.md)             | Create Krayon line
-| [Format-Escape](Elizium.Loopz/docs/Format-Escape.md)                             | Escape a regular expression
 | [Get-FormattedSignal](Elizium.Loopz/docs/Get-FormattedSignal.md)                 | Get formatted signal
 | [Get-InverseSubstring](Elizium.Loopz/docs/Get-InverseSubString.md)               | Get inverse substring (the opposite of standard substring string method)
 | [Get-IsLocked](Elizium.Loopz/docs/Get-IsLocked.md)                               | Get locked state of a command
@@ -84,17 +81,14 @@ See [Parameter Set Tools](resources/docs/parameter-set-tools.md) [:pray:](#thank
 | [Get-Signals](Elizium.Loopz/docs/Get-Signals.md)                                 | Get signals
 | [Initialize-ShellOperant](Elizium.Loopz/docs/Initialize-ShellOperant.md)         | Init shell operation
 | [Invoke-ByPlatform](Elizium.Loopz/docs/Invoke-ByPlatform.md)                     | Invoke OS specific fn
-| [Move-Match](Elizium.Loopz/docs/Move-Match.md)                                   | Move regex match
 | [New-RegularExpression](Elizium.Loopz/docs/New-RegularExpression.md)             | Regex factory fn
 | [Resolve-ByPlatform](Elizium.Loopz/docs/Resolve-ByPlatform.md)                   | Resolve item by OS type
 | [Resolve-PatternOccurrence](Elizium.Loopz/docs/Resolve-PatternOccurrence.md)     | Regex param helper
 | [Select-FsItem](Elizium.Loopz/docs/Select-FsItem.md)                             | A predicate fn used for filtering
 | [Select-SignalContainer](Elizium.Loopz/docs/Select-SignalContainer.md)           | Select signal into a container
 | [Split-Match](Elizium.Loopz/docs/Split-Match.md)                                 | Split regex match
-| [Test-IsAlreadyAnchoredAt](Elizium.Loopz/docs/Test-IsAlreadyAnchoredAt.md)       | Test if pattern occurrence already at Start or End
 | [Test-IsFileSystemSafe](Elizium.Loopz/docs/Test-IsFileSystemSafe.md)             | Test if string is FS safe
 | [Update-GroupRefs](Elizium.Loopz/docs/Update-GroupRefs.md)                       | Update named group refs
-| [Update-Match](Elizium.Loopz/docs/Update-Match.md)                               | Update regex match
 
 | CLASS-NAME                                                                       | DESCRIPTION
 |----------------------------------------------------------------------------------|------------
