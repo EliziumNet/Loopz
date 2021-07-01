@@ -316,7 +316,7 @@ task CopyFileList {
 }
 
 task ImportCompiledModule -if (Test-Path -Path $script:Properties.OutPsmPath) {
-  Get-Module -Name $script:Properties.ModuleName | Remove-Module -Force;
+  Get-Module -Name $script:Properties.ModuleName | Remove-Module -Force
   Import-Module -Name $script:Properties.OutPsdPath -Force -DisableNameChecking
 }
 
