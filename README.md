@@ -27,7 +27,7 @@ which will be installed automatically if not already present.
 
 *For best results on windows, it is recommended that the user installs and uses Microsoft's Windows Terminal, since it has better support for emojis when compared to the ageing Console app. Users can also try [TerminalBuddy](https://github.com/plastikfan/TerminalBuddy), another PowerShell module, to assist in setting up custom colour themes.*
 
-The :scroll: ChangeLog for this project is available [here](Elizium.Loopz/CHANGELOG.md).
+The :scroll: ChangeLog for this project is available [here](CHANGELOG.md).
 
 ## The Main Commands (for end users)
 
