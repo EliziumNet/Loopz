@@ -1,5 +1,5 @@
 
-# 🧿Elizium.Loopz
+# :nazar_amulet: Elizium.Loopz
 
 [![A B](https://img.shields.io/badge/branching-commonflow-informational?style=flat)](https://commonflow.org)
 [![A B](https://img.shields.io/badge/merge-rebase-informational?style=flat)](https://git-scm.com/book/en/v2/Git-Branching-Rebasing)
@@ -26,6 +26,8 @@ Requires:
 which will be installed automatically if not already present.
 
 *For best results on windows, it is recommended that the user installs and uses Microsoft's Windows Terminal, since it has better support for emojis when compared to the ageing Console app. Users can also try [TerminalBuddy](https://github.com/plastikfan/TerminalBuddy), another PowerShell module, to assist in setting up custom colour themes.*
+
+The :scroll: ChangeLog for this project is available [here](Elizium.Loopz/CHANGELOG.md).
 
 ## The Main Commands (for end users)
 
