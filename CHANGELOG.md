@@ -13,7 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 :sparkles: HIGHLIGHTS
 
-+ Lorem ipsum dolor sit amet
++ TBD ...
 
 ### Scope(:star:poshlog)
 
@@ -139,7 +139,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 :sparkles: HIGHLIGHTS
 
-+ Introducing parameter set tools: ___Show-InvokeReport___, ___Show-ParameterSetInfo___ and ___Show-ParameterSetReport___
++ Introducing :sparkling_heart: parameter set tools: ___Show-InvokeReport___, ___Show-ParameterSetInfo___ and ___Show-ParameterSetReport___
 + Integrate with *Krayola's* new ___Scribbler___ class
 + Refactor *Rename-Many* parameter sets
 + Added command bootstrap facility
@@ -225,8 +225,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 :sparkles: HIGHLIGHTS
 
-+ Introducing the new bulk file renamer: ___Rename-Many___
-+ Introducing the new ___greps___ command (*Select-Text*)
++ Introducing :sparkling_heart: the new bulk file renamer: ___Rename-Many___
++ Introducing :sparkling_heart: the new ___greps___ command (*Select-Text*)
 + Added new platform functions ___Invoke-ByPlatform___ and ___Resolve-ByPlatform___
 + The *PassThru* parameter has been renamed to *Exchange*, since *PassThru* is a like a reserved parameter name which has a specific meaning in PowerShell and should not have been accidentally repurposed.
 
