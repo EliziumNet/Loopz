@@ -150,12 +150,13 @@ function Show-InvokeReport {
       Write-Debug "    --- Show-InvokeReport - Command: [$($_.Name)] ---";
 
       [syntax]$syntax = New-Syntax -CommandName $_.Name -Signals $signals -Scribbler $Scribbler;
-      [string]$paramSetSnippet = $syntax.TableOptions.Snippets.ParamSetName;
-      [string]$resetSnippet = $syntax.TableOptions.Snippets.Reset;
-      [string]$lnSnippet = $syntax.TableOptions.Snippets.Ln;
-      [string]$punctSnippet = $syntax.TableOptions.Snippets.Punct;
-      [string]$commandSnippet = $syntax.TableOptions.Snippets.Command;
-      [string]$hiLightSnippet = $syntax.TableOptions.Snippets.HiLight;
+      [string]$paramSetSn = $syntax.TableOptions.Snippets.ParamSetName;
+      [string]$resetSn = $syntax.TableOptions.Snippets.Reset;
+      [string]$lnSn = $syntax.TableOptions.Snippets.Ln;
+      [string]$punctSn = $syntax.TableOptions.Snippets.Punct;
+      [string]$commandSn = $syntax.TableOptions.Snippets.Command;
+      [string]$nameStmt = $syntax.QuotedNameStmt($commandSn, $_.Name);
+      [string]$hiLightSn = $syntax.TableOptions.Snippets.HiLight;
       [RuleController]$controller = [RuleController]::New($_);
       [PSCustomObject]$runnerInfo = [PSCustomObject]@{
         CommonParamSet = $syntax.CommonParamSet;
@@ -172,30 +173,30 @@ function Show-InvokeReport {
       [string]$candidateNamesCSV = $candidateNames -join ', ';
       [string]$paramsCSV = $Params -join ', ';
 
-      [string]$structuredParamNames = $syntax.QuotedNameStmt($hiLightSnippet);
+      [string]$structuredParamNames = $syntax.QuotedNameStmt($hiLightSn);
       [string]$unresolvedStructuredParams = $syntax.NamesRegex.Replace($paramsCSV, $structuredParamNames);
 
       [string]$commonInvokeFormat = $(
-        $lnSnippet + $resetSnippet + '   {0}Command: ' +
-        $punctSnippet + '''' + $commandSnippet + $_.Name + $punctSnippet + '''' +
-        $resetSnippet + ' invoked with parameters: ' +
+        $lnSn + $resetSn + '   {0}Command: ' +
+        $nameStmt +
+        $resetSn + ' invoked with parameters: ' +
         $unresolvedStructuredParams +
-        ' {1}' + $lnSnippet
+        ' {1}' + $lnSn
       );
 
       [string]$doubleIndent = [string]::new(' ', $syntax.TableOptions.Chrome.Indent * 2);
       [boolean]$showCommon = $Common.IsPresent;
 
       if ($candidateNames.Length -eq 0) {
-        [string]$message = "$($resetSnippet)does not resolve to a parameter set and is therefore invalid.";
+        [string]$message = "$($resetSn)does not resolve to a parameter set and is therefore invalid.";
         $Scribbler.Scribble(
           $($commonInvokeFormat -f $(Get-FormattedSignal -Name 'INVALID' -EmojiOnly), $message)
         );
       }
       elseif ($candidateNames.Length -eq 1) {
         [string]$message = $(
-          "$($lnSnippet)$($doubleIndent)$($punctSnippet)=> $($resetSnippet)resolves to parameter set: " +
-          "$($punctSnippet)'$($paramSetSnippet)$($candidateNamesCSV)$($punctSnippet)'"
+          "$($lnSn)$($doubleIndent)$($punctSn)=> $($resetSn)resolves to parameter set: " +
+          "$($punctSn)'$($paramSetSn)$($candidateNamesCSV)$($punctSn)'"
         );
         [string]$resolvedStructuredParams = $syntax.InvokeWithParamsStmt($candidateSets[0], $params);
 
@@ -212,10 +213,10 @@ function Show-InvokeReport {
           -Common:$showCommon -Test:$Test.IsPresent;
       }
       else {
-        [string]$structuredName = $syntax.QuotedNameStmt($paramSetSnippet);
+        [string]$structuredName = $syntax.QuotedNameStmt($paramSetSn);
         [string]$compoundStructuredNames = $syntax.NamesRegex.Replace($candidateNamesCSV, $structuredName);
         [string]$message = $(
-          "$($lnSnippet)$($doubleIndent)$($punctSnippet)=> $($resetSnippet)resolves to parameter sets: " +
+          "$($lnSn)$($doubleIndent)$($punctSn)=> $($resetSn)resolves to parameter sets: " +
           "$($compoundStructuredNames)"
         );
 

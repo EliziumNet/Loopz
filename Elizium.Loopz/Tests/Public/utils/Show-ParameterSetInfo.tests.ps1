@@ -1,3 +1,4 @@
+using module Elizium.Krayola;
 
 Describe 'Show-ParameterSetInfo' -Tag 'PSTools' {
   BeforeAll {
@@ -44,19 +45,36 @@ Describe 'Show-ParameterSetInfo' -Tag 'PSTools' {
 
   Context 'given: byName' {
     It 'should: Show parameter set info' {
-      Show-ParameterSetInfo -Name 'Invoke-MirrorDirectoryTree' -Sets 'InProcess' -Test
+      Show-ParameterSetInfo -Name 'Invoke-MirrorDirectoryTree' -Sets 'InProcess' -Test;
     }
   }
 
   Context 'given: Command alias' {
     It 'should: should: Show parameter set info' {
-      Show-ParameterSetInfo -Name 'Mirror-Directory' -Sets 'InvokeFunction' -Test
+      Show-ParameterSetInfo -Name 'Mirror-Directory' -Sets 'InvokeFunction' -Test;
     }
   }
 
   Context 'given: bad Command' {
     It 'should: Not Show parameter set info' {
       Show-ParameterSetInfo -Name 'blah' -Test -ErrorAction SilentlyContinue
+    }
+  }
+
+  Context 'given: external Scribbler' {
+    BeforeEach {
+      [Scribbler]$script:_scribbler = New-Scribbler -Test;
+    }
+
+    Context 'and: byName' {
+      It 'should: show command name' {
+        Show-ParameterSetInfo -Name 'Invoke-MirrorDirectoryTree' -Sets @('InvokeFunction') -Test -Scribbler $_scribbler;
+
+        [string]$contents = $_scribbler.Builder.ToString();
+        $contents | Should -Match "Command: [^*]+Invoke-MirrorDirectoryTree[^*]+ Showed 1 of 2 parameter set\(s\).";
+
+        $_scribbler.Flush();
+      }
     }
   }
 }
