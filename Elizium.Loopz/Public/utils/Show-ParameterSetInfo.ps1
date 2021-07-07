@@ -140,9 +140,10 @@ function Show-ParameterSetInfo {
       Write-Debug "    --- Show-ParameterSetInfo - Command: [$($_.Name)] ---";
       [syntax]$syntax = New-Syntax -CommandName $_.Name -Signals $signals -Scribbler $Scribbler;
 
-      [string]$commandSnippet = $syntax.TableOptions.Custom.Snippets.Command;
-      [string]$resetSnippet = $syntax.TableOptions.Snippets.Reset;
-      [string]$lnSnippet = $syntax.TableOptions.Snippets.Ln;
+      [string]$commandSn = $syntax.TableOptions.Custom.Snippets.Command;
+      [string]$resetSn = $syntax.TableOptions.Snippets.Reset;
+      [string]$lnSn = $syntax.TableOptions.Snippets.Ln;
+      [string]$nameStmt = $syntax.QuotedNameStmt($commandSn, $_.Name);
       $Scribbler.Scribble($syntax.TitleStmt($Title, $_.Name));
 
       if ($Common) {
@@ -170,9 +171,9 @@ function Show-ParameterSetInfo {
               [string]$structuredSyntax = $syntax.SyntaxStmt($parameterSet);
 
               $Scribbler.Scribble($(
-                  "$($lnSnippet)" +
-                  "$($structuredParamSetStmt)$($lnSnippet)$($structuredSyntax)$($lnSnippet)" +
-                  "$($lnSnippet)"
+                  "$($lnSn)" +
+                  "$($structuredParamSetStmt)$($lnSn)$($structuredSyntax)$($lnSn)" +
+                  "$($lnSn)"
                 ));
 
               Show-AsTable -MetaData $fieldMetaData -Headers $headers -Table $tableContent `
@@ -185,19 +186,19 @@ function Show-ParameterSetInfo {
             }
           }
         } # foreach
-        $Scribbler.Scribble("$($lnSnippet)");
+        $Scribbler.Scribble("$($lnSn)");
 
         ($total -gt 0) `
-          ? "Command: $($commandSnippet)$($Name)$($resetSnippet); Showed $count of $total parameter set(s)." `
-          : "Command: $($commandSnippet)$($Name)$($resetSnippet) contains no parameter sets!";
+          ? "Command: $($nameStmt)$($resetSn); Showed $count of $total parameter set(s)." `
+          : "Command: $($nameStmt)$($resetSn) contains no parameter sets!";
       }
       else {
-        "Command: $($commandSnippet)$($Name)$($resetSnippet) contains no parameter sets!";
+        "Command: $($nameStmt)$($resetSn) contains no parameter sets!";
       }
 
       if (-not([string]::IsNullOrEmpty($structuredSummaryStmt))) {
         $Scribbler.Scribble(
-          $("$($resetSnippet)$($structuredSummaryStmt)$($lnSnippet)$($lnSnippet)")
+          $("$($resetSn)$($structuredSummaryStmt)$($lnSn)$($lnSn)")
         );
       }
 
