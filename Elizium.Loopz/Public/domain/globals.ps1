@@ -183,6 +183,7 @@ $global:Loopz = [PSCustomObject]@{
     'REMY.POST'       = (@('Post Process', '🌈', '=>'));
     'REMY.DROP'       = (@('Drop', '💧', ' ╬'));
     'REMY.UNDO'       = (@('Undo Rename', '❎', ' μ'));
+    'REMY.DASHES'     = (@('Dashes', '➖', '--'));
     'GREPS'           = (@('greps', '🔍', 'γ'));
     'PLOG'            = (@('PoSh Log', '📜', '~|'));
   }
