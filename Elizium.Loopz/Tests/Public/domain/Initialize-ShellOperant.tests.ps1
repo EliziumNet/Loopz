@@ -17,7 +17,7 @@ Describe 'initialize-ShellOperant' {
 
   Context 'given: LOOPZ_UNDO_RENAME_DISABLED is defined' {
     Context 'and: LOOPZ_UNDO_RENAME_DISABLED is true' {
-      Context 'and: LOOPZ_PATH is defined' {
+      Context 'and: ELIZIUM_PATH is defined' {
         Context 'and: path is relative' {
           It 'should: return Undo Rename operant' -Skip {
             InModuleScope -ModuleName Elizium.Loopz {
@@ -32,7 +32,7 @@ Describe 'initialize-ShellOperant' {
               Write-Debug "enter !!! Get-EnvironmentVariable MOCK!, Variable: '$Variable'"
               [string]$result = switch ($Variable) {
                 'LOOPZ_UNDO_RENAME_DISABLED' { 'true' }
-                'LOOPZ_PATH' { "app$([System.IO.Path]::DirectorySeparatorChar)data" }
+                'ELIZIUM_PATH' { "app$([System.IO.Path]::DirectorySeparatorChar)data" }
               }
               return $result;
             }
@@ -57,13 +57,13 @@ Describe 'initialize-ShellOperant' {
         }
       }
 
-      Context 'and: LOOPZ_PATH is NOT defined' {
+      Context 'and: ELIZIUM_PATH is NOT defined' {
 
       }
     }
 
     Context 'and: LOOPZ_UNDO_RENAME_DISABLED is false' {
-      Context 'and: LOOPZ_PATH is defined' {
+      Context 'and: ELIZIUM_PATH is defined' {
         Context 'and: path is relative' {
 
         }
@@ -73,13 +73,13 @@ Describe 'initialize-ShellOperant' {
         }
       }
 
-      Context 'and: LOOPZ_PATH is NOT defined' {
+      Context 'and: ELIZIUM_PATH is NOT defined' {
 
       }
     }
 
     Context 'and: LOOPZ_UNDO_RENAME_DISABLED is invalid' {
-      Context 'and: LOOPZ_PATH is defined' {
+      Context 'and: ELIZIUM_PATH is defined' {
         Context 'and: path is relative' {
 
         }
@@ -89,18 +89,18 @@ Describe 'initialize-ShellOperant' {
         }
       }
 
-      Context 'and: LOOPZ_PATH is NOT defined' {
+      Context 'and: ELIZIUM_PATH is NOT defined' {
 
       }
     }
   }
 
   Context 'given: LOOPZ_UNDO_RENAME_DISABLED is defined' {
-    Context 'and: LOOPZ_PATH is defined' {
+    Context 'and: ELIZIUM_PATH is defined' {
 
     }
 
-    Context 'and: LOOPZ_PATH is NOT defined' {
+    Context 'and: ELIZIUM_PATH is NOT defined' {
 
     }
   }

@@ -10,7 +10,7 @@ function Initialize-ShellOperant {
   .DESCRIPTION
     By default all operant related files are stored somewhere inside the home path.
   Actually, a predefined subpath under home is used. This can be customised by the user
-  by them defining an alternative path (in the environment as 'LOOPZ_PATH'). This
+  by them defining an alternative path (in the environment as 'ELIZIUM_PATH'). This
   alternative path can be relative or absolute. Relative paths are relative to the
   home directory.
     The options specify how the operant is created and must be a PSCustomObject with
@@ -78,27 +78,27 @@ function Initialize-ShellOperant {
   }
 
   [Operant]$operant = if (-not($isDisabled)) {
-    [string]$loopzPath = $(Get-EnvironmentVariable -Variable 'LOOPZ_PATH');
+    [string]$eliziumPath = $(Get-EnvironmentVariable -Variable 'ELIZIUM_PATH');
     [string]$subRoot = [string]::IsNullOrEmpty(${Options}?.SubRoot) ? '.elizium' : $Options.SubRoot;
     [string]$subPath = $(Join-Path -Path $subRoot -ChildPath $Options.ShortCode);
 
-    if ([string]::IsNullOrEmpty($loopzPath)) {
-      $loopzPath = Join-Path -Path $HomePath -ChildPath $subPath;
+    if ([string]::IsNullOrEmpty($eliziumPath)) {
+      $eliziumPath = Join-Path -Path $HomePath -ChildPath $subPath;
     }
     else {
-      $loopzPath = [System.IO.Path]::IsPathRooted($loopzPath) `
-        ? $(Join-Path -Path $loopzPath -ChildPath $subPath) `
-        : $(Join-Path -Path $HomePath -ChildPath $loopzPath -AdditionalChildPath $subPath);
+      $eliziumPath = [System.IO.Path]::IsPathRooted($eliziumPath) `
+        ? $(Join-Path -Path $eliziumPath -ChildPath $subPath) `
+        : $(Join-Path -Path $HomePath -ChildPath $eliziumPath -AdditionalChildPath $subPath);
     }
 
-    if (-not(Test-Path -Path $loopzPath -PathType Container)) {
+    if (-not(Test-Path -Path $eliziumPath -PathType Container)) {
       if (-not($DryRun)) {
-        $null = New-Item -Type Directory -Path $loopzPath;
+        $null = New-Item -Type Directory -Path $eliziumPath;
       }
     }
 
     New-ShellOperant -BaseFilename $Options.BaseFilename `
-      -Directory $loopzPath -Operant $($Options.OperantName) -Shell $Options.Shell;
+      -Directory $eliziumPath -Operant $($Options.OperantName) -Shell $Options.Shell;
   }
   else {
     $null;
