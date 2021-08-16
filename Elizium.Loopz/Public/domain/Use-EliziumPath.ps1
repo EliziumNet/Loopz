@@ -15,10 +15,17 @@ function Use-EliziumPath {
   .LINK
     https://eliziumnet.github.io/Loopz/
   #>
+  [OutputType([string])]
+  param()
 
-  [string]$eliziumPath = (Get-EnvironmentVariable 'ELIZIUM_PATH') ?? (Get-EnvironmentVariable 'HOME');
+  [string]$homePath = Get-EnvironmentVariable 'HOME';
+  [string]$eliziumPath = (Get-EnvironmentVariable 'ELIZIUM_PATH') ?? $(
+    Join-Path -Path $homePath -ChildPath '.elizium'
+  );
 
   if (-not(Test-Path -Path $eliziumPath -PathType Container)) {
-    $null = New-Item -Path $eliziumPath -ItemType Directory;
+    $null = New-Item -Path $eliziumPath -ItemType Directory -WhatIf:$false;
   }
+
+  return $eliziumPath;
 }

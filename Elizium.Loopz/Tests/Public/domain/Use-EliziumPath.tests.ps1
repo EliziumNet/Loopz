@@ -5,6 +5,7 @@ Describe 'Use-EliziumPath' {
       -ErrorAction 'stop' -DisableNameChecking -Force;
 
     [string]$script:HomePath = $(Join-Path -Path $TestDrive -ChildPath 'home');
+    [string]$script:EliziumPath = $(Join-Path -Path $HomePath -ChildPath '.elizium');
     [string]$script:AltPath = $(Join-Path -Path $TestDrive -ChildPath 'alt' -AdditionalChildPath 'elizium');
   }
 
@@ -25,7 +26,7 @@ Describe 'Use-EliziumPath' {
           }
 
           'HOME' {
-            HomePath
+            $HomePath
             break;
           }
 
@@ -40,16 +41,18 @@ Describe 'Use-EliziumPath' {
 
     Context 'and: ELIZIUM_PATH location does not exist' {
       It 'should: ELIZIUM_PATH location should exist' {
-        Use-EliziumPath;
+        [string]$usePath = Use-EliziumPath;
 
+        $usePath | Should -Be $AltPath;
         Test-Path -Path $AltPath | Should -BeTrue;
       }
     }
 
     Context 'and: ELIZIUM_PATH location already exists' {
       It 'should: ELIZIUM_PATH location should exist' {
-        Use-EliziumPath;
+        [string]$usePath = Use-EliziumPath;
 
+        $usePath | Should -Be $AltPath;
         Test-Path -Path $AltPath -PathType Container | Should -BeTrue;
       }
     }
@@ -83,9 +86,10 @@ Describe 'Use-EliziumPath' {
     }
 
     It 'should: create home path' {
-      Use-EliziumPath;
+      [string]$usePath = Use-EliziumPath;
 
-      Test-Path -Path $HomePath -PathType Container | Should -BeTrue;
+      $usePath | Should -Be $EliziumPath;
+      Test-Path -Path $usePath -PathType Container | Should -BeTrue;
     }
   }
 }

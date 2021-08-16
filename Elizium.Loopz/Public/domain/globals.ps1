@@ -224,6 +224,10 @@ $global:Loopz = [PSCustomObject]@{
     'shire' = @(
       'FAILED-A', 'INVALID', 'OK-A'
     );
+
+    'coji' = @(
+      'OK-A', 'BAD-A', 'WHAT-IF'
+    );
   }
 
   InvalidCharacterSet   = [char[]]'<>:"/\|?*';

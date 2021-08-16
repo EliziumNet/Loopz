@@ -36,7 +36,6 @@ The :scroll: ChangeLog for this project is available [here](CHANGELOG.md).
 | [Format-Escape](Elizium.Loopz/docs/Format-Escape.md)      | Escape Regex param
 | [Show-Signals](Elizium.Loopz/docs/Show-Signals.md)        | Show signals with overrides
 | [Select-Patterns](Elizium.Loopz/docs/Select-Patterns.md)  | Find text inside files
-| [Convert-Emojis](Elizium.Loopz/docs/Convert-Emojis.md)    | Convert emoji short codes to HTML code points
 
 ## Iteration functions (for end developers)
 
@@ -68,10 +67,6 @@ This module includes a collection of commands/classes that comprise the paramete
 | [Syntax](resources/docs/parameter-set-tools.md/#syntax.class)                  | Command syntax
 
 See [Parameter Set Tools](resources/docs/parameter-set-tools.md) [:pray:](#thanks)
-
-## Emoji Converter
-
-Included in this module is a command that converts files (typically markdown) which contains emoji short code references to HTML code points. The need for this command was discovered when it was found that external documentation services such as __gitbook__ do not support emoji short codes. If the user is dealing with a lot of content that contain many short codes references, it would be impractical to convert these by hand. The command [__Convert-Emojis__](Elizium.Loopz/docs/Convert-Emojis.md) can perform bulk conversion of files using the github emoji api for reference.
 
 ## Supporting Utilities (for developers)
 
