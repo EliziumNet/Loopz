@@ -1,6 +1,6 @@
 using module Elizium.Krayola;
 
-Describe 'Invoke-TraverseDirectory' {
+Describe 'Invoke-TraverseDirectory' -Tag 'Current' {
   BeforeAll {
     Get-Module Elizium.Loopz | Remove-Module -Force;
     Import-Module .\Output\Elizium.Loopz\Elizium.Loopz.psm1 `
@@ -20,11 +20,50 @@ Describe 'Invoke-TraverseDirectory' {
         -Includes $directoryIncludes -Excludes $directoryExcludes;
     }
 
-    [string]$script:sourcePath = '.\Tests\Data\traverse\';
+    [string]$dataPath = $(Join-Path -Path '.' -ChildPath 'Tests' -AdditionalChildPath 'Data');
+    [string]$script:sourcePath = $(Join-Path -Path $dataPath -ChildPath 'traverse');
     [string]$script:resolvedSourcePath = Convert-Path $sourcePath;
 
     [hashtable]$theme = $(Get-KrayolaTheme);
     [Krayon]$script:_krayon = New-Krayon($theme);
+
+    [scriptblock]$script:_genericTraverseBlock = {
+      param(
+        [Parameter(Mandatory)]
+        $_underscore,
+
+        [Parameter(Mandatory)]
+        [int]$_index,
+
+        [Parameter(Mandatory)]
+        [hashtable]$_exchange,
+
+        [Parameter(Mandatory)]
+        [boolean]$_trigger
+      )
+      Write-Debug "+++ (Generic Traverse) DIRECTORY (Index: $_index): $_underscore"
+
+      @{ Product = $_underscore }
+    }
+
+    function test-IsDepthInRange {
+      [OutputType([boolean])]
+      param(
+        [hashtable]$Exchange
+      )
+
+      [boolean]$isInRange = if ($Exchange.ContainsKey('LOOPZ.TRAVERSE.LIMIT-DEPTH')) {
+        [int]$limitDepth = $Exchange['LOOPZ.TRAVERSE.LIMIT-DEPTH']; # 0 based
+        [int]$controllerDepth = $Exchange['LOOPZ.CONTROLLER.DEPTH']; # 1 based
+
+        $($controllerDepth -le ($limitDepth + 2));
+      }
+      else {
+        $true;
+      }
+
+      return $isInRange;
+    }
   }
 
   BeforeEach {
@@ -38,25 +77,6 @@ Describe 'Invoke-TraverseDirectory' {
   Context 'given: custom scriptblock specified' {
     Context 'and: directory tree' {
       It 'should: traverse' {
-        [scriptblock]$traverseBlock = {
-          param(
-            [Parameter(Mandatory)]
-            $_underscore,
-
-            [Parameter(Mandatory)]
-            [int]$_index,
-
-            [Parameter(Mandatory)]
-            [hashtable]$_exchange,
-
-            [Parameter(Mandatory)]
-            [boolean]$_trigger
-          )
-          Write-Debug "+++ DIRECTORY (Index: $_index): $_underscore"
-
-          @{ Product = $_underscore }
-        }
-
         [scriptblock]$sessionSummary = {
           param(
             [int]$_count,
@@ -69,7 +89,7 @@ Describe 'Invoke-TraverseDirectory' {
         }
 
         Invoke-TraverseDirectory -Path $resolvedSourcePath `
-          -Block $traverseBlock -SessionSummary $sessionSummary;
+          -Block $_genericTraverseBlock -SessionSummary $sessionSummary;
       }
 
       Context 'and: SummaryBlock provided' {
@@ -104,27 +124,35 @@ Describe 'Invoke-TraverseDirectory' {
       }
     } # and: directory tree
 
-    Context 'and: directory tree and Hoist specified' {
-      It 'should: traverse child directories whose ancestors don\`t match filter' {
-        [scriptblock]$traverseBlock = {
+    Context 'and: <Depth>' {
+      It 'should: not exceed depth limit' -TestCases @(
+        @{ Depth = 0; },
+        @{ Depth = 1; },
+        @{ Depth = 2; },
+        @{ Depth = 3; }
+      ) {
+        [scriptblock]$summary = {
           param(
-            [Parameter(Mandatory)]
-            [System.IO.DirectoryInfo]$_underscore,
-
-            [Parameter(Mandatory)]
-            [int]$_index,
-
-            [Parameter(Mandatory)]
-            [hashtable]$_exchange,
-
-            [Parameter(Mandatory)]
-            [boolean]$_trigger
+            [int]$_count,
+            [int]$_skipped,
+            [int]$_errors,
+            [boolean]$_trigger,
+            [hashtable]$_exchange
           )
+          [boolean]$depthIsInRange = test-IsDepthInRange -Exchange $_exchange
+          [int]$actualDepth = $_exchange['LOOPZ.CONTROLLER.DEPTH'];
+          [int]$limitDepth = $_exchange['LOOPZ.TRAVERSE.LIMIT-DEPTH'];
 
-          Write-Debug "[+] Traverse with Hoist; directory ($filter): '$($_underscore.Name)', index: $_index";
-          @{ Product = $_underscore }
+          $depthIsInRange | Should -BeTrue -Because "Limit Depth ($($limitDepth + 1)) should be >= Actual Depth ($actualDepth)";
         }
 
+        Invoke-TraverseDirectory -Path $resolvedSourcePath -Block $_genericTraverseBlock `
+          -Summary $summary -Depth $Depth;
+      }
+    }
+
+    Context 'and: directory tree and Hoist specified' {
+      It 'should: traverse child directories whose ancestors don\`t match filter' {
         [scriptblock]$sessionSummary = {
           param(
             [int]$_count,
@@ -137,9 +165,48 @@ Describe 'Invoke-TraverseDirectory' {
           $_count | Should -Be 11;
         }
 
-        Invoke-TraverseDirectory -Path $resolvedSourcePath -Block $traverseBlock `
+        Invoke-TraverseDirectory -Path $resolvedSourcePath -Block $_genericTraverseBlock `
           -SessionSummary $sessionSummary -Condition $filterDirectories -Hoist;
       } # should: traverse child directories whose ancestors don\`t match filter
+
+      Context 'and: <Depth>' {
+        It 'should: not exceed depth limit and <ExpectedCount>' -TestCases @(
+          @{ Depth = 0; ExpectedCount = 1; },
+          @{ Depth = 1; ExpectedCount = 1; },
+          @{ Depth = 2; ExpectedCount = 4; },
+          @{ Depth = 3; ExpectedCount = 11; }
+        ) {
+          [scriptblock]$sessionSummary = {
+            param(
+              [int]$_count,
+              [int]$_skipped,
+              [int]$_errors,
+              [boolean]$_trigger,
+              [hashtable]$_exchange
+            )
+
+            $_count | Should -Be $ExpectedCount;
+          }
+
+          [scriptblock]$summary = {
+            param(
+              [int]$_count,
+              [int]$_skipped,
+              [int]$_errors,
+              [boolean]$_trigger,
+              [hashtable]$_exchange
+            )
+            [boolean]$depthIsInRange = test-IsDepthInRange -Exchange $_exchange
+            [int]$actualDepth = $_exchange['LOOPZ.CONTROLLER.DEPTH'];
+            [int]$limitDepth = $_exchange['LOOPZ.TRAVERSE.LIMIT-DEPTH'];
+
+            $depthIsInRange | Should -BeTrue -Because "Limit Depth ($($limitDepth + 1)) should be >= Actual Depth ($actualDepth)";
+          }
+
+          Invoke-TraverseDirectory -Path $resolvedSourcePath -Block $_genericTraverseBlock `
+            -Summary $summary -SessionSummary $sessionSummary -Condition $filterDirectories -Hoist -Depth $Depth;
+        }
+      }
 
       Context 'and: Skipped' {
         It 'should: increment skip' {

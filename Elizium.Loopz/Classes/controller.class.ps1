@@ -146,6 +146,7 @@ class BaseController {
     # Note, the _index at this point has already been incremented and refers to the
     # next allocated item.
     #
+
     if ($invokeResult) {
       if ($invokeResult.psobject.properties.match('Trigger') -and $invokeResult.Trigger) {
         $this.TriggerItem();
@@ -223,13 +224,13 @@ class ForeachController : BaseController {
 class TraverseController : BaseController {
 
   [PSCustomObject]$_session = @{
-    Count   = 0;
-    Errors  = 0;
-    Skipped = 0;
+    Count        = 0;
+    Errors       = 0;
+    Skipped      = 0;
     TriggerCount = 0;
-    Trigger = $false;
-    Header  = $null;
-    Summary = $null;
+    Trigger      = $false;
+    Header       = $null;
+    Summary      = $null;
   }
 
   TraverseController([hashtable]$exchange,

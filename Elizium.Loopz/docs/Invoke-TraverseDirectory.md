@@ -18,7 +18,7 @@ Traverses a directory tree invoking a custom defined script-block or named funct
 ```powershell
 Invoke-TraverseDirectory -Path <String> [-Condition <ScriptBlock>] [-Exchange <Hashtable>]
  [-Block <ScriptBlock>] [-BlockParams <Object>] [-Header <ScriptBlock>] [-Summary <ScriptBlock>]
- [-SessionHeader <ScriptBlock>] [-SessionSummary <ScriptBlock>] [-Hoist] [<CommonParameters>]
+ [-SessionHeader <ScriptBlock>] [-SessionSummary <ScriptBlock>] [-Hoist] [-Depth <Int32>] [<CommonParameters>]
 ```
 
 ### InvokeFunction
@@ -26,7 +26,7 @@ Invoke-TraverseDirectory -Path <String> [-Condition <ScriptBlock>] [-Exchange <H
 ```powershell
 Invoke-TraverseDirectory -Path <String> [-Condition <ScriptBlock>] [-Exchange <Hashtable>] -Functee <String>
  [-FuncteeParams <Hashtable>] [-Header <ScriptBlock>] [-Summary <ScriptBlock>] [-SessionHeader <ScriptBlock>]
- [-SessionSummary <ScriptBlock>] [-Hoist] [<CommonParameters>]
+ [-SessionSummary <ScriptBlock>] [-Hoist] [-Depth <Int32>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -157,6 +157,24 @@ directory passes the filter.
 
 Same as EXAMPLE 4, but using predefined Header and Summary script-blocks for Session header/summary and per directory header/summary. (Test-Traverse and filterDirectories as per EXAMPLE 4)
 
+### Example 6
+
+```powershell
+  [scriptblock]$block = {
+    param(
+      $underscore,
+      [int]$index,
+      [hashtable]$exchange,
+      [boolean]$trigger
+    )
+    ...
+  }
+
+  Invoke-TraverseDirectory -Path './Tests/Data/fefsi' -Block $block -Depth 2
+```
+
+Invoke a script-block for every directory in the source tree within a depth of 2
+
 ## PARAMETERS
 
 ### -Block
@@ -219,6 +237,24 @@ by the user to define which directories are selected for function/script-block i
 
 ```yaml
 Type: ScriptBlock
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Depth
+
+Allows the restriction of traversal by depth (aligned with the Depth parameter on Get-ChildItem).
+0 means restrict invocations to immediate children of Path, with successive increments relating
+to generations thereafter.
+
+```yaml
+Type: Int32
 Parameter Sets: (All)
 Aliases:
 
@@ -319,7 +355,7 @@ Accept wildcard characters: False
 
 ### -Hoist
 
-  Switch parameter. Without Hoist being specified, the Condition can prove to be too restrictive
+Switch parameter. Without Hoist being specified, the Condition can prove to be too restrictive
 on matching against directories. If a directory does not match the Condition then none of its
 descendants will be considered to be traversed. When Hoist is specified then a descendant directory that does match the Condition will be traversed even though any of its ancestors may not match the same Condition.
 
