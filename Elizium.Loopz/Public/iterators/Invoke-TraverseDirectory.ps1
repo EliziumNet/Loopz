@@ -115,6 +115,11 @@ function Invoke-TraverseDirectory {
     consequences.
     * Exchange: (see Exchange previously described)
 
+  .PARAMETER Depth
+    Allows the restriction of traversal by depth (aligned with the Depth parameter on Get-ChildItem).
+  0 means restrict invocations to immediate children of Path, with successive increments relating
+  to generations thereafter.
+
   .EXAMPLE 1
     Invoke a script-block for every directory in the source tree.
 
@@ -219,6 +224,20 @@ function Invoke-TraverseDirectory {
     -Header $LoopzHelpers.DefaultHeaderBlock -Summary $DefaultHeaderBlock.SimpleSummaryBlock `
     -SessionHeader $LoopzHelpers.DefaultHeaderBlock -SessionSummary $DefaultHeaderBlock.SimpleSummaryBlock;
 
+  .EXAMPLE 6
+    Invoke a script-block for every directory in the source tree within a depth of 2
+
+    [scriptblock]$block = {
+      param(
+        $underscore,
+        [int]$index,
+        [hashtable]$exchange,
+        [boolean]$trigger
+      )
+      ...
+    }
+
+    Invoke-TraverseDirectory -Path './Tests/Data/fefsi' -Block $block -Depth 2
   #>
   [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', '')]
   [CmdletBinding(DefaultParameterSetName = 'InvokeScriptBlock')]
@@ -303,8 +322,38 @@ function Invoke-TraverseDirectory {
 
     [Parameter(ParameterSetName = 'InvokeScriptBlock')]
     [Parameter(ParameterSetName = 'InvokeFunction')]
-    [switch]$Hoist
+    [switch]$Hoist,
+
+    [Parameter()]
+    [ValidateScript( { $_ -ge 0 })]
+    [int]$Depth
   ) # param
+
+  function Test-DepthInRange {
+
+    # Assuming 'traverse' is the root path
+    #
+    # Get-ChildItem depth/limit ----->                  0     1       2
+    # controller depth -------------->         1        2     3       4
+    #                             .\Tests\Data\traverse\Audio\MINIMAL\FUSE
+    #
+    [OutputType([boolean])]
+    param(
+      [hashtable]$Exchange
+    )
+
+    [boolean]$isInRange = if ($Exchange.ContainsKey('LOOPZ.TRAVERSE.LIMIT-DEPTH')) {
+      [int]$limitDepth = $Exchange['LOOPZ.TRAVERSE.LIMIT-DEPTH']; # 0 based
+      [int]$controllerDepth = $Exchange['LOOPZ.CONTROLLER.DEPTH']; # 1 based
+
+      $($controllerDepth -le ($limitDepth + 2));
+    }
+    else {
+      $true;
+    }
+
+    return $isInRange;
+  }
 
   # ======================================================= [recurseTraverseDirectory] ===
   #
@@ -361,18 +410,20 @@ function Invoke-TraverseDirectory {
       $result = & $invokee @parameters;
     }
 
-    [string]$fullName = $directoryInfo.FullName;
-    [System.IO.DirectoryInfo[]]$directoryInfos = Get-ChildItem -Path $fullName `
-      -Directory | Where-Object { $condition.InvokeReturnAsIs($_) };
+    if (Test-DepthInRange -Exchange $Exchange) {
+      [string]$fullName = $directoryInfo.FullName;
+      [System.IO.DirectoryInfo[]]$directoryInfos = Get-ChildItem -Path $fullName `
+        -Directory | Where-Object { $condition.InvokeReturnAsIs($_) };
 
-    [scriptblock]$adapter = $Exchange['LOOPZ.TRAVERSE.ADAPTOR'];
+      [scriptblock]$adapter = $Exchange['LOOPZ.TRAVERSE.ADAPTOR'];
 
-    if ($directoryInfos) {
-      # adapter is always a script block, this has nothing to do with the invokee,
-      # which may be a script block or a named function(functee)
-      #
-      $directoryInfos | Invoke-ForeachFsItem -Directory -Block $adapter `
-        -Exchange $Exchange -Condition $condition -Summary $Summary;
+      if ($directoryInfos) {
+        # adapter is always a script block, this has nothing to do with the invokee,
+        # which may be a script block or a named function(functee)
+        #
+        $directoryInfos | Invoke-ForeachFsItem -Directory -Block $adapter `
+          -Exchange $Exchange -Condition $condition -Summary $Summary;
+      }
     }
 
     return $result;
@@ -431,6 +482,10 @@ function Invoke-TraverseDirectory {
     -Header $Header -Summary $Summary -SessionHeader $SessionHeader -SessionSummary $SessionSummary;
   $Exchange['LOOPZ.CONTROLLER'] = $controller;
 
+  if ($PSBoundParameters.ContainsKey('Depth')) {
+    $Exchange['LOOPZ.TRAVERSE.LIMIT-DEPTH'] = $Depth;
+  }
+
   $controller.BeginSession();
 
   # Handle top level directory, before recursing through child directories
@@ -480,9 +535,10 @@ function Invoke-TraverseDirectory {
 
       $result = $null;
 
-      # This is the top level invoke
-      #
       try {
+        # No need to consider the depth here because this is the top level invoke
+        # which should never be skipped because of the depth limit
+        #
         if ('InvokeScriptBlock' -eq $PSCmdlet.ParameterSetName) {
           $result = $Block.InvokeReturnAsIs($positional);
         }
@@ -505,11 +561,21 @@ function Invoke-TraverseDirectory {
 
     # --- end of top level invoke ----------------------------------------------------------
 
-    if ($Hoist.ToBool()) {
+    if ($Hoist.IsPresent) {
       # Perform non-recursive retrieval of descendant directories
       #
-      [System.IO.DirectoryInfo[]]$directoryInfos = Get-ChildItem -Path $Path `
-        -Directory -Recurse | Where-Object { $Condition.InvokeReturnAsIs($_) }
+      [hashtable]$parametersGeChItem = @{
+        'Path'      = $Path;
+        'Directory' = $true;
+        'Recurse'   = $true;
+      }
+      if ($PSBoundParameters.ContainsKey('Depth')) {
+        $parametersGeChItem['Depth'] = $Depth;
+      }
+
+      [System.IO.DirectoryInfo[]]$directoryInfos = Get-ChildItem @parametersGeChItem | Where-Object {
+        $Condition.InvokeReturnAsIs($_)
+      }
 
       Write-Debug "  [o] Invoke-TraverseDirectory (Hoist); Count: $($directoryInfos.Count)";
 
@@ -569,4 +635,6 @@ function Invoke-TraverseDirectory {
     $controller.SkipItem();
     Write-Error "Path specified '$($Path)' is not a directory";
   }
+
+  $controller.EndSession();
 } # Invoke-TraverseDirectory
