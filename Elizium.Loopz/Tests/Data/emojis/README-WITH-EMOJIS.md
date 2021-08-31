@@ -21,7 +21,6 @@ The module can be installed using the standard **install-module** command:
 Requires:
 
 * [Elizium.Krayola](https://github.com/plastikfan/Krayola)
-* [Elizium.Klassy](https://github.com/plastikfan/Klassy)
 
 which will be installed automatically if not already present.
 

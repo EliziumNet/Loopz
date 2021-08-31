@@ -1,4 +1,3 @@
-using module Elizium.Klassy
 
 Describe 'initialize-ShellOperant' {
   # PROBLEMS: Mocking of 3rd part module (Get-EnvironmentVariable in Krayola)
