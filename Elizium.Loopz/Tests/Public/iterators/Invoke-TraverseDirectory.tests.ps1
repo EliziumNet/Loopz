@@ -1,6 +1,6 @@
 using module Elizium.Krayola;
 
-Describe 'Invoke-TraverseDirectory' -Tag 'Current' {
+Describe 'Invoke-TraverseDirectory' {
   BeforeAll {
     Get-Module Elizium.Loopz | Remove-Module -Force;
     Import-Module .\Output\Elizium.Loopz\Elizium.Loopz.psm1 `

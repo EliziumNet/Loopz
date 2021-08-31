@@ -53,12 +53,6 @@
   # Modules that must be imported into the global environment prior to importing this module
   RequiredModules   = @(
     @{
-      ModuleName    = 'Elizium.Klassy';
-      ModuleVersion = '0.0.2';
-      Guid          = 'ba99a3c5-afd7-4f93-a77f-4941ddeb1abb';
-    },
-
-    @{
       ModuleName    = 'Elizium.Krayola';
       ModuleVersion = '1.0.3';
       Guid          = 'cc13fedc-6dea-4573-b600-d26c9f77e6ac';
