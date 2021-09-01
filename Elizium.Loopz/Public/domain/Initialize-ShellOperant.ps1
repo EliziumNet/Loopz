@@ -77,10 +77,13 @@ function Initialize-ShellOperant {
     [boolean]$isDisabled = $false;
   }
 
-  [Operant]$operant = if (-not($isDisabled)) {
-    [string]$eliziumPath = $(Get-EnvironmentVariable -Variable 'ELIZIUM_PATH');
-    [string]$subRoot = [string]::IsNullOrEmpty(${Options}?.SubRoot) ? '.elizium' : $Options.SubRoot;
-    [string]$subPath = $(Join-Path -Path $subRoot -ChildPath $Options.ShortCode);
+  # [Operant]
+  [object]$operant = if (-not($isDisabled)) {
+    [string]$eliziumPath = Use-EliziumPath;
+    [string]$subRoot = [string]::IsNullOrEmpty(${Options}?.SubRoot) ? [string]::Empty : $Options.SubRoot;
+    [string]$subPath = [string]::IsNullOrEmpty($subRoot) ? [string]::Empty : $(
+      Join-Path -Path $subRoot -ChildPath $Options.ShortCode
+    );
 
     if ([string]::IsNullOrEmpty($eliziumPath)) {
       $eliziumPath = Join-Path -Path $HomePath -ChildPath $subPath;
