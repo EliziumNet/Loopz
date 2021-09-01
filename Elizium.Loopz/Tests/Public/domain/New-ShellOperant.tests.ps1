@@ -1,5 +1,5 @@
 Import-Module .\Output\Elizium.Loopz\Elizium.Loopz.psm1
-Describe 'New-ShellOperant' -Tag 'Current' {
+Describe 'New-ShellOperant' {
   BeforeAll {
     InModuleScope -ModuleName Elizium.Loopz {
       Get-Module Elizium.Loopz | Remove-Module -Force; ;

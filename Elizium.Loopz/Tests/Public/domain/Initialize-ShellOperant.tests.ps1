@@ -1,56 +1,85 @@
 
-Describe 'initialize-ShellOperant' {
-  # PROBLEMS: Mocking of 3rd part module (Get-EnvironmentVariable in Krayola)
-  # is not working
-  #
+Describe 'Initialize-ShellOperant' -Tag 'Flaky' {
   BeforeAll {
     InModuleScope -ModuleName Elizium.Loopz {
-      Mock -ModuleName Elizium.Loopz New-Item {
-        Write-Host "!!! New-Item MOCKED.";
-      }
-      Get-Module Elizium.Loopz | Remove-Module -Force;;
+      Get-Module Elizium.Loopz | Remove-Module -Force; ;
       Import-Module .\Output\Elizium.Loopz\Elizium.Loopz.psm1 `
         -ErrorAction 'stop' -DisableNameChecking -Force;
     }
   }
 
-  Context 'given: LOOPZ_UNDO_RENAME_DISABLED is defined' {
-    Context 'and: LOOPZ_UNDO_RENAME_DISABLED is true' {
-      Context 'and: ELIZIUM_PATH is defined' {
-        Context 'and: path is relative' {
-          It 'should: return Undo Rename operant' -Skip {
-            InModuleScope -ModuleName Elizium.Loopz {
+  BeforeEach {
+    [string]$global:_HomePath = $(Join-Path -Path $TestDrive -ChildPath 'username');
+    [string]$global:_EliziumPath = $(Join-Path -Path $_HomePath -ChildPath 'elizium');
+  }
 
+  Context 'given: <UndoRenameDisabled>, <EliziumPath>' {
+    It 'should: ' -TestCases @(
+      @{ UndoRenameDisabled = $true; EliziumPath = 'not-applicable' }
+      , @{ UndoRenameDisabled = $false; EliziumPath = $(Join-Path -Path 'app' -ChildPath 'data'); }
+      , @{ UndoRenameDisabled = $false; EliziumPath = $($TestDrive); }
+    ) {
+      [hashtable]$parameters = @{
+        UndoRenameDisabled = $UndoRenameDisabled;
+        EliziumPath        = $EliziumPath;
+        HomePath           = $_HomePath;
+      };
+      # Write-Host "??? EliziumPath: '$EliziumPath'"
+      # Write-Host "??? TestDrive: '$TestDrive'"
+
+      # Need to artificially run inside module scope so we can access template
+      # parameters.
+      #
+      InModuleScope -ModuleName Elizium.Loopz -Parameters $parameters {
+
+        Mock -ModuleName Elizium.Loopz Get-EnvironmentVariable {
+          param(
+            [Parameter()]
+            [string]$Variable
+          )
+          $result = switch ($Variable) {
+            'LOOPZ_UNDO_RENAME' {
+              $UndoRenameDisabled;
+              break;
             }
 
-            Mock -ModuleName Elizium.Loopz Get-EnvironmentVariable {
-              param(
-                [Parameter()]
-                [string]$Variable
-              )
-              Write-Debug "enter !!! Get-EnvironmentVariable MOCK!, Variable: '$Variable'"
-              [string]$result = switch ($Variable) {
-                'LOOPZ_UNDO_RENAME_DISABLED' { 'true' }
-                'ELIZIUM_PATH' { "app$([System.IO.Path]::DirectorySeparatorChar)data" }
-              }
-              return $result;
+            'ELIZIUM_PATH' {
+              $EliziumPath;
+              break;
             }
 
-            [PSCustomObject]$options = [PSCustomObject]@{
-              ShortCode    = 'remy';
-              OperantName  = 'UndoRename';
-              Shell        = 'PoShShell';
-              BaseFilename = 'undo-rename';
-              DisabledEnVar  = 'LOOPZ_UNDO_RENAME';
+            'HOME' {
+              $HomePath;
+              break;
             }
-            [string]$homePath = "$TestDrive$([System.IO.Path]::DirectorySeparatorChar)username";
-            [UndoRename]$operant = initialize-ShellOperant -HomePath $homePath `
-              -Options $options;
-
-            $operant | Should -Not -BeNullOrEmpty;
           }
+
+          Write-Debug "enter !!! Get-EnvironmentVariable MOCK!, Variable: '$Variable', Result: '$($result)'";
+          return $result;
         }
 
+        # Write-Host ">>> EliziumPath: '$EliziumPath'"
+        # Write-Host ">>> _EliziumPath: '$_EliziumPath'"
+
+        [PSCustomObject]$options = [PSCustomObject]@{
+          ShortCode     = 'remy';
+          OperantName   = 'UndoRename';
+          Shell         = 'PoShShell';
+          BaseFilename  = 'undo-rename';
+          DisabledEnVar = 'LOOPZ_UNDO_RENAME';
+        }
+        # [UndoRename]
+        [object]$operant = Initialize-ShellOperant -HomePath $(Join-Path -Path $TestDrive -ChildPath 'username') `
+          -Options $options;
+
+        ($null -eq $operant) | Should -Be $UndoRenameDisabled;
+      }
+    }
+  }
+
+  Context 'given: LOOPZ_UNDO_RENAME_DISABLED is defined' -Skip {
+    Context 'and: LOOPZ_UNDO_RENAME_DISABLED is true' {
+      Context 'and: ELIZIUM_PATH is defined' {
         Context 'and: path is absolute' {
 
         }
