@@ -16,6 +16,8 @@ The module can be installed using the standard **install-module** command:
 
 > PS> install-module -Name Elizium.Loopz -Scope AllUsers
 
+:warning: ___BREAKING: As of version 4.0, Rename-Many has been moved into a separate module: [RexFS](https://github.com/EliziumNet/RexFs)___
+
 ### Dependencies
 
 Requires:
