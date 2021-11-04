@@ -1,191 +1,177 @@
 using module '../../../Output/Elizium.Loopz/Elizium.Loopz.psd1';
 
 Describe 'Initialize-ShellOperant' {
-  # Ideally we'd use data driven test cases, but because we need to use TestDrive which is not accessible during
-  # discovery time when the TestCase template parameters are populated, we can't. Instead we have to manually
-  # define each test case and the problem is made worse by our need to mock out Get-EnvironmentVariable which
-  # needs the full path including TestDrive. Due to these restrictions these tests are really awful.
+  # Ideally we'd use data driven test cases, but because we need to use TestDrive
+  # which is not accessible during discovery time when the TestCase template parameters
+  # are populated, we can't. Instead we have to manually define each test case and the
+  # problem is made worse by our need to mock out Get-EnvironmentVariable which needs
+  # the full path including TestDrive. Due to these restrictions these tests are
+  # really way more verbose than they ought to be.
   #
+
   BeforeAll {
     Get-Module Elizium.Loopz | Remove-Module -Force; ;
     Import-Module .\Output\Elizium.Loopz\Elizium.Loopz.psm1 `
       -ErrorAction 'stop' -DisableNameChecking -Force;
 
-    [string]$script:_HomePath = $(Join-Path -Path $TestDrive -ChildPath 'username');
+    [string]$script:_HomePath = $(Join-Path -Path $TestDrive -ChildPath 'home');
     [string]$script:_EliziumPath = $(Join-Path -Path $_HomePath -ChildPath 'elizium');
+    [string]$script:_ShortCodeSegment = 'remy';
+    [string]$script:_SubRootSegment = 'sub-root';
+    [string]$script:_UndoDisabledName = 'UNDO_DISABLED';
+    [string]$script:_UndoDisabledValue = [string]::Empty;
+
+    $null = New-Item -Path $_EliziumPath -ItemType Directory;
+
+    Mock -ModuleName Elizium.Loopz Use-EliziumPath {
+      param()
+      return $_EliziumPath;
+    }
+
+    Mock -ModuleName Elizium.Loopz Get-EnvironmentVariable {
+      param(
+        [Parameter()][string]$Variable,
+        [Parameter()][string]$Default
+      )
+      # Each test must set _UndoDisabledValue accordingly
+      #
+      return $_UndoDisabledValue;
+    }
 
     function script:Invoke-CoreTest {
       [CmdletBinding()]
       param(
-        [Parameter()]
-        [string]$HomePath,
+        [Parameter(Mandatory)]
+        [PSCustomObject]$Options,
 
         [Parameter()]
-        [string]$ShouldExist,
+        [string[]]$Segments,
 
         [Parameter()]
-        [string]$ExpectedOperantPath
+        [switch]$ShouldCreateOp
       )
 
-      [PSCustomObject]$options = [PSCustomObject]@{
-        ShortCode     = 'remy';
-        OperantName   = 'UndoRename';
-        Shell         = 'PoShShell';
-        BaseFilename  = 'undo-rename';
-        DisabledEnVar = 'UNDO_DISABLED';
-      }
-
-      [object]$operant = Initialize-ShellOperant -HomePath $HomePath -Options $options;
-      ($null -eq $operant) | Should -Not -Be $ShouldExist;
+      [object]$operant = Initialize-ShellOperant -Options $Options;
+      ($null -ne $operant) | Should -Be $($ShouldCreateOp.IsPresent);
 
       [string]$directoryPath = [System.IO.Path]::GetDirectoryName($operant.Shell.FullPath);
 
-      if ($PSBoundParameters.ContainsKey('ExpectedOperantPath') -and
-        -not([string]::IsNullOrEmpty($ExpectedOperantPath))) {
-        $ExpectedOperantPath | Should -Be $($directoryPath);
+      if ($ShouldCreateOp) {
+        Test-Path -Path $directoryPath -PathType Container | Should -BeTrue;
+      }
+
+      # We check the segments as an alternative to checking the whole path, because
+      # doing so would not be platform independent, owing to the directory separator
+      # char.
+      #
+      if ($PSBoundParameters.ContainsKey("Segments")) {
+        $Segments | ForEach-Object {
+          $directoryPath.Contains($_) | Should -BeTrue -Because "Path does not contain segment: '$_'";
+        }
       }
     }
   }
 
+  Context 'given: UNDO_DISABLED is NOT defined' {
+    Context 'and: Options.SubRoot is defined' {
+      It 'should: create path' {
+        [PSCustomObject]$options = [PSCustomObject]@{
+          SubRoot       = $_SubRootSegment;
+          OperantName   = 'UndoRename';
+          Shell         = 'PoShShell';
+          BaseFilename  = 'undo-rename';
+          DisabledEnVar = $script:_UndoDisabledName;
+        }
+        $script:_UndoDisabledValue = [string]::Empty;
+
+        Invoke-CoreTest -Options $options -Segments @($_SubRootSegment) -ShouldCreateOp;
+      }
+    } # Options.SubRoot is defined
+
+    Context 'and: Options.ShortCode is defined' {
+      It 'should: create path' {
+        [PSCustomObject]$options = [PSCustomObject]@{
+          ShortCode     = $_ShortCodeSegment;
+          OperantName   = 'UndoRename';
+          Shell         = 'PoShShell';
+          BaseFilename  = 'undo-rename';
+          DisabledEnVar = $script:_UndoDisabledName;
+        }
+        $script:_UndoDisabledValue = [string]::Empty;
+
+        Invoke-CoreTest -Options $options -Segments @($_ShortCodeSegment) -ShouldCreateOp;
+      }
+    } # Options.ShortCode is defined
+
+    Context 'and: Options.SubRoot/ShortCode and are BOTH  defined' {
+      It 'should: create path' {
+        [PSCustomObject]$options = [PSCustomObject]@{
+          SubRoot       = $_SubRootSegment;
+          ShortCode     = $_ShortCodeSegment;
+          OperantName   = 'UndoRename';
+          Shell         = 'PoShShell';
+          BaseFilename  = 'undo-rename';
+          DisabledEnVar = $script:_UndoDisabledName;
+        }
+        $script:_UndoDisabledValue = [string]::Empty;
+
+        Invoke-CoreTest -Options $options -Segments @(
+          $_SubRootSegment, $_ShortCodeSegment) -ShouldCreateOp;
+      }
+    } # Options.SubRoot is defined
+
+  } # UNDO_DISABLED is NOT defined
+
   Context 'given: UNDO_DISABLED is defined' {
     Context 'and: UNDO_DISABLED is true' {
-      BeforeAll {
-        [boolean]$script:_disabled = $true;
-      }
-
-      Context 'and: ELIZIUM_PATH is defined' {
-        It 'should: not create shell operant' {
-          [string]$h = $_HomePath;
-
-          Mock -ModuleName Elizium.Loopz Get-EnvironmentVariable {
-            param(
-              [Parameter()][string]$Variable
-            )
-            $result = switch ($Variable) {
-              'UNDO_DISABLED' { $_disabled; break; }
-              'ELIZIUM_PATH' { $_EliziumPath; break; }
-              'HOME' { $h; break; }
-            }
-            return $result;
-          }
-          [hashtable]$parameters = @{
-            'HomePath'    = $h;
-            'ShouldExist' = -not($_disabled);
-          }
-          Invoke-CoreTest @parameters;
+      It 'should: create path' {
+        [PSCustomObject]$options = [PSCustomObject]@{
+          SubRoot       = $_SubRootSegment;
+          ShortCode     = $_ShortCodeSegment;
+          OperantName   = 'UndoRename';
+          Shell         = 'PoShShell';
+          BaseFilename  = 'undo-rename';
+          DisabledEnVar = $script:_UndoDisabledName;
         }
+        $script:_UndoDisabledValue = "true";
+
+        Invoke-CoreTest -Options $options;
       }
-    } # and: UNDO_DISABLED is true
+    } # UNDO_DISABLED is true
 
     Context 'and: UNDO_DISABLED is false' {
-      BeforeAll {
-        [boolean]$script:_disabled = $false;
-      }
-
-      Context 'and: ELIZIUM_PATH is defined' {
-        Context 'and: path is relative' {
-          It 'should: not create shell operant' {
-            [string]$p = 'child-path';
-            [string]$expectedPath = $(Join-Path -Path $_HomePath -ChildPath $p);
-
-            Mock -ModuleName Elizium.Loopz Get-EnvironmentVariable {
-              param(
-                [Parameter()][string]$Variable
-              )
-              $result = switch ($Variable) {
-                'UNDO_DISABLED' { $_disabled; break; }
-                'ELIZIUM_PATH' { $p ; break; }
-                'HOME' { $_HomePath; break; }
-              }
-              return $result;
-            }
-            [hashtable]$parameters = @{
-              'HomePath'            = $_HomePath;
-              'ShouldExist'         = -not($_disabled);
-              'ExpectedOperantPath' = $expectedPath;
-            }
-            Invoke-CoreTest @parameters;
+      Context 'and: Options.ShortCode is defined' {
+        It 'should: create path' {
+          [PSCustomObject]$options = [PSCustomObject]@{
+            ShortCode     = $_ShortCodeSegment;
+            OperantName   = 'UndoRename';
+            Shell         = 'PoShShell';
+            BaseFilename  = 'undo-rename';
+            DisabledEnVar = $script:_UndoDisabledName;
           }
-        } # path is relative
+          $script:_UndoDisabledValue = "false";
 
-        Context 'and: path is absolute' {
-          It 'should: not create shell operant' {
-            [string]$p = $(Join-Path -Path $TestDrive -ChildPath 'child-path');
-            [string]$expectedPath = $p;
-
-            Mock -ModuleName Elizium.Loopz Get-EnvironmentVariable {
-              param(
-                [Parameter()][string]$Variable
-              )
-              $result = switch ($Variable) {
-                'UNDO_DISABLED' { $_disabled; break; }
-                'ELIZIUM_PATH' { $p ; break; }
-                'HOME' { $_HomePath; break; }
-              }
-              return $result;
-            }
-            [hashtable]$parameters = @{
-              'HomePath'            = $_HomePath;
-              'ShouldExist'         = -not($_disabled);
-              'ExpectedOperantPath' = $expectedPath;
-            }
-            Invoke-CoreTest @parameters;
-          } # not create shell operant
-        } # path is absolute
-      } # ELIZIUM_PATH is defined
-
-      Context 'and: ELIZIUM_PATH is NOT defined' {
-        It 'should: not create shell operant' {
-          [string]$expectedPath = $(Join-Path -Path $_HomePath -ChildPath '.elizium');
-
-          Mock -ModuleName Elizium.Loopz Get-EnvironmentVariable {
-            param(
-              [Parameter()][string]$Variable
-            )
-            $result = switch ($Variable) {
-              'UNDO_DISABLED' { $_disabled; break; }
-              'ELIZIUM_PATH' { $null ; break; }
-              'HOME' { $_HomePath; break; }
-            }
-            return $result;
-          }
-          [hashtable]$parameters = @{
-            'HomePath'            = $_HomePath;
-            'ShouldExist'         = -not($_disabled);
-            'ExpectedOperantPath' = $expectedPath;
-          }
-          Invoke-CoreTest @parameters;
+          Invoke-CoreTest -Options $options -Segments @($_ShortCodeSegment) -ShouldCreateOp;
         }
-      }
+      } # Options.SubRoot is defined
+
     } # UNDO_DISABLED is false
 
-    Context 'and: UNDO_DISABLED is invalid' {
-      Context 'and: ELIZIUM_PATH is defined' {
-        Context 'and: path is absolute' {
-          It 'should: not create shell operant' {
-            [string]$p = $(Join-Path -Path $TestDrive -ChildPath 'child-path');
-            [string]$expectedPath = $p;
+    Context 'and: UNDO_DISABLED is mal-defined' {
+      Context 'and: Options.SubRoot is defined' {
+        It 'should: default to enabled and still create path' {
+          [PSCustomObject]$options = [PSCustomObject]@{
+            SubRoot       = $_SubRootSegment;
+            OperantName   = 'UndoRename';
+            Shell         = 'PoShShell';
+            BaseFilename  = 'undo-rename';
+            DisabledEnVar = $script:_UndoDisabledName;
+          }
+          $script:_UndoDisabledValue = "foo-bar";
 
-            Mock -ModuleName Elizium.Loopz Get-EnvironmentVariable {
-              param(
-                [Parameter()][string]$Variable
-              )
-              $result = switch ($Variable) {
-                'UNDO_DISABLED' { 'Invalid-Value'; break; }
-                'ELIZIUM_PATH' { $p ; break; }
-                'HOME' { $_HomePath; break; }
-              }
-              return $result;
-            }
-            [hashtable]$parameters = @{
-              'HomePath'            = $_HomePath;
-              'ShouldExist'         = -not($_disabled);
-              'ExpectedOperantPath' = $expectedPath;
-            }
-            Invoke-CoreTest @parameters;
-          } # not create shell operant
-        } # path is absolute
-      } # ELIZIUM_PATH is defined
-    } # UNDO_DISABLED is invalid
+          Invoke-CoreTest -Options $options -Segments @($_SubRootSegment) -ShouldCreateOp;
+        }
+      } # Options.SubRoot is defined
+    }
   } # UNDO_DISABLED is defined
 } # Initialize-ShellOperant
