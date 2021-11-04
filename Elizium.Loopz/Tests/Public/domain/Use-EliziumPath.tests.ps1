@@ -17,7 +17,8 @@ Describe 'Use-EliziumPath' {
     BeforeEach {
       Mock -ModuleName Elizium.Loopz Get-EnvironmentVariable {
         param(
-          [string]$Variable
+          [string]$Variable,
+          [string]$Default
         )
         $result = switch ($Variable) {
           'ELIZIUM_PATH' {
@@ -62,7 +63,8 @@ Describe 'Use-EliziumPath' {
     BeforeEach {
       Mock -ModuleName Elizium.Loopz Get-EnvironmentVariable {
         param(
-          [string]$Variable
+          [string]$Variable,
+          [string]$Default
         )
 
         $result = switch ($Variable) {

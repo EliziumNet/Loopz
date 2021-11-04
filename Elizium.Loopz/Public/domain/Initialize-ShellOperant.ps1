@@ -15,15 +15,16 @@ function Initialize-ShellOperant {
   home directory.
     The options specify how the operant is created and must be a PSCustomObject with
   the following fields (examples provided inside brackets relate to Rename-Many command):
-  - ShortCode ('remy'): a short string denoting the related command
-  - OperantName ('UndoRename'): name of the operant class required
-  - Shell ('PoShShell'): The type of shell that the command should be generated for. So
+  + SubRoot: This field is optional and specifies another sub-directory under which
+  + ShortCode ('remy'): a short string denoting the related command
+  + OperantName ('UndoRename'): name of the operant class required
+  + Shell ('PoShShell'): The type of shell that the command should be generated for. So
   for PowerShell the user would specify 'PoShShell' (which for the time being is the
   only shell supported).
-  - BaseFilename ('undo-rename'): the core part of the file name which should reflect
+  + BaseFilename ('undo-rename'): the core part of the file name which should reflect
   the nature of the operant (the operation, which ideally should be a verb noun pair
   but is not enforced)
-  - DisabledEnVar ('LOOPZ_REMY_UNDO_DISABLED'): The environment variable used to disable
+  + DisabledEnVar ('REXFS_REMY_UNDO_DISABLED'): The environment variable used to disable
   this operant.
 
   .LINK
@@ -32,10 +33,6 @@ function Initialize-ShellOperant {
   .PARAMETER DryRun
     Similar to WhatIf, but by passing ShouldProcess process for custom handling of
   dry run scenario. DryRun should be set if WhatIf is enabled.
-
-  .PARAMETER HomePath
-      User's home directory. (This parameter does not need to be set by client, just
-    used for testing purposes.)
 
   .PARAMETER Options
     (See command description for $Options field descriptions).
@@ -48,21 +45,40 @@ function Initialize-ShellOperant {
     OperantName  = 'UndoRename';
     Shell        = 'PoShShell';
     BaseFilename = 'undo-rename';
-    DisabledEnVar  = 'LOOPZ_REMY_UNDO_DISABLED';
+    DisabledEnVar  = 'REXFS_REMY_UNDO_DISABLED';
   }
+
+  The undo script is written to a directory denoted by the 'ShortCode'. The parent
+  of the ShortCode is whatever has been defined in the environment variable
+  'ELIZIUM_PATH'. If not defined, the operant script will be written to:
+  $HOME/.elizium/ShortCode so in this case would be "~/.elizium/remy". If
+  'ELIZIUM_PATH' has been defined, the path defined will be "'ELIZIUM_PATH'/remy".
+
+  .EXAMPLE 2
+  Operant options for Rename-Many(remy) command with SubRoot
+
+  [PSCustomObject]$operantOptions = [PSCustomObject]@{
+    SubRoot      = 'foo-bar';
+    ShortCode    = 'remy';
+    OperantName  = 'UndoRename';
+    Shell        = 'PoShShell';
+    BaseFilename = 'undo-rename';
+    DisabledEnVar  = 'REXFS_REMY_UNDO_DISABLED';
+  }
+
+  The undo script is written to a directory denoted by the 'ShortCode' and 'SubRoot'
+  If 'ELIZIUM_PATH' has not been defined as an environment variable, the operant script
+  will be written to: "~/.elizium/foo-bar/remy". If 'ELIZIUM_PATH' has been defined,
+  the path defined will be "'ELIZIUM_PATH'/foo-bar/remy".
 
   #>
   [OutputType([Operant])]
   param(
     [Parameter()]
-    [string]$HomePath = $(Resolve-Path "~"),
-
-    [Parameter()]
-    [PSCustomObject]$Options,
-
-    [Parameter()]
-    [switch]$DryRun
+    [PSCustomObject]$Options
   )
+  [string]$eliziumPath = Use-EliziumPath;
+
   [string]$envUndoRenameDisabled = $(Get-EnvironmentVariable -Variable $Options.DisabledEnVar);
 
   try {
@@ -77,31 +93,23 @@ function Initialize-ShellOperant {
     [boolean]$isDisabled = $false;
   }
 
-  # [Operant]
   [object]$operant = if (-not($isDisabled)) {
-    [string]$eliziumPath = Use-EliziumPath;
     [string]$subRoot = [string]::IsNullOrEmpty(${Options}?.SubRoot) ? [string]::Empty : $Options.SubRoot;
-    [string]$subPath = [string]::IsNullOrEmpty($subRoot) ? [string]::Empty : $(
-      Join-Path -Path $subRoot -ChildPath $Options.ShortCode
-    );
 
-    if ([string]::IsNullOrEmpty($eliziumPath)) {
-      $eliziumPath = Join-Path -Path $HomePath -ChildPath $subPath;
-    }
-    else {
-      $eliziumPath = [System.IO.Path]::IsPathRooted($eliziumPath) `
-        ? $(Join-Path -Path $eliziumPath -ChildPath $subPath) `
-        : $(Join-Path -Path $HomePath -ChildPath $eliziumPath -AdditionalChildPath $subPath);
+    [string]$operantPath = $([string]::IsNullOrEmpty($subRoot)) ? $eliziumPath `
+      : $(Join-Path -Path $eliziumPath -ChildPath $subRoot);
+
+    [string]$shortCode = [string]::IsNullOrEmpty(${Options}?.ShortCode) ? [string]::Empty : $Options.ShortCode;
+    if (-not([string]::IsNullOrEmpty($shortCode))) {
+      $operantPath = $(Join-Path -Path $operantPath -ChildPath $shortCode);
     }
 
-    if (-not(Test-Path -Path $eliziumPath -PathType Container)) {
-      if (-not($DryRun)) {
-        $null = New-Item -Type Directory -Path $eliziumPath;
-      }
+    if (-not(Test-Path -Path $operantPath -PathType Container)) {
+      $null = New-Item -Type Directory -Path $operantPath;
     }
 
     New-ShellOperant -BaseFilename $Options.BaseFilename `
-      -Directory $eliziumPath -Operant $($Options.OperantName) -Shell $Options.Shell;
+      -Directory $operantPath -Operant $($Options.OperantName) -Shell $Options.Shell;
   }
   else {
     $null;

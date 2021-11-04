@@ -1,7 +1,7 @@
 ---
 external help file: Elizium.Loopz-help.xml
 Module Name: Elizium.Loopz
-online version: https://eliziumnet.github.io/Loopz/
+online version:
 schema: 2.0.0
 ---
 
@@ -14,7 +14,7 @@ Operant factory function.
 ## SYNTAX
 
 ```powershell
-Initialize-ShellOperant [[-HomePath] <String>] [[-Options] <PSObject>] [-DryRun] [<CommonParameters>]
+Initialize-ShellOperant [[-Options] <PSObject>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -27,6 +27,7 @@ home directory.
   The options specify how the operant is created and must be a PSCustomObject with
 the following fields (examples provided inside brackets relate to Rename-Many command):
 
++ SubRoot: This field is optional and specifies another sub-directory under which
 + ShortCode ('remy'): a short string denoting the related command
 + OperantName ('UndoRename'): name of the operant class required
 + Shell ('PoShShell'): The type of shell that the command should be generated for. So
@@ -42,53 +43,45 @@ this operant.
 
 ### Example 1
 
+Operant options for Rename-Many(remy) command
+
 ```powershell
   [PSCustomObject]$operantOptions = [PSCustomObject]@{
     ShortCode    = 'remy';
     OperantName  = 'UndoRename';
     Shell        = 'PoShShell';
     BaseFilename = 'undo-rename';
-    DisabledEnVar  = 'LOOPZ_REMY_UNDO_DISABLED';
+    DisabledEnVar  = 'REXFS_REMY_UNDO_DISABLED';
   }
 ```
 
-Operant options for Rename-Many(remy) command
+The undo script is written to a directory denoted by the 'ShortCode'. The parent
+of the ShortCode is whatever has been defined in the environment variable
+'ELIZIUM_PATH'. If not defined, the operant script will be written to:
+$HOME/.elizium/ShortCode so in this case would be "~/.elizium/remy". If
+'ELIZIUM_PATH' has been defined, the path defined will be "'ELIZIUM_PATH'/remy".
+
+### Example 2
+
+Operant options for Rename-Many(remy) command with SubRoot
+
+```powershell
+  [PSCustomObject]$operantOptions = [PSCustomObject]@{
+    SubRoot      = 'foo-bar';
+    ShortCode    = 'remy';
+    OperantName  = 'UndoRename';
+    Shell        = 'PoShShell';
+    BaseFilename = 'undo-rename';
+    DisabledEnVar  = 'REXFS_REMY_UNDO_DISABLED';
+  }
+```
+
+The undo script is written to a directory denoted by the 'ShortCode' and 'SubRoot'
+If 'ELIZIUM_PATH' has not been defined as an environment variable, the operant script
+will be written to: "~/.elizium/foo-bar/remy". If 'ELIZIUM_PATH' has been defined,
+the path defined will be "'ELIZIUM_PATH'/foo-bar/remy".
 
 ## PARAMETERS
-
-### -DryRun
-
-Similar to WhatIf, but by passing ShouldProcess process for custom handling of
-dry run scenario. DryRun should be set if WhatIf is enabled.
-
-```yaml
-Type: SwitchParameter
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -HomePath
-
-User's home directory. (This parameter does not need to be set by client, just
-used for testing purposes.)
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: 0
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
 
 ### -Options
 
@@ -100,7 +93,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 1
+Position: 0
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False

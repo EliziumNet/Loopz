@@ -18,7 +18,7 @@ function Use-EliziumPath {
   [OutputType([string])]
   param()
 
-  [string]$homePath = Get-EnvironmentVariable 'HOME';
+  [string]$homePath = Get-EnvironmentVariable 'HOME' -Default $HOME;
   [string]$eliziumPath = (Get-EnvironmentVariable 'ELIZIUM_PATH') ?? $(
     Join-Path -Path $homePath -ChildPath '.elizium'
   );
