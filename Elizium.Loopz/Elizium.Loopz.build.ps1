@@ -5,15 +5,6 @@ using namespace System.Text.RegularExpressions;
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidGlobalVars', '')]
 param()
 
-task . Clean, Build, Tests, Stats
-task Tests ImportCompiledModule, Pester
-task CreateManifest CopyPSD, UpdatePublicFunctionsToExport, CopyFileList
-task Build Compile, CreateManifest
-task Stats RemoveStats, WriteStats
-task Ana Analyse
-task Fix ApplyFix
-task BuildHelp Docs
-
 $script:ModuleName = Split-Path -Path $PSScriptRoot -Leaf;
 $script:Core = [PSCustomObject]@{
   ModuleName = $(Split-Path -Path $PSScriptRoot -Leaf);
@@ -68,6 +59,18 @@ if (Test-Path -Path $script:Properties.TestHelpers) {
 if (Test-Path -Path $script:Properties.AdditionExportsPath) {
   . $script:Properties.AdditionExportsPath;
 }
+
+# Task Definitions
+#
+task . Clean, Build, Tests, Stats
+task Tests ImportCompiledModule, Pester
+task CreateManifest CopyPSD, UpdatePublicFunctionsToExport, CopyFileList
+task Build Compile, CreateManifest, Repair
+task Stats RemoveStats, WriteStats
+task Ana Analyse
+task Fix ApplyFix
+task Repair RepairUsingStatements
+task BuildHelp Docs
 
 function Get-AdditionalFnExports {
   [string []]$additional = @()
@@ -207,6 +210,7 @@ function Repair-Using {
   $statements | ForEach-Object {
     $builder.AppendLine($_);
   }
+  $builder.AppendLine([string]::Empty);
   $builder.Append($withoutUsingStatements);
 
   return [PSCustomObject]@{
@@ -379,15 +383,6 @@ task Compile @compileParams {
       $moduleInitContent >> $script:Properties.OutPsmPath;
     }
   }
-
-  # Finally resolve using statements
-  #
-  [PSCustomObject]$usingInfo = Get-UsingParseInfo -Path $script:Properties.OutPsmPath -WithContent;
-  
-  if (-not($usingInfo.IsOk)) {
-    Write-Host "Repairing using statements";
-    $null = Repair-Using -ParseInfo $usingInfo;
-  }
 }
 
 task CopyPSD {
@@ -506,6 +501,15 @@ task ApplyFix {
   Invoke-ScriptAnalyzer -Path $(Get-Location) -Recurse -Fix;
 }
 
+task RepairUsingStatements {
+  [PSCustomObject]$usingInfo = Get-UsingParseInfo -Path $script:Properties.OutPsmPath -WithContent;
+  
+  if (-not($usingInfo.IsOk)) {
+    [PSCustomObject]$repaired = Repair-Using -ParseInfo $usingInfo;
+
+    Set-Content -LiteralPath $script:Properties.OutPsmPath -Value $repaired.Content;
+  }
+}
 # Before this can be run, this must be run first
 # New-MarkdownHelp -Module <Module> -OutputFolder .\docs
 # (run from the module root, not the repo root)

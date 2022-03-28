@@ -1,4 +1,5 @@
-﻿
+﻿using module Elizium.Krayola;
+
 function Show-Summary {
   <#
   .NAME
