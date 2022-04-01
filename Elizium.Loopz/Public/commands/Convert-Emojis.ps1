@@ -1,3 +1,5 @@
+using module Elizium.Krayola;
+
 function Convert-Emojis {
   <#
   .NAME

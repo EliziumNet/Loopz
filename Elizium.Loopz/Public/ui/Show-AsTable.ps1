@@ -1,3 +1,4 @@
+using module Elizium.Krayola;
 
 function Show-AsTable {
   <#
@@ -167,7 +168,7 @@ function Show-AsTable {
 
       foreach ($col in $selection) {
         if (-not($Render.InvokeReturnAsIs(
-          $col, $_.Value.$col, $_.Value, $Options, $Scribbler, $counter))
+              $col, $_.Value.$col, $_.Value, $Options, $Scribbler, $counter))
         ) {
           $Scribbler.Scribble("$($resetSnippet)$($_.Value.$col)");
         }

@@ -1,3 +1,4 @@
+using module Elizium.Krayola;
 
 function New-Syntax {
   <#

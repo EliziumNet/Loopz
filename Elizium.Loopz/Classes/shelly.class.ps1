@@ -1,9 +1,4 @@
 
-# These classes in the same file because of the issues of class reference in modules.
-# We can't add a using module statement in files that reference these classes. Class
-# references via import module only works with classes defined in other modules. Any
-# class defined inside Shelly can't be accessed across different files.
-#
 class Shell {
   [string]$FullPath;
   [System.Text.StringBuilder] $_builder = [System.Text.StringBuilder]::new()

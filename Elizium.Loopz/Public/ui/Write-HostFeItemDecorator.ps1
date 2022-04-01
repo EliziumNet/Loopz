@@ -1,4 +1,6 @@
-﻿function Write-HostFeItemDecorator {
+﻿using module Elizium.Krayola;
+
+function Write-HostFeItemDecorator {
   <#
   .NAME
     Write-HostFeItemDecorator
