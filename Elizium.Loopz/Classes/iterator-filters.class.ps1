@@ -6,6 +6,8 @@ using namespace System.Collections.Generic;
 
 [Flags()]
 Enum FilterScope {
+  Nil = 0
+
   # filter applies to the current node's name (this would apply to files
   # and directories)
   #
@@ -25,16 +27,32 @@ Enum FilterScope {
 }
 
 class FilterOptions {
+  [FilterScope]$Scope = [FilterScope]::Current;
   [char]$Not = '!';
+
+  FilterOptions() { }
+  
+  FilterOptions([FilterScope]$scope) {
+    $this.Scope = $scope;
+  }
+
+  FilterOptions([FilterScope]$scope, [char]$not) {
+    $this.Scope = $scope;
+    $this.Not = $not;
+  }
+
+  FilterOptions([FilterOptions]$original) {
+    $this.Scope = $original.Scope;
+    $this.Not = $original.Not;
+  }
+
+  [string] ToString() {
+    return "[Options] - Scope: '$($this.Scope)', Not: '$($this.Not)'";
+  }
 }
 
 class FilterSubject {
   [PSCustomObject]$Data;
-  [int]$Segment;
-
-  FilterSubject([int]$segment) {
-    $this.Segment = $segment;
-  }
 
   FilterSubject([PSCustomObject]$data) {
     $this.Data = $data;
@@ -43,7 +61,6 @@ class FilterSubject {
 
 class CoreFilter {
   [FilterOptions]$Options;
-  [FilterScope]$Scope = [FilterScope]::Current;
 
   CoreFilter([FilterOptions]$options) {
     $this.Options = $options;
@@ -82,7 +99,7 @@ class NoFilter : CoreFilter {
 class GlobFilter : CoreFilter {
   [string]$Glob;
 
-  GlobFilter([string]$glob, [FilterOptions]$options): base($options) {
+  GlobFilter([FilterOptions]$options, [string]$glob): base($options) {
     [string]$adjusted = if ($glob.StartsWith($options.Not)) {
       $this._negate = $true;
       $glob.Substring(1);
@@ -115,7 +132,7 @@ class GlobFilter : CoreFilter {
 class RegexFilter : CoreFilter {
   [Regex]$Rexo;
 
-  RegexFilter([string]$expression, [string]$label, [FilterOptions]$options): base($options) {
+  RegexFilter([FilterOptions]$options, [string]$expression, [string]$label): base($options) {
     [string]$adjusted = if ($expression.StartsWith($options.Not)) {
       $this._negate = $true;
       $expression.Substring(1);
@@ -152,41 +169,31 @@ class FilterDriver {
     $this.Core = $core;
   }
 
+  # TBD: Preview
+
   [boolean] Accept([FilterSubject]$subject) {
     throw [PSNotImplementedException]::new('FilterDriver.Accept');
   }
 
-  [List[FileInfo]] FilesWhere([FilterSubject]$subject, [PSCustomObject]$info) {
+  [List[FileInfo]] SelectFiles([FilterSubject]$subject, [PSCustomObject]$info) {
     return $this.Core.FilesWhere($subject.Value, $info);
-  }
-
-  # the strategy should create the subject, then invoke GetSubjectValue.
-  # but how does this work in the compound scenarios? The handler will
-  # call GetSubjectValue multiple times, one for each appropriate core
-  # filter, then pass this value to the core filter in pass/preview etc.
-  # The context creates the node via the strategy.
-  #
-  [string] GetSubjectValue([FilterSubject]$subject, [CoreFilter]$filter) {
-    # TODO: get this properly, using the FilterTarget on the core filter
-    #
-    # map $filter.Scope to an entry on the subject value
-    #
-    return $subject.Value;
   }
 }
 
+# A unary filter can drive a NoFilter core filter
+#
 class UnaryFilter: FilterDriver {
   [CoreFilter]$Core
-  UnaryFilter([CoreFilter]$core) {
+  UnaryFilter([CoreFilter]$core): base($core) {
     $this.Core = $core;
   }
 
   [boolean] Accept([FilterSubject]$subject) {
-    return $this.Core.Pass($subject.Value.$($this.Core.Scope));
+    return $this.Core.Pass($subject.Data.Value.$($this.Core.Options.Scope));
   }
 
-  [List[FileInfo]] FilesWhere([FilterSubject]$subject, [PSCustomObject]$info) {
-    return $this.Core.FilesWhere($subject.Value, $info);
+  [List[FileInfo]] SelectFiles([FilterSubject]$subject, [PSCustomObject]$info) {
+    return $this.Core.FilesWhere($subject.Data.Value, $info);
   }
 }
 
@@ -204,23 +211,26 @@ Enum CompoundType {
 class CompoundHandler {
   [hashtable]$Filters;
 
-  # not sure that we actually need the scope here,as its
-  # stored in the Filters hashtable
-  #
   CompoundHandler([hashtable]$filters) {
     $this.Filters = $filters;
   }
 
   [boolean] Accept([FilterSubject]$subject) {
-    throw [PSNotImplementedException]::new('CompoundHandler.Accept');
+    throw [PSNotImplementedException]::new('CompoundHandler.Accept: ABSTRACT');
   }
 
   [List[FileInfo]] FilesWhere([FilterSubject]$subject, [PSCustomObject]$info) {
-    throw [PSNotImplementedException]::new('CompoundHandler.FilesWhere');
+    throw [PSNotImplementedException]::new('CompoundHandler.FilesWhere: ABSTRACT');
   }
 
-  [string] GetFilterScope([FilterSubject]$subject, [CoreFilter]$filter) {
-    return $subject.Value.$($filter.Scope);
+  # the strategy should create the subject, then invoke GetSubjectValue.
+  # but how does this work in the compound scenarios? The handler will
+  # call GetSubjectValue multiple times, one for each appropriate core
+  # filter, then pass this value to the core filter in pass/preview etc.
+  # The context creates the node via the strategy.
+  #
+  [string] GetSubjectValue([FilterSubject]$subject, [CoreFilter]$filter) {
+    return $subject.Data.Value.$($filter.Options.Scope);
   }
 }
 
@@ -233,17 +243,17 @@ class AllCompoundHandler : CompoundHandler {
     [IEnumerator]$enumerator = $this.Filters.GetEnumerator();
 
     while ($accepted -and $enumerator.MoveNext()) {
-      [CoreFilter]$filter = $enumerator.Current;
-
-      [string]$value = $this.GetFilterScope($subject, $filter);
+      [CoreFilter]$filter = $enumerator.Current.Value;
+      
+      [string]$value = $this.GetSubjectValue($subject, $filter);
       $accepted = $filter.Pass($value);
     }
 
     return $accepted;
   }
 
-  [List[FileInfo]] FilesWhere([FilterSubject]$subject, [PSCustomObject]$info) {
-    throw [PSNotImplementedException]::new('AllCompoundHandler.FilesWhere: AWAITING IMPL');
+  [List[FileInfo]] SelectFiles([FilterSubject]$subject, [PSCustomObject]$info) {
+    throw [PSNotImplementedException]::new('AllCompoundHandler.SelectFiles: AWAITING IMPL');
   }
 }
 
@@ -255,17 +265,17 @@ class AnyCompoundHandler : CompoundHandler {
 
     [IEnumerator]$enumerator = $this.Filters.GetEnumerator();
     while (-not($accepted) -and $enumerator.MoveNext()) {
-      [CoreFilter]$filter = $enumerator.Current;
+      [CoreFilter]$filter = $enumerator.Current.Value;
 
-      [string]$value = $this.GetFilterScope($subject, $filter);
+      [string]$value = $this.GetSubjectValue($subject, $filter);
       $accepted = $filter.Pass($value);
     }
 
     return $accepted;
   }
 
-  [List[FileInfo]] FilesWhere([FilterSubject]$subject, [PSCustomObject]$info) {
-    throw [PSNotImplementedException]::new('AnyCompoundHandler.FilesWhere: AWAITING IMPL');
+  [List[FileInfo]] SelectFiles([FilterSubject]$subject, [PSCustomObject]$info) {
+    throw [PSNotImplementedException]::new('AnyCompoundHandler.SelectFiles: AWAITING IMPL');
   }
 }
 
@@ -275,19 +285,27 @@ class CompoundFilter: FilterDriver {
   #
   # FilterScope => filter
   #
-  [hashtable]$Filters = @{}
+  [hashtable]$Filters = @{} # should this be integrated into handler?
   [CompoundHandler]$Handler;
   static [hashtable]$CompoundTypeToClassName = @{
     [CompoundType]::All = "AllCompoundHandler";
     [CompoundType]::Any = "AnyCompoundHandler"
   };
 
+  CompoundFilter([CompoundHandler]$handler): base([NoFilter]::new([FilterScope]::Nil)) {
+    $this.Handler = $handler;
+  }
+
+  # DEPRECATED
+  #
   CompoundFilter([CompoundType]$compoundType, [hashtable]$filters) {
     $this.Filters = $filters;
 
     if (-not([CompoundFilter]::CompoundTypeToClassName.ContainsKey($compoundType))) {
       throw "CompoundFilter.ctor, invalid compound type: '$($compoundType)'";
     }
+    # TODO: this handler should be injected via ctor
+    #
     $this.Handler = New-Object $([CompoundFilter]::CompoundTypeToClassName[$compoundType]) @($filters);
   }
 
@@ -295,8 +313,8 @@ class CompoundFilter: FilterDriver {
     return $this.Handler.Accept($subject);
   }
 
-  [List[FileInfo]] FilesWhere([FilterSubject]$subject, [PSCustomObject]$info) {
-    return $this.Handler.Accept($subject, $info);
+  [List[FileInfo]] SelectFiles([FilterSubject]$subject, [PSCustomObject]$info) {
+    return $this.Handler.SelectFiles($subject, $info);
   }
 }
 
@@ -372,7 +390,7 @@ class LeafGenerationStrategy: FilterStrategy {
         IsLeaf         = $isLeaf;
         SegmentNo      = 1;
         Segments       = $segments;
-        FilterScope    = [PSCustomObject]@{
+        Value          = [PSCustomObject]@{
           Current = $info.DirectoryInfo.Name;
           Parent  = $info.DirectoryInfo.Parent.Name
           Child   = $childName;

@@ -1,4 +1,4 @@
-Describe 'Iterator Filters' -Tag "Current" {
+Describe 'Iterator Filters' {
   BeforeAll {
     Get-Module Elizium.Loopz | Remove-Module -Force;
     Import-Module .\Output\Elizium.Loopz\Elizium.Loopz.psm1 `
