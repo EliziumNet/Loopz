@@ -57,7 +57,7 @@ Describe 'Filter Strategy' {
         } {
           # NB: no tests here yet for PreferChildScope=$false or PreviewLeafNodes=$false
           #
-          It "should:" -Tag "Spot" -TestCases @(
+          It "should:" -TestCases @(
             ### --- [IsChild = false /IsLeaf = false] ---
             #
             @{

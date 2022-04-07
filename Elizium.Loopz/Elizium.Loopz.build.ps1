@@ -34,12 +34,12 @@ class BuildEngine {
         Docs     = "docs";
         Tests    = "Tests";
       }
-    
+
       Module     = [PSCustomObject]@{
         Name = [string]::Empty;
         Out  = [string]::Empty;
       }
-    
+
       Directory  = [PSCustomObject]@{
         Admin                      = [string]::Empty;
         CustomModuleNameExclusions = [string]::Empty;
@@ -55,7 +55,7 @@ class BuildEngine {
         Tests                      = [string]::Empty;
         TestHelpers                = [string]::Empty;
       }
-    
+
       File       = [PSCustomObject]@{
         Psm               = [string]::Empty;
         Psd               = [string]::Empty;
@@ -212,13 +212,13 @@ class BuildEngine {
       if ($global:AdditionalFnExports -and ($global:AdditionalFnExports -is [array])) {
         $additional = $global:AdditionalFnExports;
       }
-  
+
       Write-Verbose "---> Get-AdditionalFnExports: $($additional -join ', ')";
     }
     catch {
       Write-Verbose "===> Get-AdditionalFnExports: no 'AdditionalFnExports' found";
     }
-  
+
     return $additional;
   }
 
@@ -234,7 +234,7 @@ class BuildEngine {
     catch {
       Write-Verbose "===> Get-AdditionalAliasExports: no 'AdditionalAliasExports' found";
     }
-  
+
     return $additionalAliases;
   }
 
@@ -243,7 +243,7 @@ class BuildEngine {
       Get-ChildItem -Path $this.Data.Directory.Public -Recurse | Where-Object {
         $_.Name -like '*-*' } | Select-Object -ExpandProperty BaseName
     );
-  
+
     $fnExports += $this.GetAdditionalFnExports();
     return $fnExports;
   }
@@ -251,27 +251,27 @@ class BuildEngine {
   [string[]] GetPublicFunctionAliasesToExport() {
     [string]$expression = 'Alias\((?<aliases>((?<quote>[''"])[\w-]+\k<quote>\s*,?\s*)+)\)';
     [RegexOptions]$options = 'IgnoreCase, SingleLine';
-    
+
     [regex]$aliasesRegEx = [regex]::new(
       $expression, $options
     );
-  
+
     [string[]]$aliases = @();
-  
+
     Get-ChildItem -Path $this.Data.Directory.Public -Recurse -File -Filter '*.ps1' | Foreach-Object {
       [string]$content = Get-Content $_;
-  
+
       [Match]$contentMatch = $aliasesRegEx.Match($content);
-  
+
       if ($contentMatch.Success) {
         $al = $contentMatch.Groups['aliases'];
         $al = $($al -split ',' | ForEach-Object { $_.Trim().replace('"', '').replace("'", "") });
         $aliases += $al;
       }
     };
-  
+
     $aliases += $this.GetAdditionalAliasExports();
-  
+
     return $aliases;
   }
 
@@ -279,7 +279,7 @@ class BuildEngine {
     [RegexOptions]$options = "IgnoreCase";
     [string]$escaped = [regex]::Escape($Name);
     [regex]$rexo = [regex]::new("function\s+$($escaped)", $options);
-  
+
     return $rexo.IsMatch($Content);
   }
 
@@ -289,17 +289,17 @@ class BuildEngine {
     }
     elseif ($(Test-Path -Path $this.Data.Directory.CustomModuleNameExclusions -PathType Leaf)) {
       [string]$content = Get-Content -Path $this.Data.Directory.CustomModuleNameExclusions;
-  
+
       [string[]]$exclusions = $((if (-not([string]::IsNullOrEmpty($content))) {
-            $($content -split ',') 
+            $($content -split ',')
           } | ForEach-Object { $_.Trim() }));
-  
+
       $exclusions ? $($exclusions -notContains $FileName) : $true;
       else {
         $true
       }
     }
-  
+
     return $result;
   }
 
@@ -317,7 +317,7 @@ class BuildEngine {
         IsOk    = $records.Count -eq 0;
         Rexo    = $this.Data.Rexo.RepairUsing;
       }
-    
+
       $result | Add-Member -MemberType NoteProperty -Name "Content" -Value $(
         Get-Content -LiteralPath $Path -Raw;
       )
@@ -330,11 +330,11 @@ class BuildEngine {
       Write-Host "---> MESSAGE:";
       Write-Host "$($_.Exception.Message)";
 
-     
+
       Write-Error $("🔥 Null object reference error on Script Analyzer is known issue," +
         " please just re-run the command.");
     }
-  
+
     return $result;
   }
 
@@ -342,25 +342,25 @@ class BuildEngine {
     [MatchCollection]$mc = $ParseInfo.Rexo.Matches(
       $ParseInfo.Content
     );
-  
+
     $withoutUsingStatements = $ParseInfo.Rexo.Replace($ParseInfo.Content, [string]::Empty);
-  
+
     [StringBuilder]$builder = [StringBuilder]::new();
-  
+
     [string[]]$statements = $(foreach ($m in $mc) {
         [GroupCollection]$groups = $m.Groups;
         [string]$syntax = $groups["syntax"];
         [string]$name = $groups["name"];
-  
+
         "using $syntax $name;";
       }) | Select-Object -unique;
-  
+
     $statements | ForEach-Object {
       $builder.AppendLine($_);
     }
     $builder.AppendLine([string]::Empty);
     $builder.Append($withoutUsingStatements);
-  
+
     return [PSCustomObject]@{
       Content = $builder.ToString();
     }
@@ -386,21 +386,21 @@ class BuildEngine {
       Remove-Item -Path (Resolve-Path $this.Data.File.Psm) -Recurse -Force;
     }
     New-Item -Path $this.Data.File.Psm -Force > $null;
-   
+
     "Set-StrictMode -Version 1.0" >> $this.Data.File.Psm
-  
+
     foreach ($folder in $this.Data.Directory.Import) {
       $currentFolder = Join-Path -Path $this.Data.Directory.Root -ChildPath $folder
       Write-Verbose -Message "Checking folder [$currentFolder]"
-  
+
       if (Test-Path -Path $currentFolder) {
-  
+
         $files = Get-ChildItem -Path $currentFolder -File -Recurse -Filter '*.ps1'
         foreach ($file in $files) {
           Write-Verbose -Message "Adding $($file.FullName)"
           [string]$content = Get-Content -Path (Resolve-Path $file.FullName)
           Get-Content -Path (Resolve-Path $file.FullName) >> $this.Data.File.Psm
-  
+
           if ($this.TestShouldFileNameBeChecked($file.Name)) {
             if (-not($this.DoesFileNameMatchFunctionName($File.BaseName, $content))) {
               Write-Host "*** Beware, file: '$($file.Name)' does not contain matching function definition" `
@@ -410,70 +410,70 @@ class BuildEngine {
         }
       }
     }
-  
+
     # Finally
     #
     if (Test-Path -Path $this.Data.Directory.Final) {
       [array]$items = $(Get-ChildItem -Path $this.Data.Directory.Final -File -Filter '*.ps1') ?? @();
-  
+
       foreach ($file in $items) {
         Write-Host "DEBUG(final): '$($file.FullName)'";
         Get-Content -Path $file.FullName >> $this.Data.File.Psm;
       }
     }
-  
+
     [hashtable]$sourceDefinition = Import-PowerShellDataFile -Path $this.Data.File.SourcePsd
-  
+
     if ($sourceDefinition) {
       if ($sourceDefinition.ContainsKey('VariablesToExport')) {
         [string[]]$exportVariables = $sourceDefinition['VariablesToExport'];
         Write-Verbose "Found VariablesToExport: $exportVariables in source Psd file: $($this.Data.File.SourcePsd)";
-  
+
         if (-not([string]::IsNullOrEmpty($exportVariables))) {
           [string]$variablesArgument = $($exportVariables -join ", ") + [System.Environment]::NewLine;
           [string]$contentToAdd = "Export-ModuleMember -Variable $variablesArgument";
           Write-Verbose "Adding Psm content: $contentToAdd";
-  
+
           Add-Content $this.Data.File.Psm "Export-ModuleMember -Variable $variablesArgument";
         }
       }
-  
+
       if ($sourceDefinition.ContainsKey('AliasesToExport')) {
         [string[]]$functionAliases = $this.GetPublicFunctionAliasesToExport();
-  
+
         if ($functionAliases.Count -gt 0) {
           [string]$aliasesArgument = $($functionAliases -join ", ") + [System.Environment]::NewLine;
-  
+
           Write-Verbose "Found AliasesToExport: $aliasesArgument in source Psd file: $($this.Data.File.SourcePsd)";
           [string]$contentToAdd = "Export-ModuleMember -Alias $aliasesArgument";
-  
+
           Add-Content $this.Data.File.Psm "Export-ModuleMember -Alias $aliasesArgument";
         }
       }
     }
-  
+
     $publicFunctions = $this.GetFunctionExportList();
-  
+
     if ($publicFunctions.Length -gt 0) {
       Add-Content $this.Data.File.Psm "Export-ModuleMember -Function $($publicFunctions -join ', ')";
     }
-  
+
     # Insert custom module initialisation (./Init/module.ps1)
     #
     $initFolder = Join-Path -Path $this.Data.Directory.Root -ChildPath 'Init'
     if (Test-Path -Path $initFolder) {
       $moduleInitPath = Join-Path -Path $initFolder -ChildPath 'module.ps1';
-  
+
       if (Test-Path -Path $moduleInitPath) {
         Write-Verbose "Injecting custom module initialisation code";
         "" >> $($this.Data.File.Psm);
         "# Custom Module Initialisation" >> $this.Data.File.Psm;
         "#" >> $this.Data.File.Psm;
-  
+
         $moduleInitContent = Get-Content -LiteralPath $moduleInitPath;
         $moduleInitContent >> $this.Data.File.Psm;
       }
-    }    
+    }
   } # CompileTask
 
   [void] CopyPSDTask() {
@@ -535,7 +535,7 @@ class BuildEngine {
         }
         Copy-Item @copy -Verbose
       }
-    }    
+    }
   } # CopyFileListTask
 
   [void] ImportCompiledModuleTask() {
@@ -568,7 +568,7 @@ class BuildEngine {
 
   [void] WriteStatsTask() {
     $folders = Get-ChildItem -Directory | Where-Object { $PSItem.Name -ne 'Output' }
-  
+
     $stats = foreach ($folder in $folders) {
       $files = Get-ChildItem -File $(Join-Path -Path $folder.FullName -ChildPath '*');
       if ($files) {
@@ -593,10 +593,10 @@ class BuildEngine {
 
   [void] RepairUsingStatementsTask() {
     [PSCustomObject]$usingInfo = $this.GetUsingParseInfo($this.Data.File.Psm);
-  
+
     if (-not($usingInfo.IsOk)) {
       [PSCustomObject]$repaired = $this.RepairUsing($usingInfo);
-  
+
       Set-Content -LiteralPath $this.Data.File.Psm -Value $repaired.Content;
     }
   } # RepairUsingStatementsTask

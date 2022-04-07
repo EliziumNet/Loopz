@@ -395,10 +395,6 @@ class FilterStrategy {
     [array]$segments = $($global:IsWindows) ? $($relativePath -split "\\") : $(
       $($relativePath -split [Path]::AltDirectorySeparatorChar)
     );
-    # Write-Host ">>> root parent: '$($rootParentPath)'";
-    # Write-Host ">>>    relative: '$($relativePath)'";
-    # Write-Host ">>>   full-name: '$($fullName)'";
-    # Write-Host ">>>    segments: '$($segments)'";
 
     [boolean]$ca, [boolean]$la = $this.PreferChildScope ? $(
       @(
