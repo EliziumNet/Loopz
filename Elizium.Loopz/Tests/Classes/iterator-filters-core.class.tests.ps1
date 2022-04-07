@@ -115,10 +115,11 @@ Describe 'Core Filters' {
 
     Context "UnaryFilter.Accept" {
       Context "given: Unary <FilterClass> defined with <Arguments>, <Scope>, <IsChild>, <IsLeaf>" {
-        It "should: return filter <Result>" -Tag "Current" -Skip -TestCases @(
+        It "should: return filter <Result>" -TestCases @(
           @{
             FilterClass = "GlobFilter";
             Arguments   = @("*earth*");
+            Scope       = "Current";
             IsChild     = $false;
             IsLeaf      = $true;
             Result      = $true;
@@ -181,11 +182,11 @@ Describe 'Core Filters' {
               # create a fake subject
               #
               [FilterSubject]$subject = [FilterSubject]::new([PSCustomObject]@{
-                  ChildSegmentNo = 2;
-                  IsChild        = $IsChild;
-                  IsLeaf         = $IsLeaf;
-                  Segments       = @("audio", "gothic", "nephilim", "earth inferno");
-                  Value          = [PSCustomObject]@{
+                  ChildDepthLevel = 2;
+                  IsChild         = $IsChild;
+                  IsLeaf          = $IsLeaf;
+                  Segments        = @("audio", "gothic", "nephilim", "earth inferno");
+                  Value           = [PSCustomObject]@{
                     # argh! Possible optimisation would be to store segment indices
                     # instead of the string values.
                     #
@@ -204,9 +205,9 @@ Describe 'Core Filters' {
           }
         }
       }
-    } # Accept
+    } # UnaryFilter.Accept
 
-    Context "Compound" {
+    Context "Compound.Accept" {
       Context "given: <DriverClass> <HandlerClass> defined with <FirstScope>/<SecondScope> - <FirstPattern>/<SecondPattern> - <IsChild>/IsLeaf" {
         InModuleScope Elizium.Loopz -Parameters @{
           Skip          = $Skip;
@@ -228,7 +229,7 @@ Describe 'Core Filters' {
           # we have to define all the primitive values here in the testcases, and construct
           # the instances from these primitives inside the implementation body of the test case.
           #
-          It "should: " -Tag "Current" -TestCases @(
+          It "should:" -TestCases @(
             ### --- [IsChild = false /IsLeaf = true] ---
             #
             @{
@@ -461,11 +462,11 @@ Describe 'Core Filters' {
               [CompoundFilter]$driver = [CompoundFilter]::new($handler);
 
               [FilterSubject]$subject = [FilterSubject]::new([PSCustomObject]@{
-                  ChildSegmentNo = 2;
-                  IsChild        = $IsChild;
-                  IsLeaf         = $IsLeaf
-                  Segments       = @("audio", "minimal", "fuse", "dimension intrusion");
-                  Value          = [PSCustomObject]@{
+                  ChildDepthLevel = 2;
+                  IsChild         = $IsChild;
+                  IsLeaf          = $IsLeaf
+                  Segments        = @("audio", "minimal", "fuse", "dimension intrusion");
+                  Value           = [PSCustomObject]@{
                     Current = "dimension intrusion";
                     Parent  = "fuse";
                     Child   = "minimal";
@@ -474,12 +475,12 @@ Describe 'Core Filters' {
                 });
 
               $driver.Accept($subject) | Should -Be $Result -Because $(
-                "Driver:'$DriverClass'/Handler: '$($HandlerClass)', Segments: '$($subject.Segments)'"
+                "ACCEPT: Driver:'$DriverClass'/Handler: '$($HandlerClass)', Segments: '$($subject.Segments)'"
               );
             }
           }
         }
       }
-    }
+    } # Compound.Accept
   }
 }
