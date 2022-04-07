@@ -47,12 +47,11 @@ Describe 'Iterator Filters' {
       }
 
       [PSCustomObject]$subject = [PSCustomObject]@{
-        SegmentNo      = 1;
-        ChildSegmentNo = 2;
-        IsChild        = $false;
-        IsLeaf         = $true;
-        Segments       = @("a", "b", "c");
-        Scope          = [PSCustomObject]@{
+        ChildDepthLevel = 2;
+        IsChild         = $false;
+        IsLeaf          = $true;
+        Segments        = @("a", "b", "c");
+        Scope           = [PSCustomObject]@{
           Current = "CURRENT-NODE"
           Parent  = "PARENT-NODE"
           Child   = "CHILD-NODE";

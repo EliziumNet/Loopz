@@ -169,10 +169,12 @@ class FilterDriver {
     $this.Core = $core;
   }
 
-  # TBD: Preview
+  [boolean] Preview([FilterSubject]$subject, [FilterScope]$contextScope) {
+    throw [PSNotImplementedException]::new("FilterDriver.Preview - ABSTRACT");
+  }
 
   [boolean] Accept([FilterSubject]$subject) {
-    throw [PSNotImplementedException]::new('FilterDriver.Accept');
+    throw [PSNotImplementedException]::new("FilterDriver.Accept - ABSTRACT");
   }
 
   [List[FileInfo]] SelectFiles([FilterSubject]$subject, [PSCustomObject]$info) {
@@ -186,6 +188,12 @@ class UnaryFilter: FilterDriver {
   [CoreFilter]$Core
   UnaryFilter([CoreFilter]$core): base($core) {
     $this.Core = $core;
+  }
+
+  [boolean] Preview([FilterSubject]$subject, [FilterScope]$contextScope) {
+    return $(
+      ($this.Core.Options.Scope -ne $contextScope) -or ($this.Accept($subject));
+    );
   }
 
   [boolean] Accept([FilterSubject]$subject) {
@@ -215,6 +223,17 @@ class CompoundHandler {
     $this.Filters = $filters;
   }
 
+  [boolean] Preview([FilterSubject]$subject, [FilterScope]$contextScope) {
+    [boolean]$result = if ($filter = $this.GetFilterByScope($contextScope)) {
+      $filter.Pass($this.GetSubjectValue($subject, $filter));
+    }
+    else {
+      $true;
+    }
+
+    return $result;
+  }
+
   [boolean] Accept([FilterSubject]$subject) {
     throw [PSNotImplementedException]::new('CompoundHandler.Accept: ABSTRACT');
   }
@@ -231,6 +250,10 @@ class CompoundHandler {
   #
   [string] GetSubjectValue([FilterSubject]$subject, [CoreFilter]$filter) {
     return $subject.Data.Value.$($filter.Options.Scope);
+  }
+
+  [CoreFilter] GetFilterByScope([FilterScope]$scope) {
+    return $this.Filters[$scope]
   }
 }
 
@@ -281,11 +304,6 @@ class AnyCompoundHandler : CompoundHandler {
 
 class CompoundFilter: FilterDriver {
 
-  # Checks the subject.Scope and acts accordingly
-  #
-  # FilterScope => filter
-  #
-  [hashtable]$Filters = @{} # should this be integrated into handler?
   [CompoundHandler]$Handler;
   static [hashtable]$CompoundTypeToClassName = @{
     [CompoundType]::All = "AllCompoundHandler";
@@ -296,17 +314,8 @@ class CompoundFilter: FilterDriver {
     $this.Handler = $handler;
   }
 
-  # DEPRECATED
-  #
-  CompoundFilter([CompoundType]$compoundType, [hashtable]$filters) {
-    $this.Filters = $filters;
-
-    if (-not([CompoundFilter]::CompoundTypeToClassName.ContainsKey($compoundType))) {
-      throw "CompoundFilter.ctor, invalid compound type: '$($compoundType)'";
-    }
-    # TODO: this handler should be injected via ctor
-    #
-    $this.Handler = New-Object $([CompoundFilter]::CompoundTypeToClassName[$compoundType]) @($filters);
+  [boolean] Preview([FilterSubject]$subject, [FilterScope]$contextScope) {
+    return $this.Handler.Preview($subject, $contextScope);
   }
 
   [boolean] Accept([FilterSubject]$subject) {
@@ -332,10 +341,18 @@ class FilterNode {
 
 
 class FilterStrategy {
-  [int]$ChildSegmentNo = 0;
+  [FilterDriver]$Driver;
+  [int]$ChildDepthLevel = 0;
+  [int]$ChildSegmentIndex = -1;
+  [boolean]$PreferChildScope = $true;
+  [boolean]$PreviewLeafNodes = $false; ;
 
   FilterStrategy([PSCustomObject]$strategyInfo) {
-    $this.ChildSegmentNo = $strategyInfo.ChildSegmentNo;
+    $this.Driver = $strategyInfo.Driver;
+    $this.ChildSegmentIndex = $strategyInfo.ChildSegmentIndex;
+    $this.ChildDepthLevel = $strategyInfo.ChildDepthLevel;
+    $this.PreferChildScope = $strategyInfo.PreferChildScope;
+    $this.PreviewLeafNodes = $strategyInfo.PreviewLeafNodes;
   }
 
   [FilterNode] GetNode([PSCustomObject]$info) {
@@ -355,46 +372,88 @@ class FilterStrategy {
     );
 
     return $segments;
-  } 
+  }
+
+  [PSCustomObject] GetSegmentMetaData ([PSCustomObject]$info) {
+    # Loopz DEPTH: a depth of 1 corresponds to the root path specified
+    # by the user, so all sub-directories visited by Invoke-TraverseDirectory
+    # have a depth of 2 or more. This is why the ChildDepthLevel is set to
+    # 2, ie they are the immediate descendants of the user specified root.
+    # When the current depth is only 2, there are only 2 segments, 1 is the root
+    # and the other is either the child or leaf scopes, hence PreferChildScope
+    # which defaults to true. When PreferChildScope = true, then when there
+    # is only a single remaining available segment, it is assigned to the child
+    # scope.
+    #
+    [boolean]$isLeaf = $($info.DirectoryInfo.GetDirectories()).Count -eq 0;
+    [string]$fullName = $info.DirectoryInfo.FullName;
+    [string]$rootPath = $info.Exchange["LOOPZ.FILTER.ROOT-PATH"];
+
+    [string]$rootParentPath = Split-Path -Path $rootPath;
+    [string]$relativePath = $fullName.Substring($rootParentPath.Length + 1);
+
+    [array]$segments = $($global:IsWindows) ? $($relativePath -split "\\") : $(
+      $($relativePath -split [Path]::AltDirectorySeparatorChar)
+    );
+    # Write-Host ">>> root parent: '$($rootParentPath)'";
+    # Write-Host ">>>    relative: '$($relativePath)'";
+    # Write-Host ">>>   full-name: '$($fullName)'";
+    # Write-Host ">>>    segments: '$($segments)'";
+
+    [boolean]$ca, [boolean]$la = $this.PreferChildScope ? $(
+      @(
+        $($segments.Length -gt $this.ChildSegmentIndex),
+        $($segments.Length -gt ($this.ChildSegmentIndex + 1))
+      )
+    ) : $(
+      @(
+        $($segments.Length -gt ($this.ChildSegmentIndex + 1)),
+        $($segments.Length -gt $this.ChildSegmentIndex)
+      )
+    );
+
+    $result = [PSCustomObject]@{
+      Segments       = $segments;
+      IsLeaf         = $isLeaf;
+      ChildAvailable = $ca;
+      LeafAvailable  = $la;
+      ChildName      = $($ca ?
+        $segments[$this.ChildSegmentIndex] : [string]::Empty
+      );
+      LeafName       = $($($la -and $isLeaf) ?
+        $segments[-1] : [string]::Empty
+      );
+    }
+
+    return $result;
+  }
 }
 
 class LeafGenerationStrategy: FilterStrategy {
   
-  LeafGenerationStrategy(): base([PSCustomObject]@{
-      ChildSegmentNo = 2;
+  LeafGenerationStrategy([FilterDriver]$Driver): base([PSCustomObject]@{
+      Driver            = $Driver;
+      ChildSegmentIndex = 1;
+      ChildDepthLevel   = 2;
+      PreferChildScope  = $true;
+      PreviewLeafNodes  = $true;
     }) {
 
   }
 
   [FilterNode] GetNode([PSCustomObject]$info) {
-    [boolean]$isLeaf = $($info.DirectoryInfo.GetDirectories()).Count -eq 0;
-    [string]$rootPath = $info.Exchange["LOOPZ.FILTER.ROOT-PATH"];
-    [string[]]$segments = [FilterStrategy]::GetSegments($rootPath, $info.DirectoryInfo.FullName);
+    [PSCustomObject]$meta = $this.GetSegmentMetaData($info);
 
-    [boolean]$childAvailable = $($segments.Length -gt $this.ChildSegmentNo);
-    [boolean]$leafAvailable = $($segments.Length -gt ($this.ChildSegmentNo + 1));
-
-    [string]$childName = $($childAvailable ?
-      $segments[$this.ChildSegmentNo] : [string]::Empty
-    );
-
-    [string]$leafName = $($($leafAvailable -and $isLeaf) ?
-      $segments[-1] : [string]::Empty
-    );
-
-    # segment 0 means something, not quite sure yet
-    #
     [FilterSubject]$subject = [FilterSubject]::new([PSCustomObject]@{
-        ChildSegmentNo = $this.ChildSegmentNo;
-        IsChild        = $childName -eq $info.DirectoryInfo.Name;
-        IsLeaf         = $isLeaf;
-        SegmentNo      = 1;
-        Segments       = $segments;
-        Value          = [PSCustomObject]@{
+        IsChild      = $meta.ChildName -eq $info.DirectoryInfo.Name;
+        IsLeaf       = $meta.IsLeaf;
+        Segments     = $meta.Segments;
+        CurrentDepth = $info.Exchange['LOOPZ.CONTROLLER.DEPTH'];
+        Value        = [PSCustomObject]@{
           Current = $info.DirectoryInfo.Name;
           Parent  = $info.DirectoryInfo.Parent.Name
-          Child   = $childName;
-          Leaf    = $leafName;
+          Child   = $meta.ChildName;
+          Leaf    = $meta.LeafName;
         }
       });
 
@@ -407,15 +466,15 @@ class LeafGenerationStrategy: FilterStrategy {
   }
 
   [boolean] Preview([FilterNode]$node) {
-    # -not($node.Data.Subject.IsChild may not be valid in this context
-    # because child was only relevant in the yank scenario.
+    # We need to know what the context scope is. This scope is then applied to the driver.
+    # The strategy knows the context scope so it should just pass in the one that is
+    # appropriate. For the LeafGenerationStrategy, the context scope should be child, which
+    # means that we should Preview this node if it is not a child node or it is a child node
+    # and passes the child filter.
     #
-    return $(-not($node.Data.Subject.IsChild) -or 
-      $node.Data.Filter.Preview($node.Data.Subject));
-
-    # throw [PSNotImplementedException]::new(
-    #   'FilterStrategy.Preview'
-    # );
+    return $($node.Data.Subject.Data.IsLeaf -and $this.PreviewLeafNodes) -or
+    $(-not($node.Data.Subject.Data.IsChild) -or 
+      $this.Driver.Preview($node.Data.Subject, [FilterScope]::Child));
   }
 }
 
@@ -424,21 +483,22 @@ class LeafGenerationStrategy: FilterStrategy {
 # individual core filter, it can be stored either on Kerberus, or the strategy
 #
 class Kerberus {
-  [FilterDriver]$Driver;
+  [FilterStrategy]$Strategy
 
-  Kerberus([FilterDriver]$driver) {
-    $this.Driver = $driver;
+  Kerberus([FilterStrategy]$strategy) {
+    $this.Strategy = $strategy;
   }
 
   [boolean] Preview([FilterSubject]$subject) {
-    return $this.Driver($subject);
+    return $this.Strategy($subject);
   }
 
   [boolean] Pass([FilterSubject]$subject) {
-    return $this.Driver.Pass($subject);
+    throw "NOT IMPLEMENTED YET";
   }
 
   [List[FileInfo]] FilesWhere([FilterSubject]$subject, [PSCustomObject]$info) {
-    return $this.Driver($info);
+    throw "NOT IMPLEMENTED YET";
+    # return $this.Driver($info);
   } 
 }
