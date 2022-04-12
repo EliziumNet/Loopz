@@ -120,6 +120,26 @@ function Invoke-TraverseDirectory {
   0 means restrict invocations to immediate children of Path, with successive increments relating
   to generations thereafter.
 
+  .PARAMETER OnBefore
+    For every directory traversed which itself has sub-directories, the scriptblock specified
+  by OnBefore is invoked, before those directories are invoked. The scriptblock specified must
+  be defined with the following signature:
+
+    [scriptblock]$before = {
+      param(
+        [string]$_path,
+        [hashtable]$_exchange
+      )
+      ...
+    }
+
+    The path specified is the directory whose child directories are about to be invoked.
+
+  .PARAMETER OnAfter
+    For every directory traversed which itself has sub-directories, the scriptblock specified
+  by OnBefore is invoked, after those directories are invoked. The scriptblock specified must
+  be defined with a signature the same as OnBefore.
+
   .EXAMPLE 1
     Invoke a script-block for every directory in the source tree.
 
