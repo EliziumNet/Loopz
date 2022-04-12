@@ -326,7 +326,29 @@ function Invoke-TraverseDirectory {
 
     [Parameter()]
     [ValidateScript( { $_ -ge 0 })]
-    [int]$Depth
+    [int]$Depth,
+
+    [Parameter()]
+    [scriptblock]$OnBefore = ({
+        param(
+          [Parameter()]
+          [string]$_path,
+
+          [Parameter()]
+          [hashtable]$_exchange
+        )
+      }),
+
+    [Parameter()]
+    [scriptblock]$OnAfter = ({
+        param(
+          [Parameter()]
+          [string]$_path,
+
+          [Parameter()]
+          [hashtable]$_exchange
+        )
+      })
   ) # param
 
   function Test-DepthInRange {
@@ -417,12 +439,19 @@ function Invoke-TraverseDirectory {
 
       [scriptblock]$adapter = $Exchange['LOOPZ.TRAVERSE.ADAPTOR'];
 
-      if ($directoryInfos) {
+      if ($directoryInfos.Count -gt 0) {
+        if ($Exchange.ContainsKey("LOOPZ.TRAVERSE.ON-BEFORE")) {
+          $Exchange["LOOPZ.TRAVERSE.ON-BEFORE"].Invoke($fullName, $Exchange);
+        }
         # adapter is always a script block, this has nothing to do with the invokee,
         # which may be a script block or a named function(functee)
         #
         $directoryInfos | Invoke-ForeachFsItem -Directory -Block $adapter `
           -Exchange $Exchange -Condition $condition -Summary $Summary;
+
+        if ($Exchange.ContainsKey("LOOPZ.TRAVERSE.ON-AFTER")) {
+          $Exchange["LOOPZ.TRAVERSE.ON-AFTER"].Invoke($fullName, $Exchange);
+        }
       }
     }
 
@@ -484,6 +513,14 @@ function Invoke-TraverseDirectory {
 
   if ($PSBoundParameters.ContainsKey('Depth')) {
     $Exchange['LOOPZ.TRAVERSE.LIMIT-DEPTH'] = $Depth;
+  }
+
+  if ($PSBoundParameters.ContainsKey("OnBefore")) {
+    $Exchange["LOOPZ.TRAVERSE.ON-BEFORE"] = $OnBefore;
+  }
+
+  if ($PSBoundParameters.ContainsKey("OnAfter")) {
+    $Exchange["LOOPZ.TRAVERSE.ON-AFTER"] = $OnAfter;
   }
 
   $controller.BeginSession();
@@ -579,7 +616,10 @@ function Invoke-TraverseDirectory {
 
       Write-Debug "  [o] Invoke-TraverseDirectory (Hoist); Count: $($directoryInfos.Count)";
 
-      if ($directoryInfos) {
+      if ($directoryInfos.Count -gt 0) {
+        if ($PSBoundParameters.ContainsKey("OnBefore")) {
+          $OnBefore.Invoke($Path, $Exchange);
+        }
         # No need to manage the index, let Invoke-ForeachFsItem do this for us,
         # except we do need to inform Invoke-ForeachFsItem to start the index at
         # +1, because 0 is for the top level directory which has already been
@@ -601,6 +641,10 @@ function Invoke-TraverseDirectory {
         }
 
         $directoryInfos | & 'Invoke-ForeachFsItem' @parametersFeFsItem;
+
+        if ($PSBoundParameters.ContainsKey("OnAfter")) {
+          $OnAfter.Invoke($Path, $Exchange);
+        }
       }
     }
     else {
@@ -625,9 +669,16 @@ function Invoke-TraverseDirectory {
       [System.IO.DirectoryInfo[]]$directoryInfos = Get-ChildItem -Path $Path `
         -Directory | Where-Object { $Condition.InvokeReturnAsIs($_) }
 
-      if ($directoryInfos) {
+      if ($directoryInfos.Count -gt 0) {
+        if ($PSBoundParameters.ContainsKey("OnBefore")) {
+          $OnBefore.Invoke($Path, $Exchange);
+        }
         $directoryInfos | Invoke-ForeachFsItem -Directory -Block $adapter `
           -Exchange $Exchange -Condition $Condition -Summary $Summary;
+
+        if ($PSBoundParameters.ContainsKey("OnAfter")) {
+          $OnAfter.Invoke($Path, $Exchange);
+        }
       }
     }
   }
