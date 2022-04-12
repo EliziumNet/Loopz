@@ -67,17 +67,16 @@ function New-FilterDriver {
     [OutputType([CompoundFilter])]
     param(
       [Parameter(Mandatory, Position = 0)]
-      [hashtable]$Filters,
-
-      [Parameter(Mandatory, Position = 1)]
-      [string]$HandlerClass
+      [hashtable]$Filters
     )
 
-    return [CompoundFilter]::new(
-      $(
-        New-Object $HandlerClass $Filters
-      )
-    );
+    [string]$handlerClass = [CompoundHandler]::CompoundTypeToClassName[$(
+      ([CompoundType]$Parameters["op"])
+    )];
+
+    return [CompoundFilter]::new($(
+        New-Object $handlerClass $Filters
+      ));
   }
 
   function get-filters {
@@ -138,12 +137,8 @@ function New-FilterDriver {
       -ChildArgs @(, $Parameters["ChildLike"]) `
       -LeafClass "RegexFilter" `
       -LeafArgs @($Parameters["LeafPattern"], "leaf-filter-pattern");
-
-    $handlerClass = [CompoundFilter]::CompoundTypeToClassName[$(
-        ([CompoundType]$Parameters["op"])
-    )];
   
-    get-compound $filters $handlerClass;
+    get-compound $filters;
   }
   elseif ($Parameters.ContainsKey("cl_ll")) {
 
@@ -152,11 +147,7 @@ function New-FilterDriver {
       -LeafClass "GlobFilter" `
       -LeafArgs @($Parameters["LeafLike"]);
 
-    $handlerClass = [CompoundFilter]::CompoundTypeToClassName[$(
-      ([CompoundType]$Parameters["op"])
-    )];
-
-    get-compound $filters $handlerClass;
+    get-compound $filters;
   }
   elseif ($parameters.ContainsKey("cm_lm")) {
 
@@ -165,11 +156,7 @@ function New-FilterDriver {
       -LeafClass "RegexFilter" `
       -LeafArgs @($Parameters["LeafPattern"], "leaf-filter-pattern");
 
-    $handlerClass = [CompoundFilter]::CompoundTypeToClassName[$(
-      ([CompoundType]$Parameters["op"])
-    )];
-
-    get-compound $filters $handlerClass;
+    get-compound $filters;
   }
   elseif ($parameters.ContainsKey("cm_ll")) {
 
@@ -178,11 +165,7 @@ function New-FilterDriver {
       -LeafClass "GlobFilter" `
       -LeafArgs @(, $Parameters["LeafLike"]);
 
-    $handlerClass = [CompoundFilter]::CompoundTypeToClassName[$(
-      ([CompoundType]$Parameters["op"])
-    )];
-
-    get-compound $filters $handlerClass;
+    get-compound $filters;
   }
   else {
 

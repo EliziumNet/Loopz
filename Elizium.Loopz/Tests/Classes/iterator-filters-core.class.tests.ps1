@@ -1,6 +1,6 @@
 using module Elizium.Tez;
 
-Describe 'Core Filters' {
+Describe 'Core Filters' -Tag "Filter" {
   BeforeAll {
     Get-Module Elizium.Loopz | Remove-Module -Force;
     Import-Module .\Output\Elizium.Loopz\Elizium.Loopz.psm1 `
@@ -93,8 +93,9 @@ Describe 'Core Filters' {
             Result      = $Result;
           } {
             [PSCustomObject]$testInfo = [PSCustomObject]@{
-              Skip  = (Test-Path variable:Skip) ? $Skip : $false;
-              Label = (Test-Path variable:Label) ? $Label : [string]::Empty;
+              Skip     = (Test-Path variable:Skip) ? $Skip : $false;
+              Label    = (Test-Path variable:Label) ? $Label : [string]::Empty;
+              Override = $true;
             }
 
             if ([tez]::accept($testInfo)) {
@@ -163,8 +164,9 @@ Describe 'Core Filters' {
             Result      = $Result;
           } {
             [PSCustomObject]$testInfo = [PSCustomObject]@{
-              Skip  = (Test-Path variable:Skip) ? $Skip : $false;
-              Label = (Test-Path variable:Label) ? $Label : [string]::Empty;
+              Skip     = (Test-Path variable:Skip) ? $Skip : $false;
+              Label    = (Test-Path variable:Label) ? $Label : [string]::Empty;
+              Override = $true;
             }
 
             if ([tez]::accept($testInfo)) {
@@ -430,19 +432,9 @@ Describe 'Core Filters' {
             }
           ) {
             [PSCustomObject]$testInfo = [PSCustomObject]@{
-              Skip          = (Test-Path variable:Skip) ? $Skip : $false;
-              Label         = (Test-Path variable:Label) ? $Label : [string]::Empty;
-              Override      = $true;
-              #
-              DriverClass   = $DriverClass;
-              HandlerClass  = $HandlerClass;
-              FirstScope    = $FirstScope;
-              SecondScope   = $SecondScope;
-              FirstPattern  = $FirstPattern;
-              SecondPattern = $SecondPattern;
-              IsChild       = $IsChild;
-              IsLeaf        = $IsLeaf;
-              Result        = $Result;
+              Skip     = (Test-Path variable:Skip) ? $Skip : $false;
+              Label    = (Test-Path variable:Label) ? $Label : [string]::Empty;
+              Override = $true;
             }
 
             if ([tez]::accept($testInfo)) {

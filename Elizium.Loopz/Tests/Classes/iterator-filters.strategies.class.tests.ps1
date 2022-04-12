@@ -1,7 +1,7 @@
 using module Elizium.Tez;
 using namespace System.IO;
 
-Describe 'Filter Strategy' {
+Describe 'Filter Strategy' -Tag "Filter" {
   BeforeAll {
     Get-Module Elizium.Loopz | Remove-Module -Force;
     Import-Module .\Output\Elizium.Loopz\Elizium.Loopz.psm1 `
@@ -12,7 +12,8 @@ Describe 'Filter Strategy' {
         "ROOT"      = [Path]::Join("Tests", "Data", "traverse", "Audio");
         "MINIMAL"   = [Path]::Join("Tests", "Data", "traverse", "Audio", "MINIMAL");
         "FUSE"      = [Path]::Join("Tests", "Data", "traverse", "Audio", "MINIMAL", "FUSE");
-        "DIMENSION" = [Path]::Join("Tests", "Data", "traverse", "Audio", "MINIMAL", "FUSE", "Dimension Intrusion");
+        "DIMENSION" = [Path]::Join("Tests", "Data", "traverse", "Audio", "MINIMAL", "FUSE",
+          "Dimension Intrusion");
       }
     }
   }
@@ -137,7 +138,7 @@ Describe 'Filter Strategy' {
                 "LOOPZ.FILTER.ROOT-PATH" = $(Resolve-Path -LiteralPath $global:_Paths["ROOT"])
               }
 
-              [FilterNode]$node = $strategy.GetNode([PSCustomObject] @{
+              [FilterNode]$node = $strategy.GetDirectoryNode([PSCustomObject] @{
                   DirectoryInfo = Get-Item -Path $global:_Paths[$Path];
                   Exchange      = $exchange;
                 });

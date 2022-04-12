@@ -71,15 +71,6 @@ class CoreFilter {
   [boolean] Pass([string]$value) {
     throw [PSNotImplementedException]::new('CoreFilter.Pass');
   }
-
-  [List[FileInfo]] FilesWhere([string]$value, [PSCustomObject]$info) {
-
-    [List[FileInfo]]$collection = $(
-      $info.DirectoryInfo.GetFiles()
-    );
-
-    return $collection;
-  } 
 } # CoreFilter
 
 class NoFilter : CoreFilter {
@@ -115,15 +106,6 @@ class GlobFilter : CoreFilter {
     return $this._negate ? -not($result) : $result;
   }
 
-  [List[FileInfo]] FilesWhere([string]$value, [PSCustomObject]$info) {
-
-    [List[FileInfo]]$collection = $(
-      $info.DirectoryInfo.GetFiles()
-    );
-
-    return $collection;
-  }
-
   [string] ToString() {
     return "(glob: '$($this.Glob)')";
   }
@@ -148,15 +130,6 @@ class RegexFilter : CoreFilter {
     return $this._negate ? -not($result) : $result;
   }
 
-  [List[FileInfo]] FilesWhere([string]$value, [PSCustomObject]$info) {
-
-    [List[FileInfo]]$collection = $(
-      $info.DirectoryInfo.GetFiles()
-    );
-
-    return $collection;
-  }
-
   [string] ToString() {
     return "(pattern: '$($this.Rexo)')";
   }
@@ -175,10 +148,6 @@ class FilterDriver {
 
   [boolean] Accept([FilterSubject]$subject) {
     throw [PSNotImplementedException]::new("FilterDriver.Accept - ABSTRACT");
-  }
-
-  [List[FileInfo]] SelectFiles([FilterSubject]$subject, [PSCustomObject]$info) {
-    return $this.Core.FilesWhere($subject.Value, $info);
   }
 }
 
@@ -199,10 +168,6 @@ class UnaryFilter: FilterDriver {
   [boolean] Accept([FilterSubject]$subject) {
     return $this.Core.Pass($subject.Data.Value.$($this.Core.Options.Scope));
   }
-
-  [List[FileInfo]] SelectFiles([FilterSubject]$subject, [PSCustomObject]$info) {
-    return $this.Core.FilesWhere($subject.Data.Value, $info);
-  }
 }
 
 # The CompoundType denotes what happen when there are multiple filters in force.
@@ -216,12 +181,88 @@ Enum CompoundType {
   Any
 }
 
-class CompoundHandler {
-  [hashtable]$Filters;
+class FilterIterator {
+  [IEnumerable]$Filters;
 
-  CompoundHandler([hashtable]$filters) {
+  FilterIterator([IEnumerable]$filters) {
     $this.Filters = $filters;
   }
+
+  [boolean] Iterate([ScriptBlock]$callback) {
+    throw [PSNotImplementedException]::new('FilterIterator.Iterate: ABSTRACT');
+  }
+}
+
+class FilterAll: FilterIterator {
+  FilterAll([IEnumerable]$filters): base($filters) { }
+
+  [boolean] Iterate([ScriptBlock]$callback) {
+    [boolean]$result = $true;
+
+    [IEnumerator]$enumerator = $this.Filters.GetEnumerator();
+
+    while ($result -and $enumerator.MoveNext()) {
+      [CoreFilter]$filter = $enumerator.Current.Value;
+      $result = $callback.InvokeReturnAsIs($filter);
+    }
+
+    return $result;
+  }
+}
+
+class FilterAny: FilterIterator {
+  FilterAny([IEnumerable]$filters): base($filters) { }
+
+  [boolean] Iterate([ScriptBlock]$callback) {
+    [boolean]$result = $false;
+
+    [IEnumerator]$enumerator = $this.Filters.GetEnumerator();
+
+    while (-not($result) -and $enumerator.MoveNext()) {
+      [CoreFilter]$filter = $enumerator.Current.Value;
+      $result = $callback.InvokeReturnAsIs($filter);
+    }
+
+    return $result;
+  }
+}
+
+class BaseHandler {
+  [IEnumerable]$Filters;
+  [FilterIterator]$Iterator;
+
+  BaseHandler([IEnumerable]$filters, [FilterIterator]$iterator) {
+    $this.Filters = $filters;
+    $this.Iterator = $iterator;
+  }
+
+  [void] Iterate([ScriptBlock]$callback) {
+    throw [PSNotImplementedException]::new('CompoundHandler.Iterate: ABSTRACT');
+  }
+
+  [boolean] Accept([FilterSubject]$subject) {
+
+    [boolean]$accepted = $this.Iterator.Iterate({
+        param(
+          [CoreFilter]$filter
+        )
+        return $filter.Pass($subject.Data.Value.$($filter.Options.Scope));
+      });
+
+    return $accepted;
+  }
+}
+
+class CompoundHandler: BaseHandler {
+
+  static [hashtable]$CompoundTypeToClassName = @{
+    [CompoundType]::All = "AllCompoundHandler";
+    [CompoundType]::Any = "AnyCompoundHandler"
+  };
+
+  CompoundHandler([IEnumerable]$filters, [FilterIterator]$iterator): base(
+    $filters, $iterator
+  ) { }
 
   [boolean] Preview([FilterSubject]$subject, [FilterScope]$contextScope) {
     [boolean]$result = if ($filter = $this.GetFilterByScope($contextScope)) {
@@ -232,14 +273,6 @@ class CompoundHandler {
     }
 
     return $result;
-  }
-
-  [boolean] Accept([FilterSubject]$subject) {
-    throw [PSNotImplementedException]::new('CompoundHandler.Accept: ABSTRACT');
-  }
-
-  [List[FileInfo]] FilesWhere([FilterSubject]$subject, [PSCustomObject]$info) {
-    throw [PSNotImplementedException]::new('CompoundHandler.FilesWhere: ABSTRACT');
   }
 
   # the strategy should create the subject, then invoke GetSubjectValue.
@@ -258,57 +291,24 @@ class CompoundHandler {
 }
 
 class AllCompoundHandler : CompoundHandler {
-  AllCompoundHandler([hashtable]$filters): base($filters) { }
+  AllCompoundHandler([hashtable]$filters): base(
+    $filters,
+    [FilterAll]::new($filters)
+  ) { }
 
-  [boolean] Accept([FilterSubject]$subject) {
-    [boolean]$accepted = $true;
-
-    [IEnumerator]$enumerator = $this.Filters.GetEnumerator();
-
-    while ($accepted -and $enumerator.MoveNext()) {
-      [CoreFilter]$filter = $enumerator.Current.Value;
-      
-      [string]$value = $this.GetSubjectValue($subject, $filter);
-      $accepted = $filter.Pass($value);
-    }
-
-    return $accepted;
-  }
-
-  [List[FileInfo]] SelectFiles([FilterSubject]$subject, [PSCustomObject]$info) {
-    throw [PSNotImplementedException]::new('AllCompoundHandler.SelectFiles: AWAITING IMPL');
-  }
 }
 
 class AnyCompoundHandler : CompoundHandler {
-  AnyCompoundHandler([hashtable]$filters): base($filters) { }
+  AnyCompoundHandler([hashtable]$filters): base(
+    $filters,
+    [FilterAny]::new($filters)
+  ) { }
 
-  [boolean] Accept([FilterSubject]$subject) {
-    [boolean]$accepted = $false;
-
-    [IEnumerator]$enumerator = $this.Filters.GetEnumerator();
-    while (-not($accepted) -and $enumerator.MoveNext()) {
-      [CoreFilter]$filter = $enumerator.Current.Value;
-
-      [string]$value = $this.GetSubjectValue($subject, $filter);
-      $accepted = $filter.Pass($value);
-    }
-
-    return $accepted;
-  }
-
-  [List[FileInfo]] SelectFiles([FilterSubject]$subject, [PSCustomObject]$info) {
-    throw [PSNotImplementedException]::new('AnyCompoundHandler.SelectFiles: AWAITING IMPL');
-  }
 }
 
 class CompoundFilter: FilterDriver {
 
   [CompoundHandler]$Handler;
-  static [hashtable]$CompoundTypeToClassName = @{
-    [CompoundType]::All = "AllCompoundHandler";
-    [CompoundType]::Any = "AnyCompoundHandler"
-  };
 
   CompoundFilter([CompoundHandler]$handler): base([NoFilter]::new([FilterScope]::Nil)) {
     $this.Handler = $handler;
@@ -321,9 +321,43 @@ class CompoundFilter: FilterDriver {
   [boolean] Accept([FilterSubject]$subject) {
     return $this.Handler.Accept($subject);
   }
+}
 
-  [List[FileInfo]] SelectFiles([FilterSubject]$subject, [PSCustomObject]$info) {
-    return $this.Handler.SelectFiles($subject, $info);
+class PolyHandler: BaseHandler {
+
+  static [hashtable]$CompoundTypeToClassName = @{
+    [CompoundType]::All = "AllPolyHandler";
+    [CompoundType]::Any = "AnyPolyHandler"
+  };
+
+  PolyHandler([IEnumerable]$filters, [FilterIterator]$iterator): base(
+    $filters,
+    $iterator
+  ) { }
+}
+
+class AllPolyHandler : PolyHandler {
+  AllPolyHandler([CoreFilter[]]$filters): base(
+    $filters,
+    [FilterAll]::new($filters)
+  ) { }
+
+}
+
+class AnyPolyHandler : PolyHandler {
+  AnyPolyHandler([CoreFilter[]]$filters): base(
+    $filters,
+    [FilterAny]::new($filters)
+  ) { }
+
+}
+
+class PolyFilter {
+
+  [PolyHandler]$Handler;
+
+  PolyFilter([PolyHandler]$handler) {
+    $this.Handler = $handler;
   }
 }
 
@@ -355,8 +389,8 @@ class FilterStrategy {
     $this.PreviewLeafNodes = $strategyInfo.PreviewLeafNodes;
   }
 
-  [FilterNode] GetNode([PSCustomObject]$info) {
-    throw [NotImplementedException]::new("FilterStrategy.GetNode");
+  [FilterNode] GetDirectoryNode([PSCustomObject]$info) {
+    throw [NotImplementedException]::new("FilterStrategy.GetDirectoryNode");
   }
 
   [boolean] Preview([FilterNode]$node) {
@@ -396,7 +430,7 @@ class FilterStrategy {
       $($relativePath -split [Path]::AltDirectorySeparatorChar)
     );
 
-    [boolean]$ca, [boolean]$la = $this.PreferChildScope ? $(
+    [boolean]$childAv, [boolean]$leafAv = $this.PreferChildScope ? $(
       @(
         $($segments.Length -gt $this.ChildSegmentIndex),
         $($segments.Length -gt ($this.ChildSegmentIndex + 1))
@@ -409,14 +443,13 @@ class FilterStrategy {
     );
 
     $result = [PSCustomObject]@{
-      Segments       = $segments;
       IsLeaf         = $isLeaf;
-      ChildAvailable = $ca;
-      LeafAvailable  = $la;
-      ChildName      = $($ca ?
+      ChildAvailable = $childAv;
+      LeafAvailable  = $leafAv;
+      ChildName      = $($childAv ?
         $segments[$this.ChildSegmentIndex] : [string]::Empty
       );
-      LeafName       = $($($la -and $isLeaf) ?
+      LeafName       = $($($leafAv -and $isLeaf) ?
         $segments[-1] : [string]::Empty
       );
     }
@@ -437,13 +470,12 @@ class LeafGenerationStrategy: FilterStrategy {
 
   }
 
-  [FilterNode] GetNode([PSCustomObject]$info) {
+  [FilterNode] GetDirectoryNode([PSCustomObject]$info) {
     [PSCustomObject]$meta = $this.GetSegmentMetaData($info);
 
     [FilterSubject]$subject = [FilterSubject]::new([PSCustomObject]@{
         IsChild      = $meta.ChildName -eq $info.DirectoryInfo.Name;
         IsLeaf       = $meta.IsLeaf;
-        Segments     = $meta.Segments;
         CurrentDepth = $info.Exchange['LOOPZ.CONTROLLER.DEPTH'];
         Value        = [PSCustomObject]@{
           Current = $info.DirectoryInfo.Name;
@@ -492,9 +524,4 @@ class Kerberus {
   [boolean] Pass([FilterSubject]$subject) {
     throw "NOT IMPLEMENTED YET";
   }
-
-  [List[FileInfo]] FilesWhere([FilterSubject]$subject, [PSCustomObject]$info) {
-    throw "NOT IMPLEMENTED YET";
-    # return $this.Driver($info);
-  } 
 }

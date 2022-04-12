@@ -1,4 +1,6 @@
-Describe 'Iterator Filters' {
+using module Elizium.Tez;
+
+Describe 'Iterator Filters' -Tag "Filter" {
   BeforeAll {
     Get-Module Elizium.Loopz | Remove-Module -Force;
     Import-Module .\Output\Elizium.Loopz\Elizium.Loopz.psm1 `
@@ -16,13 +18,10 @@ Describe 'Iterator Filters' {
   Context "given: statics" {
     It "should: init ok" {
       InModuleScope Elizium.Loopz {
-        [int]$length = ([CompoundFilter]::CompoundTypeToClassName).PSBase.Count;
-        Write-Host ">>> found '$($length)' members"
 
-        ([CompoundFilter]::CompoundTypeToClassName).PSBase.Keys | ForEach-Object {
+        ([CompoundHandler]::CompoundTypeToClassName).PSBase.Keys | ForEach-Object {
           [CompoundType]$compoundType = $_;
-          [string]$compoundTypeClass = ([CompoundFilter]::CompoundTypeToClassName)[$compoundType];
-          Write-Host "---> compound type: '$($compoundType)', class: '$($compoundTypeClass)'";
+          [string]$compoundTypeClass = ([CompoundHandler]::CompoundTypeToClassName)[$compoundType];
 
           [hashtable]$filters = @{}
           $handler = New-Object $($compoundTypeClass) @($filters);
@@ -33,34 +32,35 @@ Describe 'Iterator Filters' {
     }
   }
 
-  Context "given: enum" {
-    It "should: convert to string" {
-      [TargetEnum]$parent = [TargetEnum]::Parent;
-      $parent | Should -BeExactly "Parent";
+  Context "Enum comprehension tests" {
+    Context "given: enum" {
+      It "should: convert to string" {
+        [TargetEnum]$parent = [TargetEnum]::Parent;
+        $parent | Should -BeExactly "Parent";
+      }
     }
-  }
-
-  Context "given: object with enum field" {
-    It "should: convert to string" {
-      [PSCustomObject]$filter = @{
-        Target = [TargetEnum]::Current;
-      }
-
-      [PSCustomObject]$subject = [PSCustomObject]@{
-        ChildDepthLevel = 2;
-        IsChild         = $false;
-        IsLeaf          = $true;
-        Segments        = @("a", "b", "c");
-        Scope           = [PSCustomObject]@{
-          Current = "CURRENT-NODE"
-          Parent  = "PARENT-NODE"
-          Child   = "CHILD-NODE";
-          Leaf    = "LEAF-NODE";
+  
+    Context "given: object with enum field" {
+      It "should: convert to string" {
+        [PSCustomObject]$filter = @{
+          Target = [TargetEnum]::Current;
         }
+  
+        [PSCustomObject]$subject = [PSCustomObject]@{
+          ChildDepthLevel = 2;
+          IsChild         = $false;
+          IsLeaf          = $true;
+          Scope           = [PSCustomObject]@{
+            Current = "CURRENT-NODE"
+            Parent  = "PARENT-NODE"
+            Child   = "CHILD-NODE";
+            Leaf    = "LEAF-NODE";
+          }
+        }
+  
+        [string]$target = $subject.Scope.$($filter.Target);
+        $target | Should -BeExactly "CURRENT-NODE";
       }
-
-      [string]$target = $subject.Scope.$($filter.Target);
-      $target | Should -BeExactly "CURRENT-NODE";
     }
   }
 }
