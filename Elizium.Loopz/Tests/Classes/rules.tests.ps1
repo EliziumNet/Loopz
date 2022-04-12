@@ -269,7 +269,7 @@ Describe 'Rules' -Tag 'PSTools' {
           [syntax]$syntax = New-Syntax -CommandName $commandName -Signals $_signals -Scribbler $_scribbler;
           $controller.Test($syntax).Result | Should -Be $false;
 
-          $commandInfo | Show-ParameterSetReport;
+          $commandInfo | Show-ParameterSetReport -Test;
         }
       }
     } # given: functions with violations

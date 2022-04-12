@@ -74,6 +74,39 @@ Describe 'Invoke-TraverseDirectory' {
     $_scribbler.Flush();
   }
 
+  Context "given: OnBefore and OnAfter provided" {
+    It "should: invoke the callbacks" {
+
+      [scriptblock]$before = {
+        param(
+          [string]$_path,
+          [hashtable]$_exchange
+        )
+        $_exchange["LOOPZ.TRAVERSE.UNIT-TEST.COUNT"]++;
+        $count = $_exchange["LOOPZ.TRAVERSE.UNIT-TEST.COUNT"];
+        Write-Debug ">>> BEFORE [c='$($count)']: ('$($_path)')";
+      }
+
+      [scriptblock]$after = {
+        param(
+          [string]$_path,
+          [hashtable]$_exchange
+        )
+        $_exchange["LOOPZ.TRAVERSE.UNIT-TEST.COUNT"]--;
+        $count = $_exchange["LOOPZ.TRAVERSE.UNIT-TEST.COUNT"];
+        Write-Debug "<<< AFTER [c='$($count)']: ('$($_path)')";
+      }
+      [hashtable]$exchange = @{
+        "LOOPZ.TRAVERSE.UNIT-TEST.COUNT" = 0;
+      }
+      Invoke-TraverseDirectory -Path $script:resolvedSourcePath -Exchange $exchange `
+        -Block $script:_genericTraverseBlock -OnBefore $before -OnAfter $after;
+
+      $result = $exchange["LOOPZ.TRAVERSE.UNIT-TEST.COUNT"];
+      $result | Should -Be 0;
+    }
+  }
+
   Context 'given: custom scriptblock specified' {
     Context 'and: directory tree' {
       It 'should: traverse' {
