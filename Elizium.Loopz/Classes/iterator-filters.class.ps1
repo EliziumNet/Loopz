@@ -390,11 +390,30 @@ class FilterStrategy {
   }
 
   [FilterNode] GetDirectoryNode([PSCustomObject]$info) {
-    throw [NotImplementedException]::new("FilterStrategy.GetDirectoryNode");
+    [PSCustomObject]$meta = $this.GetSegmentMetaData($info);
+
+    [FilterSubject]$subject = [FilterSubject]::new([PSCustomObject]@{
+        IsChild      = $meta.ChildName -eq $info.DirectoryInfo.Name;
+        IsLeaf       = $meta.IsLeaf;
+        CurrentDepth = $info.Exchange['LOOPZ.CONTROLLER.DEPTH'];
+        Value        = [PSCustomObject]@{
+          Current = $info.DirectoryInfo.Name;
+          Parent  = $info.DirectoryInfo.Parent.Name
+          Child   = $meta.ChildName;
+          Leaf    = $meta.LeafName;
+        }
+      });
+
+    [FilterNode]$node = [FilterNode]::new([PSCustomObject]@{
+        DirectoryInfo = $info.DirectoryInfo;
+        Subject       = $subject;
+      });
+
+    return $node;
   }
 
   [boolean] Preview([FilterNode]$node) {
-    throw [PSNotImplementedException]::new("FilterStrategy.Preview");
+    throw [PSNotImplementedException]::new("FilterStrategy.Preview - ABSTRACT");
   }
 
   static [array] GetSegments ([string]$rootPath, [string]$fullName) {
@@ -470,29 +489,6 @@ class LeafGenerationStrategy: FilterStrategy {
 
   }
 
-  [FilterNode] GetDirectoryNode([PSCustomObject]$info) {
-    [PSCustomObject]$meta = $this.GetSegmentMetaData($info);
-
-    [FilterSubject]$subject = [FilterSubject]::new([PSCustomObject]@{
-        IsChild      = $meta.ChildName -eq $info.DirectoryInfo.Name;
-        IsLeaf       = $meta.IsLeaf;
-        CurrentDepth = $info.Exchange['LOOPZ.CONTROLLER.DEPTH'];
-        Value        = [PSCustomObject]@{
-          Current = $info.DirectoryInfo.Name;
-          Parent  = $info.DirectoryInfo.Parent.Name
-          Child   = $meta.ChildName;
-          Leaf    = $meta.LeafName;
-        }
-      });
-
-    [FilterNode]$node = [FilterNode]::new([PSCustomObject]@{
-        DirectoryInfo = $info.DirectoryInfo;
-        Subject       = $subject;
-      });
-
-    return $node;
-  }
-
   [boolean] Preview([FilterNode]$node) {
     # We need to know what the context scope is. This scope is then applied to the driver.
     # The strategy knows the context scope so it should just pass in the one that is
@@ -503,6 +499,36 @@ class LeafGenerationStrategy: FilterStrategy {
     return $($node.Data.Subject.Data.IsLeaf -and $this.PreviewLeafNodes) -or
     $(-not($node.Data.Subject.Data.IsChild) -or 
       $this.Driver.Preview($node.Data.Subject, [FilterScope]::Child));
+  }
+}
+
+# Might have to build a PolyDriver, which is similar to PolyFilter, but for
+# directories. But, this PolyDriver/PolyFilter thing looks like it pointing
+# to a code smell. We should only need 1 Poly entity, that satisfies the
+# needs of directories and files.
+#
+# Perhaps we have a MultiFilter derived from FilterDriver. The MultiFilter takes
+# a MultiHandler, which can contain multiple filters, but these filters are
+# tied to [FilterScope]::Current.
+#
+# TODO: Rename all Driver derivatives to be xxxDriver instead of xxxFilter because
+# the latter is confusing.
+#
+class TraverseAllStrategy: FilterStrategy {
+  TraverseAllStrategy([FilterDriver]$Driver): base([PSCustomObject]@{
+      Driver            = $Driver;
+      ChildSegmentIndex = 1;
+      ChildDepthLevel   = 2;
+      PreferChildScope  = $true;
+      PreviewLeafNodes  = $true;
+    }) {
+
+  }
+
+  [boolean] Preview([FilterNode]$node) {
+    return $(
+      $this.Driver.Preview($node.Data.Subject, [FilterScope]::Current)
+    );
   }
 }
 

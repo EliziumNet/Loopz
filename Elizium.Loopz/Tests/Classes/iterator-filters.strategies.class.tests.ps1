@@ -43,109 +43,146 @@ Describe 'Filter Strategy' -Tag "Filter" {
 
   Context "<Skip>, <Label>" {
     Context "LeafGenerationStrategy.Preview" {
-      Context "given: <DriverClass> <HandlerClass> defined with <FirstScope>/<SecondScope> - <FirstPattern>/<SecondPattern> - <Path>" {
-        InModuleScope Elizium.Loopz -Parameters @{
-          Skip          = $Skip;
-          Label         = $Label;
-          DriverClass   = $DriverClass;
-          HandlerClass  = $HandlerClass;
-          FirstScope    = $FirstScope;
-          SecondScope   = $SecondScope;
-          FirstPattern  = $FirstPattern;
-          SecondPattern = $SecondPattern;
-          Path          = $Path;
-          Result        = $Result;
-        } {
-          # NB: no tests here yet for PreferChildScope=$false or PreviewLeafNodes=$false
-          #
-          It "should:" -TestCases @(
-            ### --- [IsChild = false /IsLeaf = false] ---
+      Context "given: <DriverClass> <HandlerClass> <StrategyClass>" {
+        Context "and: defined with <FirstScope>/<SecondScope> - <FirstPattern>/<SecondPattern> - <Path>" {
+          InModuleScope Elizium.Loopz -Parameters @{
+            Skip          = $Skip;
+            Label         = $Label;
+            DriverClass   = $DriverClass;
+            HandlerClass  = $HandlerClass;
+            StrategyClass = $StrategyClass;
+            FirstScope    = $FirstScope;
+            SecondScope   = $SecondScope;
+            FirstPattern  = $FirstPattern;
+            SecondPattern = $SecondPattern;
+            Path          = $Path;
+            Result        = $Result;
+          } {
+            # NB: no tests here yet for PreferChildScope=$false or PreviewLeafNodes=$false
             #
-            @{
-              DriverClass   = "CompoundFilter";
-              HandlerClass  = "AllCompoundHandler";
-              FirstScope    = [FilterScope]::Child;
-              SecondScope   = [FilterScope]::Leaf;
-              FirstPattern  = "min";
-              SecondPattern = "sion";
-              Path          = "FUSE";
-              Result        = $true;
-            }
-
-            ### --- [IsChild = false /IsLeaf = true] ---
-            #
-            , @{
-              DriverClass   = "CompoundFilter";
-              HandlerClass  = "AllCompoundHandler";
-              FirstScope    = [FilterScope]::Child;
-              SecondScope   = [FilterScope]::Leaf;
-              FirstPattern  = "min";
-              SecondPattern = "sion";
-              Path          = "DIMENSION";
-              Result        = $true;
-            }
-
-            ### --- [IsChild = true /IsLeaf = false] ---
-            #
-            , @{
-              DriverClass   = "CompoundFilter";
-              HandlerClass  = "AllCompoundHandler";
-              FirstScope    = [FilterScope]::Child;
-              SecondScope   = [FilterScope]::Leaf;
-              FirstPattern  = "---";
-              SecondPattern = "sion";
-              Path          = "MINIMAL";
-              Result        = $false;
-            }
-
-            , @{
-              Label         = "Spot";
-              DriverClass   = "CompoundFilter";
-              HandlerClass  = "AllCompoundHandler";
-              FirstScope    = [FilterScope]::Child;
-              SecondScope   = [FilterScope]::Leaf;
-              FirstPattern  = "MIN";
-              SecondPattern = "sion";
-              Path          = "MINIMAL";
-              Result        = $true;
-            }
-          ) {
-            [PSCustomObject]$testInfo = [PSCustomObject]@{
-              Skip     = (Test-Path variable:Skip) ? $Skip : $false;
-              Label    = (Test-Path variable:Label) ? $Label : [string]::Empty;
-              Override = $true;
+            It "should:" -TestCases @(
+              ### --- [IsChild = false /IsLeaf = false] ---
               #
-            }
-
-            if ([tez]::accept($testInfo)) {
-              # NB: Only testing regex filters here to cut down the number of data driven
-              # test case variables.
-              #
-              [hashtable]$handlerParams = @{
-                $FirstScope  = $(New-Object RegexFilter $(
-                    @([FilterOptions]::new($FirstScope), $FirstPattern, "first-test-regex"))
-                );
-                $SecondScope = $(New-Object RegexFilter $(
-                    @([FilterOptions]::new($SecondScope), $SecondPattern, "second-test-regex"))
-                );
+              @{
+                DriverClass   = "CompoundFilter";
+                HandlerClass  = "AllCompoundHandler";
+                StrategyClass = "LeafGenerationStrategy";
+                FirstScope    = [FilterScope]::Child;
+                SecondScope   = [FilterScope]::Leaf;
+                FirstPattern  = "min";
+                SecondPattern = "sion";
+                Path          = "FUSE";
+                Result        = $true;
               }
 
-              [CompoundHandler]$handler = New-Object $HandlerClass $handlerParams;
-              [CompoundFilter]$driver = [CompoundFilter]::new($handler);
-              [LeafGenerationStrategy]$strategy = [LeafGenerationStrategy]::new($driver);
-
-              [hashtable]$exchange = @{
-                "LOOPZ.FILTER.ROOT-PATH" = $(Resolve-Path -LiteralPath $global:_Paths["ROOT"])
+              # PS: this is not the normal way we would use the TraverseAllStrategy
+              # strategy, but there is no reason why this shouldn't work. In reality
+              # we would use a PolyHandler and specify multiple core filters all
+              # connected to [FilterScope]::Current, but PolyHandler hasn't been
+              # defined yet.
+              # 
+              , @{
+                DriverClass   = "CompoundFilter";
+                HandlerClass  = "AllCompoundHandler";
+                StrategyClass = "TraverseAllStrategy";
+                FirstScope    = [FilterScope]::Child;
+                SecondScope   = [FilterScope]::Leaf;
+                FirstPattern  = "min";
+                SecondPattern = "sion";
+                Path          = "FUSE";
+                Result        = $true;
+              }
+  
+              ### --- [IsChild = false /IsLeaf = true] ---
+              #
+              , @{
+                DriverClass   = "CompoundFilter";
+                HandlerClass  = "AllCompoundHandler";
+                StrategyClass = "LeafGenerationStrategy";
+                FirstScope    = [FilterScope]::Child;
+                SecondScope   = [FilterScope]::Leaf;
+                FirstPattern  = "min";
+                SecondPattern = "sion";
+                Path          = "DIMENSION";
+                Result        = $true;
+              }
+  
+              ### --- [IsChild = true /IsLeaf = false] ---
+              #
+              , @{
+                DriverClass   = "CompoundFilter";
+                HandlerClass  = "AllCompoundHandler";
+                StrategyClass = "LeafGenerationStrategy";
+                FirstScope    = [FilterScope]::Child;
+                SecondScope   = [FilterScope]::Leaf;
+                FirstPattern  = "---";
+                SecondPattern = "sion";
+                Path          = "MINIMAL";
+                Result        = $false;
+              }
+  
+              , @{
+                Label         = "Spot";
+                DriverClass   = "CompoundFilter";
+                HandlerClass  = "AllCompoundHandler";
+                StrategyClass = "LeafGenerationStrategy";
+                FirstScope    = [FilterScope]::Child;
+                SecondScope   = [FilterScope]::Leaf;
+                FirstPattern  = "MIN";
+                SecondPattern = "sion";
+                Path          = "MINIMAL";
+                Result        = $true;
               }
 
-              [FilterNode]$node = $strategy.GetDirectoryNode([PSCustomObject] @{
-                  DirectoryInfo = Get-Item -Path $global:_Paths[$Path];
-                  Exchange      = $exchange;
-                });
-
-              $strategy.Preview($node) | Should -Be $Result -Because $(
-                "PREVIEW: Driver:'$DriverClass'/Handler: '$($HandlerClass)'"
-              );
+              , @{
+                DriverClass   = "CompoundFilter";
+                HandlerClass  = "AllCompoundHandler";
+                StrategyClass = "TraverseAllStrategy";
+                FirstScope    = [FilterScope]::Child;
+                SecondScope   = [FilterScope]::Leaf;
+                FirstPattern  = "---";
+                SecondPattern = "sion";
+                Path          = "MINIMAL";
+                Result        = $true;
+              }
+            ) {
+              [PSCustomObject]$testInfo = [PSCustomObject]@{
+                Skip     = (Test-Path variable:Skip) ? $Skip : $false;
+                Label    = (Test-Path variable:Label) ? $Label : [string]::Empty;
+                Override = $true;
+                #
+              }
+  
+              if ([tez]::accept($testInfo)) {
+                # NB: Only testing regex filters here to cut down the number of data driven
+                # test case variables.
+                #
+                [hashtable]$handlerParams = @{
+                  $FirstScope  = $(New-Object RegexFilter $(
+                      @([FilterOptions]::new($FirstScope), $FirstPattern, "first-test-regex"))
+                  );
+                  $SecondScope = $(New-Object RegexFilter $(
+                      @([FilterOptions]::new($SecondScope), $SecondPattern, "second-test-regex"))
+                  );
+                }
+  
+                [CompoundHandler]$handler = New-Object $HandlerClass $handlerParams;
+                [CompoundFilter]$driver = [CompoundFilter]::new($handler);
+                [FilterStrategy]$strategy = New-Object $StrategyClass $(@(, $driver));
+  
+                [hashtable]$exchange = @{
+                  "LOOPZ.FILTER.ROOT-PATH" = $(Resolve-Path -LiteralPath $global:_Paths["ROOT"])
+                }
+  
+                [FilterNode]$node = $strategy.GetDirectoryNode([PSCustomObject] @{
+                    DirectoryInfo = Get-Item -Path $global:_Paths[$Path];
+                    Exchange      = $exchange;
+                  });
+  
+                $strategy.Preview($node) | Should -Be $Result -Because $(
+                  "PREVIEW: Driver:'$DriverClass'/Handler: '$($HandlerClass)'"
+                );
+              }
             }
           }
         }
