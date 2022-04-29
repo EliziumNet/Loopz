@@ -1,3 +1,4 @@
+using namespace System.IO;
 using module Elizium.Krayola;
 
 Describe 'Invoke-TraverseDirectory' {
@@ -79,22 +80,22 @@ Describe 'Invoke-TraverseDirectory' {
 
       [scriptblock]$before = {
         param(
-          [string]$_path,
+          [DirectoryInfo]$_directory,
           [hashtable]$_exchange
         )
         $_exchange["LOOPZ.TRAVERSE.UNIT-TEST.COUNT"]++;
         $count = $_exchange["LOOPZ.TRAVERSE.UNIT-TEST.COUNT"];
-        Write-Debug ">>> BEFORE [c='$($count)']: ('$($_path)')";
+        Write-Debug ">>> BEFORE [c='$($count)']: ('$($_directory.FullName)')";
       }
 
       [scriptblock]$after = {
         param(
-          [string]$_path,
+          [DirectoryInfo]$_directory,
           [hashtable]$_exchange
         )
         $_exchange["LOOPZ.TRAVERSE.UNIT-TEST.COUNT"]--;
         $count = $_exchange["LOOPZ.TRAVERSE.UNIT-TEST.COUNT"];
-        Write-Debug "<<< AFTER [c='$($count)']: ('$($_path)')";
+        Write-Debug "<<< AFTER [c='$($count)']: ('$($_directory.FullName)')";
       }
       [hashtable]$exchange = @{
         "LOOPZ.TRAVERSE.UNIT-TEST.COUNT" = 0;

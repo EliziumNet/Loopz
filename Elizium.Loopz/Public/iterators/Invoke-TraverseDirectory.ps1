@@ -1,4 +1,5 @@
-﻿
+﻿using namespace System.IO;
+
 function Invoke-TraverseDirectory {
   <#
   .NAME
@@ -127,18 +128,19 @@ function Invoke-TraverseDirectory {
 
     [scriptblock]$before = {
       param(
-        [string]$_path,
+        [DirectoryInfo]$_directoryInfo,
         [hashtable]$_exchange
       )
       ...
     }
 
-    The path specified is the directory whose child directories are about to be invoked.
+    The directory info specified is the directory whose child directories are about to be invoked.
 
   .PARAMETER OnAfter
     For every directory traversed which itself has sub-directories, the scriptblock specified
-  by OnBefore is invoked, after those directories are invoked. The scriptblock specified must
-  be defined with a signature the same as OnBefore.
+  by OnBefore is invoked, after those directories are invoked (in fact it is the same directory
+  info that is passed into OnBefore). The scriptblock specified must be defined with a signature
+  the same as OnBefore.
 
   .EXAMPLE 1
     Invoke a script-block for every directory in the source tree.
@@ -352,7 +354,7 @@ function Invoke-TraverseDirectory {
     [scriptblock]$OnBefore = ({
         param(
           [Parameter()]
-          [string]$_path,
+          [DirectoryInfo]$_directoryInfo,
 
           [Parameter()]
           [hashtable]$_exchange
@@ -363,7 +365,7 @@ function Invoke-TraverseDirectory {
     [scriptblock]$OnAfter = ({
         param(
           [Parameter()]
-          [string]$_path,
+          [DirectoryInfo]$_directoryInfo,
 
           [Parameter()]
           [hashtable]$_exchange
@@ -638,7 +640,7 @@ function Invoke-TraverseDirectory {
 
       if ($directoryInfos.Count -gt 0) {
         if ($PSBoundParameters.ContainsKey("OnBefore")) {
-          $OnBefore.Invoke($Path, $Exchange);
+          $OnBefore.Invoke($directory, $Exchange);
         }
         # No need to manage the index, let Invoke-ForeachFsItem do this for us,
         # except we do need to inform Invoke-ForeachFsItem to start the index at
@@ -663,7 +665,7 @@ function Invoke-TraverseDirectory {
         $directoryInfos | & 'Invoke-ForeachFsItem' @parametersFeFsItem;
 
         if ($PSBoundParameters.ContainsKey("OnAfter")) {
-          $OnAfter.Invoke($Path, $Exchange);
+          $OnAfter.Invoke($directory, $Exchange);
         }
       }
     }
@@ -691,13 +693,13 @@ function Invoke-TraverseDirectory {
 
       if ($directoryInfos.Count -gt 0) {
         if ($PSBoundParameters.ContainsKey("OnBefore")) {
-          $OnBefore.Invoke($Path, $Exchange);
+          $OnBefore.Invoke($directory, $Exchange);
         }
         $directoryInfos | Invoke-ForeachFsItem -Directory -Block $adapter `
           -Exchange $Exchange -Condition $Condition -Summary $Summary;
 
         if ($PSBoundParameters.ContainsKey("OnAfter")) {
-          $OnAfter.Invoke($Path, $Exchange);
+          $OnAfter.Invoke($directory, $Exchange);
         }
       }
     }
