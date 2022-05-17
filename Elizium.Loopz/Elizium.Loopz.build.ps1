@@ -2,6 +2,7 @@
 using namespace System.Text.RegularExpressions;
 using namespace System.Text;
 using namespace System.IO;
+using module Pester;
 
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingWriteHost', '')]
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidGlobalVars', '')]
